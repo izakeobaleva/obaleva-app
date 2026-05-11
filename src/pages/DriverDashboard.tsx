@@ -11,11 +11,17 @@ export const DriverDashboard = () => {
   const [saldo, setSaldo] = useState(0)
 
   useEffect(() => {
+    if (!user) return
     fetchDriverData()
     subscribeToRides()
-  }, [])
+  }, [user])
+
+  if (!user) {
+    return <div className="p-4 text-center text-red-500">Usuário não autenticado.</div>
+  }
 
   async function fetchDriverData() {
+    if (!user) return
     const { data: motorista } = await supabase.from('motoristas').select('*').eq('id', user.id).single()
     if (motorista?.status !== 'aprovado') toast.error('Aguardando aprovação do admin')
     const { data: carteira } = await supabase.from('carteira_motorista').select('saldo_disponivel').eq('motorista_id', user.id).single()
@@ -42,6 +48,7 @@ export const DriverDashboard = () => {
   }
 
   async function acceptRide(rideId: string) {
+    if (!user) return
     await supabase.from('corridas').update({ motorista_id: user.id, status: 'aceita' }).eq('id', rideId)
     toast.success('Corrida aceita! Vá até o passageiro.')
   }

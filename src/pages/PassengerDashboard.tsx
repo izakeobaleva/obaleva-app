@@ -9,6 +9,10 @@ export const PassengerDashboard = () => {
   const [destino, setDestino] = useState('')
   const [solicitando, setSolicitando] = useState(false)
 
+  if (!user) {
+    return <div className="p-4 text-center text-red-500">Usuário não autenticado.</div>
+  }
+
   const solicitarCorrida = async () => {
     if (!destino) return toast.error('Digite o destino')
     setSolicitando(true)
