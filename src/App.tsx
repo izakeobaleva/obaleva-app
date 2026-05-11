@@ -1,31 +1,25 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import { Toaster } from 'sonner'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { Login } from './pages/Login'
-import { PassengerDashboard } from './pages/PassengerDashboard'
-import { DriverDashboard } from './pages/DriverDashboard'
-import { AdminDashboard } from './pages/AdminDashboard'
-
-function AppRoutes() {
-  const { user, profile, loading } = useAuth()
-  if (loading) return <div className="p-4 text-center">Carregando...</div>
-  if (!user) return <Routes><Route path="*" element={<Login />} /></Routes>
-  if (!profile) {
-    return <div className="p-4 text-center text-red-500">Perfil não encontrado. Faça logout e tente novamente.</div>
-  }
-  if (profile.tipo === 'passageiro') return <Routes><Route path="*" element={<PassengerDashboard />} /></Routes>
-  if (profile.tipo === 'motorista') return <Routes><Route path="*" element={<DriverDashboard />} /></Routes>
-  if (profile.tipo === 'admin') return <Routes><Route path="*" element={<AdminDashboard />} /></Routes>
-  return <Navigate to="/login" />
-}
+import Login from './pages/Login'
+import RegisterPassenger from './pages/RegisterPassenger'
+import RegisterDriver from './pages/RegisterDriver'
+import PassengerDashboard from './pages/PassengerDashboard'
+import DriverDashboard from './pages/DriverDashboard'
+import AdminDashboard from './pages/AdminDashboard'
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-        <Toaster position="top-center" />
-      </BrowserRouter>
+      <Toaster position="top-center" richColors />
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register/passenger" element={<RegisterPassenger />} />
+        <Route path="/register/driver" element={<RegisterDriver />} />
+        <Route path="/passenger" element={<PassengerDashboard />} />
+        <Route path="/driver" element={<DriverDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Routes>
     </AuthProvider>
   )
 }

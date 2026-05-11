@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 .btn-amarelo {
-  @apply bg-amarelo-principal text-black hover:bg-amarelo-escuro transition font-bold rounded-lg;
+  @apply bg-amarelo-oba text-roxo-principal font-bold hover:bg-yellow-400 transition-colors;
 }

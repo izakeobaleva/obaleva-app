@@ -1,49 +1,47 @@
 import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
 
-export const Login = () => {
+export default function Login() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { signIn } = useAuth()
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      await signIn(email, password)
-    } catch {
-      toast.error('E‑mail ou senha inválidos')
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      toast.error('Erro: ' + error.message)
+    } else {
+      toast.success('Login realizado!')
+      // redirecionamento baseado no tipo de usuário será feito via trigger do Supabase
     }
+    setLoading(false)
   }
 
   return (
     <div className="min-h-screen bg-roxo-principal flex items-center justify-center p-4">
-      <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-roxo-principal mb-4 text-center">OBALEVA</h1>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            placeholder="E-mail"
-            className="w-full p-3 border rounded-lg mb-3"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            className="w-full p-3 border rounded-lg mb-4"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit" className="btn-amarelo w-full py-3 rounded-lg font-bold">Entrar</button>
+      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        <h1 className="text-3xl font-bold text-roxo-principal text-center mb-6">OBALEVA</h1>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">E-mail</label>
+            <input type="email" required className="w-full p-3 border rounded-lg" value={email} onChange={e => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Senha</label>
+            <input type="password" required className="w-full p-3 border rounded-lg" value={password} onChange={e => setPassword(e.target.value)} />
+          </div>
+          <button type="submit" disabled={loading} className="btn-amarelo w-full py-3 rounded-lg text-lg">
+            {loading ? 'Entrando...' : 'Entrar'}
+          </button>
         </form>
-        <div className="mt-4 text-center text-sm">
-          <Link to="/register" className="text-roxo-principal font-semibold">Cadastrar como passageiro</Link>
-          {' | '}
-          <Link to="/register-driver" className="text-roxo-principal font-semibold">Quero ser motorista</Link>
+        <div className="mt-4 text-center space-y-2">
+          <button onClick={() => navigate('/register/passenger')} className="text-roxo-principal underline block w-full">Cadastrar como Passageiro</button>
+          <button onClick={() => navigate('/register/driver')} className="text-roxo-principal underline block w-full">Cadastrar como Motorista</button>
         </div>
       </div>
     </div>
