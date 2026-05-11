@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.btn-amarelo {
+  @apply bg-amarelo-principal text-black hover:bg-amarelo-escuro transition font-bold rounded-lg;
+}
