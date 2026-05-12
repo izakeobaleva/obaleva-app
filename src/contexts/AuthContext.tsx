@@ -50,20 +50,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function initAuth() {
     setLoading(true);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     const currentUser = session?.user ?? null;
     setUser(currentUser);
-
-    if (currentUser) {
-      await fetchProfile(currentUser.id);
-    }
+    if (currentUser) await fetchProfile(currentUser.id);
     setLoading(false);
   }
 
   async function fetchProfile(userId: string) {
-    // ✅ Usar maybeSingle() para evitar erro quando o perfil não existe
     const { data, error } = await supabase
       .from('usuarios')
       .select('*')
@@ -75,13 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       return;
     }
-
-    if (data) {
-      setProfile(data as UserProfile);
-    } else {
-      console.warn('Perfil não encontrado para o usuário:', userId);
-      setProfile(null);
-    }
+    setProfile(data as UserProfile | null);
   }
 
   const signIn = async (email: string, password: string) => {
@@ -103,17 +91,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string;
   }) => {
     const { nome_completo, cpf, telefone, email, password } = data;
-
-    // 1. Criar usuário no Auth
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { nome_completo, tipo: 'passageiro' } },
     });
-    if (signUpError) throw signUpError;
+    if (authError) throw authError;
     if (!authData.user) throw new Error('Erro ao criar usuário');
 
-    // 2. Inserir na tabela usuarios
     const { error: insertUserError } = await supabase.from('usuarios').insert({
       id: authData.user.id,
       nome_completo,
@@ -124,7 +109,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (insertUserError) throw insertUserError;
 
-    // 3. Inserir na tabela passageiros (opcional, se você usa essa tabela)
     const { error: insertPassError } = await supabase.from('passageiros').insert({
       id: authData.user.id,
     });
