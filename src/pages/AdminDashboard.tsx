@@ -28,37 +28,6 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#0F0B1A]">
       <header className="glass-header sticky top-0 z-10 flex justify-between items-center px-6 py-4">
         <div className="flex items-center gap-3">
-          <div<dyad-write path="src/pages/AdminDashboard.tsx" description="Admin escuro e arredondado">
-import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import { motion } from 'framer-motion'
-import Motoristas from './Admin/Motoristas'
-import Passageiros from './Admin/Passageiros'
-import Corridas from './Admin/Corridas'
-import Financeiro from './Admin/Financeiro'
-import Alugueis from './Admin/Alugueis'
-import Suporte from './Admin/Suporte'
-import { Shield } from 'lucide-react'
-
-type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'alugueis' | 'suporte'
-
-export default function AdminDashboard() {
-  const { signOut } = useAuth()
-  const [activeTab, setActiveTab] = useState<Tab>('motoristas')
-
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'motoristas', label: 'Motoristas' },
-    { id: 'passageiros', label: 'Passageiros' },
-    { id: 'corridas', label: 'Corridas' },
-    { id: 'financeiro', label: 'Financeiro' },
-    { id: 'alugueis', label: 'Aluguel' },
-    { id: 'suporte', label: 'Suporte' },
-  ]
-
-  return (
-    <div className="min-h-screen bg-[#0F0B1A]">
-      <header className="glass-header sticky top-0 z-10 flex justify-between items-center px-6 py-4">
-        <div className="flex items-center gap-3">
           <div className="p-2 bg-[#F4D03F]/20 rounded-2xl">
             <Shield size={24} className="text-[#F4D03F]" />
           </div>
