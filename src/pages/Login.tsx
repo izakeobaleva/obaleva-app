@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Share2, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 
-export default function Login() {
+function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -129,7 +129,7 @@ export default function Login() {
             <div className="w-full border-t border-white/10"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-[#1A1528] px-3 text-[#A0A0B0]">ou — entre com e-mail —</span>
+            <span className="bg-[#1A1528] px-3 text-[#A0A0B0]">Entre com e-mail</span>
           </div>
         </div>
 
@@ -214,3 +214,5 @@ export default function Login() {
     </div>
   )
 }
+
+export default Login;
