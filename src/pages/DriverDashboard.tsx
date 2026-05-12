@@ -23,39 +23,13 @@ export default function DriverDashboard() {
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000);
     fetchDriverStats();
-    subscribeToRides();
     return () => {
       clearTimeout(timer);
     };
   }, []);
 
-  async function fetchDriverStats() {
-    if (!user) return;
-    
-    const { data: corridas } = await supabase
-      .from('corridas')
-      .select('valor, status, created_at')
-      .eq('motorista_id', user.id);
-
-    if (corridas) {
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      
-      const hojeCorridas = corridas.filter(c => new Date(c.created_at) >= hoje && c.status === 'finalizada');
-      const ganhosHoje = hojeCorridas.reduce((acc, c) => acc + (c.valor || 0), 0);
-      
-      setStats({
-        corridasHoje: hojeCorridas.length,
-        ganhosHoje: ganhosHoje,
-        avaliacao: 4.5,
-        totalCorridas: corridas.filter(c => c.status === 'finalizada').length,
-      });
-    }
-    setLoading(false);
-  }
-
-  async function subscribeToRides() {
-    const subscription = supabase
+  useEffect(() => {
+    const channel = supabase
       .channel('novas-corridas')
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'corridas', filter: `status=eq.pendente` }, 
@@ -95,7 +69,34 @@ export default function DriverDashboard() {
       )
       .subscribe();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [disponivel]);
+
+  async function fetchDriverStats() {
+    if (!user) return;
+    
+    const { data: corridas } = await supabase
+      .from('corridas')
+      .select('valor, status, created_at')
+      .eq('motorista_id', user.id);
+
+    if (corridas) {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      
+      const hojeCorridas = corridas.filter(c => new Date(c.created_at) >= hoje && c.status === 'finalizada');
+      const ganhosHoje = hojeCorridas.reduce((acc, c) => acc + (c.valor || 0), 0);
+      
+      setStats({
+        corridasHoje: hojeCorridas.length,
+        ganhosHoje: ganhosHoje,
+        avaliacao: 4.5,
+        totalCorridas: corridas.filter(c => c.status === 'finalizada').length,
+      });
+    }
+    setLoading(false);
   }
 
   async function acceptRide(rideId: string) {
