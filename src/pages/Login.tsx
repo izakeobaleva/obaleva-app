@@ -91,6 +91,16 @@ export default function Login() {
             onChange={e => setPassword(e.target.value)}
             required
           />
+          
+          <div className="flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-[#A0A0B0] hover:text-[#F4D03F] transition"
+            >
+              Esqueceu a senha?
+            </Link>
+          </div>
+
           <motion.button
             whileTap={{ scale: 0.98 }}
             type="submit"
