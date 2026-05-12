@@ -1,81 +1,69 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Login } from './pages/Login';
-import { RegisterPassenger } from './pages/RegisterPassenger';
-import { RegisterDriver } from './pages/RegisterDriver';
-import { PassengerDashboard } from './pages/PassengerDashboard';
-import { DriverDashboard } from './pages/DriverDashboard';
-import { AdminDashboard } from './pages/AdminDashboard';
+import Login from './pages/Login';
+import RegisterPassenger from './pages/RegisterPassenger';
+import RegisterDriver from './pages/RegisterDriver';
+import PassengerDashboard from './pages/PassengerDashboard';
+import DriverDashboard from './pages/DriverDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import Landing from './pages/Landing';
+import { Toaster } from 'sonner';
 
-function AppRoutes() {
+function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
   const { user, profile, loading } = useAuth();
 
-  // Enquanto carrega, mostra uma mensagem neutra
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
+    return (
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#F4D03F]"></div>
+      </div>
+    );
   }
 
-  // 🔓 Usuário NÃO logado: só pode ver as telas de login e cadastro
   if (!user) {
-    return (
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<RegisterPassenger />} />
-        <Route path="/register-driver" element={<RegisterDriver />} />
-        {/* Qualquer outra rota redireciona para o login */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    );
+    return <Navigate to="/login" replace />;
   }
 
-  // 🔐 Usuário logado: redireciona conforme o tipo (se o perfil ainda não carregou, aguarda)
-  if (!profile) {
-    return <div className="flex items-center justify-center min-h-screen">Carregando perfil...</div>;
+  if (allowedRoles && profile && !allowedRoles.includes(profile.tipo)) {
+    return <Navigate to="/home" replace />;
   }
 
-  if (profile.tipo === 'passageiro') {
-    return (
-      <Routes>
-        <Route path="/" element={<PassengerDashboard />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    );
-  }
-
-  if (profile.tipo === 'motorista') {
-    return (
-      <Routes>
-        <Route path="/" element={<DriverDashboard />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    );
-  }
-
-  if (profile.tipo === 'admin') {
-    return (
-      <Routes>
-        <Route path="/" element={<AdminDashboard />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    );
-  }
-
-  // Fallback: se o tipo for desconhecido, faz logout
-  return <Navigate to="/login" replace />;
+  return <>{children}</>;
 }
 
-function App() {
+function AppRoutes() {
+  const { profile, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#F4D03F]"></div>
+      </div>
+    );
+  }
+
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-        <Toaster position="top-center" richColors />
-      </BrowserRouter>
-    </AuthProvider>
+    <Routes>
+      <Route path="/" element={profile ? <Navigate to="/home" replace /> : <Landing />} />
+      <Route path="/login" element={profile ? <Navigate to="/home" replace /> : <Login />} />
+      <Route path="/register-passenger" element={profile ? <Navigate to="/home" replace /> : <RegisterPassenger />} />
+      <Route path="/register-driver" element={profile ? <Navigate to="/home" replace /> : <RegisterDriver />} />
+      <Route path="/home" element={<ProtectedRoute allowedRoles={['passageiro', 'motorista', 'admin']}><div id="dashboard-root" /></ProtectedRoute>} />
+      <Route path="/passenger" element={<ProtectedRoute allowedRoles={['passageiro']}><PassengerDashboard /></ProtectedRoute>} />
+      <Route path="/driver" element={<ProtectedRoute allowedRoles={['motorista']}><DriverDashboard /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppRoutes />
+        <Toaster position="top-right" richColors />
+      </AuthProvider>
+    </Router>
+  );
+}
