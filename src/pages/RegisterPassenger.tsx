@@ -51,11 +51,11 @@ export default function RegisterPassenger() {
         className="relative z-10 w-full max-w-md"
       >
         <div className="card-dark p-8">
-          <div className="text-center mb-6">
+          <div className="text-center mb-4">
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3"
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-2"
             >
               <UserPlus className="w-8 h-8 text-[#F4D03F]" />
             </motion.div>
@@ -63,7 +63,7 @@ export default function RegisterPassenger() {
             <p className="text-[#A0A0B0] text-sm">Crie sua conta em instantes</p>
           </div>
 
-          <form onSubmit={handleRegister} className="space-y-3">
+          <form onSubmit={handleRegister} className="space-y-1">
             <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input
@@ -130,7 +130,7 @@ export default function RegisterPassenger() {
             </motion.button>
           </form>
 
-          <p className="text-center text-[#A0A0B0] text-sm mt-4">
+          <p className="text-center text-[#A0A0B0] text-sm mt-2">
             Já tem conta?{' '}
             <button onClick={() => navigate('/')} className="text-[#F4D03F] font-semibold hover:underline">
               Faça login

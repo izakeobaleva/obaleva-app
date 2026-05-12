@@ -40,8 +40,8 @@ export default function ForgotPassword() {
         animate={{ opacity: 1, y: 0 }}
         className="card-dark w-full max-w-md p-8 relative z-10"
       >
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 mb-4">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 mb-3">
             {sent ? (
               <CheckCircle className="w-8 h-8 text-green-400" />
             ) : (
@@ -59,7 +59,7 @@ export default function ForgotPassword() {
         </div>
 
         {!sent ? (
-          <form onSubmit={handleReset} className="space-y-4">
+          <form onSubmit={handleReset} className="space-y-1">
             <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
               <Mail size={14} className="text-[#F4D03F] shrink-0" />
               <input
@@ -83,7 +83,7 @@ export default function ForgotPassword() {
           </form>
         ) : (
           <div className="text-center">
-            <p className="text-[#A0A0B0] text-sm mb-4">
+            <p className="text-[#A0A0B0] text-sm mb-3">
               Não recebeu o e-mail? Verifique sua caixa de spam ou tente novamente.
             </p>
             <button
@@ -95,7 +95,7 @@ export default function ForgotPassword() {
           </div>
         )}
 
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <Link
             to="/login"
             className="text-[#A0A0B0] hover:text-white transition flex items-center justify-center gap-2 text-sm"

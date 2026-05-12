@@ -51,15 +51,15 @@ export default function UpdatePassword() {
         animate={{ opacity: 1, y: 0 }}
         className="card-dark w-full max-w-md p-8 relative z-10"
       >
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-3">
             <Lock className="w-8 h-8 text-green-400" />
           </div>
           <h1 className="text-3xl font-bold text-white">Nova senha</h1>
           <p className="text-[#A0A0B0] mt-1">Escolha uma nova senha para sua conta.</p>
         </div>
 
-        <form onSubmit={handleUpdate} className="space-y-4">
+        <form onSubmit={handleUpdate} className="space-y-1">
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
             <Lock size={14} className="text-[#F4D03F] shrink-0" />
             <input

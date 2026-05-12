@@ -106,9 +106,9 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[320px] p-4"
       >
-        <div className="text-center mb-3">
+        <div className="text-center mb-1">
           <h1 className="text-base font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
-          <p className="text-[#A0A0B0] text-[11px] mt-0.5">Segurança e conforto em cada viagem</p>
+          <p className="text-[#A0A0B0] text-[11px]">Segurança e conforto em cada viagem</p>
         </div>
 
         <button
@@ -124,7 +124,7 @@ export default function Login() {
           Continuar com Google
         </button>
 
-        <div className="relative my-2.5">
+        <div className="relative my-1">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10"></div>
           </div>
@@ -133,7 +133,7 @@ export default function Login() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-1">
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
             <Mail size={14} className="text-[#F4D03F] shrink-0" />
             <input
@@ -180,11 +180,11 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="border-t border-white/10 pt-2 mt-2">
-          <p className="text-[11px] text-[#A0A0B0] text-center mb-1.5">Ainda não tem conta?</p>
+        <div className="border-t border-white/10 pt-1 mt-1">
+          <p className="text-[11px] text-[#A0A0B0] text-center mb-1">Ainda não tem conta?</p>
           <Link
             to="/register"
-            className="w-full rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs mb-1.5 px-3 py-1 leading-none"
+            className="w-full rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs mb-1 px-3 py-1 leading-none"
           >
             <User size={13} className="text-[#F4D03F]" />
             Criar conta como Passageiro
@@ -205,7 +205,7 @@ export default function Login() {
 
         <button
           onClick={handleShare}
-          className="w-full mt-2 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-xs border border-white/5 px-3 py-1 leading-none"
+          className="w-full mt-1 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-xs border border-white/5 px-3 py-1 leading-none"
         >
           <Share2 size={12} />
           Compartilhar ObaLeve
