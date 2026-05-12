@@ -16,11 +16,11 @@
     @apply min-h-[44px] min-w-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F4D03F] focus-visible:ring-offset-2;
   }
 
-  /* Botão premium arredondado - AINDA MAIS COMPACTO */
+  /* Botão premium ultra-compacto */
   .btn-premium {
     @apply relative overflow-hidden font-bold shadow-lg transition-all duration-200 text-[#1E1E2F];
     background: linear-gradient(135deg, #FFD966 0%, #F4D03F 100%);
-    padding: 0.25rem 1.25rem;
+    padding: 0.25rem 1rem;
     border-radius: 2rem;
     box-shadow: 0 4px 14px 0 rgba(244, 208, 63, 0.3);
   }
@@ -32,9 +32,9 @@
     transform: translateY(1px);
   }
 
-  /* Botão outline escuro - AINDA MAIS COMPACTO */
+  /* Botão outline escuro ultra-compacto */
   .btn-outline-dark {
-    @apply border border-white/20 bg-transparent text-white/90 px-5 py-1 transition hover:bg-white/10 font-semibold;
+    @apply border border-white/20 bg-transparent text-white/90 px-4 py-0.5 transition hover:bg-white/10 font-semibold text-xs;
     border-radius: 2rem;
   }
 
@@ -53,9 +53,9 @@
     @apply backdrop-blur-xl bg-[#1A1528]/80 border-b border-white/10 shadow-sm;
   }
 
-  /* Input container compacto */
+  /* Input container ultra-compacto */
   .input-compact {
-    @apply flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none;
+    @apply flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-0.5 text-sm;
   }
 }
 
