@@ -103,13 +103,18 @@ export default function RegisterDriver() {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
     try {
-      const urls = await uploadMultipleFiles('veiculos', files, `driver_${Date.now()}_`)
+      const urls = await uploadMultipleFiles('veiculos', files, 'driver_' + Date.now() + '_')
       updateForm({ fotos_veiculo: [...form.fotos_veiculo, ...urls] })
-      toast.success(`${files.length} foto(s) enviada(s) com sucesso!`)
+      toast.success(files.length + ' foto(s) enviada(s) com sucesso!')
     } catch (err: any) {
       toast.error('Erro ao enviar fotos')
     }
   }
+
+  const inputContainerClass = "flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none"
+  const inputClass = "w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
+  const btnClass = "w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs px-3 py-1 leading-none"
+  const btnOutlineClass = "flex-1 rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-xs px-3 py-1 leading-none"
 
   const renderStepIndicator = () => (
     <div className="flex gap-2 mb-6">
@@ -117,18 +122,13 @@ export default function RegisterDriver() {
         <motion.div
           key={s}
           animate={{ scale: step >= s ? 1 : 0.9 }}
-          className={`flex-1 h-2 rounded-full ${step >= s ? 'bg-[#F4D03F]' : 'bg-white/20'}`}
+          className={"flex-1 h-2 rounded-full " + (step >= s ? 'bg-[#F4D03F]' : 'bg-white/20')}
         />
       ))}
     </div>
   )
 
   const renderStep = () => {
-    const inputContainerClass = "flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none"
-    const inputClass = "w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
-    const btnClass = "w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md px-3 py-1.5 leading-none"
-    const btnOutlineClass = "flex-1 rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm px-3 py-1.5 leading-none"
-
     switch (step) {
       case 1:
         return (
@@ -142,7 +142,7 @@ export default function RegisterDriver() {
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="CPF (apenas números)" className={inputClass} value={form.cpf} onChange={(e) => updateForm({ cpf: e.target.value })} required />
             </div>
-            <input type="date" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.data_nascimento} onChange={(e) => updateForm({ data_nascimento: e.target.value })} required />
+            <input type="date" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.data_nascimento} onChange={(e) => updateForm({ data_nascimento: e.target.value })} required />
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="RG" className={inputClass} value={form.rg} onChange={(e) => updateForm({ rg: e.target.value })} required />
@@ -190,7 +190,7 @@ export default function RegisterDriver() {
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Categoria (ex: A, B, AB)" className={inputClass} value={form.cnh_categoria} onChange={(e) => updateForm({ cnh_categoria: e.target.value })} required />
             </div>
-            <input type="month" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.cnh_validade} onChange={(e) => updateForm({ cnh_validade: e.target.value })} required />
+            <input type="month" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.cnh_validade} onChange={(e) => updateForm({ cnh_validade: e.target.value })} required />
             <UploadFile label="📸 Foto da CNH (frente)" onUpload={(url) => updateForm({ cnh_frente_url: url })} />
             <UploadFile label="📸 Foto da CNH (verso)" onUpload={(url) => updateForm({ cnh_verso_url: url })} />
             <div className="flex gap-2">
@@ -206,7 +206,7 @@ export default function RegisterDriver() {
             <h2 className="text-xl font-bold text-white">🚙 Dados do Veículo</h2>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Placa" className={`${inputClass} uppercase`} value={form.placa} onChange={(e) => updateForm({ placa: e.target.value })} required />
+              <input type="text" placeholder="Placa" className={inputClass + ' uppercase'} value={form.placa} onChange={(e) => updateForm({ placa: e.target.value })} required />
             </div>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
@@ -220,7 +220,7 @@ export default function RegisterDriver() {
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Cor" className={inputClass} value={form.cor} onChange={(e) => updateForm({ cor: e.target.value })} required />
             </div>
-            <select className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] text-sm leading-none" value={form.categoria_veiculo} onChange={(e) => updateForm({ categoria_veiculo: e.target.value as 'carro' | 'moto' })} required>
+            <select className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] text-sm leading-none" value={form.categoria_veiculo} onChange={(e) => updateForm({ categoria_veiculo: e.target.value as 'carro' | 'moto' })} required>
               <option value="" className="text-gray-800">Categoria do veículo</option>
               <option value="carro" className="text-gray-800">🚗 Carro</option>
               <option value="moto" className="text-gray-800">🏍️ Moto</option>
@@ -228,11 +228,11 @@ export default function RegisterDriver() {
             <UploadFile label="📄 CRLV (foto)" onUpload={(url) => updateForm({ crlv_url: url })} />
             <div>
               <label className="block text-white/80 text-sm font-medium mb-1">📸 Fotos do veículo (máx 5)</label>
-              <input type="file" multiple accept="image/*" onChange={handleUploadFotosVeiculo} className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-2xl file:border-0 file:bg-[#F4D03F] file:text-[#1E1E2F] file:font-bold file:text-xs leading-none" />
+              <input type="file" multiple accept="image/*" onChange={handleUploadFotosVeiculo} className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-2xl file:border-0 file:bg-[#F4D03F] file:text-[#1E1E2F] file:font-bold file:text-xs leading-none" />
               {form.fotos_veiculo.length > 0 && (
                 <div className="flex gap-2 mt-2 flex-wrap">
                   {form.fotos_veiculo.map((url, i) => (
-                    <img key={i} src={url} alt={`Foto ${i + 1}`} className="w-16 h-16 object-cover rounded-2xl border border-white/10" />
+                    <img key={i} src={url} alt={'Foto ' + (i + 1)} className="w-16 h-16 object-cover rounded-2xl border border-white/10" />
                   ))}
                 </div>
               )}
@@ -261,7 +261,7 @@ export default function RegisterDriver() {
             </div>
             <div className="flex gap-2">
               <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={handleSubmit} disabled={loading} className={`${btnClass} disabled:opacity-50`}>
+              <button onClick={handleSubmit} disabled={loading} className={btnClass + (loading ? ' opacity-50' : '')}>
                 {loading ? 'Enviando...' : <><Check size={20} /> Finalizar</>}
               </button>
             </div>

@@ -64,7 +64,7 @@ export default function RegisterPassenger() {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-3">
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="text"
@@ -76,7 +76,7 @@ export default function RegisterPassenger() {
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
               <Phone size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="tel"
@@ -88,7 +88,7 @@ export default function RegisterPassenger() {
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
               <Mail size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="email"
@@ -100,7 +100,7 @@ export default function RegisterPassenger() {
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
               <Lock size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -124,7 +124,7 @@ export default function RegisterPassenger() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md px-3 py-1.5 leading-none"
+              className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs px-3 py-1 leading-none"
             >
               {loading ? 'Cadastrando...' : <>Criar conta <ArrowRight size={18} /></>}
             </motion.button>
