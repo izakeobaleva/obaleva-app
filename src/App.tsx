@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import Login from './pages/Login';
 
 function App() {
+  console.log('App renderizando - versão correta');
   return (
     <AuthProvider>
       <BrowserRouter>
