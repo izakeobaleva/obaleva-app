@@ -60,7 +60,7 @@ export default function ForgotPassword() {
 
         {!sent ? (
           <form onSubmit={handleReset} className="space-y-4">
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="input-compact">
               <Mail size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="email"
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="btn-premium w-full py-1.5 flex items-center justify-center gap-2 leading-none"
+              className="btn-premium w-full flex items-center justify-center gap-2 btn-compact"
             >
               {loading ? 'Enviando...' : 'Enviar link de redefinição'}
             </motion.button>

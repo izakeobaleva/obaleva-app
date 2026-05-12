@@ -60,7 +60,7 @@ export default function RegisterPassenger() {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-3">
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="input-compact">
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="text"
@@ -72,7 +72,7 @@ export default function RegisterPassenger() {
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="input-compact">
               <Phone size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="tel"
@@ -84,7 +84,7 @@ export default function RegisterPassenger() {
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="input-compact">
               <Mail size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="email"
@@ -96,7 +96,7 @@ export default function RegisterPassenger() {
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className="input-compact">
               <Lock size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -120,7 +120,7 @@ export default function RegisterPassenger() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="btn-premium w-full flex items-center justify-center gap-2 py-1.5 leading-none"
+              className="btn-premium w-full flex items-center justify-center gap-2 btn-compact"
             >
               {loading ? 'Cadastrando...' : <>Criar conta <ArrowRight size={18} /></>}
             </motion.button>
