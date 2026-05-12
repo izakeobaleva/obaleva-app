@@ -11,6 +11,14 @@ import {
 import { RatingStars } from '../components/RatingStars'
 import { BottomNav } from '../components/BottomNav'
 
+interface PassageiroInfo {
+  nome_completo: string
+}
+
+interface MotoristaInfo {
+  nome_completo: string
+}
+
 interface TripData {
   id: string
   origem: string
@@ -21,8 +29,8 @@ interface TripData {
   distancia_km: number
   tempo_min: number
   created_at: string
-  passageiro: { nome_completo: string }
-  motorista: { nome_completo: string }
+  passageiro: PassageiroInfo | PassageiroInfo[]
+  motorista: MotoristaInfo | MotoristaInfo[]
 }
 
 export default function TripDetails() {
@@ -41,6 +49,7 @@ export default function TripDetails() {
   }, [id])
 
   async function fetchTrip() {
+    if (!id) return
     setLoading(true)
     const { data, error } = await supabase
       .from('corridas')
@@ -52,7 +61,7 @@ export default function TripDetails() {
       toast.error('Erro ao carregar detalhes da corrida')
       navigate(-1)
     } else {
-      setTrip(data)
+      setTrip(data as unknown as TripData)
     }
     setLoading(false)
   }
@@ -71,6 +80,18 @@ export default function TripDetails() {
     em_andamento: 'Em andamento',
     finalizada: 'Finalizada',
     cancelada: 'Cancelada',
+  }
+
+  const getNomePassageiro = (): string => {
+    if (!trip?.passageiro) return 'N/A'
+    if (Array.isArray(trip.passageiro)) return trip.passageiro[0]?.nome_completo || 'N/A'
+    return (trip.passageiro as PassageiroInfo).nome_completo || 'N/A'
+  }
+
+  const getNomeMotorista = (): string => {
+    if (!trip?.motorista) return 'N/A'
+    if (Array.isArray(trip.motorista)) return trip.motorista[0]?.nome_completo || 'N/A'
+    return (trip.motorista as MotoristaInfo).nome_completo || 'N/A'
   }
 
   if (loading) {
@@ -153,43 +174,41 @@ export default function TripDetails() {
               <p className="text-xl font-bold text-white">{trip.tempo_min || '--'} min</p>
             </div>
           </div>
-          {trip.distancia_km && (
+          {trip.distancia_km ? (
             <div className="text-center mt-3 pt-3 border-t border-white/10">
               <p className="text-xs text-[#A0A0B0]">Distância</p>
               <p className="text-white font-medium">{trip.distancia_km.toFixed(1)} km</p>
             </div>
-          )}
+          ) : null}
         </motion.div>
 
         {/* Driver info */}
-        {trip.motorista && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="card-dark p-5"
-          >
-            <h2 className="text-white font-semibold mb-3 flex items-center gap-2">
-              <Car size={18} className="text-[#F4D03F]" />
-              Motorista
-            </h2>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-full flex items-center justify-center">
-                <User size={20} className="text-[#1E1E2F]" />
-              </div>
-              <div className="flex-1">
-                <p className="text-white font-medium">{trip.motorista.nome_completo}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <RatingStars value={4.5} readonly size={14} />
-                  <span className="text-xs text-[#A0A0B0]">4.5</span>
-                </div>
-              </div>
-              <button className="btn-outline-dark p-2">
-                <Phone size={18} />
-              </button>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="card-dark p-5"
+        >
+          <h2 className="text-white font-semibold mb-3 flex items-center gap-2">
+            <Car size={18} className="text-[#F4D03F]" />
+            Motorista
+          </h2>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-full flex items-center justify-center">
+              <User size={20} className="text-[#1E1E2F]" />
             </div>
-          </motion.div>
-        )}
+            <div className="flex-1">
+              <p className="text-white font-medium">{getNomeMotorista()}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <RatingStars value={4.5} readonly size={14} />
+                <span className="text-xs text-[#A0A0B0]">4.5</span>
+              </div>
+            </div>
+            <button className="btn-outline-dark p-2">
+              <Phone size={18} />
+            </button>
+          </div>
+        </motion.div>
 
         {/* Payment info */}
         <motion.div
