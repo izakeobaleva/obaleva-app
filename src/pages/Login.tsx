@@ -77,7 +77,7 @@ export default function Login() {
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleGoogleLogin}
-          className="w-full py-3.5 rounded-2xl border-2 border-white/20 bg-white/5 text-white flex items-center justify-center gap-3 hover:bg-white/10 hover:border-white/30 transition-all font-medium text-base mb-4"
+          className="w-full py-3.5 rounded-2xl border-2 border-white/20 bg-white/5 text-white flex items-center justify-center gap-3 hover:bg-white/10 hover:border-white/30 transition-all font-medium text-base"
         >
           <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -88,18 +88,8 @@ export default function Login() {
           Entrar com Google
         </motion.button>
 
-        {/* Separador */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10"></div>
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-[#1A1528] px-3 text-[#A0A0B0]">ou acesse com e-mail</span>
-          </div>
-        </div>
-
-        {/* Formulário de e-mail/senha */}
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        {/* Formulário de e-mail/senha logo abaixo do Google */}
+        <form onSubmit={handleSubmit} className="space-y-3.5 mt-4">
           <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:border-[#F4D03F]/50 transition-all">
             <Mail size={18} className="text-[#A0A0B0]" />
             <input
@@ -146,8 +136,18 @@ export default function Login() {
           </motion.button>
         </form>
 
+        {/* Separador */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-white/10"></div>
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-[#1A1528] px-3 text-[#A0A0B0]">ou acesse com e-mail</span>
+          </div>
+        </div>
+
         {/* Botões de cadastro */}
-        <div className="flex flex-col gap-3 mt-6">
+        <div className="flex flex-col gap-3 mt-2">
           <Link
             to="/register"
             className="w-full py-3.5 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-sm"
