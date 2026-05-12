@@ -17,34 +17,34 @@ export default function Suporte() {
   ])
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow">
-      <h2 className="text-xl font-bold mb-4">Suporte</h2>
+    <div className="bg-[#1A1528] p-4 rounded-2xl border border-white/10">
+      <h2 className="text-xl font-bold text-white mb-4">Suporte</h2>
       <div className="space-y-4">
         {tickets.map(ticket => (
-          <div key={ticket.id} className="border rounded-lg p-4">
+          <div key={ticket.id} className="bg-[#1A1528] border border-white/10 rounded-2xl p-4">
             <div className="flex justify-between items-start">
               <div className="flex items-start gap-3">
                 {ticket.status === 'aberto' ? (
-                  <AlertCircle className="text-red-500 mt-1" size={20} />
+                  <AlertCircle className="text-red-400 mt-1" size={20} />
                 ) : (
-                  <CheckCircle className="text-green-500 mt-1" size={20} />
+                  <CheckCircle className="text-green-400 mt-1" size={20} />
                 )}
                 <div>
-                  <h3 className="font-bold">{ticket.assunto}</h3>
-                  <p className="text-sm text-gray-500">{ticket.usuario}</p>
-                  <p className="text-sm mt-2">{ticket.mensagem}</p>
-                  <p className="text-xs text-gray-400 mt-2">{ticket.data}</p>
+                  <h3 className="font-bold text-white">{ticket.assunto}</h3>
+                  <p className="text-sm text-[#A0A0B0]">{ticket.usuario}</p>
+                  <p className="text-sm text-white mt-2">{ticket.mensagem}</p>
+                  <p className="text-xs text-[#A0A0B0] mt-2">{ticket.data}</p>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded text-xs font-semibold ${
-                ticket.status === 'aberto' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                ticket.status === 'aberto' ? 'bg-red-900/40 text-red-400' : 'bg-green-900/40 text-green-400'
               }`}>
                 {ticket.status === 'aberto' ? 'Aberto' : 'Respondido'}
               </span>
             </div>
             <div className="mt-3 flex gap-2">
-              <button className="bg-roxo-principal text-white px-4 py-2 rounded-lg text-sm">Responder</button>
-              <button className="bg-gray-200 px-4 py-2 rounded-lg text-sm">Arquivar</button>
+              <button className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] px-4 py-2 rounded-2xl text-sm font-bold">Responder</button>
+              <button className="border border-white/20 text-white/90 px-4 py-2 rounded-2xl text-sm">Arquivar</button>
             </div>
           </div>
         ))}

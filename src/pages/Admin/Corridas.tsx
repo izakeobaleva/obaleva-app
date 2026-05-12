@@ -29,50 +29,50 @@ export default function Corridas() {
   }
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow">
+    <div className="bg-[#1A1528] p-4 rounded-2xl border border-white/10">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Corridas</h2>
+        <h2 className="text-xl font-bold text-white">Corridas</h2>
         <select
           value={filtro}
           onChange={e => setFiltro(e.target.value)}
-          className="border rounded-lg p-2"
+          className="bg-[#1A1528] text-white border border-white/10 rounded-2xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4D03F]"
         >
-          <option value="todas">Todas</option>
-          <option value="pendente">Pendentes</option>
-          <option value="em_andamento">Em andamento</option>
-          <option value="finalizada">Finalizadas</option>
-          <option value="cancelada">Canceladas</option>
+          <option value="todas" className="bg-[#1A1528]">Todas</option>
+          <option value="pendente" className="bg-[#1A1528]">Pendentes</option>
+          <option value="em_andamento" className="bg-[#1A1528]">Em andamento</option>
+          <option value="finalizada" className="bg-[#1A1528]">Finalizadas</option>
+          <option value="cancelada" className="bg-[#1A1528]">Canceladas</option>
         </select>
       </div>
 
       {loading ? (
-        <div className="text-center py-8">Carregando...</div>
+        <div className="text-center py-8 text-[#A0A0B0]">Carregando...</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-100">
+            <thead className="bg-white/5">
               <tr>
-                <th className="p-2 text-left">Passageiro</th>
-                <th className="p-2 text-left">Motorista</th>
-                <th className="p-2 text-left">Status</th>
-                <th className="p-2 text-left">Valor</th>
-                <th className="p-2 text-left">Data</th>
+                <th className="p-2 text-left text-[#A0A0B0] font-medium">Passageiro</th>
+                <th className="p-2 text-left text-[#A0A0B0] font-medium">Motorista</th>
+                <th className="p-2 text-left text-[#A0A0B0] font-medium">Status</th>
+                <th className="p-2 text-left text-[#A0A0B0] font-medium">Valor</th>
+                <th className="p-2 text-left text-[#A0A0B0] font-medium">Data</th>
               </tr>
             </thead>
             <tbody>
               {corridas.map(c => (
-                <tr key={c.id} className="border-b">
-                  <td className="p-2">{c.passageiro?.nome_completo || 'N/A'}</td>
-                  <td className="p-2">{c.motorista?.nome_completo || 'N/A'}</td>
+                <tr key={c.id} className="border-b border-white/10">
+                  <td className="p-2 text-white">{c.passageiro?.nome_completo || 'N/A'}</td>
+                  <td className="p-2 text-white">{c.motorista?.nome_completo || 'N/A'}</td>
                   <td className="p-2">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                      c.status === 'finalizada' ? 'bg-green-100 text-green-800' :
-                      c.status === 'em_andamento' ? 'bg-blue-100 text-blue-800' :
-                      c.status === 'cancelada' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                      c.status === 'finalizada' ? 'bg-green-900/40 text-green-400' :
+                      c.status === 'em_andamento' ? 'bg-blue-900/40 text-blue-400' :
+                      c.status === 'cancelada' ? 'bg-red-900/40 text-red-400' : 'bg-yellow-900/40 text-yellow-400'
                     }`}>{c.status}</span>
                   </td>
-                  <td className="p-2">R$ {c.valor?.toFixed(2) || '0.00'}</td>
-                  <td className="p-2">{new Date(c.created_at).toLocaleDateString()}</td>
+                  <td className="p-2 text-white">R$ {c.valor?.toFixed(2) || '0.00'}</td>
+                  <td className="p-2 text-white">{new Date(c.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

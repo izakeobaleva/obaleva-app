@@ -21,27 +21,27 @@ export default function Passageiros() {
     setLoading(false)
   }
 
-  if (loading) return <div className="text-center py-8">Carregando...</div>
+  if (loading) return <div className="text-center py-8 text-[#A0A0B0]">Carregando...</div>
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow overflow-x-auto">
-      <h2 className="text-xl font-bold mb-4">Passageiros</h2>
+    <div className="bg-[#1A1528] p-4 rounded-2xl border border-white/10 overflow-x-auto">
+      <h2 className="text-xl font-bold text-white mb-4">Passageiros</h2>
       <table className="w-full text-sm">
-        <thead className="bg-gray-100">
+        <thead className="bg-white/5">
           <tr>
-            <th className="p-2 text-left">Nome</th>
-            <th className="p-2 text-left">Email</th>
-            <th className="p-2 text-left">Telefone</th>
-            <th className="p-2 text-left">Total de Corridas</th>
+            <th className="p-2 text-left text-[#A0A0B0] font-medium">Nome</th>
+            <th className="p-2 text-left text-[#A0A0B0] font-medium">Email</th>
+            <th className="p-2 text-left text-[#A0A0B0] font-medium">Telefone</th>
+            <th className="p-2 text-left text-[#A0A0B0] font-medium">Total de Corridas</th>
           </tr>
         </thead>
         <tbody>
           {passageiros.map(p => (
-            <tr key={p.id} className="border-b">
-              <td className="p-2">{p.usuarios?.nome_completo || 'N/A'}</td>
-              <td className="p-2">{p.usuarios?.email || 'N/A'}</td>
-              <td className="p-2">{p.usuarios?.telefone || 'N/A'}</td>
-              <td className="p-2">{p.total_corridas || 0}</td>
+            <tr key={p.id} className="border-b border-white/10">
+              <td className="p-2 text-white">{p.usuarios?.nome_completo || 'N/A'}</td>
+              <td className="p-2 text-white">{p.usuarios?.email || 'N/A'}</td>
+              <td className="p-2 text-white">{p.usuarios?.telefone || 'N/A'}</td>
+              <td className="p-2 text-white">{p.total_corridas || 0}</td>
             </tr>
           ))}
         </tbody>
