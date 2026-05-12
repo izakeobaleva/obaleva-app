@@ -1,42 +1,58 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { supabase } from '../lib/supabaseClient'
-import { motion } from 'framer-motion'
-import { toast } from 'sonner'
-import { Car, ArrowRight } from 'lucide-react'
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
+import { motion } from 'framer-motion';
+import { toast } from 'sonner';
+import { Car, UserPlus, Truck, Share2, ArrowRight } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     
     if (error) {
-      toast.error('E-mail ou senha inválidos')
-      setLoading(false)
-      return
+      toast.error('E-mail ou senha inválidos');
+      setLoading(false);
+      return;
     }
     
     if (data.user) {
-      toast.success('Login realizado!')
-      navigate('/home')
+      toast.success('Login realizado!');
+      navigate('/home');
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
-    })
-    if (error) toast.error('Erro ao logar com Google')
-  }
+    });
+    if (error) toast.error('Erro ao logar com Google');
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'OBALEVA',
+      text: 'Mobilidade premium para sua cidade! Baixe o app e experimente.',
+      url: window.location.origin,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {}
+    } else {
+      navigator.clipboard.writeText(window.location.origin);
+      toast.success('Link copiado! Compartilhe com seus amigos.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
@@ -55,7 +71,7 @@ export default function Login() {
             <Car className="w-8 h-8 text-[#F4D03F]" />
           </div>
           <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
-          <p className="text-[#A0A0B0] mt-1">Entre na sua conta</p>
+          <p className="text-[#A0A0B0] mt-1">Acesse sua conta</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -96,7 +112,7 @@ export default function Login() {
 
         <button
           onClick={handleGoogleLogin}
-          className="btn-outline-dark w-full py-3 flex items-center justify-center gap-2"
+          className="btn-outline-dark w-full py-3 flex items-center justify-center gap-2 mb-4"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -107,13 +123,25 @@ export default function Login() {
           Entrar com Google
         </button>
 
-        <p className="text-center text-[#A0A0B0] text-sm mt-6">
-          Não tem conta?{' '}
-          <Link to="/register/passenger" className="text-[#F4D03F] hover:underline">Cadastrar passageiro</Link>{' '}
-          ou{' '}
-          <Link to="/register/driver" className="text-[#F4D03F] hover:underline">motorista</Link>
-        </p>
+        <div className="flex flex-col gap-3">
+          <Link to="/register/passenger" className="btn-outline-dark w-full py-3 flex items-center justify-center gap-2">
+            <UserPlus size={18} />
+            Cadastrar como Passageiro
+          </Link>
+          <Link to="/register/driver" className="btn-outline-dark w-full py-3 flex items-center justify-center gap-2">
+            <Truck size={18} />
+            Cadastrar como Motorista
+          </Link>
+        </div>
+
+        <button
+          onClick={handleShare}
+          className="w-full py-3 flex items-center justify-center gap-2 text-[#A0A0B0] hover:text-white transition mt-6"
+        >
+          <Share2 size={18} />
+          Compartilhar OBALEVA
+        </button>
       </motion.div>
     </div>
-  )
+  );
 }
