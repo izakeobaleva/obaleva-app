@@ -1,173 +1,143 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
-import toast from 'sonner';
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient'
+import { motion } from 'framer-motion'
+import { toast } from 'sonner'
+import { UserPlus, ArrowRight, Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react'
 
-export const RegisterDriver = () => {
-  const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState<any>({});
-  const [loading, setLoading] = useState(false);
+export default function RegisterPassenger() {
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [nome, setNome] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const updateForm = (field: string, value: any) => {
-    setForm({ ...form, [field]: value });
-  };
-
-  const nextStep = () => setStep(step + 1);
-  const prevStep = () => setStep(step - 1);
-
-  const finalSubmit = async () => {
-    setLoading(true);
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
     try {
-      const { nome_completo, cpf, telefone, email, password, placa, modelo, ano, cor, pix } = form;
-
-      // 1. Criar usuário no Auth
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { nome_completo, tipo: 'motorista' } },
-      });
-      if (signUpError) throw signUpError;
-      if (!authData.user) throw new Error('Erro ao criar usuário');
-
-      // 2. Inserir na tabela usuarios
-      const { error: insertUserError } = await supabase.from('usuarios').insert({
-        id: authData.user.id,
-        nome_completo,
-        cpf,
-        telefone,
-        email,
-        tipo: 'motorista',
-      });
-      if (insertUserError) throw insertUserError;
-
-      // 3. Inserir na tabela motoristas
-      const { error: insertDriverError } = await supabase.from('motoristas').insert({
-        id: authData.user.id,
-        status: 'pendente',
-        dados_veiculo: { placa, modelo, ano, cor },
-        conta_bancaria_pix: pix,
-      });
-      if (insertDriverError) throw insertDriverError;
-
-      toast.success('Cadastro enviado! Aguarde aprovação do administrador.');
-      navigate('/login');
+        options: { data: { nome_completo: nome, tipo: 'passageiro' } }
+      })
+      if (error) throw error
+      if (data.user) {
+        await supabase.from('passageiros').insert({ id: data.user.id, nome, telefone })
+        await supabase.from('usuarios').insert({ id: data.user.id, nome_completo: nome, telefone, email, tipo: 'passageiro' })
+        toast.success('Cadastro realizado! Verifique seu e-mail para confirmar.')
+        navigate('/')
+      }
     } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || 'Erro no cadastro');
+      toast.error('Erro: ' + err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-
-  if (step === 1) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-4 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-xl max-w-lg w-full shadow">
-          <h2 className="text-2xl font-bold text-roxo-principal">Cadastro Motorista – Etapa 1</h2>
-          <p className="text-gray-600 mb-4">Dados pessoais</p>
-          <input
-            type="text"
-            placeholder="Nome completo"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('nome_completo', e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="CPF (apenas números)"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('cpf', e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Telefone com DDD"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('telefone', e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="E-mail"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('email', e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('password', e.target.value)}
-            required
-          />
-          <button onClick={nextStep} className="btn-amarelo w-full py-2 rounded-lg mt-3">
-            Próximo
-          </button>
-        </div>
-      </div>
-    );
   }
 
-  if (step === 2) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-4 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-xl max-w-lg w-full shadow">
-          <h2 className="text-2xl font-bold text-roxo-principal">Cadastro Motorista – Etapa 2</h2>
-          <p className="text-gray-600 mb-4">Dados do veículo e PIX</p>
-          <input
-            type="text"
-            placeholder="Placa"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('placa', e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Modelo"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('modelo', e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Ano"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('ano', e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Cor"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('cor', e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Chave PIX (CPF, e-mail ou telefone)"
-            className="w-full p-2 border rounded my-1"
-            onChange={(e) => updateForm('pix', e.target.value)}
-            required
-          />
-          <div className="flex gap-2 mt-4">
-            <button onClick={prevStep} className="bg-gray-500 text-white px-4 py-2 rounded-lg">
-              Voltar
-            </button>
-            <button
-              onClick={finalSubmit}
-              disabled={loading}
-              className="btn-amarelo flex-1 py-2 rounded-lg"
+  return (
+    <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center p-4">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 w-full max-w-md"
+      >
+        <div className="card-dark p-8">
+          <div className="text-center mb-6">
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3"
             >
-              {loading ? 'Enviando...' : 'Enviar cadastro'}
-            </button>
+              <UserPlus className="w-8 h-8 text-[#F4D03F]" />
+            </motion.div>
+            <h2 className="text-2xl font-bold text-white">Cadastro Passageiro</h2>
+            <p className="text-[#A0A0B0] text-sm">Crie sua conta em instantes</p>
           </div>
+
+          <form onSubmit={handleRegister} className="space-y-3">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+              <User size={14} className="text-[#F4D03F] shrink-0" />
+              <input
+                type="text"
+                placeholder="Nome completo"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
+                value={nome}
+                onChange={e => setNome(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+              <Phone size={14} className="text-[#F4D03F] shrink-0" />
+              <input
+                type="tel"
+                placeholder="Telefone com DDD"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
+                value={telefone}
+                onChange={e => setTelefone(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+              <Mail size={14} className="text-[#F4D03F] shrink-0" />
+              <input
+                type="email"
+                placeholder="E-mail"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+              <Lock size={14} className="text-[#F4D03F] shrink-0" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Senha (mínimo 6 caracteres)"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md px-3 py-1.5 leading-none"
+            >
+              {loading ? 'Cadastrando...' : <>Criar conta <ArrowRight size={18} /></>}
+            </motion.button>
+          </form>
+
+          <p className="text-center text-[#A0A0B0] text-sm mt-4">
+            Já tem conta?{' '}
+            <button onClick={() => navigate('/')} className="text-[#F4D03F] font-semibold hover:underline">
+              Faça login
+            </button>
+          </p>
         </div>
-      </div>
-    );
-  }
-
-  return null;
-};
-
-export default RegisterDriver;
+      </motion.div>
+    </div>
+  )
+}
