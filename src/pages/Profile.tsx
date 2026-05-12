@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext'
 import { BottomNav } from '../components/BottomNav'
-import { User, Mail, Shield, LogOut } from 'lucide-react'
+import { User, Mail, Shield, LogOut, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Perfil() {
@@ -16,7 +16,14 @@ export default function Perfil() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
-      <header className="glass-header sticky top-0 z-20 px-6 py-4">
+      <header className="glass-header sticky top-0 z-20 px-6 py-4 flex items-center gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="btn-outline-dark p-2"
+          aria-label="Voltar"
+        >
+          <ArrowLeft size={20} />
+        </button>
         <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Meu Perfil</h1>
       </header>
       
