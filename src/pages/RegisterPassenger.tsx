@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
 
 export default function CadastroPassageiro() {
   const navigate = useNavigate()
@@ -83,12 +83,17 @@ export default function CadastroPassageiro() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[400px] p-6"
       >
-        <div className="text-center mb-5">
-          <div className="w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center mx-auto mb-3">
-            <User size={24} className="text-[#F4D03F]" />
+        <div className="flex items-center mb-4">
+          <button
+            onClick={() => navigate('/')}
+            className="btn-outline-dark p-2"
+            aria-label="Voltar"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex-1 text-center -ml-10">
+            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Criar Conta</h1>
           </div>
-          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Criar Conta</h1>
-          <p className="text-[#A0A0B0] text-sm mt-0.5">Cadastre-se como passageiro</p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-3">

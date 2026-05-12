@@ -40,6 +40,19 @@ export default function ForgotPassword() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-6"
       >
+        <div className="flex items-center mb-4">
+          <button
+            onClick={() => navigate('/login')}
+            className="btn-outline-dark p-2"
+            aria-label="Voltar"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex-1 text-center -ml-10">
+            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>{sent ? 'E-mail enviado!' : 'Redefinir senha'}</h1>
+          </div>
+        </div>
+
         <div className="text-center mb-5">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3">
             {sent ? (
@@ -48,9 +61,6 @@ export default function ForgotPassword() {
               <KeyRound className="w-7 h-7 text-[#F4D03F]" />
             )}
           </div>
-          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
-            {sent ? 'E-mail enviado!' : 'Redefinir senha'}
-          </h1>
           <p className="text-[#A0A0B0] text-sm mt-0.5">
             {sent
               ? 'Verifique sua caixa de entrada e siga as instruções.'

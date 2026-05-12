@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 
 export default function Entrar() {
@@ -30,12 +30,10 @@ export default function Entrar() {
 
         if (tipo === 'motorista') {
           navigate('/driver')
-        } else if (tipo === 'passageiro') {
-          navigate('/passenger')
         } else if (tipo === 'admin') {
           navigate('/admin')
         } else {
-          navigate('/passenger')
+          navigate('/home')
         }
         toast.success('Login realizado com sucesso!')
       }
@@ -58,12 +56,17 @@ export default function Entrar() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-6"
       >
-        <div className="text-center mb-5">
-          <div className="w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center mx-auto mb-3">
-            <LogIn size={24} className="text-[#F4D03F]" />
+        <div className="flex items-center mb-4">
+          <button
+            onClick={() => navigate('/')}
+            className="btn-outline-dark p-2"
+            aria-label="Voltar"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex-1 text-center -ml-10">
+            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Entrar</h1>
           </div>
-          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Entrar</h1>
-          <p className="text-[#A0A0B0] text-sm mt-0.5">Acesse sua conta ObaLeve</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-3.5">
