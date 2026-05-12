@@ -1,3 +1,6 @@
+</dyad-delete>
+
+<dyad-write path="src/pages/RegisterDriver.tsx" description="Criar arquivo limpo do zero, sem nenhum dyad-write aninhado">
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
@@ -38,7 +41,6 @@ export default function RegisterDriver() {
   })
 
   const updateForm = (data: Partial<typeof form>) => setForm({ ...form, ...data })
-
   const nextStep = () => setStep(step + 1)
   const prevStep = () => setStep(step - 1)
 
@@ -47,7 +49,6 @@ export default function RegisterDriver() {
       toast.error('Preencha todos os campos obrigatórios')
       return
     }
-
     setLoading(true)
     try {
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -55,10 +56,8 @@ export default function RegisterDriver() {
         password: form.password,
         options: { data: { nome_completo: form.nome_completo, tipo: 'motorista' } },
       })
-
       if (signUpError) throw signUpError
       if (!authData.user) throw new Error('Erro ao criar usuário')
-
       const { error: insertUserError } = await supabase.from('usuarios').insert({
         id: authData.user.id,
         nome_completo: form.nome_completo,
@@ -68,7 +67,6 @@ export default function RegisterDriver() {
         tipo: 'motorista',
       })
       if (insertUserError) throw insertUserError
-
       const { error: insertDriverError } = await supabase.from('motoristas').insert({
         id: authData.user.id,
         status: 'pendente',
@@ -95,7 +93,6 @@ export default function RegisterDriver() {
         conta_bancaria_pix: form.pix,
       })
       if (insertDriverError) throw insertDriverError
-
       toast.success('Cadastro enviado! Aguarde aprovação do administrador.')
       navigate('/')
     } catch (err: any) {
@@ -129,30 +126,31 @@ export default function RegisterDriver() {
     </div>
   )
 
-  const inputClass = "w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
-
   const renderStep = () => {
+    const inputContainerClass = "flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none"
+    const inputClass = "w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
+    const btnClass = "w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md px-3 py-1.5 leading-none"
+    const btnOutlineClass = "flex-1 rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm px-3 py-1.5 leading-none"
+
     switch (step) {
       case 1:
         return (
           <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3">
             <h2 className="text-xl font-bold text-white">📋 Dados Pessoais</h2>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Nome completo" className={inputClass} value={form.nome_completo} onChange={e => updateForm({ nome_completo: e.target.value })} required />
             </div>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="CPF (apenas números)" className={inputClass} value={form.cpf} onChange={e => updateForm({ cpf: e.target.value })} required />
             </div>
             <input type="date" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.data_nascimento} onChange={e => updateForm({ data_nascimento: e.target.value })} required />
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="RG" className={inputClass} value={form.rg} onChange={e => updateForm({ rg: e.target.value })} required />
             </div>
-            <button onClick={nextStep} className="w-full py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md">
-              Próximo <ArrowRight size={20} />
-            </button>
+            <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={20} /></button>
           </motion.div>
         )
 
@@ -160,15 +158,15 @@ export default function RegisterDriver() {
         return (
           <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3">
             <h2 className="text-xl font-bold text-white">📞 Contato e Senha</h2>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <Phone size={14} className="text-[#F4D03F] shrink-0" />
               <input type="tel" placeholder="Telefone (com DDD)" className={inputClass} value={form.telefone} onChange={e => updateForm({ telefone: e.target.value })} required />
             </div>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <Mail size={14} className="text-[#F4D03F] shrink-0" />
               <input type="email" placeholder="E-mail" className={inputClass} value={form.email} onChange={e => updateForm({ email: e.target.value })} required />
             </div>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <Lock size={14} className="text-[#F4D03F] shrink-0" />
               <input type={showPassword ? 'text' : 'password'} placeholder="Crie uma senha" className={inputClass} value={form.password} onChange={e => updateForm({ password: e.target.value })} required />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
@@ -177,8 +175,8 @@ export default function RegisterDriver() {
             </div>
             <UploadFile label="📄 Comprovante de residência" onUpload={(url) => updateForm({ comprovante_residencia_url: url })} />
             <div className="flex gap-2">
-              <button onClick={prevStep} className="flex-1 py-1.5 leading-none rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm"><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={nextStep} className="flex-1 py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md">Próximo <ArrowRight size={20} /></button>
+              <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={20} /> Voltar</button>
+              <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={20} /></button>
             </div>
           </motion.div>
         )
@@ -187,11 +185,11 @@ export default function RegisterDriver() {
         return (
           <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3">
             <h2 className="text-xl font-bold text-white">🚗 Habilitação (CNH)</h2>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Número da CNH" className={inputClass} value={form.cnh_numero} onChange={e => updateForm({ cnh_numero: e.target.value })} required />
             </div>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Categoria (ex: A, B, AB)" className={inputClass} value={form.cnh_categoria} onChange={e => updateForm({ cnh_categoria: e.target.value })} required />
             </div>
@@ -199,8 +197,8 @@ export default function RegisterDriver() {
             <UploadFile label="📸 Foto da CNH (frente)" onUpload={(url) => updateForm({ cnh_frente_url: url })} />
             <UploadFile label="📸 Foto da CNH (verso)" onUpload={(url) => updateForm({ cnh_verso_url: url })} />
             <div className="flex gap-2">
-              <button onClick={prevStep} className="flex-1 py-1.5 leading-none rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm"><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={nextStep} className="flex-1 py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md">Próximo <ArrowRight size={20} /></button>
+              <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={20} /> Voltar</button>
+              <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={20} /></button>
             </div>
           </motion.div>
         )
@@ -209,19 +207,19 @@ export default function RegisterDriver() {
         return (
           <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3">
             <h2 className="text-xl font-bold text-white">🚙 Dados do Veículo</h2>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Placa" className={`${inputClass} uppercase`} value={form.placa} onChange={e => updateForm({ placa: e.target.value })} required />
             </div>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Modelo (ex: Fiat Uno)" className={inputClass} value={form.modelo} onChange={e => updateForm({ modelo: e.target.value })} required />
             </div>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Ano" className={inputClass} value={form.ano} onChange={e => updateForm({ ano: e.target.value })} required />
             </div>
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Cor" className={inputClass} value={form.cor} onChange={e => updateForm({ cor: e.target.value })} required />
             </div>
@@ -243,8 +241,8 @@ export default function RegisterDriver() {
               )}
             </div>
             <div className="flex gap-2">
-              <button onClick={prevStep} className="flex-1 py-1.5 leading-none rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm"><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={nextStep} className="flex-1 py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md">Próximo <ArrowRight size={20} /></button>
+              <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={20} /> Voltar</button>
+              <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={20} /></button>
             </div>
           </motion.div>
         )
@@ -254,7 +252,7 @@ export default function RegisterDriver() {
           <motion.div key="step5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3">
             <h2 className="text-xl font-bold text-white">💰 Seguro e Pagamento</h2>
             <UploadFile label="📄 Apólice de seguro (foto)" onUpload={(url) => updateForm({ seguro_apolice_url: url })} />
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
+            <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Chave PIX (CPF, e-mail ou telefone)" className={inputClass} value={form.pix} onChange={e => updateForm({ pix: e.target.value })} required />
             </div>
@@ -265,8 +263,8 @@ export default function RegisterDriver() {
               <p className="text-sm text-[#A0A0B0]">Veículo: {form.modelo} - {form.placa}</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={prevStep} className="flex-1 py-1.5 leading-none rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm"><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={handleSubmit} disabled={loading} className="flex-1 py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md disabled:opacity-50">
+              <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={20} /> Voltar</button>
+              <button onClick={handleSubmit} disabled={loading} className={`${btnClass} disabled:opacity-50`}>
                 {loading ? 'Enviando...' : <><Check size={20} /> Finalizar</>}
               </button>
             </div>
