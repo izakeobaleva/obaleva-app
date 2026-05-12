@@ -18,7 +18,6 @@ export default function Motoristas() {
         .from('usuarios')
         .select('id, nome_completo, email, telefone')
         .eq('tipo', 'motorista')
-        .order('created_at', { ascending: false })
 
       if (userError) throw userError
 
