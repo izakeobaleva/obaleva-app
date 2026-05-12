@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Car, Truck, Shield, User, BarChart, Settings, LogOut, Wallet, Clock } from 'lucide-react'
 
-export default function Home() {
+export default function Inicio() {
   const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
 

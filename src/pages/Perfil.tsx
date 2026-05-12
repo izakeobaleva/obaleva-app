@@ -3,7 +3,7 @@ import { BottomNav } from '../components/BottomNav'
 import { User, Mail, Shield, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-export default function Profile() {
+export default function Perfil() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
 

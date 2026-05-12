@@ -9,8 +9,8 @@ import EsqueciSenha from './pages/EsqueciSenha';
 import AtualizarSenha from './pages/AtualizarSenha';
 import PainelPassageiro from './pages/PainelPassageiro';
 import PainelMotorista from './pages/PainelMotorista';
-import Home from './pages/Home';
-import Profile from './pages/Profile';
+import Inicio from './pages/Inicio';
+import Perfil from './pages/Perfil';
 import Viagens from './pages/Viagens';
 import DetalhesViagem from './pages/DetalhesViagem';
 import Ganhos from './pages/Ganhos';
@@ -29,8 +29,8 @@ function App() {
           <Route path="/update-password" element={<AtualizarSenha />} />
           <Route path="/passenger" element={<PainelPassageiro />} />
           <Route path="/driver" element={<PainelMotorista />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/home" element={<Inicio />} />
+          <Route path="/profile" element={<Perfil />} />
           <Route path="/trips" element={<Viagens />} />
           <Route path="/trips/:id" element={<DetalhesViagem />} />
           <Route path="/earnings" element={<Ganhos />} />
