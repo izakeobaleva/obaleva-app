@@ -159,9 +159,11 @@ export default function Login() {
             to="/register-driver"
             className="w-full py-3.5 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-sm"
           >
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F4D03F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" strokeWidth="3"/>
+              <path d="M12 4 L13 12 L17 14" strokeWidth="3"/>
+              <path d="M12 4 L11 12 L7 14" strokeWidth="3"/>
+              <path d="M12 4 L12 10" strokeWidth="3"/>
             </svg>
             Cadastrar como Motorista
           </Link>
