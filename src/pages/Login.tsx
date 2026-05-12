@@ -154,12 +154,12 @@ export default function Login() {
         <div className="relative overflow-hidden rounded-2xl mb-2.5">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3.5 py-2.5">
-            <Lock size={16} className="text-[#F4D03F] shrink-0" />
+          <div className="relative flex items-center gap-3 px-3.5 py-2">
+            <Lock size={15} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm h-0 leading-none"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -169,7 +169,7 @@ export default function Login() {
               onClick={() => setShowPassword(!showPassword)}
               className="text-[#A0A0B0] hover:text-white transition shrink-0"
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
         </div>
@@ -183,25 +183,25 @@ export default function Login() {
         <motion.button
           whileTap={{ scale: 0.98 }}
           type="submit"
-          className="w-full py-2.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm mb-4"
+          className="w-full py-[10px] rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm mb-3"
         >
           Entrar <ArrowRight size={17} />
         </motion.button>
 
-        <div className="border-t border-white/10 pt-3.5">
-          <p className="text-[11px] text-[#A0A0B0] text-center mb-2.5">Ainda não tem conta?</p>
+        <div className="border-t border-white/10 pt-3">
+          <p className="text-[11px] text-[#A0A0B0] text-center mb-2">Ainda não tem conta?</p>
           <Link
             to="/register"
-            className="w-full py-2.5 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs mb-2"
+            className="w-full py-2 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs mb-1.5"
           >
-            <User size={16} className="text-[#F4D03F]" />
+            <User size={15} className="text-[#F4D03F]" />
             Criar conta como Passageiro
           </Link>
           <Link
             to="/register-driver"
-            className="w-full py-2.5 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs"
+            className="w-full py-2 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs"
           >
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#F4D03F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#F4D03F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" strokeWidth="3"/>
               <path d="M12 4 L13 12 L17 14" strokeWidth="3"/>
               <path d="M12 4 L11 12 L7 14" strokeWidth="3"/>
