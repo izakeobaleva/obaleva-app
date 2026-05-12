@@ -15,24 +15,6 @@ export default function AdminDashboard() {
   const { signOut } = useAuth()
   const [activeTab, setActiveTab] = useState<Tab>('motoristas')
 
-  const tabs: { id: Tab; label: string }[]<dyad-write path="src/pages/AdminDashboard.tsx" description="Painel admin com paleta refinada">
-import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import { motion } from 'framer-motion'
-import Motoristas from './Admin/Motoristas'
-import Passageiros from './Admin/Passageiros'
-import Corridas from './Admin/Corridas'
-import Financeiro from './Admin/Financeiro'
-import Alugueis from './Admin/Alugueis'
-import Suporte from './Admin/Suporte'
-import { Shield } from 'lucide-react'
-
-type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'alugueis' | 'suporte'
-
-export default function AdminDashboard() {
-  const { signOut } = useAuth()
-  const [activeTab, setActiveTab] = useState<Tab>('motoristas')
-
   const tabs: { id: Tab; label: string }[] = [
     { id: 'motoristas', label: 'Motoristas' },
     { id: 'passageiros', label: 'Passageiros' },
