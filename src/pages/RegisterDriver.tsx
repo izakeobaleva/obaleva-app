@@ -1,6 +1,6 @@
 </dyad-delete>
 
-<dyad-write path="src/pages/RegisterDriver.tsx" description="Criar arquivo limpo do zero, sem nenhum dyad-write aninhado">
+<dyad-write path="src/pages/RegisterDriver.tsx" description="Criar arquivo limpo sem tags aninhadas">
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
@@ -116,7 +116,7 @@ export default function RegisterDriver() {
 
   const renderStepIndicator = () => (
     <div className="flex gap-2 mb-6">
-      {[1, 2, 3, 4, 5].map(s => (
+      {[1, 2, 3, 4, 5].map((s) => (
         <motion.div
           key={s}
           animate={{ scale: step >= s ? 1 : 0.9 }}
@@ -139,16 +139,16 @@ export default function RegisterDriver() {
             <h2 className="text-xl font-bold text-white">📋 Dados Pessoais</h2>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Nome completo" className={inputClass} value={form.nome_completo} onChange={e => updateForm({ nome_completo: e.target.value })} required />
+              <input type="text" placeholder="Nome completo" className={inputClass} value={form.nome_completo} onChange={(e) => updateForm({ nome_completo: e.target.value })} required />
             </div>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="CPF (apenas números)" className={inputClass} value={form.cpf} onChange={e => updateForm({ cpf: e.target.value })} required />
+              <input type="text" placeholder="CPF (apenas números)" className={inputClass} value={form.cpf} onChange={(e) => updateForm({ cpf: e.target.value })} required />
             </div>
-            <input type="date" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.data_nascimento} onChange={e => updateForm({ data_nascimento: e.target.value })} required />
+            <input type="date" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.data_nascimento} onChange={(e) => updateForm({ data_nascimento: e.target.value })} required />
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="RG" className={inputClass} value={form.rg} onChange={e => updateForm({ rg: e.target.value })} required />
+              <input type="text" placeholder="RG" className={inputClass} value={form.rg} onChange={(e) => updateForm({ rg: e.target.value })} required />
             </div>
             <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={20} /></button>
           </motion.div>
@@ -160,20 +160,20 @@ export default function RegisterDriver() {
             <h2 className="text-xl font-bold text-white">📞 Contato e Senha</h2>
             <div className={inputContainerClass}>
               <Phone size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="tel" placeholder="Telefone (com DDD)" className={inputClass} value={form.telefone} onChange={e => updateForm({ telefone: e.target.value })} required />
+              <input type="tel" placeholder="Telefone (com DDD)" className={inputClass} value={form.telefone} onChange={(e) => updateForm({ telefone: e.target.value })} required />
             </div>
             <div className={inputContainerClass}>
               <Mail size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="email" placeholder="E-mail" className={inputClass} value={form.email} onChange={e => updateForm({ email: e.target.value })} required />
+              <input type="email" placeholder="E-mail" className={inputClass} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} required />
             </div>
             <div className={inputContainerClass}>
               <Lock size={14} className="text-[#F4D03F] shrink-0" />
-              <input type={showPassword ? 'text' : 'password'} placeholder="Crie uma senha" className={inputClass} value={form.password} onChange={e => updateForm({ password: e.target.value })} required />
+              <input type={showPassword ? 'text' : 'password'} placeholder="Crie uma senha" className={inputClass} value={form.password} onChange={(e) => updateForm({ password: e.target.value })} required />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
                 {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>
             </div>
-            <UploadFile label="📄 Comprovante de residência" onUpload={(url) => updateForm({ comprovante_residencia_url: url })} />
+            <UploadFile label="📄 Comprovante de residência" onUpload={(url: string) => updateForm({ comprovante_residencia_url: url })} />
             <div className="flex gap-2">
               <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={20} /> Voltar</button>
               <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={20} /></button>
@@ -187,15 +187,15 @@ export default function RegisterDriver() {
             <h2 className="text-xl font-bold text-white">🚗 Habilitação (CNH)</h2>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Número da CNH" className={inputClass} value={form.cnh_numero} onChange={e => updateForm({ cnh_numero: e.target.value })} required />
+              <input type="text" placeholder="Número da CNH" className={inputClass} value={form.cnh_numero} onChange={(e) => updateForm({ cnh_numero: e.target.value })} required />
             </div>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Categoria (ex: A, B, AB)" className={inputClass} value={form.cnh_categoria} onChange={e => updateForm({ cnh_categoria: e.target.value })} required />
+              <input type="text" placeholder="Categoria (ex: A, B, AB)" className={inputClass} value={form.cnh_categoria} onChange={(e) => updateForm({ cnh_categoria: e.target.value })} required />
             </div>
-            <input type="month" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.cnh_validade} onChange={e => updateForm({ cnh_validade: e.target.value })} required />
-            <UploadFile label="📸 Foto da CNH (frente)" onUpload={(url) => updateForm({ cnh_frente_url: url })} />
-            <UploadFile label="📸 Foto da CNH (verso)" onUpload={(url) => updateForm({ cnh_verso_url: url })} />
+            <input type="month" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm leading-none" value={form.cnh_validade} onChange={(e) => updateForm({ cnh_validade: e.target.value })} required />
+            <UploadFile label="📸 Foto da CNH (frente)" onUpload={(url: string) => updateForm({ cnh_frente_url: url })} />
+            <UploadFile label="📸 Foto da CNH (verso)" onUpload={(url: string) => updateForm({ cnh_verso_url: url })} />
             <div className="flex gap-2">
               <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={20} /> Voltar</button>
               <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={20} /></button>
@@ -209,32 +209,32 @@ export default function RegisterDriver() {
             <h2 className="text-xl font-bold text-white">🚙 Dados do Veículo</h2>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Placa" className={`${inputClass} uppercase`} value={form.placa} onChange={e => updateForm({ placa: e.target.value })} required />
+              <input type="text" placeholder="Placa" className={`${inputClass} uppercase`} value={form.placa} onChange={(e) => updateForm({ placa: e.target.value })} required />
             </div>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Modelo (ex: Fiat Uno)" className={inputClass} value={form.modelo} onChange={e => updateForm({ modelo: e.target.value })} required />
+              <input type="text" placeholder="Modelo (ex: Fiat Uno)" className={inputClass} value={form.modelo} onChange={(e) => updateForm({ modelo: e.target.value })} required />
             </div>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Ano" className={inputClass} value={form.ano} onChange={e => updateForm({ ano: e.target.value })} required />
+              <input type="text" placeholder="Ano" className={inputClass} value={form.ano} onChange={(e) => updateForm({ ano: e.target.value })} required />
             </div>
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Cor" className={inputClass} value={form.cor} onChange={e => updateForm({ cor: e.target.value })} required />
+              <input type="text" placeholder="Cor" className={inputClass} value={form.cor} onChange={(e) => updateForm({ cor: e.target.value })} required />
             </div>
-            <select className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] text-sm leading-none" value={form.categoria_veiculo} onChange={e => updateForm({ categoria_veiculo: e.target.value as 'carro' | 'moto' })} required>
+            <select className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] text-sm leading-none" value={form.categoria_veiculo} onChange={(e) => updateForm({ categoria_veiculo: e.target.value as 'carro' | 'moto' })} required>
               <option value="" className="text-gray-800">Categoria do veículo</option>
               <option value="carro" className="text-gray-800">🚗 Carro</option>
               <option value="moto" className="text-gray-800">🏍️ Moto</option>
             </select>
-            <UploadFile label="📄 CRLV (foto)" onUpload={(url) => updateForm({ crlv_url: url })} />
+            <UploadFile label="📄 CRLV (foto)" onUpload={(url: string) => updateForm({ crlv_url: url })} />
             <div>
               <label className="block text-white/80 text-sm font-medium mb-1">📸 Fotos do veículo (máx 5)</label>
               <input type="file" multiple accept="image/*" onChange={handleUploadFotosVeiculo} className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-3 py-1.5 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-2xl file:border-0 file:bg-[#F4D03F] file:text-[#1E1E2F] file:font-bold file:text-xs leading-none" />
               {form.fotos_veiculo.length > 0 && (
                 <div className="flex gap-2 mt-2 flex-wrap">
-                  {form.fotos_veiculo.map((url, i) => (
+                  {form.fotos_veiculo.map((url: string, i: number) => (
                     <img key={i} src={url} alt={`Foto ${i + 1}`} className="w-16 h-16 object-cover rounded-2xl border border-white/10" />
                   ))}
                 </div>
@@ -251,10 +251,10 @@ export default function RegisterDriver() {
         return (
           <motion.div key="step5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3">
             <h2 className="text-xl font-bold text-white">💰 Seguro e Pagamento</h2>
-            <UploadFile label="📄 Apólice de seguro (foto)" onUpload={(url) => updateForm({ seguro_apolice_url: url })} />
+            <UploadFile label="📄 Apólice de seguro (foto)" onUpload={(url: string) => updateForm({ seguro_apolice_url: url })} />
             <div className={inputContainerClass}>
               <User size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Chave PIX (CPF, e-mail ou telefone)" className={inputClass} value={form.pix} onChange={e => updateForm({ pix: e.target.value })} required />
+              <input type="text" placeholder="Chave PIX (CPF, e-mail ou telefone)" className={inputClass} value={form.pix} onChange={(e) => updateForm({ pix: e.target.value })} required />
             </div>
             <div className="bg-[#1A1528] border border-white/10 rounded-2xl p-5 space-y-1">
               <h3 className="font-bold text-white mb-2">📝 Resumo do cadastro</h3>
