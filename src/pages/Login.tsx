@@ -102,26 +102,10 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8"
       >
-        {/* Header do card - ícone pequeno ao lado do título */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-          >
-            {logoUrl ? (
-              <img 
-                src={logoUrl} 
-                alt="ObaLeve" 
-                className="w-8 h-8 object-contain"
-              />
-            ) : (
-              <Car className="text-[#F4D03F] w-7 h-7" />
-            )}
-          </motion.div>
-          <div>
-            <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
-            <p className="text-[#A0A0B0] text-xs">Faça login para continuar</p>
-          </div>
+        {/* Header do card - só texto */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+          <p className="text-[#A0A0B0] text-sm mt-1">Faça login para continuar</p>
         </div>
 
         {/* Login com Google */}
