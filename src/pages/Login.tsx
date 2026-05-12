@@ -77,12 +77,12 @@ export default function Login() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
       </div>
 
-      {/* Logo no canto superior direito */}
+      {/* Logo no canto superior esquerdo */}
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
+        initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.3 }}
-        className="fixed top-6 right-6 z-20"
+        className="fixed top-6 left-6 z-20"
       >
         <div className="w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
           {logoUrl ? (
