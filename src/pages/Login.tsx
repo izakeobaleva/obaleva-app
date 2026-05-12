@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Share2, Eye, EyeOff, ArrowRight, User, Car } from 'lucide-react';
+import { Mail, Lock, Share2, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -91,7 +91,12 @@ export default function Login() {
               className="w-full h-full object-contain p-2"
             />
           ) : (
-            <Car className="text-[#F4D03F] w-6 h-6" />
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="6" width="22" height="12" rx="2"/>
+              <circle cx="7" cy="14" r="2"/>
+              <circle cx="17" cy="14" r="2"/>
+              <path d="M1 9h22"/>
+            </svg>
           )}
         </div>
       </motion.div>
@@ -210,5 +215,5 @@ export default function Login() {
         </motion.button>
       </motion.div>
     </div>
-  );
+  )
 }
