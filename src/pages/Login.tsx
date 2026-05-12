@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
-import { Car, Mail, Lock, Eye, EyeOff, Share2 } from 'lucide-react';
+import { Car, Mail, Lock, Eye, EyeOff, Share2, User, Truck } from 'lucide-react';
 
 export default function Entrar() {
   const navigate = useNavigate();
@@ -175,10 +175,12 @@ export default function Entrar() {
           className="mt-6 space-y-3"
         >
           <p className="text-xs text-[#A0A0B0] text-center">Ainda não tem conta?</p>
-          <Link to="/register" className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center">
+          <Link to="/register" className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center flex items-center justify-center gap-2">
+            <User size={18} />
             Criar conta como Passageiro
           </Link>
-          <Link to="/register-driver" className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center">
+          <Link to="/register-driver" className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center flex items-center justify-center gap-2">
+            <Truck size={18} />
             Criar conta como Motorista
           </Link>
         </motion.div>
