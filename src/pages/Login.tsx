@@ -109,7 +109,7 @@ export default function Login() {
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleGoogleLogin}
-          className="w-full py-2 rounded-2xl border-2 border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/30 transition-all font-medium text-sm"
+          className="w-full py-1.5 rounded-2xl border-2 border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/30 transition-all font-medium text-sm"
         >
           <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -130,24 +130,24 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-2">
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
             <Mail size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type="email"
               placeholder="Seu e-mail"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm leading-none"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
             />
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
             <Lock size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm leading-none"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -171,7 +171,7 @@ export default function Login() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             type="submit"
-            className="w-full py-2 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
+            className="w-full py-1.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
           >
             Entrar <ArrowRight size={15} />
           </motion.button>
@@ -181,14 +181,14 @@ export default function Login() {
           <p className="text-[11px] text-[#A0A0B0] text-center mb-1.5">Ainda não tem conta?</p>
           <Link
             to="/register"
-            className="w-full py-2 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-[11px] mb-1"
+            className="w-full py-1.5 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-[11px] mb-1"
           >
             <User size={13} className="text-[#F4D03F]" />
             Criar conta como Passageiro
           </Link>
           <Link
             to="/register-driver"
-            className="w-full py-2 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-[11px]"
+            className="w-full py-1.5 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-[11px]"
           >
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F4D03F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" strokeWidth="3"/>
@@ -203,7 +203,7 @@ export default function Login() {
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleShare}
-          className="w-full mt-2 py-2 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-[11px] border border-white/5"
+          className="w-full mt-2 py-1.5 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-[11px] border border-white/5"
         >
           <Share2 size={12} />
           Compartilhar ObaLeve
