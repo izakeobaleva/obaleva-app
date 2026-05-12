@@ -67,11 +67,11 @@ export default function TripDetails() {
   }
 
   const statusColors: Record<string, string> = {
-    pendente: 'bg-yellow-100 text-yellow-800',
-    aceita: 'bg-blue-100 text-blue-800',
-    em_andamento: 'bg-indigo-100 text-indigo-800',
-    finalizada: 'bg-green-100 text-green-800',
-    cancelada: 'bg-red-100 text-red-800',
+    pendente: 'bg-yellow-900/40 text-yellow-400',
+    aceita: 'bg-blue-900/40 text-blue-400',
+    em_andamento: 'bg-indigo-900/40 text-indigo-400',
+    finalizada: 'bg-green-900/40 text-green-400',
+    cancelada: 'bg-red-900/40 text-red-400',
   }
 
   const statusLabels: Record<string, string> = {
@@ -96,7 +96,7 @@ export default function TripDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
       </div>
     )
@@ -105,7 +105,7 @@ export default function TripDetails() {
   if (!trip) return null
 
   return (
-    <div className="min-h-screen bg-[#0F0B1A] pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
       <header className="glass-header sticky top-0 z-20 px-6 py-4">
         <div className="flex items-center gap-3">
           <button
@@ -114,11 +114,11 @@ export default function TripDetails() {
           >
             <ArrowLeft size={20} />
           </button>
-          <h1 className="text-xl font-bold text-white">Detalhes da Corrida</h1>
+          <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Detalhes da Corrida</h1>
         </div>
       </header>
 
-      <main className="p-4 max-w-lg mx-auto space-y-4">
+      <main className="p-4 max-w-lg mx-auto mt-4 space-y-4">
         {/* Status badge */}
         <div className="flex justify-center">
           <span className={`px-5 py-2 rounded-full text-sm font-bold ${statusColors[trip.status] || 'bg-gray-100 text-gray-800'}`}>
@@ -130,7 +130,7 @@ export default function TripDetails() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-dark p-5"
+          className="bg-[#1A1528] rounded-2xl p-5 border border-white/10"
         >
           <div className="space-y-4">
             <div className="flex items-start gap-3">
@@ -160,7 +160,7 @@ export default function TripDetails() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="card-dark p-5"
+          className="bg-[#1A1528] rounded-2xl p-5 border border-white/10"
         >
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
@@ -187,7 +187,7 @@ export default function TripDetails() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="card-dark p-5"
+          className="bg-[#1A1528] rounded-2xl p-5 border border-white/10"
         >
           <h2 className="text-white font-semibold mb-3 flex items-center gap-2">
             <Car size={18} className="text-[#F4D03F]" />
@@ -215,7 +215,7 @@ export default function TripDetails() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="card-dark p-5"
+          className="bg-[#1A1528] rounded-2xl p-5 border border-white/10"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -231,29 +231,6 @@ export default function TripDetails() {
             </span>
           </div>
         </motion.div>
-
-        {/* Rating (only for finished trips) */}
-        {trip.status === 'finalizada' && role === 'passageiro' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="card-dark p-5 text-center"
-          >
-            <h2 className="text-white font-semibold mb-3">Avalie sua corrida</h2>
-            <div className="flex justify-center">
-              <RatingStars value={rating} onChange={setRating} size={32} />
-            </div>
-            {rating > 0 && (
-              <button
-                onClick={() => toast.success('Avaliação enviada! Obrigado.')}
-                className="btn-premium mt-4 px-6 py-2 text-sm inline-flex items-center gap-2"
-              >
-                Enviar avaliação
-              </button>
-            )}
-          </motion.div>
-        )}
       </main>
 
       <BottomNav role={role as 'passageiro' | 'motorista'} />

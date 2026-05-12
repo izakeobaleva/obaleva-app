@@ -26,19 +26,19 @@ export default function Trips() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F0B1A] pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
       <header className="glass-header sticky top-0 z-20 px-6 py-4">
-        <h1 className="text-xl font-bold text-white">Minhas Viagens</h1>
+        <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Minhas Viagens</h1>
       </header>
       
-      <main className="p-4 max-w-lg mx-auto">
+      <main className="p-4 max-w-lg mx-auto mt-4">
         {loading ? (
           <div className="text-center py-8 text-[#A0A0B0]">Carregando...</div>
         ) : trips.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="bg-[#1A1528] rounded-2xl p-8 border border-white/10 text-center">
             <Clock size={48} className="mx-auto mb-4 text-gray-600" />
-            <p className="text-gray-400 font-medium">Nenhuma viagem ainda</p>
-            <p className="text-sm text-gray-500 mt-1">Suas viagens aparecerão aqui</p>
+            <p className="text-white font-medium">Nenhuma viagem ainda</p>
+            <p className="text-sm text-[#A0A0B0] mt-1">Suas viagens aparecerão aqui</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -46,14 +46,14 @@ export default function Trips() {
               <button
                 key={trip.id}
                 onClick={() => navigate(`/trips/${trip.id}`)}
-                className="w-full text-left bg-[#1A1528] rounded-xl p-4 border border-white/10 hover:border-[#F4D03F]/30 transition-all"
+                className="w-full text-left bg-[#1A1528] rounded-2xl p-4 border border-white/10 hover:border-[#F4D03F]/30 transition-all"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Navigation size={16} className="text-[#F4D03F]" />
                     <span className="font-medium text-white">{trip.destino}</span>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                     trip.status === 'finalizada' ? 'bg-green-900/40 text-green-400' :
                     trip.status === 'cancelada' ? 'bg-red-900/40 text-red-400' :
                     'bg-yellow-900/40 text-yellow-400'

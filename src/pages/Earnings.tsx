@@ -29,45 +29,45 @@ export default function Earnings() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
       <header className="glass-header sticky top-0 z-20 px-6 py-4">
-        <h1 className="text-xl font-bold text-roxo-principal">Meus Ganhos</h1>
+        <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Meus Ganhos</h1>
       </header>
       
-      <main className="p-4 max-w-lg mx-auto">
-        <div className="bg-gradient-to-br from-roxo-principal to-purple-600 rounded-2xl p-6 text-white shadow-xl mb-6">
+      <main className="p-4 max-w-lg mx-auto mt-4 space-y-4">
+        <div className="bg-gradient-to-br from-[#F4D03F]/20 to-amber-900/30 rounded-2xl p-6 border border-white/10 shadow-xl">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign size={20} />
-            <span className="text-purple-200">Saldo total</span>
+            <DollarSign size={20} className="text-[#F4D03F]" />
+            <span className="text-[#A0A0B0]">Saldo total</span>
           </div>
           {loading ? (
-            <div className="animate-pulse h-10 bg-white/20 rounded" />
+            <div className="animate-pulse h-10 bg-white/10 rounded" />
           ) : (
-            <p className="text-4xl font-bold">R$ {totalGanhos.toFixed(2)}</p>
+            <p className="text-4xl font-bold text-white">R$ {totalGanhos.toFixed(2)}</p>
           )}
-          <p className="text-sm text-purple-200 mt-2 flex items-center gap-1">
+          <p className="text-sm text-[#A0A0B0] mt-2 flex items-center gap-1">
             <Calendar size={14} />
             Desde o início
           </p>
         </div>
 
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h2 className="font-bold text-gray-700 mb-3 flex items-center gap-2">
-            <TrendingUp size={18} />
+        <div className="bg-[#1A1528] rounded-2xl p-5 border border-white/10">
+          <h2 className="font-bold text-white mb-4 flex items-center gap-2">
+            <TrendingUp size={18} className="text-[#F4D03F]" />
             Resumo
           </h2>
           <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b">
-              <span className="text-gray-600">Total de corridas</span>
-              <span className="font-bold">--</span>
+            <div className="flex justify-between items-center py-2 border-b border-white/10">
+              <span className="text-[#A0A0B0]">Total de corridas</span>
+              <span className="font-bold text-white">--</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b">
-              <span className="text-gray-600">Média por corrida</span>
-              <span className="font-bold">--</span>
+            <div className="flex justify-between items-center py-2 border-b border-white/10">
+              <span className="text-[#A0A0B0]">Média por corrida</span>
+              <span className="font-bold text-white">--</span>
             </div>
             <div className="flex justify-between items-center py-2">
-              <span className="text-gray-600">Taxa da plataforma</span>
-              <span className="font-bold">--</span>
+              <span className="text-[#A0A0B0]">Taxa da plataforma</span>
+              <span className="font-bold text-white">--</span>
             </div>
           </div>
         </div>

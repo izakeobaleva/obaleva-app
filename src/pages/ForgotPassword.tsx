@@ -29,7 +29,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
@@ -38,20 +38,20 @@ export default function ForgotPassword() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-dark w-full max-w-md p-8 relative z-10"
+        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-6"
       >
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 mb-3">
+        <div className="text-center mb-5">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3">
             {sent ? (
-              <CheckCircle className="w-8 h-8 text-green-400" />
+              <CheckCircle className="w-7 h-7 text-green-400" />
             ) : (
-              <KeyRound className="w-8 h-8 text-[#F4D03F]" />
+              <KeyRound className="w-7 h-7 text-[#F4D03F]" />
             )}
           </div>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
             {sent ? 'E-mail enviado!' : 'Redefinir senha'}
           </h1>
-          <p className="text-[#A0A0B0] mt-1">
+          <p className="text-[#A0A0B0] text-sm mt-0.5">
             {sent
               ? 'Verifique sua caixa de entrada e siga as instruções.'
               : 'Digite seu e-mail para receber o link de redefinição.'}
@@ -59,13 +59,13 @@ export default function ForgotPassword() {
         </div>
 
         {!sent ? (
-          <form onSubmit={handleReset} className="space-y-1">
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
-              <Mail size={14} className="text-[#F4D03F] shrink-0" />
+          <form onSubmit={handleReset} className="space-y-3.5">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
+              <Mail size={18} className="text-[#F4D03F] shrink-0" />
               <input
                 type="email"
                 placeholder="Seu e-mail cadastrado"
-                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
+                className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs px-3 py-1 leading-none"
+              className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3 text-sm"
             >
               {loading ? 'Enviando...' : 'Enviar link de redefinição'}
             </motion.button>
@@ -95,7 +95,7 @@ export default function ForgotPassword() {
           </div>
         )}
 
-        <div className="mt-4 text-center">
+        <div className="mt-5 pt-5 border-t border-white/10 text-center">
           <Link
             to="/login"
             className="text-[#A0A0B0] hover:text-white transition flex items-center justify-center gap-2 text-sm"
