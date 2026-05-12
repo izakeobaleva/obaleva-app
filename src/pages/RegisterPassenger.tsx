@@ -120,7 +120,7 @@ export default function RegisterPassenger() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="btn-premium w-full text-lg flex items-center justify-center gap-2 py-1.5"
+              className="btn-premium w-full flex items-center justify-center gap-2 py-1.5 leading-none"
             >
               {loading ? 'Cadastrando...' : <>Criar conta <ArrowRight size={18} /></>}
             </motion.button>

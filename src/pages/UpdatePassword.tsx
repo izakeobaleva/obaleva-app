@@ -106,7 +106,7 @@ export default function UpdatePassword() {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="btn-premium w-full py-1.5 flex items-center justify-center gap-2"
+            className="btn-premium w-full py-1.5 flex items-center justify-center gap-2 leading-none"
           >
             {loading ? 'Atualizando...' : <><CheckCircle size={18} /> Atualizar senha</>}
           </motion.button>
