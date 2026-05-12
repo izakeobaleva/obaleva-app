@@ -131,10 +131,9 @@ export default function DriverDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24">
-      {/* Header glass */}
       <header className="glass-header sticky top-0 z-20 flex justify-between items-center px-6 py-4">
         <div>
-          <h1 className="text-xl font-bold text-roxo-principal">OBALEVA</h1>
+          <h1 className="text-xl font-bold text-roxo-principal" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
           <p className="text-xs text-gray-400">Motorista</p>
         </div>
         <button
@@ -146,7 +145,6 @@ export default function DriverDashboard() {
       </header>
 
       <main className="p-4 max-w-lg mx-auto space-y-4">
-        {/* Card de status com glassmorphism */}
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -188,7 +186,6 @@ export default function DriverDashboard() {
           </div>
         </motion.div>
 
-        {/* Mapa */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -197,7 +194,6 @@ export default function DriverDashboard() {
           <MapWithPersonCar />
         </motion.div>
 
-        {/* Estatísticas com animação */}
         <div className="grid grid-cols-2 gap-3">
           {statCards.map((stat, index) => (
             <motion.div
@@ -219,7 +215,6 @@ export default function DriverDashboard() {
           ))}
         </div>
 
-        {/* Solicitações pendentes */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

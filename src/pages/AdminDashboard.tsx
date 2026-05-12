@@ -52,7 +52,7 @@ export default function AdminDashboard() {
           <div className="p-2 bg-[#F4D03F]/20 rounded-2xl">
             <Shield size={24} className="text-[#F4D03F]" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Admin OBALEVA</h1>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve Admin</h1>
         </div>
         <button
           onClick={signOut}

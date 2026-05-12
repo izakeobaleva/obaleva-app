@@ -91,14 +91,14 @@ export default function PassengerDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0F0B1A] pb-24">
-      {/* Header glass */}
       <header className="glass-header sticky top-0 z-20 flex justify-between items-center px-6 py-4">
         <motion.h1
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="text-2xl font-bold bg-gradient-to-r from-[#F4D03F] to-amber-400 bg-clip-text text-transparent"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
         >
-          OBALEVA
+          ObaLeve
         </motion.h1>
         <div className="flex items-center gap-3">
           <span className="text-sm text-[#A0A0B0] hidden sm:block">{user?.email}</span>
@@ -111,7 +111,6 @@ export default function PassengerDashboard() {
         </div>
       </header>
 
-      {/* Mapa em destaque */}
       <div className="relative -mt-1">
         <MapWithPersonCar />
         <div className="absolute bottom-4 left-4 right-4 flex justify-center">
@@ -121,7 +120,6 @@ export default function PassengerDashboard() {
         </div>
       </div>
 
-      {/* Card flutuante de solicitação */}
       <motion.div
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -207,7 +205,6 @@ export default function PassengerDashboard() {
         </div>
       </motion.div>
 
-      {/* Destinos rápidos */}
       <div className="mx-4 mt-6">
         <h2 className="font-semibold text-white mb-3">Destinos rápidos</h2>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
@@ -227,7 +224,6 @@ export default function PassengerDashboard() {
         </div>
       </div>
 
-      {/* Últimas corridas */}
       <div className="mx-4 mt-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-white">Últimas corridas</h2>

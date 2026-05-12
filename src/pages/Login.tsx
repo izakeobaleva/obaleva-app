@@ -16,7 +16,6 @@ export default function Login() {
 
   useEffect(() => {
     loadLogo()
-    // Escuta mudanças no logo em tempo real
     const handleStorage = () => loadLogo()
     window.addEventListener('storage', handleStorage)
     return () => window.removeEventListener('storage', handleStorage)
@@ -57,7 +56,7 @@ export default function Login() {
 
   const handleShare = async () => {
     const shareData = {
-      title: 'OBALEVA',
+      title: 'ObaLeve',
       text: 'Mobilidade premium para sua cidade! Baixe o app e experimente.',
       url: window.location.origin,
     };
@@ -83,7 +82,6 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8"
       >
-        {/* Logo ou ícone padrão */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0.9 }}
@@ -93,18 +91,17 @@ export default function Login() {
             {logoUrl ? (
               <img 
                 src={logoUrl} 
-                alt="OBALEVA" 
+                alt="ObaLeve" 
                 className="w-full h-full object-contain p-2"
               />
             ) : (
               <Car className="text-[#F4D03F] w-10 h-10" />
             )}
           </motion.div>
-          <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
+          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
           <p className="text-[#A0A0B0] mt-1">Mobilidade premium para sua cidade</p>
         </div>
 
-        {/* Botão Google */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleGoogleLogin}
@@ -119,7 +116,6 @@ export default function Login() {
           Entrar com Google
         </motion.button>
 
-        {/* Formulário de e-mail/senha logo abaixo do Google */}
         <form onSubmit={handleSubmit} className="space-y-3.5 mt-4">
           <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:border-[#F4D03F]/50 transition-all">
             <Mail size={18} className="text-[#A0A0B0]" />
@@ -167,7 +163,6 @@ export default function Login() {
           </motion.button>
         </form>
 
-        {/* Separador */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10"></div>
@@ -177,7 +172,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Botões de cadastro */}
         <div className="flex flex-col gap-3 mt-2">
           <Link
             to="/register"
@@ -200,14 +194,13 @@ export default function Login() {
           </Link>
         </div>
 
-        {/* Compartilhar */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleShare}
           className="w-full mt-6 py-3 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm border border-white/5"
         >
           <Share2 size={16} />
-          Compartilhar OBALEVA
+          Compartilhar ObaLeve
         </motion.button>
       </motion.div>
     </div>

@@ -36,10 +36,8 @@ export default function Home() {
     <div className="min-h-screen bg-[#0F0B1A] pb-24">
       <header className="glass-header sticky top-0 z-20 flex justify-between items-center px-6 py-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">
-            Olá, {profile?.nome_completo || user?.email?.split('@')[0] || 'Usuário'}
-          </h1>
-          <p className="text-[#A0A0B0] text-sm">O que você deseja fazer hoje?</p>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+          <p className="text-[#A0A0B0] text-sm">Olá, {profile?.nome_completo || user?.email?.split('@')[0] || 'Usuário'}</p>
         </div>
         <div className="flex items-center gap-3">
           <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-[#F4D03F]/20 text-[#F4D03F] text-xs font-semibold capitalize">
