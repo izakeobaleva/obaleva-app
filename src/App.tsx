@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { Toaster } from 'sonner'
 import Login from './pages/Login'
+import Home from './pages/Home'
 import RegisterPassenger from './pages/RegisterPassenger'
 import RegisterDriver from './pages/RegisterDriver'
 import PassengerDashboard from './pages/PassengerDashboard'
@@ -17,6 +18,7 @@ function App() {
       <Toaster position="top-center" richColors />
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/register/passenger" element={<RegisterPassenger />} />
         <Route path="/register/driver" element={<RegisterDriver />} />
         <Route path="/passenger" element={<PassengerDashboard />} />

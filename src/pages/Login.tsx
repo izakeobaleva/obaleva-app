@@ -25,20 +25,7 @@ export default function Login() {
     
     if (data.user) {
       toast.success('Login realizado!');
-      
-      const { data: userData } = await supabase
-        .from('usuarios')
-        .select('tipo')
-        .eq('id', data.user.id)
-        .single();
-
-      if (userData?.tipo === 'motorista') {
-        navigate('/driver');
-      } else if (userData?.tipo === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/passenger');
-      }
+      navigate('/home');
     }
     setLoading(false);
   };
