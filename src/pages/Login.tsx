@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { toast } from 'sonner';
+import toast from 'sonner';
 import { motion } from 'framer-motion';
 import { Car, Mail, Chrome, Share2, UserPlus, Truck } from 'lucide-react';
 
-function Login() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { signIn } = useAuth();
@@ -16,9 +16,10 @@ function Login() {
     e.preventDefault();
     try {
       await signIn(email, password);
+      toast.success('Login bem-sucedido!');
       navigate('/passenger');
     } catch (err) {
-      toast('E-mail ou senha inválidos', { style: { background: '#ef4444', color: '#fff' } });
+      toast.error('E-mail ou senha inválidos');
     }
   };
 
@@ -27,7 +28,7 @@ function Login() {
       provider: 'google',
       options: { redirectTo: window.location.origin + '/passenger' },
     });
-    if (error) toast('Erro ao logar com Google', { style: { background: '#ef4444', color: '#fff' } });
+    if (error) toast.error('Erro ao logar com Google');
   };
 
   const handleShare = async () => {
@@ -42,7 +43,7 @@ function Login() {
       } catch (err) {}
     } else {
       navigator.clipboard.writeText(window.location.origin);
-      toast('Link copiado! Compartilhe com seus amigos.', { style: { background: '#22c55e', color: '#fff' } });
+      toast.success('Link copiado! Compartilhe com seus amigos.');
     }
   };
 
@@ -51,7 +52,7 @@ function Login() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-dark w-full max-w-md p-8"
+        className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8"
       >
         <div className="text-center mb-8">
           <Car className="text-[#F4D03F] w-12 h-12 mx-auto mb-3" />
@@ -63,7 +64,7 @@ function Login() {
           <input
             type="email"
             placeholder="E-mail"
-            className="w-full px-4 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]"
+            className="w-full px-4 py-3 rounded-2xl bg-[#0F0B1A] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -71,12 +72,12 @@ function Login() {
           <input
             type="password"
             placeholder="Senha"
-            className="w-full px-4 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]"
+            className="w-full px-4 py-3 rounded-2xl bg-[#0F0B1A] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
           />
-          <button type="submit" className="btn-premium w-full py-3">
+          <button type="submit" className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition">
             Entrar
           </button>
         </form>
@@ -92,19 +93,17 @@ function Login() {
 
         <button
           onClick={handleGoogleLogin}
-          className="btn-outline-dark w-full py-3 flex items-center justify-center gap-2 mb-4"
+          className="w-full py-3 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition mb-4"
         >
           <Chrome size={18} />
           Entrar com Google
         </button>
 
         <div className="flex flex-col gap-3 mt-4">
-          <Link to="/register" className="btn-outline-dark w-full py-3 flex items-center justify-center gap-2">
-            <UserPlus size={18} />
+          <Link to="/register" className="w-full py-3 rounded-2xl border border-white/20 text-white text-center hover:bg-white/5 transition">
             Cadastrar como Passageiro
           </Link>
-          <Link to="/register-driver" className="btn-outline-dark w-full py-3 flex items-center justify-center gap-2">
-            <Truck size={18} />
+          <Link to="/register-driver" className="w-full py-3 rounded-2xl border border-white/20 text-white text-center hover:bg-white/5 transition">
             Cadastrar como Motorista
           </Link>
         </div>
@@ -120,5 +119,3 @@ function Login() {
     </div>
   );
 }
-
-export default Login;
