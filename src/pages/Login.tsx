@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import toast from 'sonner';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Car, Mail, Chrome, Share2, UserPlus, Truck } from 'lucide-react';
 
