@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Car, Mail, Lock, Share2, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
+import { Mail, Lock, Share2, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -77,17 +77,38 @@ export default function Login() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
       </div>
 
+      {/* Logo no canto superior direito */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.3 }}
+        className="fixed top-6 right-6 z-20"
+      >
+        <div className="w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
+          {logoUrl ? (
+            <img 
+              src={logoUrl} 
+              alt="ObaLeve" 
+              className="w-full h-full object-contain p-2"
+            />
+          ) : (
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 17a6 6 0 0 1 14 0"/>
+              <circle cx="9" cy="9" r="2"/>
+              <circle cx="15" cy="9" r="2"/>
+              <path d="M12 17v-4"/>
+            </svg>
+          )}
+        </div>
+      </motion.div>
+
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8"
       >
         <div className="text-center mb-8">
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3 overflow-hidden"
-          >
+          <div className="w-24 h-24 mx-auto mb-3 rounded-full bg-[#F4D03F]/20 backdrop-blur flex items-center justify-center overflow-hidden">
             {logoUrl ? (
               <img 
                 src={logoUrl} 
@@ -95,9 +116,14 @@ export default function Login() {
                 className="w-full h-full object-contain p-2"
               />
             ) : (
-              <Car className="text-[#F4D03F] w-10 h-10" />
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 17a6 6 0 0 1 14 0"/>
+                <circle cx="9" cy="9" r="2"/>
+                <circle cx="15" cy="9" r="2"/>
+                <path d="M12 17v-4"/>
+              </svg>
             )}
-          </motion.div>
+          </div>
           <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
           <p className="text-[#A0A0B0] mt-1">Mobilidade premium para sua cidade</p>
         </div>
