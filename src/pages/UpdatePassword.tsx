@@ -60,12 +60,12 @@ export default function UpdatePassword() {
         </div>
 
         <form onSubmit={handleUpdate} className="space-y-4">
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
             <Lock size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Nova senha (mín. 6 caracteres)"
-              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -81,12 +81,12 @@ export default function UpdatePassword() {
             </button>
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
             <Lock size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type={showConfirm ? 'text' : 'password'}
               placeholder="Confirmar nova senha"
-              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
               required
@@ -106,7 +106,7 @@ export default function UpdatePassword() {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="btn-premium w-full py-3 flex items-center justify-center gap-2"
+            className="btn-premium w-full py-1.5 flex items-center justify-center gap-2"
           >
             {loading ? 'Atualizando...' : <><CheckCircle size={18} /> Atualizar senha</>}
           </motion.button>

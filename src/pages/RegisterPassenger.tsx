@@ -60,48 +60,48 @@ export default function RegisterPassenger() {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-3">
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="text"
                 placeholder="Nome completo"
-                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
                 value={nome}
                 onChange={e => setNome(e.target.value)}
                 required
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
               <Phone size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="tel"
                 placeholder="Telefone com DDD"
-                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
                 value={telefone}
                 onChange={e => setTelefone(e.target.value)}
                 required
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
               <Mail size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="email"
                 placeholder="E-mail"
-                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
               <Lock size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Senha (mínimo 6 caracteres)"
-                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm leading-none"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
@@ -120,7 +120,7 @@ export default function RegisterPassenger() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="btn-premium w-full text-lg flex items-center justify-center gap-2"
+              className="btn-premium w-full text-lg flex items-center justify-center gap-2 py-1.5"
             >
               {loading ? 'Cadastrando...' : <>Criar conta <ArrowRight size={18} /></>}
             </motion.button>
