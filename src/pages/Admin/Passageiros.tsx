@@ -13,16 +13,13 @@ export default function Passageiros() {
   async function fetchPassageiros() {
     setLoading(true)
     try {
-      // Buscar usuarios com tipo passageiro
       const { data: usuarios, error: userError } = await supabase
         .from('usuarios')
         .select('id, nome_completo, email, telefone')
         .eq('tipo', 'passageiro')
-        .order('created_at', { ascending: false })
 
       if (userError) throw userError
 
-      // Para cada usuario, buscar dados na tabela passageiros
       const passageirosComDados = await Promise.all(
         (usuarios || []).map(async (u) => {
           const { data: pData } = await supabase

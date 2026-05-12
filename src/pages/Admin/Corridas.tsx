@@ -16,7 +16,6 @@ export default function Corridas() {
     let query = supabase
       .from('corridas')
       .select('*')
-      .order('created_at', { ascending: false })
 
     if (filtro !== 'todas') {
       query = query.eq('status', filtro)
@@ -25,9 +24,8 @@ export default function Corridas() {
     const { data, error } = await query
     
     if (!error && data) {
-      // Carregar dados dos passageiros e motoristas separadamente
       const corridasComNomes = await Promise.all(
-        data.map(async (c) => {
+        data.map(async (c: any) => {
           let passageiroNome = 'N/A'
           let motoristaNome = 'N/A'
           
@@ -103,7 +101,7 @@ export default function Corridas() {
                     }`}>{c.status}</span>
                   </td>
                   <td className="p-2 text-white">R$ {c.valor?.toFixed(2) || '0.00'}</td>
-                  <td className="p-2 text-white">{new Date(c.created_at).toLocaleDateString()}</td>
+                  <td className="p-2 text-white">{c.created_at ? new Date(c.created_at).toLocaleDateString() : '-'}</td>
                 </tr>
               ))}
             </tbody>
