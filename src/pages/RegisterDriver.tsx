@@ -13,6 +13,7 @@ export default function CadastroMotorista() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -70,6 +71,11 @@ export default function CadastroMotorista() {
     }
   }
 
+  const handleVoltar = (e: React.MouseEvent) => {
+    e.preventDefault()
+    navigate('/')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -84,9 +90,10 @@ export default function CadastroMotorista() {
       >
         <div className="flex items-center mb-4">
           <button
-            onClick={() => navigate('/')}
+            onClick={handleVoltar}
             className="btn-outline-dark p-2"
             aria-label="Voltar"
+            type="button"
           >
             <ArrowLeft size={20} />
           </button>
@@ -113,15 +120,44 @@ export default function CadastroMotorista() {
 
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
             <Lock size={18} className="text-[#F4D03F] shrink-0" />
-            <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6 caracteres)" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
+            <input 
+              type={showPassword ? 'text' : 'password'} 
+              placeholder="Senha (mín. 6 caracteres)" 
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+              required 
+              minLength={6} 
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0"
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+            >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
 
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
             <Lock size={18} className="text-[#F4D03F] shrink-0" />
-            <input type={showPassword ? 'text' : 'password'} placeholder="Confirmar senha" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} />
+            <input 
+              type={showConfirm ? 'text' : 'password'} 
+              placeholder="Confirmar senha" 
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" 
+              value={confirmPassword} 
+              onChange={e => setConfirmPassword(e.target.value)} 
+              required 
+              minLength={6} 
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0"
+              aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}
+            >
+              {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
           </div>
 
           <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3 text-sm">
