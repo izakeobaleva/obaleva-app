@@ -13,17 +13,17 @@
     @apply bg-[#0F0B1A] text-[#F0F0F5];
   }
   button, a, [role="button"] {
-    @apply min-h-[44px] min-w-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F4D03F] focus-visible:ring-offset-2;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F4D03F] focus-visible:ring-offset-2;
   }
 
   /* Botão premium ultra-compacto */
   .btn-premium {
     @apply relative overflow-hidden font-bold shadow-lg transition-all duration-200 text-[#1E1E2F];
     background: linear-gradient(135deg, #FFD966 0%, #F4D03F 100%);
-    padding: 0.15rem 0.75rem;
+    padding: 0.1rem 0.6rem;
     border-radius: 2rem;
-    font-size: 0.75rem;
-    line-height: 1.2;
+    font-size: 0.7rem;
+    line-height: 1.1;
     box-shadow: 0 4px 14px 0 rgba(244, 208, 63, 0.3);
   }
   .btn-premium:hover {
@@ -36,9 +36,9 @@
 
   /* Botão outline escuro ultra-compacto */
   .btn-outline-dark {
-    @apply border border-white/20 bg-transparent text-white/90 px-3 py-0.5 transition hover:bg-white/10 font-semibold;
-    font-size: 0.75rem;
-    line-height: 1.2;
+    @apply border border-white/20 bg-transparent text-white/90 px-2 py-0 transition hover:bg-white/10 font-semibold;
+    font-size: 0.7rem;
+    line-height: 1.1;
     border-radius: 2rem;
   }
 
@@ -59,9 +59,9 @@
 
   /* Input container ultra-compacto */
   .input-compact {
-    @apply flex items-center gap-2 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-0.5;
-    font-size: 0.75rem;
-    line-height: 1.2;
+    @apply flex items-center gap-2 bg-[#1A1528] border border-white/10 rounded-2xl px-2 py-0;
+    font-size: 0.7rem;
+    line-height: 1.1;
   }
 }
 
