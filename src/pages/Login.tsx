@@ -83,15 +83,15 @@ export default function Login() {
         transition={{ delay: 0.3 }}
         className="fixed top-6 left-6 z-20"
       >
-        <div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
+        <div className="w-10 h-10 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
           {logoUrl ? (
             <img
               src={logoUrl}
               alt="ObaLeve"
-              className="w-full h-full object-contain p-2"
+              className="w-full h-full object-contain p-1.5"
             />
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="1" y="6" width="22" height="12" rx="2"/>
               <circle cx="7" cy="14" r="2"/>
               <circle cx="17" cy="14" r="2"/>
@@ -104,16 +104,16 @@ export default function Login() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[320px] p-4"
+        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[320px] p-5"
       >
-        <div className="text-center mb-1">
+        <div className="text-center mb-2">
           <h1 className="text-base font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
           <p className="text-[#A0A0B0] text-[11px]">Segurança e conforto em cada viagem</p>
         </div>
 
         <button
           onClick={handleGoogleLogin}
-          className="w-full rounded-2xl border-2 border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/30 transition-all font-medium text-xs px-3 py-1 leading-none"
+          className="w-full rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/30 transition-all font-medium text-xs py-2"
         >
           <svg viewBox="0 0 24 24" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -124,7 +124,7 @@ export default function Login() {
           Continuar com Google
         </button>
 
-        <div className="relative my-1">
+        <div className="relative my-2">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10"></div>
           </div>
@@ -133,25 +133,25 @@ export default function Login() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-1">
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
+        <form onSubmit={handleSubmit} className="space-y-1.5">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5">
             <Mail size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type="email"
               placeholder="Seu e-mail"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm leading-none"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
             />
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1 leading-none">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5">
             <Lock size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm leading-none"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -174,24 +174,24 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs px-3 py-1 leading-none"
+            className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs py-2"
           >
             Entrar <ArrowRight size={14} />
           </button>
         </form>
 
-        <div className="border-t border-white/10 pt-1 mt-1">
-          <p className="text-[11px] text-[#A0A0B0] text-center mb-1">Ainda não tem conta?</p>
+        <div className="border-t border-white/10 pt-2 mt-2 space-y-1.5">
+          <p className="text-[11px] text-[#A0A0B0] text-center">Ainda não tem conta?</p>
           <Link
             to="/register"
-            className="w-full rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs mb-1 px-3 py-1 leading-none"
+            className="w-full rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs py-2"
           >
             <User size={13} className="text-[#F4D03F]" />
             Criar conta como Passageiro
           </Link>
           <Link
             to="/register-driver"
-            className="w-full rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs px-3 py-1 leading-none"
+            className="w-full rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs py-2"
           >
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F4D03F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/>
@@ -205,7 +205,7 @@ export default function Login() {
 
         <button
           onClick={handleShare}
-          className="w-full mt-1 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-xs border border-white/5 px-3 py-1 leading-none"
+          className="w-full mt-1.5 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-xs border border-white/5 py-2"
         >
           <Share2 size={12} />
           Compartilhar ObaLeve
