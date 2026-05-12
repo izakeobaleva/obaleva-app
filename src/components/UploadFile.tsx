@@ -24,9 +24,9 @@ export function UploadFile({ onUpload, label = 'Upload' }: UploadFileProps) {
   return (
     <div>
       <label className="block text-white/80 text-sm font-medium mb-1">{label}</label>
-      <label className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white cursor-pointer hover:bg-white/20 transition">
+      <label className="flex items-center gap-3 w-full px-5 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white cursor-pointer hover:bg-white/10 transition">
         <Upload size={18} className="text-[#F4D03F]" />
-        <span className="flex-1 text-sm text-white/70">
+        <span className="flex-1 text-sm text-white/50">
           {uploading ? 'Enviando...' : 'Clique para selecionar arquivo'}
         </span>
         <input type="file" onChange={handleFileChange} disabled={uploading} className="hidden" />
