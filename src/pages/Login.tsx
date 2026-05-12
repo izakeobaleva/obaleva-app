@@ -15,23 +15,23 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadLogo()
-    const handleStorage = () => loadLogo()
-    window.addEventListener('storage', handleStorage)
-    return () => window.removeEventListener('storage', handleStorage)
-  }, [])
+    loadLogo();
+    const handleStorage = () => loadLogo();
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   async function loadLogo() {
     const { data } = await supabase
       .from('app_config')
       .select('value')
       .eq('key', 'app_logo')
-      .maybeSingle()
-    
+      .maybeSingle();
+
     if (data?.value) {
-      setLogoUrl(data.value)
+      setLogoUrl(data.value);
     } else {
-      setLogoUrl(null)
+      setLogoUrl(null);
     }
   }
 
@@ -86,9 +86,9 @@ export default function Login() {
       >
         <div className="w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
           {logoUrl ? (
-            <img 
-              src={logoUrl} 
-              alt="ObaLeve" 
+            <img
+              src={logoUrl}
+              alt="ObaLeve"
               className="w-full h-full object-contain p-2"
             />
           ) : (
@@ -154,7 +154,7 @@ export default function Login() {
         <div className="relative overflow-hidden rounded-2xl mb-2.5">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3.5 py-1.5">
+          <div className="relative flex items-center gap-3 px-3.5 py-1">
             <Lock size={15} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
