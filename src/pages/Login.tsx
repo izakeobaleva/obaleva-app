@@ -140,7 +140,7 @@ export default function Login() {
             <input
               type="email"
               placeholder="Seu e-mail"
-              className="flex-1 bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+              className="flex-1 bg-transparent text-white placeholder-white/30 focus:outline-none text-sm min-w-0"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
@@ -152,7 +152,7 @@ export default function Login() {
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="flex-1 bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+              className="flex-1 bg-transparent text-white placeholder-white/30 focus:outline-none text-sm min-w-0"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -160,7 +160,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-[#A0A0B0] hover:text-white transition"
+              className="text-[#A0A0B0] hover:text-white transition flex-shrink-0"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
