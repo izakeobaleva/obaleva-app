@@ -11,14 +11,6 @@ import {
 import { RatingStars } from '../components/RatingStars'
 import { BottomNav } from '../components/BottomNav'
 
-interface PassageiroInfo {
-  nome_completo: string
-}
-
-interface MotoristaInfo {
-  nome_completo: string
-}
-
 interface TripData {
   id: string
   origem: string
@@ -29,8 +21,8 @@ interface TripData {
   distancia_km: number
   tempo_min: number
   created_at: string
-  passageiro: PassageiroInfo | PassageiroInfo[]
-  motorista: MotoristaInfo | MotoristaInfo[]
+  passageiro_id: string
+  motorista_id: string | null
 }
 
 export default function TripDetails() {
@@ -38,6 +30,8 @@ export default function TripDetails() {
   const { user, profile } = useAuth()
   const navigate = useNavigate()
   const [trip, setTrip] = useState<TripData | null>(null)
+  const [passageiroNome, setPassageiroNome] = useState('N/A')
+  const [motoristaNome, setMotoristaNome] = useState('N/A')
   const [loading, setLoading] = useState(true)
   const [rating, setRating] = useState(0)
 
@@ -51,18 +45,42 @@ export default function TripDetails() {
   async function fetchTrip() {
     if (!id) return
     setLoading(true)
-    const { data, error } = await supabase
+    
+    // Buscar a corrida primeiro
+    const { data: corrida, error } = await supabase
       .from('corridas')
-      .select('*, passageiro:usuarios!passageiro_id(nome_completo), motorista:usuarios!motorista_id(nome_completo)')
+      .select('*')
       .eq('id', id)
       .single()
 
-    if (error) {
+    if (error || !corrida) {
       toast.error('Erro ao carregar detalhes da corrida')
       navigate(-1)
-    } else {
-      setTrip(data as unknown as TripData)
+      return
     }
+
+    setTrip(corrida)
+
+    // Buscar nome do passageiro
+    if (corrida.passageiro_id) {
+      const { data: pData } = await supabase
+        .from('usuarios')
+        .select('nome_completo')
+        .eq('id', corrida.passageiro_id)
+        .maybeSingle()
+      if (pData?.nome_completo) setPassageiroNome(pData.nome_completo)
+    }
+
+    // Buscar nome do motorista
+    if (corrida.motorista_id) {
+      const { data: mData } = await supabase
+        .from('usuarios')
+        .select('nome_completo')
+        .eq('id', corrida.motorista_id)
+        .maybeSingle()
+      if (mData?.nome_completo) setMotoristaNome(mData.nome_completo)
+    }
+
     setLoading(false)
   }
 
@@ -80,18 +98,6 @@ export default function TripDetails() {
     em_andamento: 'Em andamento',
     finalizada: 'Finalizada',
     cancelada: 'Cancelada',
-  }
-
-  const getNomePassageiro = (): string => {
-    if (!trip?.passageiro) return 'N/A'
-    if (Array.isArray(trip.passageiro)) return trip.passageiro[0]?.nome_completo || 'N/A'
-    return (trip.passageiro as PassageiroInfo).nome_completo || 'N/A'
-  }
-
-  const getNomeMotorista = (): string => {
-    if (!trip?.motorista) return 'N/A'
-    if (Array.isArray(trip.motorista)) return trip.motorista[0]?.nome_completo || 'N/A'
-    return (trip.motorista as MotoristaInfo).nome_completo || 'N/A'
   }
 
   if (loading) {
@@ -182,7 +188,7 @@ export default function TripDetails() {
           ) : null}
         </motion.div>
 
-        {/* Driver info */}
+        {/* Driver/Passenger info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -191,14 +197,16 @@ export default function TripDetails() {
         >
           <h2 className="text-white font-semibold mb-3 flex items-center gap-2">
             <Car size={18} className="text-[#F4D03F]" />
-            Motorista
+            {role === 'motorista' ? 'Passageiro' : 'Motorista'}
           </h2>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-full flex items-center justify-center">
               <User size={20} className="text-[#1E1E2F]" />
             </div>
             <div className="flex-1">
-              <p className="text-white font-medium">{getNomeMotorista()}</p>
+              <p className="text-white font-medium">
+                {role === 'motorista' ? passageiroNome : motoristaNome}
+              </p>
               <div className="flex items-center gap-2 mt-1">
                 <RatingStars value={4.5} readonly size={14} />
                 <span className="text-xs text-[#A0A0B0]">4.5</span>
