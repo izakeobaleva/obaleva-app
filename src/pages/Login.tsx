@@ -137,8 +137,8 @@ export default function Login() {
         <div className="relative overflow-hidden rounded-2xl mb-2">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3.5 py-2.5">
-            <Mail size={16} className="text-[#F4D03F] shrink-0" />
+          <div className="relative flex items-center gap-3 px-3.5 py-2">
+            <Mail size={15} className="text-[#F4D03F] shrink-0" />
             <input
               type="email"
               placeholder="Seu e-mail"
@@ -159,7 +159,7 @@ export default function Login() {
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm h-0 leading-none"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
