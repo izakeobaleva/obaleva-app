@@ -12,26 +12,37 @@ export default function Passageiros() {
 
   async function fetchPassageiros() {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('passageiros')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (!error) {
-      // Carregar dados dos usuários separadamente
-      const passageirosComUsuarios = await Promise.all(
-        (data || []).map(async (p) => {
-          const { data: userData } = await supabase
-            .from('usuarios')
-            .select('nome_completo, email, telefone')
-            .eq('id', p.id)
-            .single()
-          return { ...p, usuarios: userData }
+    try {
+      // Buscar usuarios com tipo passageiro
+      const { data: usuarios, error: userError } = await supabase
+        .from('usuarios')
+        .select('id, nome_completo, email, telefone')
+        .eq('tipo', 'passageiro')
+        .order('created_at', { ascending: false })
+
+      if (userError) throw userError
+
+      // Para cada usuario, buscar dados na tabela passageiros
+      const passageirosComDados = await Promise.all(
+        (usuarios || []).map(async (u) => {
+          const { data: pData } = await supabase
+            .from('passageiros')
+            .select('*')
+            .eq('id', u.id)
+            .maybeSingle()
+          
+          return { 
+            ...u, 
+            ...(pData || {}), 
+            usuarios: { nome_completo: u.nome_completo, email: u.email, telefone: u.telefone } 
+          }
         })
       )
-      setPassageiros(passageirosComUsuarios)
-    } else {
-      toast.error('Erro ao carregar passageiros')
+
+      setPassageiros(passageirosComDados)
+    } catch (err: any) {
+      console.error('Erro ao carregar passageiros:', err)
+      toast.error('Erro ao carregar passageiros: ' + (err.message || 'Erro desconhecido'))
     }
     setLoading(false)
   }
