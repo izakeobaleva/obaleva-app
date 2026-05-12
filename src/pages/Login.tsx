@@ -35,7 +35,7 @@ export default function Entrar() {
         } else if (tipo === 'admin') {
           navigate('/admin')
         } else {
-          navigate('/home')
+          navigate('/passenger')
         }
         toast.success('Login realizado com sucesso!')
       }
