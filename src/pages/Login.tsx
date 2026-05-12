@@ -105,7 +105,7 @@ export default function Login() {
         {/* Header do card - só texto */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
-          <p className="text-[#A0A0B0] text-sm mt-1">Faça login para continuar</p>
+          <p className="text-[#A0A0B0] text-sm mt-1">Segurança e conforto em cada viagem</p>
         </div>
 
         {/* Login com Google */}
