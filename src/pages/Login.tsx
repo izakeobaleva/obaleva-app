@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import toast from 'sonner';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Car, Mail, Chrome, Share2, UserPlus, Truck } from 'lucide-react';
 
-export const Login = () => {
+function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { signIn } = useAuth();
@@ -16,9 +16,9 @@ export const Login = () => {
     e.preventDefault();
     try {
       await signIn(email, password);
-      navigate('/passenger'); // ou qualquer dashboard padrão; mas o App.tsx não redireciona automaticamente
+      navigate('/passenger');
     } catch (err) {
-      toast.error('E-mail ou senha inválidos');
+      toast('E-mail ou senha inválidos', { style: { background: '#ef4444', color: '#fff' } });
     }
   };
 
@@ -27,7 +27,7 @@ export const Login = () => {
       provider: 'google',
       options: { redirectTo: window.location.origin + '/passenger' },
     });
-    if (error) toast.error('Erro ao logar com Google');
+    if (error) toast('Erro ao logar com Google', { style: { background: '#ef4444', color: '#fff' } });
   };
 
   const handleShare = async () => {
@@ -42,7 +42,7 @@ export const Login = () => {
       } catch (err) {}
     } else {
       navigator.clipboard.writeText(window.location.origin);
-      toast.success('Link copiado! Compartilhe com seus amigos.');
+      toast('Link copiado! Compartilhe com seus amigos.', { style: { background: '#22c55e', color: '#fff' } });
     }
   };
 
@@ -119,4 +119,6 @@ export const Login = () => {
       </motion.div>
     </div>
   );
-};
+}
+
+export default Login;
