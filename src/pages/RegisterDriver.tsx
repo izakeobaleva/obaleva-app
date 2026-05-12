@@ -122,13 +122,13 @@ export default function RegisterDriver() {
         <motion.div
           key={s}
           animate={{ scale: step >= s ? 1 : 0.9 }}
-          className={`flex-1 h-2 rounded-full ${step >= s ? 'bg-amarelo-oba' : 'bg-white/20'}`}
+          className={`flex-1 h-2 rounded-full ${step >= s ? 'bg-[#F4D03F]' : 'bg-white/20'}`}
         />
       ))}
     </div>
   )
 
-  const inputClass = "w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-amarelo-oba transition"
+  const inputClass = "w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] transition"
 
   const renderStep = () => {
     switch (step) {
@@ -142,7 +142,7 @@ export default function RegisterDriver() {
               <input type="date" className={`${inputClass} [color-scheme:dark]`} value={form.data_nascimento} onChange={e => updateForm({ data_nascimento: e.target.value })} required />
             </div>
             <input type="text" placeholder="RG" className={inputClass} value={form.rg} onChange={e => updateForm({ rg: e.target.value })} required />
-            <button onClick={nextStep} className="btn-amarelo w-full py-3 rounded-xl text-lg font-bold shadow-lg flex items-center justify-center gap-2">
+            <button onClick={nextStep} className="btn-premium w-full py-3 text-lg flex items-center justify-center gap-2">
               Próximo <ArrowRight size={20} />
             </button>
           </motion.div>
@@ -160,7 +160,7 @@ export default function RegisterDriver() {
               <button onClick={prevStep} className="flex-1 bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-3 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
                 <ArrowLeft size={20} /> Voltar
               </button>
-              <button onClick={nextStep} className="flex-1 btn-amarelo py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+              <button onClick={nextStep} className="flex-1 btn-premium py-3 flex items-center justify-center gap-2">
                 Próximo <ArrowRight size={20} />
               </button>
             </div>
@@ -182,7 +182,7 @@ export default function RegisterDriver() {
               <button onClick={prevStep} className="flex-1 bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-3 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
                 <ArrowLeft size={20} /> Voltar
               </button>
-              <button onClick={nextStep} className="flex-1 btn-amarelo py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+              <button onClick={nextStep} className="flex-1 btn-premium py-3 flex items-center justify-center gap-2">
                 Próximo <ArrowRight size={20} />
               </button>
             </div>
@@ -205,7 +205,7 @@ export default function RegisterDriver() {
             <UploadFile label="📄 CRLV (foto)" onUpload={(url) => updateForm({ crlv_url: url })} />
             <div>
               <label className="block text-white/80 text-sm font-medium mb-1">📸 Fotos do veículo (máx 5)</label>
-              <input type="file" multiple accept="image/*" onChange={handleUploadFotosVeiculo} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amarelo-oba file:text-roxo-principal file:font-bold file:text-sm" />
+              <input type="file" multiple accept="image/*" onChange={handleUploadFotosVeiculo} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#F4D03F] file:text-[#1E1E2F] file:font-bold file:text-sm" />
               {form.fotos_veiculo.length > 0 && (
                 <div className="flex gap-2 mt-2 flex-wrap">
                   {form.fotos_veiculo.map((url, i) => (
@@ -218,7 +218,7 @@ export default function RegisterDriver() {
               <button onClick={prevStep} className="flex-1 bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-3 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
                 <ArrowLeft size={20} /> Voltar
               </button>
-              <button onClick={nextStep} className="flex-1 btn-amarelo py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+              <button onClick={nextStep} className="flex-1 btn-premium py-3 flex items-center justify-center gap-2">
                 Próximo <ArrowRight size={20} />
               </button>
             </div>
@@ -241,7 +241,7 @@ export default function RegisterDriver() {
               <button onClick={prevStep} className="flex-1 bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-3 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
                 <ArrowLeft size={20} /> Voltar
               </button>
-              <button onClick={handleSubmit} disabled={loading} className="flex-1 btn-amarelo py-3 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+              <button onClick={handleSubmit} disabled={loading} className="flex-1 btn-premium py-3 text-lg flex items-center justify-center gap-2 disabled:opacity-50">
                 {loading ? 'Enviando...' : <><Check size={20} /> Finalizar</>}
               </button>
             </div>
@@ -254,39 +254,41 @@ export default function RegisterDriver() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-roxo-principal via-purple-800 to-purple-600 flex items-center justify-center p-4">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-amarelo-oba/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amarelo-oba/20 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-gradient-to-br from-[#4A1D61] via-[#6B2D8C] to-[#3B1A4B] flex items-center justify-center p-4">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#F4D03F]/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#F4D03F]/20 rounded-full blur-3xl" />
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-lg backdrop-blur-md bg-white/10 rounded-2xl shadow-2xl border border-white/20 p-6"
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-lg"
       >
-        <div className="text-center mb-4">
-          <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-400/20 backdrop-blur mb-3"
-          >
-            <Truck className="w-8 h-8 text-amarelo-oba" />
-          </motion.div>
-          <h2 className="text-2xl font-bold text-white">Cadastro Motorista</h2>
-          <p className="text-white/70 text-sm">Etapa {step} de 5</p>
+        <div className="backdrop-blur-lg bg-white/10 rounded-2xl shadow-2xl border border-white/20 p-6">
+          <div className="text-center mb-4">
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3"
+            >
+              <Truck className="w-8 h-8 text-[#F4D03F]" />
+            </motion.div>
+            <h2 className="text-2xl font-bold text-white drop-shadow-sm">Cadastro Motorista</h2>
+            <p className="text-white/70 text-sm">Etapa {step} de 5</p>
+          </div>
+
+          {renderStepIndicator()}
+          {renderStep()}
+
+          <p className="text-center text-white/70 text-sm mt-4">
+            Já tem conta?{' '}
+            <button onClick={() => navigate('/')} className="text-[#F4D03F] font-semibold hover:underline">
+              Faça login
+            </button>
+          </p>
         </div>
-
-        {renderStepIndicator()}
-        {renderStep()}
-
-        <p className="text-center text-white/70 text-sm mt-4">
-          Já tem conta?{' '}
-          <button onClick={() => navigate('/')} className="text-amarelo-oba font-semibold hover:underline">
-            Faça login
-          </button>
-        </p>
       </motion.div>
     </div>
   )
