@@ -129,31 +129,25 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl mb-1.5">
-          <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3">
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4">
             <Mail size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type="email"
               placeholder="Seu e-mail"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm my-1"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm py-2"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
             />
           </div>
-        </div>
 
-        <div className="relative overflow-hidden rounded-2xl mb-2">
-          <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4">
             <Lock size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm my-1"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm py-2"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -161,28 +155,29 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-[#A0A0B0] hover:text-white transition shrink-0"
+              className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0"
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
             >
               {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
-        </div>
 
-        <div className="text-right mb-2">
-          <Link to="/forgot-password" className="text-[11px] text-[#A0A0B0] hover:text-[#F4D03F] transition">
-            Esqueceu a senha?
-          </Link>
-        </div>
+          <div className="text-right">
+            <Link to="/forgot-password" className="text-[11px] text-[#A0A0B0] hover:text-[#F4D03F] transition">
+              Esqueceu a senha?
+            </Link>
+          </div>
 
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          type="submit"
-          className="w-full py-[8px] rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm mb-2"
-        >
-          Entrar <ArrowRight size={15} />
-        </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            className="w-full py-[8px] rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
+          >
+            Entrar <ArrowRight size={15} />
+          </motion.button>
+        </form>
 
-        <div className="border-t border-white/10 pt-2">
+        <div className="border-t border-white/10 pt-2 mt-2">
           <p className="text-[11px] text-[#A0A0B0] text-center mb-1.5">Ainda não tem conta?</p>
           <Link
             to="/register"
