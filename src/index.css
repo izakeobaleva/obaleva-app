@@ -16,14 +16,14 @@
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F4D03F] focus-visible:ring-offset-2;
   }
 
-  /* Botão premium - aumentado sutilmente */
+  /* Botão premium */
   .btn-premium {
     @apply relative overflow-hidden font-bold shadow-lg transition-all duration-200 text-[#1E1E2F];
     background: linear-gradient(135deg, #FFD966 0%, #F4D03F 100%);
-    padding: 0.25rem 0.8rem;
+    padding: 0.35rem 1rem;
     border-radius: 2rem;
-    font-size: 0.8rem;
-    line-height: 1.3;
+    font-size: 0.85rem;
+    line-height: 1.4;
     box-shadow: 0 4px 14px 0 rgba(244, 208, 63, 0.3);
   }
   .btn-premium:hover {
@@ -36,9 +36,9 @@
 
   /* Botão outline escuro */
   .btn-outline-dark {
-    @apply border border-white/20 bg-transparent text-white/90 px-3 py-0.5 transition hover:bg-white/10 font-semibold;
-    font-size: 0.8rem;
-    line-height: 1.3;
+    @apply border border-white/20 bg-transparent text-white/90 px-3 py-1 transition hover:bg-white/10 font-semibold;
+    font-size: 0.85rem;
+    line-height: 1.4;
     border-radius: 2rem;
   }
 
@@ -57,11 +57,11 @@
     @apply backdrop-blur-xl bg-[#1A1528]/80 border-b border-white/10 shadow-sm;
   }
 
-  /* Input container mais confortável */
+  /* Input container */
   .input-compact {
-    @apply flex items-center gap-2 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-0.5;
-    font-size: 0.8rem;
-    line-height: 1.3;
+    @apply flex items-center gap-2 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1;
+    font-size: 0.85rem;
+    line-height: 1.4;
   }
 }
 
