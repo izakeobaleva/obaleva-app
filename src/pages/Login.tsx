@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import { Car, Chrome, Mail, Lock, Eye, EyeOff, Share2 } from 'lucide-react'
 
 export default function Entrar() {
   const navigate = useNavigate()
@@ -44,8 +44,26 @@ export default function Entrar() {
     }
   }
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'ObaLeve',
+          text: 'Baixe o ObaLeve - Mobilidade premium para sua cidade!',
+          url: window.location.origin,
+        })
+      } catch (err) {
+        // usuário cancelou
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.origin)
+      toast.success('Link copiado!')
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col items-center justify-center p-5">
+      {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
@@ -54,22 +72,52 @@ export default function Entrar() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-6"
+        className="relative z-10 w-full max-w-[380px]"
       >
-        <div className="flex items-center mb-4">
-          <button
-            onClick={() => navigate('/')}
-            className="btn-outline-dark p-2"
-            aria-label="Voltar"
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="mb-4"
           >
-            <ArrowLeft size={20} />
-          </button>
-          <div className="flex-1 text-center -ml-10">
-            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Entrar</h1>
-          </div>
+            <div className="w-20 h-20 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-[#F4D03F]/20">
+              <Car size={40} className="text-[#1E1E2F]" />
+            </div>
+          </motion.div>
+          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+          <p className="text-[#A0A0B0] text-sm mt-1">Segurança e conforto em cada viagem</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-3.5">
+        {/* Botão Google */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="w-full bg-[#1A1528] border border-white/10 rounded-2xl px-5 py-4 text-white font-medium flex items-center justify-center gap-3 hover:bg-white/5 transition-all mb-4"
+          disabled
+        >
+          <Chrome size={22} />
+          <span>Continuar com Google</span>
+          <span className="ml-auto text-[10px] text-[#A0A0B0] bg-white/10 px-2 py-0.5 rounded-full">Em breve</span>
+        </motion.button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-xs text-[#A0A0B0]">Entre com e-mail</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* Form */}
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          onSubmit={handleLogin}
+          className="space-y-3"
+        >
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
             <Mail size={18} className="text-[#F4D03F] shrink-0" />
             <input
@@ -115,36 +163,51 @@ export default function Entrar() {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3"
+            className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all py-3 text-sm"
           >
-            {loading ? (
-              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-            ) : (
-              <>
-                <span className="text-sm">Entrar</span>
-                <ArrowRight size={18} />
-              </>
-            )}
+            {loading ? 'Entrando...' : 'Entrar'}
           </motion.button>
-        </form>
+        </motion.form>
 
-        <div className="mt-5 pt-5 border-t border-white/10 space-y-3">
-          <p className="text-xs text-[#A0A0B0] text-center">
-            Novo por aqui?{' '}
-            <Link to="/register" className="text-[#F4D03F] font-semibold hover:underline">
-              Cadastre-se
-            </Link>
-          </p>
-          <p className="text-xs text-[#A0A0B0] text-center">
-            Quer dirigir?{' '}
-            <Link to="/register-driver" className="text-[#F4D03F] font-semibold hover:underline">
-              Cadastro Motorista
-            </Link>
-          </p>
-        </div>
+        {/* Cadastro */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 space-y-3"
+        >
+          <p className="text-xs text-[#A0A0B0] text-center">Ainda não tem conta?</p>
+
+          <Link
+            to="/register"
+            className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center"
+          >
+            Criar conta como Passageiro
+          </Link>
+
+          <Link
+            to="/register-driver"
+            className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center"
+          >
+            Criar conta como Motorista
+          </Link>
+        </motion.div>
+
+        {/* Compartilhar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="mt-6 text-center"
+        >
+          <button
+            onClick={handleShare}
+            className="text-[#A0A0B0] hover:text-[#F4D03F] transition-all flex items-center justify-center gap-2 mx-auto text-xs"
+          >
+            <Share2 size={14} />
+            Compartilhar ObaLeve
+          </button>
+        </motion.div>
       </motion.div>
     </div>
   )
