@@ -1,275 +1,72 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { UploadFile } from '../components/UploadFile'
-import { uploadMultipleFiles } from '../lib/uploadHelpers'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { Truck, ArrowLeft, ArrowRight, Check, Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react'
+import { User, Mail, Lock, Phone, Car, Eye, EyeOff } from 'lucide-react'
 
-export default function RegisterDriver() {
+export default function CadastroMotorista() {
   const navigate = useNavigate()
-  const [step, setStep] = useState(1)
-  const [loading, setLoading] = useState(false)
+  const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [form, setForm] = useState({
-    nome_completo: '',
-    cpf: '',
-    data_nascimento: '',
-    rg: '',
-    telefone: '',
-    email: '',
-    password: '',
-    comprovante_residencia_url: '',
-    cnh_numero: '',
-    cnh_categoria: '',
-    cnh_validade: '',
-    cnh_frente_url: '',
-    cnh_verso_url: '',
-    crlv_url: '',
-    placa: '',
-    modelo: '',
-    ano: '',
-    cor: '',
-    categoria_veiculo: '' as 'carro' | 'moto' | '',
-    fotos_veiculo: [] as string[],
-    seguro_apolice_url: '',
-    pix: '',
-  })
+  const [loading, setLoading] = useState(false)
 
-  const updateForm = (data: Partial<typeof form>) => setForm({ ...form, ...data })
-  const nextStep = () => setStep(step + 1)
-  const prevStep = () => setStep(step - 1)
-
-  const handleSubmit = async () => {
-    if (!form.nome_completo || !form.cpf || !form.email || !form.password) {
-      toast.error('Preencha todos os campos obrigatórios')
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!nome || !email || !telefone || !password) {
+      toast.error('Preencha todos os campos')
       return
     }
+    
+    if (password !== confirmPassword) {
+      toast.error('As senhas não coincidem')
+      return
+    }
+    
+    if (password.length < 6) {
+      toast.error('A senha deve ter pelo menos 6 caracteres')
+      return
+    }
+
     setLoading(true)
     try {
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: { data: { nome_completo: form.nome_completo, tipo: 'motorista' } },
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { nome_completo: nome, tipo: 'motorista' }
+        }
       })
-      if (signUpError) throw signUpError
+      
+      if (authError) throw authError
       if (!authData.user) throw new Error('Erro ao criar usuário')
+
       const { error: insertUserError } = await supabase.from('usuarios').insert({
         id: authData.user.id,
-        nome_completo: form.nome_completo,
-        cpf: form.cpf,
-        telefone: form.telefone,
-        email: form.email,
-        tipo: 'motorista',
+        nome_completo: nome,
+        email,
+        telefone,
+        tipo: 'motorista'
       })
       if (insertUserError) throw insertUserError
-      const { error: insertDriverError } = await supabase.from('motoristas').insert({
+
+      const { error: insertMotoristaError } = await supabase.from('motoristas').insert({
         id: authData.user.id,
-        status: 'pendente',
-        documentos_urls: {
-          comprovante_residencia: form.comprovante_residencia_url,
-          cnh: {
-            numero: form.cnh_numero,
-            categoria: form.cnh_categoria,
-            validade: form.cnh_validade,
-            frente: form.cnh_frente_url,
-            verso: form.cnh_verso_url,
-          },
-          crlv: form.crlv_url,
-          seguro: form.seguro_apolice_url,
-        },
-        dados_veiculo: {
-          placa: form.placa,
-          modelo: form.modelo,
-          ano: form.ano,
-          cor: form.cor,
-          categoria: form.categoria_veiculo,
-          fotos: form.fotos_veiculo,
-        },
-        conta_bancaria_pix: form.pix,
+        status: 'pendente'
       })
-      if (insertDriverError) throw insertDriverError
-      toast.success('Cadastro enviado! Aguarde aprovação do administrador.')
+      if (insertMotoristaError) throw insertMotoristaError
+
+      toast.success('Cadastro realizado! Aguarde aprovação.')
       navigate('/')
     } catch (err: any) {
-      toast.error(err.message || 'Erro no cadastro')
+      toast.error(err.message || 'Erro ao cadastrar')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleUploadFotosVeiculo = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
-    try {
-      const urls = await uploadMultipleFiles('veiculos', files, 'driver_' + Date.now() + '_')
-      updateForm({ fotos_veiculo: [...form.fotos_veiculo, ...urls] })
-      toast.success(files.length + ' foto(s) enviada(s) com sucesso!')
-    } catch (err: any) {
-      toast.error('Erro ao enviar fotos')
-    }
-  }
-
-  const inputContainerClass = "flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3"
-  const inputClass = "w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
-  const btnClass = "w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3 text-sm"
-  const btnOutlineClass = "flex-1 rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 py-3 text-sm"
-
-  const renderStepIndicator = () => (
-    <div className="flex gap-2 mb-5">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <motion.div
-          key={s}
-          animate={{ scale: step >= s ? 1 : 0.9 }}
-          className={"flex-1 h-2 rounded-full " + (step >= s ? 'bg-[#F4D03F]' : 'bg-white/20')}
-        />
-      ))}
-    </div>
-  )
-
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3.5">
-            <h2 className="text-xl font-bold text-white mb-2">Dados Pessoais</h2>
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Nome completo" className={inputClass} value={form.nome_completo} onChange={(e) => updateForm({ nome_completo: e.target.value })} required />
-            </div>
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="CPF (apenas números)" className={inputClass} value={form.cpf} onChange={(e) => updateForm({ cpf: e.target.value })} required />
-            </div>
-            <input type="date" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm" value={form.data_nascimento} onChange={(e) => updateForm({ data_nascimento: e.target.value })} required />
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="RG" className={inputClass} value={form.rg} onChange={(e) => updateForm({ rg: e.target.value })} required />
-            </div>
-            <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={18} /></button>
-          </motion.div>
-        )
-
-      case 2:
-        return (
-          <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3.5">
-            <h2 className="text-xl font-bold text-white mb-2">Contato e Senha</h2>
-            <div className={inputContainerClass}>
-              <Phone size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="tel" placeholder="Telefone (com DDD)" className={inputClass} value={form.telefone} onChange={(e) => updateForm({ telefone: e.target.value })} required />
-            </div>
-            <div className={inputContainerClass}>
-              <Mail size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="email" placeholder="E-mail" className={inputClass} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} required />
-            </div>
-            <div className={inputContainerClass}>
-              <Lock size={18} className="text-[#F4D03F] shrink-0" />
-              <input type={showPassword ? 'text' : 'password'} placeholder="Crie uma senha" className={inputClass} value={form.password} onChange={(e) => updateForm({ password: e.target.value })} required />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            <UploadFile label="Comprovante de residência" onUpload={(url) => updateForm({ comprovante_residencia_url: url })} />
-            <div className="flex gap-3">
-              <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={18} /> Voltar</button>
-              <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={18} /></button>
-            </div>
-          </motion.div>
-        )
-
-      case 3:
-        return (
-          <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3.5">
-            <h2 className="text-xl font-bold text-white mb-2">Habilitação (CNH)</h2>
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Número da CNH" className={inputClass} value={form.cnh_numero} onChange={(e) => updateForm({ cnh_numero: e.target.value })} required />
-            </div>
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Categoria (ex: A, B, AB)" className={inputClass} value={form.cnh_categoria} onChange={(e) => updateForm({ cnh_categoria: e.target.value })} required />
-            </div>
-            <input type="month" className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] [color-scheme:dark] text-sm" value={form.cnh_validade} onChange={(e) => updateForm({ cnh_validade: e.target.value })} required />
-            <UploadFile label="Foto da CNH (frente)" onUpload={(url) => updateForm({ cnh_frente_url: url })} />
-            <UploadFile label="Foto da CNH (verso)" onUpload={(url) => updateForm({ cnh_verso_url: url })} />
-            <div className="flex gap-3">
-              <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={18} /> Voltar</button>
-              <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={18} /></button>
-            </div>
-          </motion.div>
-        )
-
-      case 4:
-        return (
-          <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3.5">
-            <h2 className="text-xl font-bold text-white mb-2">Dados do Veículo</h2>
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Placa" className={inputClass + ' uppercase'} value={form.placa} onChange={(e) => updateForm({ placa: e.target.value })} required />
-            </div>
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Modelo (ex: Fiat Uno)" className={inputClass} value={form.modelo} onChange={(e) => updateForm({ modelo: e.target.value })} required />
-            </div>
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Ano" className={inputClass} value={form.ano} onChange={(e) => updateForm({ ano: e.target.value })} required />
-            </div>
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Cor" className={inputClass} value={form.cor} onChange={(e) => updateForm({ cor: e.target.value })} required />
-            </div>
-            <select className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] text-sm" value={form.categoria_veiculo} onChange={(e) => updateForm({ categoria_veiculo: e.target.value as 'carro' | 'moto' })} required>
-              <option value="" className="text-gray-800">Categoria do veículo</option>
-              <option value="carro" className="text-gray-800">Carro</option>
-              <option value="moto" className="text-gray-800">Moto</option>
-            </select>
-            <UploadFile label="CRLV (foto)" onUpload={(url) => updateForm({ crlv_url: url })} />
-            <div>
-              <label className="block text-white/80 text-sm font-medium mb-1">Fotos do veículo (max 5)</label>
-              <input type="file" multiple accept="image/*" onChange={handleUploadFotosVeiculo} className="w-full bg-[#1A1528] text-white border border-white/10 rounded-2xl px-4 py-3 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-2xl file:border-0 file:bg-[#F4D03F] file:text-[#1E1E2F] file:font-bold file:text-xs" />
-              {form.fotos_veiculo.length > 0 && (
-                <div className="flex gap-2 mt-2 flex-wrap">
-                  {form.fotos_veiculo.map((url, i) => (
-                    <img key={i} src={url} alt={'Foto ' + (i + 1)} className="w-16 h-16 object-cover rounded-2xl border border-white/10" />
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="flex gap-3">
-              <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={18} /> Voltar</button>
-              <button onClick={nextStep} className={btnClass}>Próximo <ArrowRight size={18} /></button>
-            </div>
-          </motion.div>
-        )
-
-      case 5:
-        return (
-          <motion.div key="step5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-3.5">
-            <h2 className="text-xl font-bold text-white mb-2">Seguro e Pagamento</h2>
-            <UploadFile label="Apólice de seguro (foto)" onUpload={(url) => updateForm({ seguro_apolice_url: url })} />
-            <div className={inputContainerClass}>
-              <User size={18} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Chave PIX (CPF, e-mail ou telefone)" className={inputClass} value={form.pix} onChange={(e) => updateForm({ pix: e.target.value })} required />
-            </div>
-            <div className="bg-[#1A1528] border border-white/10 rounded-2xl p-4 space-y-1">
-              <h3 className="font-bold text-white mb-1">Resumo do cadastro</h3>
-              <p className="text-sm text-[#A0A0B0]">Nome: {form.nome_completo}</p>
-              <p className="text-sm text-[#A0A0B0]">E-mail: {form.email}</p>
-              <p className="text-sm text-[#A0A0B0]">Veículo: {form.modelo} - {form.placa}</p>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={prevStep} className={btnOutlineClass}><ArrowLeft size={18} /> Voltar</button>
-              <button onClick={handleSubmit} disabled={loading} className={btnClass + (loading ? ' opacity-50' : '')}>
-                {loading ? 'Enviando...' : <><Check size={18} /> Finalizar</>}
-              </button>
-            </div>
-          </motion.div>
-        )
-
-      default:
-        return null
     }
   }
 
@@ -281,33 +78,54 @@ export default function RegisterDriver() {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-lg"
+        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[400px] p-6"
       >
-        <div className="bg-[#1A1528] border border-white/10 rounded-3xl shadow-xl p-6">
-          <div className="text-center mb-3">
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3"
-            >
-              <Truck className="w-7 h-7 text-[#F4D03F]" />
-            </motion.div>
-            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Cadastro Motorista</h2>
-            <p className="text-[#A0A0B0] text-sm">Etapa {step} de 5</p>
+        <div className="text-center mb-5">
+          <div className="w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center mx-auto mb-3">
+            <Car size={24} className="text-[#F4D03F]" />
+          </div>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Cadastro Motorista</h1>
+          <p className="text-[#A0A0B0] text-sm mt-0.5">Crie sua conta para dirigir</p>
+        </div>
+
+        <form onSubmit={handleRegister} className="space-y-3">
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
+            <User size={18} className="text-[#F4D03F] shrink-0" />
+            <input type="text" placeholder="Nome completo" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={nome} onChange={e => setNome(e.target.value)} required />
           </div>
 
-          {renderStepIndicator()}
-          {renderStep()}
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
+            <Mail size={18} className="text-[#F4D03F] shrink-0" />
+            <input type="email" placeholder="E-mail" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
+          </div>
 
-          <p className="text-center text-[#A0A0B0] text-sm mt-4">
-            Já tem conta?{' '}
-            <button onClick={() => navigate('/')} className="text-[#F4D03F] font-semibold hover:underline">
-              Faça login
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
+            <Phone size={18} className="text-[#F4D03F] shrink-0" />
+            <input type="tel" placeholder="Telefone" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+          </div>
+
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
+            <Lock size={18} className="text-[#F4D03F] shrink-0" />
+            <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6 caracteres)" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
-          </p>
+          </div>
+
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
+            <Lock size={18} className="text-[#F4D03F] shrink-0" />
+            <input type={showPassword ? 'text' : 'password'} placeholder="Confirmar senha" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} />
+          </div>
+
+          <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3 text-sm">
+            {loading ? 'Cadastrando...' : 'Criar conta de motorista'}
+          </motion.button>
+        </form>
+
+        <div className="mt-5 pt-5 border-t border-white/10 text-center">
+          <p className="text-xs text-[#A0A0B0]">Já tem conta? <Link to="/" className="text-[#F4D03F] font-semibold hover:underline">Entrar</Link></p>
         </div>
       </motion.div>
     </div>

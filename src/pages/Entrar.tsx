@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 
-function Login() {
+export default function Entrar() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -146,5 +146,3 @@ function Login() {
     </div>
   )
 }
-
-export default Login
