@@ -100,15 +100,15 @@ export default function Login() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-sm p-6"
+        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-xs p-5"
       >
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+        <div className="text-center mb-5">
+          <h1 className="text-lg font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
           <p className="text-[#A0A0B0] text-xs mt-1">Segurança e conforto em cada viagem</p>
         </div>
 
-        {/* Google */}
+        {/* Login com Google */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleGoogleLogin}
@@ -124,7 +124,7 @@ export default function Login() {
         </motion.button>
 
         {/* Separador */}
-        <div className="relative my-5">
+        <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10"></div>
           </div>
@@ -133,26 +133,33 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:border-[#F4D03F]/50 transition-all">
-            <Mail size={18} className="text-[#A0A0B0] shrink-0" />
+        {/* Email - fundo com mapa */}
+        <div className="relative overflow-hidden rounded-2xl mb-3">
+          <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
+          <div className="relative flex items-center gap-3 px-4 py-3">
+            <Mail size={18} className="text-[#F4D03F] shrink-0" />
             <input
               type="email"
               placeholder="Seu e-mail"
-              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
             />
           </div>
+        </div>
 
-          <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:border-[#F4D03F]/50 transition-all">
-            <Lock size={18} className="text-[#A0A0B0] shrink-0" />
+        {/* Senha - fundo com mapa */}
+        <div className="relative overflow-hidden rounded-2xl mb-3">
+          <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
+          <div className="relative flex items-center gap-3 px-4 py-3">
+            <Lock size={18} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -165,30 +172,27 @@ export default function Login() {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+        </div>
 
-          <div className="text-right">
-            <Link to="/forgot-password" className="text-xs text-[#A0A0B0] hover:text-[#F4D03F] transition">
-              Esqueceu a senha?
-            </Link>
-          </div>
+        <div className="text-right mb-3">
+          <Link to="/forgot-password" className="text-xs text-[#A0A0B0] hover:text-[#F4D03F] transition">
+            Esqueceu a senha?
+          </Link>
+        </div>
 
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
-          >
-            Entrar <ArrowRight size={18} />
-          </motion.button>
-        </form>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm mb-4"
+        >
+          Entrar <ArrowRight size={18} />
+        </motion.button>
 
-        {/* Cadastro */}
-        <div className="mt-5 space-y-3">
-          <div className="border-t border-white/10 pt-4">
-            <p className="text-xs text-[#A0A0B0] text-center mb-3">Ainda não tem conta?</p>
-          </div>
+        <div className="border-t border-white/10 pt-4">
+          <p className="text-xs text-[#A0A0B0] text-center mb-3">Ainda não tem conta?</p>
           <Link
             to="/register"
-            className="w-full py-3 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-sm"
+            className="w-full py-3 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-sm mb-2"
           >
             <User size={18} className="text-[#F4D03F]" />
             Criar conta como Passageiro
@@ -207,11 +211,10 @@ export default function Login() {
           </Link>
         </div>
 
-        {/* Compartilhar */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleShare}
-          className="w-full mt-4 py-2.5 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-xs border border-white/5"
+          className="w-full mt-3 py-2.5 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-xs border border-white/5"
         >
           <Share2 size={14} />
           Compartilhar ObaLeve
