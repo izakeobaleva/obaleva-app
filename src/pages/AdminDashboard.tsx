@@ -6,13 +6,11 @@ import Motoristas from './Admin/Motoristas'
 import Passageiros from './Admin/Passageiros'
 import Corridas from './Admin/Corridas'
 import Financeiro from './Admin/Financeiro'
-import Alugueis from './Admin/Alugueis'
-import Suporte from './Admin/Suporte'
 import LandingEditor from './Admin/LandingEditor'
 import LogoEditor from './Admin/LogoEditor'
 import { Shield, ArrowLeft, Image } from 'lucide-react'
 
-type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'alugueis' | 'suporte' | 'landing' | 'logo'
+type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'landing' | 'logo'
 
 export default function AdminDashboard() {
   const { signOut } = useAuth()
@@ -33,11 +31,28 @@ export default function AdminDashboard() {
     { id: 'passageiros', label: 'Passageiros' },
     { id: 'corridas', label: 'Corridas' },
     { id: 'financeiro', label: 'Financeiro' },
-    { id: 'alugueis', label: 'Aluguel' },
-    { id: 'suporte', label: 'Suporte' },
     { id: 'landing', label: 'Landing Page' },
     { id: 'logo', label: 'Logo', icon: Image },
   ]
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'motoristas':
+        return <Motoristas />
+      case 'passageiros':
+        return <Passageiros />
+      case 'corridas':
+        return <Corridas />
+      case 'financeiro':
+        return <Financeiro />
+      case 'landing':
+        return <LandingEditor />
+      case 'logo':
+        return <LogoEditor />
+      default:
+        return <Motoristas />
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#0F0B1A]">
@@ -88,14 +103,7 @@ export default function AdminDashboard() {
           transition={{ duration: 0.3 }}
           className="mt-4"
         >
-          {activeTab === 'motoristas' && <Motoristas />}
-          {activeTab === 'passageiros' && <Passageiros />}
-          {activeTab === 'corridas' && <Corridas />}
-          {activeTab === 'financeiro' && <Financeiro />}
-          {activeTab === 'alugueis' && <Alugueis />}
-          {activeTab === 'suporte' && <Suporte />}
-          {activeTab === 'landing' && <LandingEditor />}
-          {activeTab === 'logo' && <LogoEditor />}
+          {renderTabContent()}
         </motion.div>
       </div>
     </div>
