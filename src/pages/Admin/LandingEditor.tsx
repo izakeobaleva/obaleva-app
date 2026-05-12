@@ -32,10 +32,15 @@ export default function LandingEditor() {
       )
     )
 
-    if (results[0]?.data?.value) setForm(f => ({ ...f, title: results[0].data.value as string }))
-    if (results[1]?.data?.value) setForm(f => ({ ...f, subtitle: results[1].data.value as string }))
-    if (results[2]?.data?.value) setForm(f => ({ ...f, ctaText: results[2].data.value as string }))
-    if (results[3]?.data?.value) setForm(f => ({ ...f, appUrl: results[3].data.value as string }))
+    const titleValue = results[0]?.data?.value
+    const subtitleValue = results[1]?.data?.value
+    const ctaValue = results[2]?.data?.value
+    const appUrlValue = results[3]?.data?.value
+
+    if (titleValue) setForm(f => ({ ...f, title: String(titleValue) }))
+    if (subtitleValue) setForm(f => ({ ...f, subtitle: String(subtitleValue) }))
+    if (ctaValue) setForm(f => ({ ...f, ctaText: String(ctaValue) }))
+    if (appUrlValue) setForm(f => ({ ...f, appUrl: String(appUrlValue) }))
     
     setLoading(false)
   }
