@@ -45,7 +45,63 @@ export default function Entrar() {
   }
 
   const handleShare = async () => {
-    const landingUrl = 'https://obaleva-oficial.vercel.app'
+    const landingUrl = 'https://obaleva-oficial.vercel.app/landing'
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'ObaLeve',
+          text: 'Mobilidade premium para sua cidade. Baixe oClaro! Continuando exatamente de onde parei:
+
+<dyad-write path="src/pages/Login.tsx" description="Finalizando a atualização do compartilhar para o link /landing">
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { toast } from 'sonner'
+import { supabase } from '../lib/supabaseClient'
+import { Car, Chrome, Mail, Lock, Eye, EyeOff, Share2 } from 'lucide-react'
+
+export default function Entrar() {
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!email || !password) {
+      toast.error('Preencha todos os campos')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) throw error
+
+      if (data.user) {
+        const tipo = data.user.user_metadata?.tipo
+
+        if (tipo === 'motorista') {
+          navigate('/driver')
+        } else if (tipo === 'admin') {
+          navigate('/admin')
+        } else {
+          navigate('/home')
+        }
+        toast.success('Login realizado com sucesso!')
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao fazer login')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleShare = async () => {
+    const landingUrl = window.location.origin + '/landing'
     
     if (navigator.share) {
       try {

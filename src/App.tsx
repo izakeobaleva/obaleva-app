@@ -15,6 +15,7 @@ import Trips from './pages/Trips';
 import TripDetails from './pages/TripDetails';
 import Earnings from './pages/Earnings';
 import AdminDashboard from './pages/AdminDashboard';
+import LandingPage from './pages/LandingPage';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/register" element={<RegisterPassenger />} />
           <Route path="/register-driver" element={<RegisterDriver />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
