@@ -148,12 +148,12 @@ export default function Login() {
         <div className="relative overflow-hidden rounded-2xl mb-2">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-2 px-2.5 py-0.5">
-            <Lock size={13} className="text-[#F4D03F] shrink-0" />
+          <div className="relative flex items-center gap-2 px-2 py-0">
+            <Lock size={12} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-xs py-1"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-xs py-0.5"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -163,7 +163,7 @@ export default function Login() {
               onClick={() => setShowPassword(!showPassword)}
               className="text-[#A0A0B0] hover:text-white transition shrink-0"
             >
-              {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+              {showPassword ? <EyeOff size={12} /> : <Eye size={12} />}
             </button>
           </div>
         </div>
