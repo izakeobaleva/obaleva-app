@@ -2,46 +2,38 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Login } from './pages/Login';
-import { RegisterPassenger } from './pages/RegisterPassenger';
-import { RegisterDriver } from './pages/RegisterDriver';
-import { PassengerDashboard } from './pages/PassengerDashboard';
-import { DriverDashboard } from './pages/DriverDashboard';
-import { AdminDashboard } from './pages/AdminDashboard';
-
-// Componente de depuração temporária
-const DebugInfo = () => {
-  const { user, profile, loading } = useAuth();
-  return (
-    <div className="fixed bottom-0 left-0 bg-black text-white p-2 text-xs z-50">
-      loading: {String(loading)} | user: {user ? user.email : 'null'} | tipo: {profile?.tipo}
-    </div>
-  );
-};
+import Login from './pages/Login';
+import RegisterPassenger from './pages/RegisterPassenger';
+import RegisterDriver from './pages/RegisterDriver';
+import PassengerDashboard from './pages/PassengerDashboard';
+import DriverDashboard from './pages/DriverDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 function AppRoutes() {
   const { user, profile, loading } = useAuth();
 
   if (loading) {
-    return <div className="p-4 text-center text-white">Carregando...</div>;
+    return (
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
+      </div>
+    );
   }
 
-  console.log('[AppRoutes] user:', user?.email, 'tipo:', profile?.tipo);
-
-  // 🔓 USUÁRIO NÃO LOGADO → tela de login
   if (!user) {
     return (
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<RegisterPassenger />} />
+        <Route path="/register/passenger" element={<RegisterPassenger />} />
         <Route path="/register-driver" element={<RegisterDriver />} />
+        <Route path="/register/driver" element={<RegisterDriver />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }
 
-  // 🔐 USUÁRIO LOGADO → redireciona conforme tipo
   if (profile?.tipo === 'passageiro') {
     return (
       <Routes>
@@ -69,7 +61,6 @@ function AppRoutes() {
     );
   }
 
-  // Se chegou aqui, o usuário tem perfil desconhecido → vai para login
   return <Navigate to="/login" replace />;
 }
 
@@ -79,7 +70,6 @@ function App() {
       <BrowserRouter>
         <AppRoutes />
         <Toaster position="top-center" richColors />
-        <DebugInfo />
       </BrowserRouter>
     </AuthProvider>
   );
