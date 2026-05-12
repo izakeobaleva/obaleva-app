@@ -14,11 +14,16 @@ export default function RegisterPassenger() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { nome_completo: nome, tipo: 'passageiro' } }
+    })
     if (error) {
       toast.error('Erro: ' + error.message)
     } else if (data.user) {
       await supabase.from('passageiros').insert({ id: data.user.id, nome, telefone })
+      await supabase.from('usuarios').insert({ id: data.user.id, nome_completo: nome, telefone, email, tipo: 'passageiro' })
       toast.success('Cadastro realizado! Verifique seu e-mail para confirmar.')
       navigate('/')
     }

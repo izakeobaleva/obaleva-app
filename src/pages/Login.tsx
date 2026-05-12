@@ -12,12 +12,26 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       toast.error('Erro: ' + error.message)
-    } else {
+    } else if (data.user) {
       toast.success('Login realizado!')
-      // redirecionamento baseado no tipo de usuário será feito via trigger do Supabase
+      
+      // Buscar tipo de usuário
+      const { data: userData } = await supabase
+        .from('usuarios')
+        .select('tipo')
+        .eq('id', data.user.id)
+        .single()
+
+      if (userData?.tipo === 'motorista') {
+        navigate('/driver')
+      } else if (userData?.tipo === 'admin') {
+        navigate('/admin')
+      } else {
+        navigate('/passenger')
+      }
     }
     setLoading(false)
   }

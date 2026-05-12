@@ -7,6 +7,9 @@ import RegisterDriver from './pages/RegisterDriver'
 import PassengerDashboard from './pages/PassengerDashboard'
 import DriverDashboard from './pages/DriverDashboard'
 import AdminDashboard from './pages/AdminDashboard'
+import Trips from './pages/Trips'
+import Earnings from './pages/Earnings'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
         <Route path="/passenger" element={<PassengerDashboard />} />
         <Route path="/driver" element={<DriverDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/trips" element={<Trips />} />
+        <Route path="/earnings" element={<Earnings />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </AuthProvider>
   )
