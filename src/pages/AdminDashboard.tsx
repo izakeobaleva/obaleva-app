@@ -9,9 +9,10 @@ import Financeiro from './Admin/Financeiro'
 import Alugueis from './Admin/Alugueis'
 import Suporte from './Admin/Suporte'
 import LandingEditor from './Admin/LandingEditor'
-import { Shield, ArrowLeft } from 'lucide-react'
+import LogoEditor from './Admin/LogoEditor'
+import { Shield, ArrowLeft, Image } from 'lucide-react'
 
-type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'alugueis' | 'suporte' | 'landing'
+type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'alugueis' | 'suporte' | 'landing' | 'logo'
 
 export default function AdminDashboard() {
   const { signOut } = useAuth()
@@ -27,7 +28,7 @@ export default function AdminDashboard() {
     }
   }, [tabFromUrl])
 
-  const tabs: { id: Tab; label: string }[] = [
+  const tabs: { id: Tab; label: string; icon?: any }[] = [
     { id: 'motoristas', label: 'Motoristas' },
     { id: 'passageiros', label: 'Passageiros' },
     { id: 'corridas', label: 'Corridas' },
@@ -35,6 +36,7 @@ export default function AdminDashboard() {
     { id: 'alugueis', label: 'Aluguel' },
     { id: 'suporte', label: 'Suporte' },
     { id: 'landing', label: 'Landing Page' },
+    { id: 'logo', label: 'Logo', icon: Image },
   ]
 
   return (
@@ -66,13 +68,14 @@ export default function AdminDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-2.5 font-medium text-sm transition-all whitespace-nowrap ${
+              className={`px-5 py-2.5 font-medium text-sm transition-all whitespace-nowrap flex items-center gap-2 ${
                 activeTab === tab.id
                   ? 'bg-[#F4D03F] text-[#1E1E2F] shadow-md'
                   : 'bg-[#1A1528] text-[#A0A0A0] hover:bg-[#1A1528]/80 border border-white/10'
               }`}
               style={{ borderRadius: '2rem' }}
             >
+              {tab.icon && <tab.icon size={16} />}
               {tab.label}
             </button>
           ))}
@@ -92,6 +95,7 @@ export default function AdminDashboard() {
           {activeTab === 'alugueis' && <Alugueis />}
           {activeTab === 'suporte' && <Suporte />}
           {activeTab === 'landing' && <LandingEditor />}
+          {activeTab === 'logo' && <LogoEditor />}
         </motion.div>
       </div>
     </div>

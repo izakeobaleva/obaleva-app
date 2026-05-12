@@ -1,17 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Car, Chrome, Mail, Lock, UserPlus, Truck, Share2, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
+import { Car, Mail, Lock, Share2, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    loadLogo()
+    // Escuta mudanças no logo em tempo real
+    const handleStorage = () => loadLogo()
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [])
+
+  async function loadLogo() {
+    const { data } = await supabase
+      .from('app_config')
+      .select('value')
+      .eq('key', 'app_logo')
+      .maybeSingle()
+    
+    if (data?.value) {
+      setLogoUrl(data.value)
+    } else {
+      setLogoUrl(null)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,14 +83,22 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8"
       >
-        {/* Logo e título */}
+        {/* Logo ou ícone padrão */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3"
+            className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-3 overflow-hidden"
           >
-            <Car className="text-[#F4D03F] w-8 h-8" />
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt="OBALEVA" 
+                className="w-full h-full object-contain p-2"
+              />
+            ) : (
+              <Car className="text-[#F4D03F] w-10 h-10" />
+            )}
           </motion.div>
           <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
           <p className="text-[#A0A0B0] mt-1">Mobilidade premium para sua cidade</p>
