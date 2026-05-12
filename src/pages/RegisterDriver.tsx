@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { UploadFile } from '../components/UploadFile'
-import { uploadFile, uploadMultipleFiles } from '../lib/uploadHelpers'
+import { uploadMultipleFiles } from '../lib/uploadHelpers'
+import { motion } from 'framer-motion'
 import { toast } from 'sonner'
+import { Truck, ArrowLeft, ArrowRight, Check } from 'lucide-react'
 
 export default function RegisterDriver() {
   const navigate = useNavigate()
@@ -117,107 +119,133 @@ export default function RegisterDriver() {
   const renderStepIndicator = () => (
     <div className="flex gap-2 mb-6">
       {[1, 2, 3, 4, 5].map(s => (
-        <div key={s} className={`flex-1 h-2 rounded-full ${step >= s ? 'bg-amarelo-oba' : 'bg-gray-200'}`} />
+        <motion.div
+          key={s}
+          animate={{ scale: step >= s ? 1 : 0.9 }}
+          className={`flex-1 h-2 rounded-full ${step >= s ? 'bg-amarelo-oba' : 'bg-white/20'}`}
+        />
       ))}
     </div>
   )
+
+  const inputClass = "w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-amarelo-oba transition"
 
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-roxo-principal">📋 Dados Pessoais</h2>
-            <input type="text" placeholder="Nome completo" className="w-full p-3 border rounded-lg" value={form.nome_completo} onChange={e => updateForm({ nome_completo: e.target.value })} required />
-            <input type="text" placeholder="CPF (apenas números)" className="w-full p-3 border rounded-lg" value={form.cpf} onChange={e => updateForm({ cpf: e.target.value })} required />
-            <input type="date" className="w-full p-3 border rounded-lg" value={form.data_nascimento} onChange={e => updateForm({ data_nascimento: e.target.value })} required />
-            <input type="text" placeholder="RG" className="w-full p-3 border rounded-lg" value={form.rg} onChange={e => updateForm({ rg: e.target.value })} required />
-            <button onClick={nextStep} className="btn-amarelo w-full py-3 rounded-lg text-lg">Próximo →</button>
-          </div>
+          <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <h2 className="text-xl font-bold text-white">📋 Dados Pessoais</h2>
+            <input type="text" placeholder="Nome completo" className={inputClass} value={form.nome_completo} onChange={e => updateForm({ nome_completo: e.target.value })} required />
+            <input type="text" placeholder="CPF (apenas números)" className={inputClass} value={form.cpf} onChange={e => updateForm({ cpf: e.target.value })} required />
+            <div className="relative">
+              <input type="date" className={`${inputClass} [color-scheme:dark]`} value={form.data_nascimento} onChange={e => updateForm({ data_nascimento: e.target.value })} required />
+            </div>
+            <input type="text" placeholder="RG" className={inputClass} value={form.rg} onChange={e => updateForm({ rg: e.target.value })} required />
+            <button onClick={nextStep} className="btn-amarelo w-full py-3 rounded-xl text-lg font-bold shadow-lg flex items-center justify-center gap-2">
+              Próximo <ArrowRight size={20} />
+            </button>
+          </motion.div>
         )
 
       case 2:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-roxo-principal">📞 Contato e Senha</h2>
-            <input type="tel" placeholder="Telefone (com DDD)" className="w-full p-3 border rounded-lg" value={form.telefone} onChange={e => updateForm({ telefone: e.target.value })} required />
-            <input type="email" placeholder="E-mail" className="w-full p-3 border rounded-lg" value={form.email} onChange={e => updateForm({ email: e.target.value })} required />
-            <input type="password" placeholder="Crie uma senha" className="w-full p-3 border rounded-lg" value={form.password} onChange={e => updateForm({ password: e.target.value })} required />
+          <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <h2 className="text-xl font-bold text-white">📞 Contato e Senha</h2>
+            <input type="tel" placeholder="Telefone (com DDD)" className={inputClass} value={form.telefone} onChange={e => updateForm({ telefone: e.target.value })} required />
+            <input type="email" placeholder="E-mail" className={inputClass} value={form.email} onChange={e => updateForm({ email: e.target.value })} required />
+            <input type="password" placeholder="Crie uma senha" className={inputClass} value={form.password} onChange={e => updateForm({ password: e.target.value })} required />
             <UploadFile label="📄 Comprovante de residência" onUpload={(url) => updateForm({ comprovante_residencia_url: url })} />
             <div className="flex gap-2">
-              <button onClick={prevStep} className="bg-gray-500 text-white px-6 py-3 rounded-lg">← Voltar</button>
-              <button onClick={nextStep} className="btn-amarelo flex-1 py-3 rounded-lg">Próximo →</button>
+              <button onClick={prevStep} className="flex-1 bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-3 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
+                <ArrowLeft size={20} /> Voltar
+              </button>
+              <button onClick={nextStep} className="flex-1 btn-amarelo py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+                Próximo <ArrowRight size={20} />
+              </button>
             </div>
-          </div>
+          </motion.div>
         )
 
       case 3:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-roxo-principal">🚗 Habilitação (CNH)</h2>
-            <input type="text" placeholder="Número da CNH" className="w-full p-3 border rounded-lg" value={form.cnh_numero} onChange={e => updateForm({ cnh_numero: e.target.value })} required />
-            <input type="text" placeholder="Categoria (ex: A, B, AB)" className="w-full p-3 border rounded-lg" value={form.cnh_categoria} onChange={e => updateForm({ cnh_categoria: e.target.value })} required />
-            <input type="month" className="w-full p-3 border rounded-lg" value={form.cnh_validade} onChange={e => updateForm({ cnh_validade: e.target.value })} required />
+          <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <h2 className="text-xl font-bold text-white">🚗 Habilitação (CNH)</h2>
+            <input type="text" placeholder="Número da CNH" className={inputClass} value={form.cnh_numero} onChange={e => updateForm({ cnh_numero: e.target.value })} required />
+            <input type="text" placeholder="Categoria (ex: A, B, AB)" className={inputClass} value={form.cnh_categoria} onChange={e => updateForm({ cnh_categoria: e.target.value })} required />
+            <div className="relative">
+              <input type="month" className={`${inputClass} [color-scheme:dark]`} value={form.cnh_validade} onChange={e => updateForm({ cnh_validade: e.target.value })} required />
+            </div>
             <UploadFile label="📸 Foto da CNH (frente)" onUpload={(url) => updateForm({ cnh_frente_url: url })} />
             <UploadFile label="📸 Foto da CNH (verso)" onUpload={(url) => updateForm({ cnh_verso_url: url })} />
             <div className="flex gap-2">
-              <button onClick={prevStep} className="bg-gray-500 text-white px-6 py-3 rounded-lg">← Voltar</button>
-              <button onClick={nextStep} className="btn-amarelo flex-1 py-3 rounded-lg">Próximo →</button>
+              <button onClick={prevStep} className="flex-1 bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-3 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
+                <ArrowLeft size={20} /> Voltar
+              </button>
+              <button onClick={nextStep} className="flex-1 btn-amarelo py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+                Próximo <ArrowRight size={20} />
+              </button>
             </div>
-          </div>
+          </motion.div>
         )
 
       case 4:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-roxo-principal">🚙 Dados do Veículo</h2>
-            <input type="text" placeholder="Placa" className="w-full p-3 border rounded-lg uppercase" value={form.placa} onChange={e => updateForm({ placa: e.target.value })} required />
-            <input type="text" placeholder="Modelo (ex: Fiat Uno)" className="w-full p-3 border rounded-lg" value={form.modelo} onChange={e => updateForm({ modelo: e.target.value })} required />
-            <input type="text" placeholder="Ano" className="w-full p-3 border rounded-lg" value={form.ano} onChange={e => updateForm({ ano: e.target.value })} required />
-            <input type="text" placeholder="Cor" className="w-full p-3 border rounded-lg" value={form.cor} onChange={e => updateForm({ cor: e.target.value })} required />
-            <select className="w-full p-3 border rounded-lg" value={form.categoria_veiculo} onChange={e => updateForm({ categoria_veiculo: e.target.value as 'carro' | 'moto' })} required>
-              <option value="">Categoria do veículo</option>
-              <option value="carro">🚗 Carro</option>
-              <option value="moto">🏍️ Moto</option>
+          <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <h2 className="text-xl font-bold text-white">🚙 Dados do Veículo</h2>
+            <input type="text" placeholder="Placa" className={`${inputClass} uppercase`} value={form.placa} onChange={e => updateForm({ placa: e.target.value })} required />
+            <input type="text" placeholder="Modelo (ex: Fiat Uno)" className={inputClass} value={form.modelo} onChange={e => updateForm({ modelo: e.target.value })} required />
+            <input type="text" placeholder="Ano" className={inputClass} value={form.ano} onChange={e => updateForm({ ano: e.target.value })} required />
+            <input type="text" placeholder="Cor" className={inputClass} value={form.cor} onChange={e => updateForm({ cor: e.target.value })} required />
+            <select className={inputClass} value={form.categoria_veiculo} onChange={e => updateForm({ categoria_veiculo: e.target.value as 'carro' | 'moto' })} required>
+              <option value="" className="text-gray-800">Categoria do veículo</option>
+              <option value="carro" className="text-gray-800">🚗 Carro</option>
+              <option value="moto" className="text-gray-800">🏍️ Moto</option>
             </select>
             <UploadFile label="📄 CRLV (foto)" onUpload={(url) => updateForm({ crlv_url: url })} />
             <div>
-              <label className="block mb-1 font-medium">📸 Fotos do veículo (máx 5)</label>
-              <input type="file" multiple accept="image/*" onChange={handleUploadFotosVeiculo} className="w-full p-3 border rounded-lg" />
+              <label className="block text-white/80 text-sm font-medium mb-1">📸 Fotos do veículo (máx 5)</label>
+              <input type="file" multiple accept="image/*" onChange={handleUploadFotosVeiculo} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amarelo-oba file:text-roxo-principal file:font-bold file:text-sm" />
               {form.fotos_veiculo.length > 0 && (
                 <div className="flex gap-2 mt-2 flex-wrap">
                   {form.fotos_veiculo.map((url, i) => (
-                    <img key={i} src={url} alt={`Foto ${i+1}`} className="w-16 h-16 object-cover rounded" />
+                    <img key={i} src={url} alt={`Foto ${i+1}`} className="w-16 h-16 object-cover rounded-lg border border-white/20" />
                   ))}
                 </div>
               )}
             </div>
             <div className="flex gap-2">
-              <button onClick={prevStep} className="bg-gray-500 text-white px-6 py-3 rounded-lg">← Voltar</button>
-              <button onClick={nextStep} className="btn-amarelo flex-1 py-3 rounded-lg">Próximo →</button>
+              <button onClick={prevStep} className="flex-1 bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-3 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
+                <ArrowLeft size={20} /> Voltar
+              </button>
+              <button onClick={nextStep} className="flex-1 btn-amarelo py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+                Próximo <ArrowRight size={20} />
+              </button>
             </div>
-          </div>
+          </motion.div>
         )
 
       case 5:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-roxo-principal">💰 Seguro e Pagamento</h2>
+          <motion.div key="step5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+            <h2 className="text-xl font-bold text-white">💰 Seguro e Pagamento</h2>
             <UploadFile label="📄 Apólice de seguro (foto)" onUpload={(url) => updateForm({ seguro_apolice_url: url })} />
-            <input type="text" placeholder="Chave PIX (CPF, e-mail ou telefone)" className="w-full p-3 border rounded-lg" value={form.pix} onChange={e => updateForm({ pix: e.target.value })} required />
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">📝 Resumo do cadastro</h3>
-              <p className="text-sm">Nome: {form.nome_completo}</p>
-              <p className="text-sm">E-mail: {form.email}</p>
-              <p className="text-sm">Veículo: {form.modelo} - {form.placa}</p>
+            <input type="text" placeholder="Chave PIX (CPF, e-mail ou telefone)" className={inputClass} value={form.pix} onChange={e => updateForm({ pix: e.target.value })} required />
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
+              <h3 className="font-bold text-white mb-2">📝 Resumo do cadastro</h3>
+              <p className="text-sm text-white/70">Nome: {form.nome_completo}</p>
+              <p className="text-sm text-white/70">E-mail: {form.email}</p>
+              <p className="text-sm text-white/70">Veículo: {form.modelo} - {form.placa}</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={prevStep} className="bg-gray-500 text-white px-6 py-3 rounded-lg">← Voltar</button>
-              <button onClick={handleSubmit} disabled={loading} className="btn-amarelo flex-1 py-3 rounded-lg text-lg">
-                {loading ? 'Enviando...' : '✅ Finalizar Cadastro'}
+              <button onClick={prevStep} className="flex-1 bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-3 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
+                <ArrowLeft size={20} /> Voltar
+              </button>
+              <button onClick={handleSubmit} disabled={loading} className="flex-1 btn-amarelo py-3 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+                {loading ? 'Enviando...' : <><Check size={20} /> Finalizar</>}
               </button>
             </div>
-          </div>
+          </motion.div>
         )
 
       default:
@@ -226,13 +254,40 @@ export default function RegisterDriver() {
   }
 
   return (
-    <div className="min-h-screen bg-roxo-principal flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
-        <h1 className="text-3xl font-bold text-roxo-principal text-center mb-6">Cadastro Motorista</h1>
-        {renderStepIndicator()}
-        <p className="text-sm text-gray-500 text-center mb-4">Etapa {step} de 5</p>
-        {renderStep()}
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-roxo-principal via-purple-800 to-purple-600 flex items-center justify-center p-4">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-amarelo-oba/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amarelo-oba/20 rounded-full blur-3xl" />
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 w-full max-w-lg backdrop-blur-md bg-white/10 rounded-2xl shadow-2xl border border-white/20 p-6"
+      >
+        <div className="text-center mb-4">
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-400/20 backdrop-blur mb-3"
+          >
+            <Truck className="w-8 h-8 text-amarelo-oba" />
+          </motion.div>
+          <h2 className="text-2xl font-bold text-white">Cadastro Motorista</h2>
+          <p className="text-white/70 text-sm">Etapa {step} de 5</p>
+        </div>
+
+        {renderStepIndicator()}
+        {renderStep()}
+
+        <p className="text-center text-white/70 text-sm mt-4">
+          Já tem conta?{' '}
+          <button onClick={() => navigate('/')} className="text-amarelo-oba font-semibold hover:underline">
+            Faça login
+          </button>
+        </p>
+      </motion.div>
     </div>
   )
 }

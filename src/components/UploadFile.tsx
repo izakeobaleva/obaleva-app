@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Upload } from 'lucide-react'
 
 interface UploadFileProps {
   onUpload: (url: string) => void
@@ -13,7 +14,6 @@ export function UploadFile({ onUpload, label = 'Upload' }: UploadFileProps) {
     if (!file) return
 
     setUploading(true)
-    // Simula upload - em produção, enviar para o Supabase Storage
     setTimeout(() => {
       const fakeUrl = URL.createObjectURL(file)
       onUpload(fakeUrl)
@@ -23,9 +23,14 @@ export function UploadFile({ onUpload, label = 'Upload' }: UploadFileProps) {
 
   return (
     <div>
-      <label className="block mb-1 font-medium">{label}</label>
-      <input type="file" onChange={handleFileChange} disabled={uploading} className="w-full p-2 border rounded" />
-      {uploading && <p className="text-sm text-gray-500 mt-1">Enviando...</p>}
+      <label className="block text-white/80 text-sm font-medium mb-1">{label}</label>
+      <label className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white cursor-pointer hover:bg-white/20 transition">
+        <Upload size={18} className="text-amarelo-oba" />
+        <span className="flex-1 text-sm text-white/70">
+          {uploading ? 'Enviando...' : 'Clique para selecionar arquivo'}
+        </span>
+        <input type="file" onChange={handleFileChange} disabled={uploading} className="hidden" />
+      </label>
     </div>
   )
 }

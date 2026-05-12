@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { motion } from 'framer-motion'
 import Motoristas from './Admin/Motoristas'
 import Passageiros from './Admin/Passageiros'
 import Corridas from './Admin/Corridas'
 import Financeiro from './Admin/Financeiro'
 import Alugueis from './Admin/Alugueis'
 import Suporte from './Admin/Suporte'
+import { Shield } from 'lucide-react'
 
 type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'alugueis' | 'suporte'
 
@@ -23,33 +25,55 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-roxo-principal text-white p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Admin OBALEVA</h1>
-        <button onClick={signOut} className="btn-amarelo px-4 py-2 rounded-lg">Sair</button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <header className="glass-effect sticky top-0 z-10 flex justify-between items-center px-6 py-4 border-b border-white/20">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-roxo-principal/10 rounded-lg">
+            <Shield size={24} className="text-roxo-principal" />
+          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-roxo-principal to-purple-500 bg-clip-text text-transparent">
+            Admin OBALEVA
+          </h1>
+        </div>
+        <button
+          onClick={signOut}
+          className="bg-roxo-principal/10 backdrop-blur px-4 py-2 rounded-full text-sm font-medium text-roxo-principal hover:bg-roxo-principal/20 transition"
+        >
+          Sair
+        </button>
       </header>
-      <div className="p-4">
+
+      <div className="p-4 max-w-7xl mx-auto">
         <div className="flex gap-2 overflow-x-auto pb-2">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 rounded-lg font-medium transition whitespace-nowrap ${
-                activeTab === tab.id ? 'bg-roxo-principal text-white' : 'bg-white text-gray-700 shadow hover:bg-gray-100'
+              className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'bg-roxo-principal text-white shadow-md shadow-purple-200'
+                  : 'bg-white/60 backdrop-blur text-gray-700 hover:bg-white shadow-sm'
               }`}
             >
               {tab.label}
             </button>
           ))}
         </div>
-        <div className="mt-4">
+
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mt-4"
+        >
           {activeTab === 'motoristas' && <Motoristas />}
           {activeTab === 'passageiros' && <Passageiros />}
           {activeTab === 'corridas' && <Corridas />}
           {activeTab === 'financeiro' && <Financeiro />}
           {activeTab === 'alugueis' && <Alugueis />}
           {activeTab === 'suporte' && <Suporte />}
-        </div>
+        </motion.div>
       </div>
     </div>
   )
