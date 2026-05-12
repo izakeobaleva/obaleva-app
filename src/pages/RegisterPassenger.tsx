@@ -85,7 +85,7 @@ export default function CadastroPassageiro() {
       >
         <div className="flex items-center mb-4">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/landing')}
             className="btn-outline-dark p-2"
             aria-label="Voltar"
           >
