@@ -150,7 +150,7 @@ export default function RegisterDriver() {
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="RG" className={inputClass} value={form.rg} onChange={e => updateForm({ rg: e.target.value })} required />
             </div>
-            <button onClick={nextStep} className="btn-premium w-full flex items-center justify-center gap-2 py-1.5 leading-none">
+            <button onClick={nextStep} className="w-full py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md">
               Próximo <ArrowRight size={20} />
             </button>
           </motion.div>
@@ -171,19 +171,14 @@ export default function RegisterDriver() {
             <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1.5 leading-none">
               <Lock size={14} className="text-[#F4D03F] shrink-0" />
               <input type={showPassword ? 'text' : 'password'} placeholder="Crie uma senha" className={inputClass} value={form.password} onChange={e => updateForm({ password: e.target.value })} required />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0"
-                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-              >
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
                 {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>
             </div>
             <UploadFile label="📄 Comprovante de residência" onUpload={(url) => updateForm({ comprovante_residencia_url: url })} />
             <div className="flex gap-2">
-              <button onClick={prevStep} className="btn-outline-dark flex items-center justify-center gap-2 flex-1 py-1.5 leading-none"><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={nextStep} className="btn-premium flex items-center justify-center gap-2 flex-1 py-1.5 leading-none">Próximo <ArrowRight size={20} /></button>
+              <button onClick={prevStep} className="flex-1 py-1.5 leading-none rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm"><ArrowLeft size={20} /> Voltar</button>
+              <button onClick={nextStep} className="flex-1 py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md">Próximo <ArrowRight size={20} /></button>
             </div>
           </motion.div>
         )
@@ -204,8 +199,8 @@ export default function RegisterDriver() {
             <UploadFile label="📸 Foto da CNH (frente)" onUpload={(url) => updateForm({ cnh_frente_url: url })} />
             <UploadFile label="📸 Foto da CNH (verso)" onUpload={(url) => updateForm({ cnh_verso_url: url })} />
             <div className="flex gap-2">
-              <button onClick={prevStep} className="btn-outline-dark flex items-center justify-center gap-2 flex-1 py-1.5 leading-none"><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={nextStep} className="btn-premium flex items-center justify-center gap-2 flex-1 py-1.5 leading-none">Próximo <ArrowRight size={20} /></button>
+              <button onClick={prevStep} className="flex-1 py-1.5 leading-none rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm"><ArrowLeft size={20} /> Voltar</button>
+              <button onClick={nextStep} className="flex-1 py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md">Próximo <ArrowRight size={20} /></button>
             </div>
           </motion.div>
         )
@@ -242,14 +237,14 @@ export default function RegisterDriver() {
               {form.fotos_veiculo.length > 0 && (
                 <div className="flex gap-2 mt-2 flex-wrap">
                   {form.fotos_veiculo.map((url, i) => (
-                    <img key={i} src={url} alt={`Foto ${i+1}`} className="w-16 h-16 object-cover rounded-2xl border border-white/10" />
+                    <img key={i} src={url} alt={`Foto ${i + 1}`} className="w-16 h-16 object-cover rounded-2xl border border-white/10" />
                   ))}
                 </div>
               )}
             </div>
             <div className="flex gap-2">
-              <button onClick={prevStep} className="btn-outline-dark flex items-center justify-center gap-2 flex-1 py-1.5 leading-none"><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={nextStep} className="btn-premium flex items-center justify-center gap-2 flex-1 py-1.5 leading-none">Próximo <ArrowRight size={20} /></button>
+              <button onClick={prevStep} className="flex-1 py-1.5 leading-none rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm"><ArrowLeft size={20} /> Voltar</button>
+              <button onClick={nextStep} className="flex-1 py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md">Próximo <ArrowRight size={20} /></button>
             </div>
           </motion.div>
         )
@@ -263,15 +258,15 @@ export default function RegisterDriver() {
               <User size={14} className="text-[#F4D03F] shrink-0" />
               <input type="text" placeholder="Chave PIX (CPF, e-mail ou telefone)" className={inputClass} value={form.pix} onChange={e => updateForm({ pix: e.target.value })} required />
             </div>
-            <div className="card-dark p-5 space-y-1">
+            <div className="bg-[#1A1528] border border-white/10 rounded-2xl p-5 space-y-1">
               <h3 className="font-bold text-white mb-2">📝 Resumo do cadastro</h3>
               <p className="text-sm text-[#A0A0B0]">Nome: {form.nome_completo}</p>
               <p className="text-sm text-[#A0A0B0]">E-mail: {form.email}</p>
               <p className="text-sm text-[#A0A0B0]">Veículo: {form.modelo} - {form.placa}</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={prevStep} className="btn-outline-dark flex items-center justify-center gap-2 flex-1 py-1.5 leading-none"><ArrowLeft size={20} /> Voltar</button>
-              <button onClick={handleSubmit} disabled={loading} className="btn-premium flex items-center justify-center gap-2 flex-1 py-1.5 leading-none disabled:opacity-50">
+              <button onClick={prevStep} className="flex-1 py-1.5 leading-none rounded-2xl border border-white/20 text-white/90 hover:bg-white/10 transition font-semibold flex items-center justify-center gap-2 text-sm"><ArrowLeft size={20} /> Voltar</button>
+              <button onClick={handleSubmit} disabled={loading} className="flex-1 py-1.5 leading-none rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md disabled:opacity-50">
                 {loading ? 'Enviando...' : <><Check size={20} /> Finalizar</>}
               </button>
             </div>
@@ -296,7 +291,7 @@ export default function RegisterDriver() {
         transition={{ duration: 0.6 }}
         className="relative z-10 w-full max-w-lg"
       >
-        <div className="card-dark p-8">
+        <div className="bg-[#1A1528] border border-white/10 rounded-2xl shadow-xl p-8">
           <div className="text-center mb-4">
             <motion.div
               initial={{ scale: 0.9 }}
