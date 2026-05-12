@@ -132,7 +132,7 @@ export default function Login() {
         <div className="relative overflow-hidden rounded-2xl mb-1.5">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3 py-1">
+          <div className="relative flex items-center gap-3 px-3 py-0.5">
             <Mail size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type="email"
@@ -148,7 +148,7 @@ export default function Login() {
         <div className="relative overflow-hidden rounded-2xl mb-2">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3 py-1">
+          <div className="relative flex items-center gap-3 px-3 py-0.5">
             <Lock size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
