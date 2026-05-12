@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { Lock, CheckCircle } from 'lucide-react'
+import { Lock, CheckCircle, Eye, EyeOff } from 'lucide-react'
 
 export default function UpdatePassword() {
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -58,24 +60,48 @@ export default function UpdatePassword() {
         </div>
 
         <form onSubmit={handleUpdate} className="space-y-4">
-          <input
-            type="password"
-            placeholder="Nova senha (mín. 6 caracteres)"
-            className="w-full px-4 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            minLength={6}
-          />
-          <input
-            type="password"
-            placeholder="Confirmar nova senha"
-            className="w-full px-4 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]"
-            value={confirm}
-            onChange={e => setConfirm(e.target.value)}
-            required
-            minLength={6}
-          />
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+            <Lock size={14} className="text-[#F4D03F] shrink-0" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Nova senha (mín. 6 caracteres)"
+              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0"
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+            >
+              {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+            <Lock size={14} className="text-[#F4D03F] shrink-0" />
+            <input
+              type={showConfirm ? 'text' : 'password'}
+              placeholder="Confirmar nova senha"
+              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+              value={confirm}
+              onChange={e => setConfirm(e.target.value)}
+              required
+              minLength={6}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0"
+              aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}
+            >
+              {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
+
           <motion.button
             whileTap={{ scale: 0.98 }}
             type="submit"

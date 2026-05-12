@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { UserPlus, ArrowRight } from 'lucide-react'
+import { UserPlus, ArrowRight, Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react'
 
 export default function RegisterPassenger() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
   const [loading, setLoading] = useState(false)
@@ -58,39 +59,62 @@ export default function RegisterPassenger() {
             <p className="text-[#A0A0B0] text-sm">Crie sua conta em instantes</p>
           </div>
 
-          <form onSubmit={handleRegister} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Nome completo"
-              className="w-full px-5 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] transition"
-              value={nome}
-              onChange={e => setNome(e.target.value)}
-              required
-            />
-            <input
-              type="tel"
-              placeholder="Telefone com DDD"
-              className="w-full px-5 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] transition"
-              value={telefone}
-              onChange={e => setTelefone(e.target.value)}
-              required
-            />
-            <input
-              type="email"
-              placeholder="E-mail"
-              className="w-full px-5 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] transition"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Senha (mínimo 6 caracteres)"
-              className="w-full px-5 py-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] transition"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
+          <form onSubmit={handleRegister} className="space-y-3">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+              <User size={14} className="text-[#F4D03F] shrink-0" />
+              <input
+                type="text"
+                placeholder="Nome completo"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                value={nome}
+                onChange={e => setNome(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+              <Phone size={14} className="text-[#F4D03F] shrink-0" />
+              <input
+                type="tel"
+                placeholder="Telefone com DDD"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                value={telefone}
+                onChange={e => setTelefone(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+              <Mail size={14} className="text-[#F4D03F] shrink-0" />
+              <input
+                type="email"
+                placeholder="E-mail"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+              <Lock size={14} className="text-[#F4D03F] shrink-0" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Senha (mínimo 6 caracteres)"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-[#A0A0B0] hover:text-white transition shrink-0 p-0 min-h-0 min-w-0"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
 
             <motion.button
               whileTap={{ scale: 0.98 }}

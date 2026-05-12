@@ -60,12 +60,12 @@ export default function ForgotPassword() {
 
         {!sent ? (
           <form onSubmit={handleReset} className="space-y-4">
-            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-              <Mail size={18} className="text-[#A0A0B0]" />
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+              <Mail size={14} className="text-[#F4D03F] shrink-0" />
               <input
                 type="email"
                 placeholder="Seu e-mail cadastrado"
-                className="flex-1 bg-transparent text-white placeholder-white/30 focus:outline-none"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
