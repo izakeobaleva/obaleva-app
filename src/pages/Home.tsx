@@ -65,27 +65,33 @@ export default function Inicio() {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {cards.map((card, index) => (
-            <motion.button
-              key={card.path}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              whileTap={{ scale: 0.97 }}
-              whileHover={{ scale: 1.02 }}
-              onClick={() => navigate(card.path)}
-              className="card-dark p-5 text-left hover:border-[#F4D03F]/50 transition-all cursor-pointer"
-              style={{ borderLeft: `4px solid ${card.color}` }}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-xl" style={{ backgroundColor: `${card.color}20` }}>
-                  <card.icon size={22} color={card.color} />
+          {cards.length === 0 ? (
+            <div className="col-span-full text-center text-[#A0A0B0] py-8">
+              Nenhuma opção disponível para este perfil.
+            </div>
+          ) : (
+            cards.map((card, index) => (
+              <motion.button
+                key={card.path}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
+                onClick={() => navigate(card.path)}
+                className="card-dark p-5 text-left hover:border-[#F4D03F]/50 transition-all cursor-pointer"
+                style={{ borderLeft: `4px solid ${card.color}` }}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-xl" style={{ backgroundColor: `${card.color}20` }}>
+                    <card.icon size={22} color={card.color} />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-lg font-semibold text-white">{card.title}</h3>
-              <p className="text-[#A0A0B0] text-xs mt-1">{card.desc}</p>
-            </motion.button>
-          ))}
+                <h3 className="text-lg font-semibold text-white">{card.title}</h3>
+                <p className="text-[#A0A0B0] text-xs mt-1">{card.desc}</p>
+              </motion.button>
+            ))
+          )}
         </div>
       </main>
     </div>
