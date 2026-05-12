@@ -128,26 +128,26 @@ export default function PassengerDashboard() {
       >
         <div className="bg-[#1A1528] rounded-2xl shadow-xl p-5 space-y-4 border border-white/10">
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="bg-green-900/40 p-2 rounded-full">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+              <div className="bg-green-900/40 p-2 rounded-full shrink-0">
                 <MapPin size={18} className="text-green-400" />
               </div>
               <input
                 type="text"
                 placeholder="Onde você está?"
-                className="flex-1 p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white placeholder-white/30 focus:ring-2 focus:ring-[#F4D03F] outline-none"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
                 value={origem}
                 onChange={e => setOrigem(e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-red-900/40 p-2 rounded-full">
+            <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2">
+              <div className="bg-red-900/40 p-2 rounded-full shrink-0">
                 <Navigation size={18} className="text-red-400" />
               </div>
               <input
                 type="text"
                 placeholder="Para onde vai?"
-                className="flex-1 p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white placeholder-white/30 focus:ring-2 focus:ring-[#F4D03F] outline-none"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
                 value={destino}
                 onChange={e => setDestino(e.target.value)}
               />

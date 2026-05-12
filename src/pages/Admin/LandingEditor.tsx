@@ -30,7 +30,7 @@ export default function LandingEditor() {
           <div>
             <label className="block text-white/80 text-sm mb-1">Título principal</label>
             <input 
-              className="w-full p-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" 
+              className="w-full bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" 
               value={title} 
               onChange={e => setTitle(e.target.value)} 
             />
@@ -39,7 +39,7 @@ export default function LandingEditor() {
           <div>
             <label className="block text-white/80 text-sm mb-1">Subtítulo</label>
             <textarea 
-              className="w-full p-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" 
+              className="w-full bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" 
               rows={3} 
               value={subtitle} 
               onChange={e => setSubtitle(e.target.value)} 
@@ -49,7 +49,7 @@ export default function LandingEditor() {
           <div>
             <label className="block text-white/80 text-sm mb-1">Texto do botão CTA</label>
             <input 
-              className="w-full p-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" 
+              className="w-full bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" 
               value={ctaText} 
               onChange={e => setCtaText(e.target.value)} 
             />
@@ -58,7 +58,7 @@ export default function LandingEditor() {
           <div>
             <label className="block text-white/80 text-sm mb-1">URL do App / Download</label>
             <input 
-              className="w-full p-3 rounded-2xl bg-[#1A1528] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" 
+              className="w-full bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" 
               value={appUrl} 
               onChange={e => setAppUrl(e.target.value)} 
             />
