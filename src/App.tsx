@@ -15,6 +15,7 @@ import Trips from './pages/Trips';
 import TripDetails from './pages/TripDetails';
 import Earnings from './pages/Earnings';
 import AdminDashboard from './pages/AdminDashboard';
+import Landing from './pages/Landing';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<RegisterPassenger />} />
           <Route path="/register-driver" element={<RegisterDriver />} />

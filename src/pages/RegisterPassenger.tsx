@@ -136,7 +136,7 @@ export default function CadastroPassageiro() {
         </form>
 
         <div className="mt-5 pt-5 border-t border-white/10 text-center">
-          <p className="text-xs text-[#A0A0B0]">Já tem conta? <Link to="/" className="text-[#F4D03F] font-semibold hover:underline">Entrar</Link></p>
+          <p className="text-xs text-[#A0A0B0]">Já tem conta? <Link to="/login" className="text-[#F4D03F] font-semibold hover:underline">Entrar</Link></p>
         </div>
       </motion.div>
     </div>
