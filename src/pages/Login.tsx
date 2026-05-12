@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Share2, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
+import { Mail, Lock, Share2, Eye, EyeOff, ArrowRight, User, Car } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -92,12 +92,7 @@ export default function Login() {
               className="w-full h-full object-contain p-2"
             />
           ) : (
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 17a6 6 0 0 1 14 0"/>
-              <circle cx="9" cy="9" r="2"/>
-              <circle cx="15" cy="9" r="2"/>
-              <path d="M12 17v-4"/>
-            </svg>
+            <Car className="text-[#F4D03F] w-7 h-7" />
           )}
         </div>
       </motion.div>
@@ -107,8 +102,13 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8"
       >
-        <div className="text-center mb-8">
-          <div className="w-24 h-24 mx-auto mb-3 rounded-full bg-[#F4D03F]/20 backdrop-blur flex items-center justify-center overflow-hidden">
+        {/* Header do card */}
+        <div className="text-center mb-6">
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F4D03F]/20 backdrop-blur mb-4"
+          >
             {logoUrl ? (
               <img 
                 src={logoUrl} 
@@ -116,18 +116,14 @@ export default function Login() {
                 className="w-full h-full object-contain p-2"
               />
             ) : (
-              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 17a6 6 0 0 1 14 0"/>
-                <circle cx="9" cy="9" r="2"/>
-                <circle cx="15" cy="9" r="2"/>
-                <path d="M12 17v-4"/>
-              </svg>
+              <Car className="text-[#F4D03F] w-8 h-8" />
             )}
-          </div>
-          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
-          <p className="text-[#A0A0B0] mt-1">Mobilidade premium para sua cidade</p>
+          </motion.div>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+          <p className="text-[#A0A0B0] text-sm mt-1">Faça login para continuar</p>
         </div>
 
+        {/* Login com Google */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleGoogleLogin}
@@ -139,10 +135,21 @@ export default function Login() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          Entrar com Google
+          Continuar com Google
         </motion.button>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5 mt-4">
+        {/* Separador */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-white/10"></div>
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-[#1A1528] px-3 text-[#A0A0B0]">ou com e-mail</span>
+          </div>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:border-[#F4D03F]/50 transition-all">
             <Mail size={18} className="text-[#A0A0B0]" />
             <input
@@ -189,22 +196,17 @@ export default function Login() {
           </motion.button>
         </form>
 
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10"></div>
+        {/* Cadastro */}
+        <div className="mt-6 space-y-3">
+          <div className="border-t border-white/10 pt-5">
+            <p className="text-xs text-[#A0A0B0] text-center mb-3">Ainda não tem conta?</p>
           </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-[#1A1528] px-3 text-[#A0A0B0]">ou acesse com e-mail</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 mt-2">
           <Link
             to="/register"
             className="w-full py-3.5 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-sm"
           >
             <User size={18} className="text-[#F4D03F]" />
-            Cadastrar como Passageiro
+            Criar conta como Passageiro
           </Link>
           <Link
             to="/register-driver"
@@ -216,14 +218,15 @@ export default function Login() {
               <path d="M12 4 L11 12 L7 14" strokeWidth="3"/>
               <path d="M12 4 L12 10" strokeWidth="3"/>
             </svg>
-            Cadastrar como Motorista
+            Criar conta como Motorista
           </Link>
         </div>
 
+        {/* Compartilhar */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleShare}
-          className="w-full mt-6 py-3 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm border border-white/5"
+          className="w-full mt-5 py-3 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm border border-white/5"
         >
           <Share2 size={16} />
           Compartilhar ObaLeve
