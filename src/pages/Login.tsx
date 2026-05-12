@@ -84,7 +84,7 @@ export default function Login() {
         transition={{ delay: 0.3 }}
         className="fixed top-6 left-6 z-20"
       >
-        <div className="w-14 h-14 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
+        <div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 backdrop-blur-md border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
           {logoUrl ? (
             <img
               src={logoUrl}
@@ -92,7 +92,7 @@ export default function Login() {
               className="w-full h-full object-contain p-2"
             />
           ) : (
-            <Car className="text-[#F4D03F] w-7 h-7" />
+            <Car className="text-[#F4D03F] w-6 h-6" />
           )}
         </div>
       </motion.div>
@@ -100,21 +100,21 @@ export default function Login() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[340px] p-5"
+        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[320px] p-4"
       >
         {/* Header */}
-        <div className="text-center mb-4">
-          <h1 className="text-lg font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
-          <p className="text-[#A0A0B0] text-xs mt-0.5">Segurança e conforto em cada viagem</p>
+        <div className="text-center mb-3">
+          <h1 className="text-base font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+          <p className="text-[#A0A0B0] text-[11px] mt-0.5">Segurança e conforto em cada viagem</p>
         </div>
 
         {/* Google */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleGoogleLogin}
-          className="w-full py-2.5 rounded-2xl border-2 border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/30 transition-all font-medium text-sm"
+          className="w-full py-2 rounded-2xl border-2 border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/30 transition-all font-medium text-sm"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -124,7 +124,7 @@ export default function Login() {
         </motion.button>
 
         {/* Separador */}
-        <div className="relative my-3.5">
+        <div className="relative my-2.5">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10"></div>
           </div>
@@ -133,12 +133,12 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Email - fundo com mapa */}
-        <div className="relative overflow-hidden rounded-2xl mb-2">
+        {/* Email */}
+        <div className="relative overflow-hidden rounded-2xl mb-1.5">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3.5 py-1.5">
-            <Mail size={15} className="text-[#F4D03F] shrink-0" />
+          <div className="relative flex items-center gap-3 px-3 py-1">
+            <Mail size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type="email"
               placeholder="Seu e-mail"
@@ -150,12 +150,12 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Senha - fundo com mapa */}
-        <div className="relative overflow-hidden rounded-2xl mb-2.5">
+        {/* Senha */}
+        <div className="relative overflow-hidden rounded-2xl mb-2">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3.5 py-0.5">
-            <Lock size={15} className="text-[#F4D03F] shrink-0" />
+          <div className="relative flex items-center gap-3 px-3 py-1">
+            <Lock size={14} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
@@ -169,12 +169,12 @@ export default function Login() {
               onClick={() => setShowPassword(!showPassword)}
               className="text-[#A0A0B0] hover:text-white transition shrink-0"
             >
-              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
         </div>
 
-        <div className="text-right mb-2.5">
+        <div className="text-right mb-2">
           <Link to="/forgot-password" className="text-[11px] text-[#A0A0B0] hover:text-[#F4D03F] transition">
             Esqueceu a senha?
           </Link>
@@ -183,25 +183,25 @@ export default function Login() {
         <motion.button
           whileTap={{ scale: 0.98 }}
           type="submit"
-          className="w-full py-[10px] rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm mb-3"
+          className="w-full py-[8px] rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm mb-2"
         >
-          Entrar <ArrowRight size={17} />
+          Entrar <ArrowRight size={15} />
         </motion.button>
 
-        <div className="border-t border-white/10 pt-3">
-          <p className="text-[11px] text-[#A0A0B0] text-center mb-2">Ainda não tem conta?</p>
+        <div className="border-t border-white/10 pt-2">
+          <p className="text-[11px] text-[#A0A0B0] text-center mb-1.5">Ainda não tem conta?</p>
           <Link
             to="/register"
-            className="w-full py-2 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs mb-1.5"
+            className="w-full py-[6px] rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-[11px] mb-1"
           >
-            <User size={15} className="text-[#F4D03F]" />
+            <User size={13} className="text-[#F4D03F]" />
             Criar conta como Passageiro
           </Link>
           <Link
             to="/register-driver"
-            className="w-full py-2 rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-xs"
+            className="w-full py-[6px] rounded-2xl border border-white/15 text-white flex items-center justify-center gap-2 hover:bg-white/5 hover:border-white/30 transition-all font-medium text-[11px]"
           >
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#F4D03F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F4D03F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" strokeWidth="3"/>
               <path d="M12 4 L13 12 L17 14" strokeWidth="3"/>
               <path d="M12 4 L11 12 L7 14" strokeWidth="3"/>
@@ -214,9 +214,9 @@ export default function Login() {
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleShare}
-          className="w-full mt-3 py-2 rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-[11px] border border-white/5"
+          className="w-full mt-2 py-[6px] rounded-2xl text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-[11px] border border-white/5"
         >
-          <Share2 size={13} />
+          <Share2 size={12} />
           Compartilhar ObaLeve
         </motion.button>
       </motion.div>
