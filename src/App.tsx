@@ -18,7 +18,7 @@ import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 
 function App() {
-  const { user, loading } = useAuth()
+  const { user, profile, loading } = useAuth()
 
   if (loading) {
     return (

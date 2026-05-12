@@ -1,13 +1,13 @@
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Truck, Shield, User, BarChart, Settings, LogOut, Home as HomeIcon, Wallet, Clock } from 'lucide-react'
+import { Car, Truck, Shield, User, BarChart, Settings, LogOut, Wallet, Clock } from 'lucide-react'
 
 export default function Home() {
-  const { user, signOut } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
 
-  const role = user?.user_metadata?.tipo || 'passageiro'
+  const role = profile?.tipo || user?.user_metadata?.tipo || 'passageiro'
 
   const cards: { title: string; icon: any; path: string; color: string; desc: string }[] = []
 
@@ -21,7 +21,7 @@ export default function Home() {
     cards.push({ title: 'Ganhos', icon: Wallet, path: '/earnings', color: '#6B2D8C', desc: 'Histórico e saques' })
     cards.push({ title: 'Perfil', icon: User, path: '/profile', color: '#9B59B6', desc: 'Seus dados' })
   }
-  else if (role === 'admin' || role === 'admin') {
+  else if (role === 'admin') {
     cards.push({ title: 'Motoristas', icon: Truck, path: '/admin?tab=motoristas', color: '#F4D03F', desc: 'Aprovar e gerenciar motoristas' })
     cards.push({ title: 'Passageiros', icon: User, path: '/admin?tab=passageiros', color: '#6B2D8C', desc: 'Listar e gerenciar passageiros' })
     cards.push({ title: 'Corridas', icon: Car, path: '/admin?tab=corridas', color: '#9B59B6', desc: 'Todas as corridas' })
@@ -32,16 +32,12 @@ export default function Home() {
     cards.push({ title: 'Modo Passageiro', icon: Car, path: '/passenger', color: '#F4D03F', desc: 'Visualizar como passageiro' })
   }
 
-  const handleCardClick = (path: string) => {
-    navigate(path)
-  }
-
   return (
     <div className="min-h-screen bg-[#0F0B1A] pb-24">
       <header className="glass-header sticky top-0 z-20 flex justify-between items-center px-6 py-4">
         <div>
           <h1 className="text-2xl font-bold text-white">
-            Olá, {user?.email?.split('@')[0] || 'Usuário'}
+            Olá, {profile?.nome_completo || user?.email?.split('@')[0] || 'Usuário'}
           </h1>
           <p className="text-[#A0A0B0] text-sm">O que você deseja fazer hoje?</p>
         </div>
@@ -79,7 +75,7 @@ export default function Home() {
               transition={{ delay: index * 0.05 }}
               whileTap={{ scale: 0.97 }}
               whileHover={{ scale: 1.02 }}
-              onClick={() => handleCardClick(card.path)}
+              onClick={() => navigate(card.path)}
               className="card-dark p-5 text-left hover:border-[#F4D03F]/50 transition-all cursor-pointer"
               style={{ borderLeft: `4px solid ${card.color}` }}
             >

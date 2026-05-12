@@ -35,13 +35,13 @@ interface TripData {
 
 export default function TripDetails() {
   const { id } = useParams<{ id: string }>()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const navigate = useNavigate()
   const [trip, setTrip] = useState<TripData | null>(null)
   const [loading, setLoading] = useState(true)
   const [rating, setRating] = useState(0)
 
-  const role = user?.user_metadata?.tipo || 'passageiro'
+  const role = profile?.tipo || user?.user_metadata?.tipo || 'passageiro'
 
   useEffect(() => {
     if (!id) return
