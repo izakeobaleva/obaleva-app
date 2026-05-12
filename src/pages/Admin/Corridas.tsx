@@ -15,7 +15,7 @@ export default function Corridas() {
     setLoading(true)
     let query = supabase
       .from('corridas')
-      .select('*, passageiro:usuarios!passageiro_id(nome_completo), motorista:usuarios!motorista_id(nome_completo)')
+      .select('*')
       .order('created_at', { ascending: false })
 
     if (filtro !== 'todas') {
@@ -23,8 +23,39 @@ export default function Corridas() {
     }
 
     const { data, error } = await query
-    if (!error) setCorridas(data || [])
-    else toast.error('Erro ao carregar corridas')
+    
+    if (!error && data) {
+      // Carregar dados dos passageiros e motoristas separadamente
+      const corridasComNomes = await Promise.all(
+        data.map(async (c) => {
+          let passageiroNome = 'N/A'
+          let motoristaNome = 'N/A'
+          
+          if (c.passageiro_id) {
+            const { data: pData } = await supabase
+              .from('usuarios')
+              .select('nome_completo')
+              .eq('id', c.passageiro_id)
+              .single()
+            if (pData) passageiroNome = pData.nome_completo
+          }
+          
+          if (c.motorista_id) {
+            const { data: mData } = await supabase
+              .from('usuarios')
+              .select('nome_completo')
+              .eq('id', c.motorista_id)
+              .single()
+            if (mData) motoristaNome = mData.nome_completo
+          }
+          
+          return { ...c, passageiro_nome: passageiroNome, motorista_nome: motoristaNome }
+        })
+      )
+      setCorridas(corridasComNomes)
+    } else {
+      toast.error('Erro ao carregar corridas')
+    }
     setLoading(false)
   }
 
@@ -62,8 +93,8 @@ export default function Corridas() {
             <tbody>
               {corridas.map(c => (
                 <tr key={c.id} className="border-b border-white/10">
-                  <td className="p-2 text-white">{c.passageiro?.nome_completo || 'N/A'}</td>
-                  <td className="p-2 text-white">{c.motorista?.nome_completo || 'N/A'}</td>
+                  <td className="p-2 text-white">{c.passageiro_nome}</td>
+                  <td className="p-2 text-white">{c.motorista_nome}</td>
                   <td className="p-2">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
                       c.status === 'finalizada' ? 'bg-green-900/40 text-green-400' :

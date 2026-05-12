@@ -14,10 +14,25 @@ export default function Motoristas() {
     setLoading(true)
     const { data, error } = await supabase
       .from('motoristas')
-      .select('*, usuarios:usuarios(nome_completo, email, telefone)')
+      .select('*')
       .order('created_at', { ascending: false })
-    if (!error) setMotoristas(data || [])
-    else toast.error('Erro ao carregar motoristas')
+    
+    if (!error) {
+      // Carregar dados dos usuários separadamente
+      const motoristasComUsuarios = await Promise.all(
+        (data || []).map(async (m) => {
+          const { data: userData } = await supabase
+            .from('usuarios')
+            .select('nome_completo, email, telefone')
+            .eq('id', m.id)
+            .single()
+          return { ...m, usuarios: userData }
+        })
+      )
+      setMotoristas(motoristasComUsuarios)
+    } else {
+      toast.error('Erro ao carregar motoristas')
+    }
     setLoading(false)
   }
 

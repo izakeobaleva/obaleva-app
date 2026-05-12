@@ -14,10 +14,25 @@ export default function Passageiros() {
     setLoading(true)
     const { data, error } = await supabase
       .from('passageiros')
-      .select('*, usuarios:usuarios(nome_completo, email, telefone)')
+      .select('*')
       .order('created_at', { ascending: false })
-    if (!error) setPassageiros(data || [])
-    else toast.error('Erro ao carregar passageiros')
+    
+    if (!error) {
+      // Carregar dados dos usuários separadamente
+      const passageirosComUsuarios = await Promise.all(
+        (data || []).map(async (p) => {
+          const { data: userData } = await supabase
+            .from('usuarios')
+            .select('nome_completo, email, telefone')
+            .eq('id', p.id)
+            .single()
+          return { ...p, usuarios: userData }
+        })
+      )
+      setPassageiros(passageirosComUsuarios)
+    } else {
+      toast.error('Erro ao carregar passageiros')
+    }
     setLoading(false)
   }
 

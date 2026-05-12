@@ -21,7 +21,10 @@ export default function Financeiro() {
     
     const { data: corridas } = await supabase.from('corridas').select('valor, status')
     const { data: motoristas } = await supabase.from('motoristas').select('status')
-    const { data: passageiros } = await supabase.from('passageiros').select('*')
+    
+    let passageirosCount = 0
+    const { count } = await supabase.from('passageiros').select('*', { count: 'exact', head: true })
+    passageirosCount = count || 0
 
     if (corridas) {
       const receita = corridas
@@ -32,7 +35,7 @@ export default function Financeiro() {
         totalCorridas: corridas.filter(c => c.status === 'finalizada').length,
         receitaTotal: receita,
         motoristasAtivos: motoristas?.filter(m => m.status === 'aprovado').length || 0,
-        passageirosAtivos: passageiros?.length || 0
+        passageirosAtivos: passageirosCount
       })
     }
     setLoading(false)
