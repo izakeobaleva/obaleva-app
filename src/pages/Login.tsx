@@ -45,19 +45,21 @@ export default function Entrar() {
   }
 
   const handleShare = async () => {
+    const landingUrl = 'https://obaleva-oficial.vercel.app'
+    
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'ObaLeve',
-          text: 'Baixe o ObaLeve - Mobilidade premium para sua cidade!',
-          url: window.location.origin,
+          text: 'Mobilidade premium para sua cidade. Baixe o app ObaLeve!',
+          url: landingUrl,
         })
       } catch (err) {
         // usuário cancelou
       }
     } else {
-      navigator.clipboard.writeText(window.location.origin)
-      toast.success('Link copiado!')
+      navigator.clipboard.writeText(landingUrl)
+      toast.success('Link da Landing Page copiado!')
     }
   }
 
