@@ -77,7 +77,6 @@ export default function Login() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
       </div>
 
-      {/* Logo no canto superior esquerdo */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -102,13 +101,11 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[320px] p-4"
       >
-        {/* Header */}
         <div className="text-center mb-3">
           <h1 className="text-base font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
           <p className="text-[#A0A0B0] text-[11px] mt-0.5">Segurança e conforto em cada viagem</p>
         </div>
 
-        {/* Google */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleGoogleLogin}
@@ -123,7 +120,6 @@ export default function Login() {
           Continuar com Google
         </motion.button>
 
-        {/* Separador */}
         <div className="relative my-2.5">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10"></div>
@@ -133,7 +129,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Email */}
         <div className="relative overflow-hidden rounded-2xl mb-1.5">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
@@ -150,16 +145,15 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Senha */}
         <div className="relative overflow-hidden rounded-2xl mb-2">
           <div className="absolute inset-0 bg-[url('https://raw.githubusercontent.com/leandrofahur/map-assets/main/map-bg.png')] bg-cover bg-center opacity-20"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0B1A]/90 via-[#0F0B1A]/70 to-[#0F0B1A]/90"></div>
-          <div className="relative flex items-center gap-3 px-3 py-1">
-            <Lock size={14} className="text-[#F4D03F] shrink-0" />
+          <div className="relative flex items-center gap-2 px-2.5 py-0.5">
+            <Lock size={13} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
+              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-xs py-1"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
@@ -169,7 +163,7 @@ export default function Login() {
               onClick={() => setShowPassword(!showPassword)}
               className="text-[#A0A0B0] hover:text-white transition shrink-0"
             >
-              {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
             </button>
           </div>
         </div>
