@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { toast } from 'sonner'
-import { motion } from 'framer-motion'
 import { Image, Upload, Trash2, Eye } from 'lucide-react'
-import { uploadFile } from '../../lib/uploadHelpers'
 
 export default function LogoEditor() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
@@ -28,28 +26,85 @@ export default function LogoEditor() {
     setLoading(false)
   }
 
+  // Tenta fazer upload em múltiplos buckets conhecidos
+  async function uploadToFirstAvailableBucket(file: File): Promise<string | null> {
+    const bucketsToTry = ['logos', 'veiculos', 'public', 'uploads']
+    
+    for (const bucket of bucketsToTry) {
+      try {
+        // Verifica se o bucket existe
+        const { data: buckets } = await supabase.storage.listBuckets()
+        const bucketExists = buckets?.some(b => b.name === bucket)
+        
+        if (!bucketExists) continue
+
+        const fileExt = file.name.split('.').pop()
+        const fileName = `logo_${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`
+        
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .upload(fileName, file)
+
+        if (error) continue
+        
+        const { data: publicUrl } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(data.path)
+
+        return publicUrl.publicUrl
+      } catch {
+        continue
+      }
+    }
+    
+    return null // Nenhum bucket funcionou
+  }
+
   async function handleUpload(file: File) {
     setUploading(true)
     try {
-      const url = await uploadFile('logos', file, `logo_`)
+      // Tenta upload no storage
+      const url = await uploadToFirstAvailableBucket(file)
       
-      // Salvar no Supabase
-      const { error } = await supabase
-        .from('app_config')
-        .upsert({ key: 'app_logo', value: url, updated_at: new Date().toISOString() })
+      if (!url) {
+        // Fallback: salvar como data URL
+        toast.info('Storage não configurado. Salvando logo localmente.')
+        const dataUrl = await fileToDataUrl(file)
+        
+        // Salvar no Supabase apenas como referência
+        const { error } = await supabase
+          .from('app_config')
+          .upsert({ key: 'app_logo', value: dataUrl, updated_at: new Date().toISOString() })
+        
+        if (error) throw error
+        setLogoUrl(dataUrl)
+      } else {
+        // Salvar URL no Supabase
+        const { error } = await supabase
+          .from('app_config')
+          .upsert({ key: 'app_logo', value: url, updated_at: new Date().toISOString() })
+        
+        if (error) throw error
+        setLogoUrl(url)
+      }
       
-      if (error) throw error
-      
-      setLogoUrl(url)
+      localStorage.setItem('app_logo_updated', Date.now().toString())
       toast.success('Logo atualizado com sucesso!')
       
-      // Disparar evento para outras abas atualizarem
-      localStorage.setItem('app_logo_updated', Date.now().toString())
     } catch (err: any) {
-      toast.error('Erro ao enviar logo: ' + err.message)
+      toast.error('Erro ao enviar logo: ' + (err.message || 'Erro desconhecido'))
     } finally {
       setUploading(false)
     }
+  }
+
+  function fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
   }
 
   async function handleRemove() {
