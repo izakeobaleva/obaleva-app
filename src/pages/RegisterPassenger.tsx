@@ -86,7 +86,7 @@ export function RegisterPassenger() {
       >
         <div className="flex items-center mb-4">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/login')}
             className="btn-outline-dark p-2"
             aria-label="Voltar"
             type="button"
