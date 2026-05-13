@@ -8,7 +8,7 @@ import { RegisterPassenger } from './pages/RegisterPassenger';
 import { RegisterDriver } from './pages/RegisterDriver';
 import { PassengerDashboard } from './pages/PassengerDashboard';
 import { DriverDashboard } from './pages/DriverDashboard';
-import { AdminDashboard } from './pages/AdminDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
 import Profile from './pages/Profile';
