@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
+import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft, Car } from 'lucide-react'
 
 export function RegisterPassenger() {
   const navigate = useNavigate()
@@ -12,22 +11,16 @@ export function RegisterPassenger() {
   const [telefone, setTelefone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [step, setStep] = useState<'form' | 'success'>('form')
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!nome || !cpf || !telefone || !email || !password) {
       toast.error('Preencha todos os campos')
-      return
-    }
-    
-    if (password !== confirmPassword) {
-      toast.error('As senhas não coincidem')
       return
     }
     
@@ -41,15 +34,13 @@ export function RegisterPassenger() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: { nome_completo: nome, tipo: 'passageiro' }
-        }
+        options: { data: { nome_completo: nome, tipo: 'passageiro' } }
       })
       
       if (authError) throw authError
       if (!authData.user) throw new Error('Erro ao criar usuário')
 
-      const { error: insertUserError } = await supabase.from('usuarios').insert({
+      await supabase.from('usuarios').insert({
         id: authData.user.id,
         nome_completo: nome,
         cpf,
@@ -57,15 +48,11 @@ export function RegisterPassenger() {
         email,
         tipo: 'passageiro'
       })
-      if (insertUserError) throw insertUserError
 
-      const { error: insertPassError } = await supabase.from('passageiros').insert({
-        id: authData.user.id
-      })
-      if (insertPassError) console.warn('Erro ao inserir em passageiros:', insertPassError)
+      await supabase.from('passageiros').insert({ id: authData.user.id })
 
-      setSuccess(true)
       toast.success('Conta criada com sucesso!')
+      setStep('success')
     } catch (err: any) {
       toast.error(err.message || 'Erro ao cadastrar')
     } finally {
@@ -73,61 +60,46 @@ export function RegisterPassenger() {
     }
   }
 
-  if (success) {
+  if (step === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-8 text-center"
-        >
+      <div className="min-h-screen flex items-center justify-center p-5" style={{ background: 'linear-gradient(135deg, #0F0B1A 0%, #1A1528 100%)' }}>
+        <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-8 text-center">
           <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle size={32} className="text-green-400" />
+            <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Conta criada!</h2>
-          <p className="text-[#A0A0B0] text-sm mb-6">
-            Sua conta foi criada com sucesso. Agora você pode fazer login.
-          </p>
-          <Link
-            to="/login"
-            className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all inline-flex items-center justify-center gap-2"
+          <p className="text-[#A0A0B0] text-sm mb-6">Sua conta foi criada com sucesso.</p>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="w-full py-3 rounded-2xl font-bold text-[#1E1E2F] hover:shadow-lg transition-all"
+            style={{ background: 'linear-gradient(135deg, #FFD966 0%, #F4D03F 100%)' }}
           >
             Ir para o Login
-          </Link>
-        </motion.div>
+          </button>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
-      </div>
+    <div className="min-h-screen p-5" style={{ background: 'linear-gradient(135deg, #0F0B1A 0%, #1A1528 100%)' }}>
+      <div className="max-w-[400px] mx-auto pt-8">
+        <button
+          onClick={() => window.location.href = '/login'}
+          className="flex items-center gap-2 text-[#A0A0B0] hover:text-white transition mb-6"
+          type="button"
+        >
+          <ArrowLeft size={20} /> Voltar
+        </button>
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[400px] p-6"
-      >
-        <div className="flex items-center mb-4">
-          <button
-            onClick={() => navigate('/login')}
-            className="btn-outline-dark p-2 inline-flex items-center justify-center"
-            aria-label="Voltar"
-            type="button"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div className="flex-1 text-center -ml-10">
-            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Criar Conta</h1>
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: 'rgba(244, 208, 63, 0.1)' }}>
+            <Car className="text-[#F4D03F]" size={32} />
           </div>
+          <h1 className="text-2xl font-bold text-white">Criar Conta</h1>
+          <p className="text-[#A0A0B0] text-sm mt-1">Preencha os dados para se cadastrar</p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-3">
@@ -162,12 +134,7 @@ export function RegisterPassenger() {
               required
               minLength={6}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-[#A0A0B0] hover:text-white transition shrink-0"
-              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-            >
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
@@ -178,30 +145,39 @@ export function RegisterPassenger() {
               type={showConfirm ? 'text' : 'password'}
               placeholder="Confirmar senha"
               className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
               required
               minLength={6}
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirm(!showConfirm)}
-              className="text-[#A0A0B0] hover:text-white transition shrink-0"
-              aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}
-            >
+            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
               {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
 
-          <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3 text-sm">
-            {loading ? 'Cadastrando...' : <><ArrowRight size={18} /> Criar conta</>}
-          </motion.button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-2xl font-bold text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50"
+            style={{ background: 'linear-gradient(135deg, #FFD966 0%, #F4D03F 100%)' }}
+          >
+            {loading ? 'Cadastrando...' : 'Criar conta'}
+          </button>
         </form>
 
-        <div className="mt-5 pt-5 border-t border-white/10 text-center">
-          <p className="text-xs text-[#A0A0B0]">Já tem conta? <Link to="/login" className="text-[#F4D03F] font-semibold hover:underline">Entrar</Link></p>
+        <div className="mt-6 pt-6 border-t border-white/10 text-center">
+          <p className="text-xs text-[#A0A0B0]">
+            Já tem conta?{' '}
+            <button
+              onClick={() => window.location.href = '/login'}
+              className="text-[#F4D03F] font-semibold hover:underline"
+              type="button"
+            >
+              Entrar
+            </button>
+          </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }
