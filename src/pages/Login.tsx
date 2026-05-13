@@ -13,6 +13,7 @@ export default function Entrar() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +44,22 @@ export default function Entrar() {
       toast.error(err.message || 'Erro ao fazer login');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/home`,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao fazer login com Google');
+      setGoogleLoading(false);
     }
   };
 
@@ -96,8 +113,9 @@ export default function Entrar() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          onClick={handleGoogleLogin}
+          disabled={googleLoading}
           className="w-full bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-4 text-white font-medium flex items-center justify-center gap-3 hover:bg-white/5 transition-all mb-3 text-base"
-          disabled
         >
           <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -105,8 +123,7 @@ export default function Entrar() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          <span>Continuar com Google</span>
-          <span className="ml-auto text-[11px] text-[#A0A0B0] bg-white/10 px-2.5 py-0.5 rounded-full">Em breve</span>
+          <span>{googleLoading ? 'Abrindo Google...' : 'Continuar com Google'}</span>
         </motion.button>
 
         <div className="flex items-center gap-3 mb-4">
