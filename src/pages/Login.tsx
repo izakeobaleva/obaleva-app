@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
-import { Car, Chrome, Share2, UserPlus, Truck, ChevronLeft } from 'lucide-react'
+import { Car, Chrome, Share2, UserPlus, Truck, ChevronLeft, Mail, ArrowRight } from 'lucide-react'
 
 export const Login = () => {
   const [email, setEmail] = useState('')
@@ -134,7 +134,7 @@ export const Login = () => {
           onClick={() => setShowEmailForm(true)} 
           className="w-full py-3 rounded-2xl border border-[#F4D03F]/30 text-[#F4D03F] flex items-center justify-center gap-2 hover:bg-[#F4D03F]/5 transition mb-6"
         >
-          Entre com e-mail
+          <Mail size={20} /> Entre com e-mail
         </button>
 
         <div className="flex flex-col gap-3">
