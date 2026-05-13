@@ -132,30 +132,81 @@ export function RegisterPassenger() {
         <form onSubmit={handleRegister} className="space-y-2.5">
           <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
             <User size={16} className="text-[#F4D03F] shrink-0" />
-            <input type="text" placeholder="Nome completo" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={nome} onChange={e => setNome(e.target.value)} required />
+            <input 
+              type="text" 
+              placeholder="Nome completo" 
+              autoComplete="name"
+              className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+              value={nome} 
+              onChange={e => setNome(e.target.value)} 
+              required 
+            />
           </div>
           <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
             <User size={16} className="text-[#F4D03F] shrink-0" />
-            <input type="text" placeholder="CPF" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={cpf} onChange={e => setCpf(formatarCpf(e.target.value))} required maxLength={14} />
+            <input 
+              type="text" 
+              placeholder="CPF" 
+              autoComplete="off"
+              className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+              value={cpf} 
+              onChange={e => setCpf(formatarCpf(e.target.value))} 
+              required 
+              maxLength={14} 
+            />
           </div>
           <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
             <Phone size={16} className="text-[#F4D03F] shrink-0" />
-            <input type="tel" placeholder="Telefone / WhatsApp" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+            <input 
+              type="tel" 
+              placeholder="Telefone / WhatsApp" 
+              autoComplete="tel"
+              className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+              value={telefone} 
+              onChange={e => setTelefone(e.target.value)} 
+              required 
+            />
           </div>
           <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
             <Mail size={16} className="text-[#F4D03F] shrink-0" />
-            <input type="email" placeholder="E-mail" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input 
+              type="email" 
+              placeholder="E-mail" 
+              autoComplete="email"
+              className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+              required 
+            />
           </div>
           <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
             <Lock size={16} className="text-[#F4D03F] shrink-0" />
-            <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6 caracteres)" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+            <input 
+              type={showPassword ? 'text' : 'password'} 
+              placeholder="Senha (mín. 6 caracteres)" 
+              autoComplete="new-password"
+              className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+              required 
+              minLength={6} 
+            />
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
               {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
           <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
             <Lock size={16} className="text-[#F4D03F] shrink-0" />
-            <input type={showConfirm ? 'text' : 'password'} placeholder="Confirmar senha" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} />
+            <input 
+              type={showConfirm ? 'text' : 'password'} 
+              placeholder="Confirmar senha" 
+              autoComplete="new-password"
+              className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+              value={confirmPassword} 
+              onChange={e => setConfirmPassword(e.target.value)} 
+              required 
+              minLength={6} 
+            />
             <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
               {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
