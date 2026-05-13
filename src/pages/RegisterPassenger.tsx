@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
+import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
 
 export function RegisterPassenger() {
   const navigate = useNavigate()
@@ -16,6 +16,7 @@ export function RegisterPassenger() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,13 +64,44 @@ export function RegisterPassenger() {
       })
       if (insertPassError) console.warn('Erro ao inserir em passageiros:', insertPassError)
 
+      setSuccess(true)
       toast.success('Conta criada com sucesso!')
-      navigate('/login')
     } catch (err: any) {
       toast.error(err.message || 'Erro ao cadastrar')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-8 text-center"
+        >
+          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle size={32} className="text-green-400" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Conta criada!</h2>
+          <p className="text-[#A0A0B0] text-sm mb-6">
+            Sua conta foi criada com sucesso. Agora você pode fazer login.
+          </p>
+          <Link
+            to="/login"
+            className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all inline-flex items-center justify-center gap-2"
+          >
+            Ir para o Login
+          </Link>
+        </motion.div>
+      </div>
+    )
   }
 
   return (
