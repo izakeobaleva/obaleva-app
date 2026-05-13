@@ -104,9 +104,16 @@ export function RegisterPassenger() {
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-sm mx-auto p-5"
       >
         <div className="flex items-center mb-4">
-          <button onClick={goToLogin} className="btn-outline-dark p-2" type="button">
+          <motion.button
+            onClick={goToLogin}
+            className="btn-outline-dark p-2"
+            type="button"
+            whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.15)' }}
+            whileTap={{ scale: 0.9, rotate: -5 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+          >
             <ArrowLeft size={20} />
-          </button>
+          </motion.button>
           <div className="flex-1 text-center -ml-10">
             <h1 className="text-lg font-bold text-white">Cadastro</h1>
           </div>
