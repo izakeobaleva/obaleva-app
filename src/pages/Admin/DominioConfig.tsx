@@ -1,3 +1,4 @@
+dentro do JSX">
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { toast } from 'sonner'
@@ -34,7 +35,6 @@ export default function DominioConfig() {
       return
     }
 
-    // Validação básica
     let url = dominio.trim()
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = 'https://' + url
@@ -162,7 +162,7 @@ export default function DominioConfig() {
               <div>
                 <p className="text-white font-medium text-sm">Aponte o DNS para a Vercel</p>
                 <p className="text-xs text-[#A0A0B0] mt-1">
-                  No painel do seu domínio, crie um registro CNAME apontando para <code className="text-[#F4D03F]">cname.vercel-dns.com</code>
+                  No painel do seu domínio, crie um registro CNAME apontando para cname.vercel-dns.com
                 </p>
               </div>
             </div>
@@ -174,7 +174,8 @@ export default function DominioConfig() {
               <div>
                 <p className="text-white font-medium text-sm">Adicione na Vercel</p>
                 <p className="text-xs text-[#A0A0B0] mt-1">
-                  Acesse: <strong>Vercel.com > Projeto obaleva > Settings > Domains</strong><br />
+                  Acesse: Vercel.com {'>'} Projeto obaleva {'>'} Settings {'>'} Domains
+                  <br />
                   Adicione seu domínio e siga as instruções.
                 </p>
               </div>
