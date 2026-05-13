@@ -70,7 +70,7 @@ export const Login = () => {
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-6 py-3.5">
+              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-8 py-4">
                 <input 
                   type="email" 
                   placeholder="seu@email.com" 
@@ -81,7 +81,7 @@ export const Login = () => {
                   required 
                 />
               </div>
-              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-6 py-3.5 flex items-center">
+              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-8 py-4 flex items-center">
                 <input 
                   type={showPassword ? 'text' : 'password'} 
                   placeholder="Senha" 
@@ -106,7 +106,7 @@ export const Login = () => {
                 whileTap={{ scale: 0.97 }}
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3.5 text-sm disabled:opacity-50"
+                className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-4 text-sm disabled:opacity-50"
               >
                 {loading ? 'Entrando...' : <><ChevronRight size={18} /> Entrar</>}
               </motion.button>
@@ -202,15 +202,15 @@ export const Login = () => {
           className="px-8 mb-8"
         >
           <div className="flex justify-center gap-6 flex-wrap">
-            <div className="flex items-center gap-2 bg-[#1A1528]/60 rounded-full px-5 py-2 border border-white/10">
+            <div className="flex items-center gap-2 bg-[#1A1528]/60 rounded-full px-6 py-2.5 border border-white/10">
               <Shield size={14} className="text-green-400" />
               <span className="text-white text-xs">Seguro</span>
             </div>
-            <div className="flex items-center gap-2 bg-[#1A1528]/60 rounded-full px-5 py-2 border border-white/10">
+            <div className="flex items-center gap-2 bg-[#1A1528]/60 rounded-full px-6 py-2.5 border border-white/10">
               <Star size={14} className="text-[#F4D03F]" />
               <span className="text-white text-xs">4.8★</span>
             </div>
-            <div className="flex items-center gap-2 bg-[#1A1528]/60 rounded-full px-5 py-2 border border-white/10">
+            <div className="flex items-center gap-2 bg-[#1A1528]/60 rounded-full px-6 py-2.5 border border-white/10">
               <Smartphone size={14} className="text-blue-400" />
               <span className="text-white text-xs">Rápido</span>
             </div>
@@ -227,13 +227,13 @@ export const Login = () => {
           <div className="flex gap-3">
             <button
               onClick={handleGoogleLogin}
-              className="flex-1 py-3.5 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-sm font-medium"
+              className="flex-1 py-4 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-sm font-medium"
             >
               <Chrome size={18} /> Google
             </button>
             <button
               onClick={() => setShowEmailForm(true)}
-              className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-lg"
+              className="flex-1 py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-lg"
             >
               <Mail size={18} /> E-mail
             </button>
@@ -248,10 +248,10 @@ export const Login = () => {
           className="px-8 mt-4 max-w-sm mx-auto w-full"
         >
           <div className="flex gap-3">
-            <button onClick={() => navigate('/register')} className="flex-1 py-3.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-sm font-medium">
+            <button onClick={() => navigate('/register')} className="flex-1 py-4 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-sm font-medium">
               Passageiro
             </button>
-            <button onClick={() => navigate('/register-driver')} className="flex-1 py-3.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-sm font-medium">
+            <button onClick={() => navigate('/register-driver')} className="flex-1 py-4 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-sm font-medium">
               Motorista
             </button>
           </div>
