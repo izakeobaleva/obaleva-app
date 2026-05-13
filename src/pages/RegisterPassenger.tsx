@@ -1,8 +1,12 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
-import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft, Car } from 'lucide-react'
+import { 
+  User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft, 
+  ArrowRight, Check, Car 
+} from 'lucide-react'
 
 export function RegisterPassenger() {
   const navigate = useNavigate()
@@ -11,16 +15,22 @@ export function RegisterPassenger() {
   const [telefone, setTelefone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState<'form' | 'success'>('form')
+  const [success, setSuccess] = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!nome || !cpf || !telefone || !email || !password) {
       toast.error('Preencha todos os campos')
+      return
+    }
+    
+    if (password !== confirmPassword) {
+      toast.error('As senhas não coincidem')
       return
     }
     
@@ -43,7 +53,7 @@ export function RegisterPassenger() {
       await supabase.from('usuarios').insert({
         id: authData.user.id,
         nome_completo: nome,
-        cpf,
+        cpf: cpf.replace(/\D/g, ''),
         telefone,
         email,
         tipo: 'passageiro'
@@ -52,7 +62,7 @@ export function RegisterPassenger() {
       await supabase.from('passageiros').insert({ id: authData.user.id })
 
       toast.success('Conta criada com sucesso!')
-      setStep('success')
+      setSuccess(true)
     } catch (err: any) {
       toast.error(err.message || 'Erro ao cadastrar')
     } finally {
@@ -60,46 +70,75 @@ export function RegisterPassenger() {
     }
   }
 
-  if (step === 'success') {
+  const formatarCpf = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11)
+    return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+  }
+
+  if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-5" style={{ background: 'linear-gradient(135deg, #0F0B1A 0%, #1A1528 100%)' }}>
-        <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-8 text-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-8 text-center"
+        >
           <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <Check size={32} className="text-green-400" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Conta criada!</h2>
-          <p className="text-[#A0A0B0] text-sm mb-6">Sua conta foi criada com sucesso.</p>
+          <p className="text-[#A0A0B0] text-sm mb-6">Sua conta foi criada com sucesso. Agora faça login para começar.</p>
           <button
             onClick={() => window.location.href = '/login'}
-            className="w-full py-3 rounded-2xl font-bold text-[#1E1E2F] hover:shadow-lg transition-all"
-            style={{ background: 'linear-gradient(135deg, #FFD966 0%, #F4D03F 100%)' }}
+            className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white hover:shadow-lg transition-all text-sm"
           >
             Ir para o Login
           </button>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen p-5" style={{ background: 'linear-gradient(135deg, #0F0B1A 0%, #1A1528 100%)' }}>
-      <div className="max-w-[400px] mx-auto pt-8">
-        <button
-          onClick={() => window.location.href = '/login'}
-          className="flex items-center gap-2 text-[#A0A0B0] hover:text-white transition mb-6"
-          type="button"
-        >
-          <ArrowLeft size={20} /> Voltar
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] py-5 px-5">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
+      </div>
 
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: 'rgba(244, 208, 63, 0.1)' }}>
-            <Car className="text-[#F4D03F]" size={32} />
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[420px] mx-auto p-6"
+      >
+        {/* Header com botão de voltar */}
+        <div className="flex items-center mb-6">
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="btn-outline-dark p-2 inline-flex items-center justify-center"
+            aria-label="Voltar"
+            type="button"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex-1 text-center -ml-10">
+            <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
+              Criar Conta
+            </h1>
           </div>
-          <h1 className="text-2xl font-bold text-white">Criar Conta</h1>
-          <p className="text-[#A0A0B0] text-sm mt-1">Preencha os dados para se cadastrar</p>
+        </div>
+
+        {/* Ícone decorativo */}
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 bg-[#F4D03F]/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
+            <Car size={28} className="text-[#F4D03F]" />
+          </div>
+          <p className="text-xs text-[#A0A0B0]">Preencha seus dados para se cadastrar</p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-3">
@@ -110,12 +149,12 @@ export function RegisterPassenger() {
 
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
             <User size={18} className="text-[#F4D03F] shrink-0" />
-            <input type="text" placeholder="CPF" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={cpf} onChange={e => setCpf(e.target.value)} required />
+            <input type="text" placeholder="CPF" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={cpf} onChange={e => setCpf(formatarCpf(e.target.value))} required maxLength={14} />
           </div>
 
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
             <Phone size={18} className="text-[#F4D03F] shrink-0" />
-            <input type="tel" placeholder="Telefone" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+            <input type="tel" placeholder="Telefone / WhatsApp" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
           </div>
 
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
@@ -134,7 +173,12 @@ export function RegisterPassenger() {
               required
               minLength={6}
             />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-[#A0A0B0] hover:text-white transition shrink-0"
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+            >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
@@ -145,27 +189,42 @@ export function RegisterPassenger() {
               type={showConfirm ? 'text' : 'password'}
               placeholder="Confirmar senha"
               className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
               required
               minLength={6}
             />
-            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="text-[#A0A0B0] hover:text-white transition shrink-0"
+              aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}
+            >
               {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
 
-          <button
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-2xl font-bold text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50"
-            style={{ background: 'linear-gradient(135deg, #FFD966 0%, #F4D03F 100%)' }}
+            className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3 text-sm disabled:opacity-50 mt-4"
           >
-            {loading ? 'Cadastrando...' : 'Criar conta'}
-          </button>
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Cadastrando...
+              </span>
+            ) : (
+              <><ArrowRight size={18} /> Criar conta</>
+            )}
+          </motion.button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-white/10 text-center">
+        <div className="mt-5 pt-5 border-t border-white/10 text-center">
           <p className="text-xs text-[#A0A0B0]">
             Já tem conta?{' '}
             <button
@@ -177,7 +236,7 @@ export function RegisterPassenger() {
             </button>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
