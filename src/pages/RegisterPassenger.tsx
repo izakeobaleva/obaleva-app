@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -9,7 +8,6 @@ import {
 } from 'lucide-react'
 
 export function RegisterPassenger() {
-  const navigate = useNavigate()
   const [nome, setNome] = useState('')
   const [cpf, setCpf] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -93,12 +91,12 @@ export function RegisterPassenger() {
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Conta criada!</h2>
           <p className="text-[#A0A0B0] text-sm mb-6">Sua conta foi criada com sucesso. Agora faça login para começar.</p>
-          <Link
-            to="/login"
-            className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white hover:shadow-lg transition-all text-sm inline-flex items-center justify-center"
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white hover:shadow-lg transition-all text-sm"
           >
             Ir para o Login
-          </Link>
+          </button>
         </motion.div>
       </div>
     )
@@ -116,15 +114,14 @@ export function RegisterPassenger() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[420px] mx-auto p-6"
       >
-        {/* Header com botão de voltar */}
         <div className="flex items-center mb-6">
-          <Link
-            to="/login"
+          <button
+            onClick={() => window.location.href = '/login'}
             className="btn-outline-dark p-2 inline-flex items-center justify-center"
-            aria-label="Voltar"
+            type="button"
           >
             <ArrowLeft size={20} />
-          </Link>
+          </button>
           <div className="flex-1 text-center -ml-10">
             <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
               Criar Conta
@@ -132,7 +129,6 @@ export function RegisterPassenger() {
           </div>
         </div>
 
-        {/* Ícone decorativo */}
         <div className="text-center mb-6">
           <div className="w-14 h-14 bg-[#F4D03F]/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
             <Car size={28} className="text-[#F4D03F]" />
@@ -176,7 +172,6 @@ export function RegisterPassenger() {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="text-[#A0A0B0] hover:text-white transition shrink-0"
-              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -197,7 +192,6 @@ export function RegisterPassenger() {
               type="button"
               onClick={() => setShowConfirm(!showConfirm)}
               className="text-[#A0A0B0] hover:text-white transition shrink-0"
-              aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}
             >
               {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -226,9 +220,13 @@ export function RegisterPassenger() {
         <div className="mt-5 pt-5 border-t border-white/10 text-center">
           <p className="text-xs text-[#A0A0B0]">
             Já tem conta?{' '}
-            <Link to="/login" className="text-[#F4D03F] font-semibold hover:underline">
+            <button
+              onClick={() => window.location.href = '/login'}
+              className="text-[#F4D03F] font-semibold hover:underline"
+              type="button"
+            >
               Entrar
-            </Link>
+            </button>
           </p>
         </div>
       </motion.div>
