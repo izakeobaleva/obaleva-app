@@ -87,6 +87,12 @@ export function RegisterDriver() {
       return
     }
 
+    // Converter data de DD/MM/AAAA para AAAA-MM-DD para o banco
+    const dataParts = dataNascimento.split('/')
+    const dataFormatadaBanco = dataParts.length === 3 
+      ? `${dataParts[2]}-${dataParts[1]}-${dataParts[0]}` 
+      : ''
+
     setLoading(true)
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -106,7 +112,7 @@ export function RegisterDriver() {
         id: userId,
         nome_completo: nome,
         cpf,
-        data_nascimento: dataNascimento || null,
+        data_nascimento: dataFormatadaBanco || null,
         email,
         telefone,
         tipo: 'motorista',

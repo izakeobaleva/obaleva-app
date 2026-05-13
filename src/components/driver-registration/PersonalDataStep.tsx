@@ -1,4 +1,4 @@
-import { User, Mail, Lock, Phone, Home, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Lock, Phone, Home, Eye, EyeOff, Calendar } from 'lucide-react';
 import { useState } from 'react';
 
 interface PersonalDataStepProps {
@@ -51,16 +51,27 @@ export function PersonalDataStep({
       <InputField icon={User} placeholder="Nome completo" autoComplete="name" value={nome} onChange={onNomeChange} />
       <InputField icon={User} placeholder="CPF" autoComplete="off" value={cpf} onChange={(v) => onCpfChange(formatarCpf(v))} maxLength={14} />
       
-      <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
-        <Home size={14} className="text-[#F4D03F] shrink-0" />
+      {/* Data de Nascimento - AGORA EDITÁVEL com DOIS ÍCONES de calendário */}
+      <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
+        <Calendar size={14} className="text-[#F4D03F] shrink-0" />
         <input
-          type="date"
-          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs [color-scheme:dark]"
+          type="text"
+          placeholder="Data de nascimento (DD/MM/AAAA)"
           autoComplete="bday"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs"
           value={dataNascimento}
-          onChange={(e) => onDataNascimentoChange(e.target.value)}
+          onChange={(e) => {
+            // Formata automaticamente como DD/MM/AAAA
+            const digits = e.target.value.replace(/\D/g, '').slice(0, 8)
+            let formatted = digits
+              .replace(/(\d{2})(\d)/, '$1/$2')
+              .replace(/(\d{2})(\d)/, '$1/$2')
+            onDataNascimentoChange(formatted)
+          }}
+          maxLength={10}
           required
         />
+        <Calendar size={14} className="text-[#F4D03F] shrink-0" />
       </div>
 
       <InputField icon={Phone} placeholder="Telefone / WhatsApp" autoComplete="tel" value={telefone} onChange={onTelefoneChange} />
@@ -89,7 +100,7 @@ export function PersonalDataStep({
 
 function InputField({ icon: Icon, placeholder, autoComplete, type = 'text', value, onChange, maxLength }: any) {
   return (
-    <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
+    <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
       <Icon size={14} className="text-[#F4D03F] shrink-0" />
       <input
         type={type}
@@ -107,7 +118,7 @@ function InputField({ icon: Icon, placeholder, autoComplete, type = 'text', valu
 
 function PasswordField({ placeholder, autoComplete, value, onChange, showPassword, onTogglePassword }: any) {
   return (
-    <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
+    <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
       <Lock size={14} className="text-[#F4D03F] shrink-0" />
       <input
         type={showPassword ? 'text' : 'password'}
