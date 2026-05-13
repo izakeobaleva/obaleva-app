@@ -61,16 +61,16 @@ export const Login = () => {
               ← Voltar
             </button>
 
-            <div className="text-center mb-4">
-              <div className="w-14 h-14 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-[#F4D03F]/20">
-                <Car className="text-[#F4D03F]" size={24} />
+            <div className="text-center mb-3">
+              <div className="w-12 h-12 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-[#F4D03F]/20">
+                <Car className="text-[#F4D03F]" size={22} />
               </div>
-              <h1 className="text-xl font-bold text-white">ObaLeva</h1>
-              <p className="text-[#A0A0B0] text-xs mt-0.5">Segurança e conforto em cada viagem</p>
+              <h1 className="text-lg font-bold text-white">ObaLeva</h1>
+              <p className="text-[#A0A0B0] text-[10px] mt-0.5">Segurança e conforto em cada viagem</p>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-2.5">
-              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-6 py-2">
+            <form onSubmit={handleSubmit} className="space-y-2">
+              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-1.5">
                 <input 
                   type="email" 
                   placeholder="seu@email.com" 
@@ -81,7 +81,7 @@ export const Login = () => {
                   required 
                 />
               </div>
-              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-6 py-2 flex items-center">
+              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-1.5 flex items-center">
                 <input 
                   type={showPassword ? 'text' : 'password'} 
                   placeholder="Senha" 
@@ -97,7 +97,7 @@ export const Login = () => {
               </div>
               
               <div className="text-right">
-                <button onClick={() => navigate('/forgot-password')} className="text-[#F4D03F] text-xs hover:underline" type="button">
+                <button onClick={() => navigate('/forgot-password')} className="text-[#F4D03F] text-[10px] hover:underline" type="button">
                   Esqueceu a senha?
                 </button>
               </div>
@@ -112,8 +112,8 @@ export const Login = () => {
               </motion.button>
             </form>
 
-            <div className="mt-3 pt-3 border-t border-white/10 text-center space-y-2.5">
-              <p className="text-[#A0A0B0] text-xs">Ainda não tem conta?</p>
+            <div className="mt-3 pt-3 border-t border-white/10 text-center space-y-2">
+              <p className="text-[#A0A0B0] text-[10px]">Ainda não tem conta?</p>
               <div className="flex gap-2">
                 <button onClick={() => navigate('/register')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
                   Passageiro
@@ -138,56 +138,56 @@ export const Login = () => {
 
       <div className="flex-1 flex flex-col relative z-10 px-4">
         {/* Header */}
-        <div className="pt-8 pb-3 text-center">
+        <div className="pt-6 pb-2 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-20 h-20 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#F4D03F]/20"
+            className="w-16 h-16 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-[#F4D03F]/20"
           >
-            <Car className="text-[#F4D03F] w-10 h-10" />
+            <Car className="text-[#F4D03F] w-8 h-8" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
             OBALEVA
           </h1>
-          <p className="text-[#A0A0B0] text-xs mt-0.5">Mobilidade premium para sua cidade</p>
+          <p className="text-[#A0A0B0] text-[10px] mt-0.5">Mobilidade premium para sua cidade</p>
         </div>
 
         {/* Mockup do App */}
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center mb-3">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-[#1A1528] rounded-3xl border border-white/10 p-4 w-full shadow-2xl"
+            className="bg-[#1A1528] rounded-3xl border border-white/10 p-3 w-full shadow-2xl"
           >
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <div className="w-6 h-6 bg-[#F4D03F]/20 rounded-lg flex items-center justify-center">
-                  <Car size={14} className="text-[#F4D03F]" />
+                <div className="w-5 h-5 bg-[#F4D03F]/20 rounded-lg flex items-center justify-center">
+                  <Car size={12} className="text-[#F4D03F]" />
                 </div>
-                <span className="text-white text-xs font-semibold">ObaLeve</span>
-                <div className="w-6 h-6" />
+                <span className="text-white text-[10px] font-semibold">ObaLeve</span>
+                <div className="w-5 h-5" />
               </div>
               
-              <div className="bg-[#0F0B1A] rounded-2xl h-24 flex items-center justify-center border border-white/10">
+              <div className="bg-[#0F0B1A] rounded-2xl h-20 flex items-center justify-center border border-white/10">
                 <div className="text-center">
-                  <Smartphone size={24} className="text-[#F4D03F]/50 mx-auto mb-1" />
+                  <Smartphone size={20} className="text-[#F4D03F]/50 mx-auto mb-1" />
                   <p className="text-[#A0A0B0] text-[10px]">Mapa ao vivo</p>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <div className="bg-[#0F0B1A] rounded-xl p-2.5 border border-white/10 flex items-center gap-2">
+              <div className="space-y-1">
+                <div className="bg-[#0F0B1A] rounded-xl p-2 border border-white/10 flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full" />
                   <span className="text-white/50 text-[10px]">Onde você está?</span>
                 </div>
-                <div className="bg-[#0F0B1A] rounded-xl p-2.5 border border-white/10 flex items-center gap-2">
+                <div className="bg-[#0F0B1A] rounded-xl p-2 border border-white/10 flex items-center gap-2">
                   <div className="w-2 h-2 bg-red-400 rounded-full" />
                   <span className="text-white/50 text-[10px]">Para onde vai?</span>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-2 text-center">
+              <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-1.5 text-center">
                 <span className="text-[#1E1E2F] font-bold text-[10px]">🚗 Solicitar ObaLeva</span>
               </div>
             </div>
@@ -199,19 +199,19 @@ export const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mb-4"
+          className="mb-3"
         >
-          <div className="flex justify-center gap-4 flex-wrap">
-            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-4 py-1.5 border border-white/10">
-              <Shield size={12} className="text-green-400" />
+          <div className="flex justify-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-3 py-1.5 border border-white/10">
+              <Shield size={11} className="text-green-400" />
               <span className="text-white text-[10px]">Seguro</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-4 py-1.5 border border-white/10">
-              <Star size={12} className="text-[#F4D03F]" />
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-3 py-1.5 border border-white/10">
+              <Star size={11} className="text-[#F4D03F]" />
               <span className="text-white text-[10px]">4.8★</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-4 py-1.5 border border-white/10">
-              <Smartphone size={12} className="text-blue-400" />
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-3 py-1.5 border border-white/10">
+              <Smartphone size={11} className="text-blue-400" />
               <span className="text-white text-[10px]">Rápido</span>
             </div>
           </div>
@@ -224,18 +224,18 @@ export const Login = () => {
           transition={{ delay: 0.4 }}
           className="w-full mx-auto"
         >
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={handleGoogleLogin}
               className="flex-1 py-2 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-sm font-medium"
             >
-              <Chrome size={18} /> Google
+              <Chrome size={16} /> Google
             </button>
             <button
               onClick={() => setShowEmailForm(true)}
               className="flex-1 py-2 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm shadow-lg"
             >
-              <Mail size={18} /> E-mail
+              <Mail size={16} /> E-mail
             </button>
           </div>
         </motion.div>
@@ -245,9 +245,9 @@ export const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="w-full mx-auto mt-3"
+          className="w-full mx-auto mt-2"
         >
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button onClick={() => navigate('/register')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-sm font-medium">
               Passageiro
             </button>
@@ -262,10 +262,10 @@ export const Login = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="text-center py-4"
+          className="text-center py-3"
         >
           <button onClick={handleShare} className="text-[#A0A0B0] hover:text-white transition flex items-center justify-center gap-2 text-xs mx-auto">
-            <Share2 size={14} /> Compartilhar App
+            <Share2 size={12} /> Compartilhar App
           </button>
         </motion.div>
       </div>
