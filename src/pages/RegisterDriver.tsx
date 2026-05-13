@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
@@ -478,10 +480,11 @@ export function RegisterDriver() {
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-sm mx-auto p-4"
       >
         <div className="flex items-center mb-3">
-          <button onClick={() => etapa > 1 ? setEtapa((etapa - 1) as Etapa) : navigate('/login')} className="btn-outline-dark p-2" type="button">
-            <ArrowLeft size={18} />
+          <button onClick={() => etapa > 1 ? setEtapa((etapa - 1) as Etapa) : navigate('/login')} className="btn-outline-dark" type="button"
+            style={{ minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+            <ArrowLeft size={20} />
           </button>
-          <div className="flex-1 text-center -ml-9">
+          <div className="flex-1 text-center -ml-12">
             <h1 className="text-base font-bold text-white">Motorista</h1>
           </div>
         </div>

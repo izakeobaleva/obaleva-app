@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
@@ -43,12 +45,13 @@ export default function ForgotPassword() {
         <div className="flex items-center mb-4">
           <button
             onClick={() => navigate('/login')}
-            className="btn-outline-dark p-2"
+            className="btn-outline-dark"
             aria-label="Voltar"
+            style={{ minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}
           >
             <ArrowLeft size={20} />
           </button>
-          <div className="flex-1 text-center -ml-10">
+          <div className="flex-1 text-center -ml-12">
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>{sent ? 'E-mail enviado!' : 'Redefinir senha'}</h1>
           </div>
         </div>

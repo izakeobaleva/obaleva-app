@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
@@ -108,15 +110,16 @@ export function RegisterPassenger() {
         <div className="flex items-center mb-4">
           <motion.button
             onClick={() => navigate('/login')}
-            className="btn-outline-dark p-2"
+            className="btn-outline-dark"
             type="button"
             whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.15)' }}
             whileTap={{ scale: 0.9, rotate: -5 }}
             transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            style={{ minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={22} />
           </motion.button>
-          <div className="flex-1 text-center -ml-10">
+          <div className="flex-1 text-center -ml-12">
             <h1 className="text-lg font-bold text-white">Cadastro</h1>
           </div>
         </div>
