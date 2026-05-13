@@ -4,9 +4,11 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabaseClient';
 import { Car, Mail, Lock, Eye, EyeOff, Share2, User } from 'lucide-react';
+import { useAppUrl } from '../hooks/useAppUrl';
 
 export default function Entrar() {
   const navigate = useNavigate();
+  const appUrl = useAppUrl();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -45,7 +47,7 @@ export default function Entrar() {
   };
 
   const handleShare = async () => {
-    const landingUrl = window.location.origin + '/landing';
+    const landingUrl = `${appUrl}/landing`;
     
     if (navigator.share) {
       try {
@@ -181,13 +183,10 @@ export default function Entrar() {
           </Link>
           <Link to="/register-driver" className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center flex items-center justify-center gap-2">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F4D03F" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-              {/* Aro externo do volante - borda grossa */}
               <circle cx="12" cy="12" r="9" />
-              {/* 3 raios */}
               <line x1="12" y1="3" x2="12" y2="9" />
               <line x1="4.5" y1="9" x2="8.5" y2="11.5" />
               <line x1="19.5" y1="9" x2="15.5" y2="11.5" />
-              {/* Haste central que desce (ponta virada para baixo) */}
               <line x1="12" y1="12" x2="12" y2="20" />
             </svg>
             Criar conta como Motorista
