@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { Index } from './pages/Index'
 import { Login } from './pages/Login'
 import { RegisterPassenger } from './pages/RegisterPassenger'
 import { RegisterDriver } from './pages/RegisterDriver'
@@ -17,7 +18,7 @@ function AppRoutes() {
   if (!user) {
     return (
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<RegisterPassenger />} />
         <Route path="/register-driver" element={<RegisterDriver />} />
