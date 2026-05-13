@@ -1,13 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-<<<<<<< HEAD
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
-  theme: {
-    extend: {
-      colors: {
-        roxo: { principal: "#6B2D8C", escuro: "#4A1D61", claro: "#9B59B6" },
-        amarelo: { principal: "#F4D03F", escuro: "#D4AC0D" },
-=======
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -34,7 +26,6 @@ export default {
       borderRadius: {
         '3xl': '1.5rem',
         '4xl': '2rem',
->>>>>>> f9fab54ce8b57aa4cace2f2e9bce17804474d780
       },
     },
   },

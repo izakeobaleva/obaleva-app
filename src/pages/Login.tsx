@@ -81,9 +81,9 @@ export const Login = () => {
             </div>
             
             <div className="text-right">
-              <button type="button" className="text-[#F4D03F] text-sm hover:underline">
+              <Link to="/forgot-password" className="text-[#F4D03F] text-sm hover:underline">
                 Esqueceu a senha?
-              </button>
+              </Link>
             </div>
             
             <button type="submit" className="btn-amarelo w-full py-3 rounded-2xl text-lg">Entrar</button>
