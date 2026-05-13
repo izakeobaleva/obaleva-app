@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
-import { Car, Chrome, Mail, Eye, EyeOff, ChevronRight, Download, Smartphone, Shield, Star, Share2 } from 'lucide-react'
+import { Car, Chrome, Mail, Eye, EyeOff, ChevronRight, Smartphone, Shield, Star, Share2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export const Login = () => {
@@ -217,26 +217,27 @@ export const Login = () => {
           </div>
         </motion.div>
 
-        {/* Botões de Login */}
+        {/* Botões de Login - lado a lado */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="px-6 space-y-3 max-w-xs mx-auto w-full"
+          className="px-6 max-w-xs mx-auto w-full"
         >
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full py-3.5 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2.5 hover:bg-white/10 transition text-sm font-medium"
-          >
-            <Chrome size={18} /> Continuar com Google
-          </button>
-
-          <button
-            onClick={() => setShowEmailForm(true)}
-            className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm shadow-lg"
-          >
-            <Mail size={18} /> Entrar com e-mail
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleGoogleLogin}
+              className="flex-1 py-3.5 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-xs font-medium"
+            >
+              <Chrome size={16} /> Google
+            </button>
+            <button
+              onClick={() => setShowEmailForm(true)}
+              className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs shadow-lg"
+            >
+              <Mail size={16} /> E-mail
+            </button>
+          </div>
         </motion.div>
 
         {/* Cadastro rápido */}
@@ -244,14 +245,16 @@ export const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="px-6 mt-5 flex gap-2 max-w-xs mx-auto w-full"
+          className="px-6 mt-5 max-w-xs mx-auto w-full"
         >
-          <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
-            Passageiro
-          </button>
-          <button onClick={() => navigate('/register-driver')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
-            Motorista
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
+              Passageiro
+            </button>
+            <button onClick={() => navigate('/register-driver')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
+              Motorista
+            </button>
+          </div>
         </motion.div>
 
         {/* Compartilhar */}
