@@ -27,6 +27,7 @@ function AppRoutes() {
     </div>
   )
 
+  // Rotas públicas (usuário NÃO logado)
   if (!user) {
     return (
       <Routes>
@@ -42,41 +43,41 @@ function AppRoutes() {
     )
   }
 
-  if (profile?.tipo === 'passageiro') {
-    return (
-      <Routes>
-        <Route path="/" element={<PassengerDashboard />} />
-        <Route path="/trips" element={<Trips />} />
-        <Route path="/trips/:id" element={<TripDetails />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    )
-  }
+  // Rotas protegidas por tipo de usuário
+  return (
+    <Routes>
+      {/* Passageiro */}
+      {profile?.tipo === 'passageiro' && (
+        <>
+          <Route path="/" element={<PassengerDashboard />} />
+          <Route path="/trips" element={<Trips />} />
+          <Route path="/trips/:id" element={<TripDetails />} />
+          <Route path="/profile" element={<Profile />} />
+        </>
+      )}
 
-  if (profile?.tipo === 'motorista') {
-    return (
-      <Routes>
-        <Route path="/" element={<DriverDashboard />} />
-        <Route path="/earnings" element={<Earnings />} />
-        <Route path="/trips/:id" element={<TripDetails />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    )
-  }
+      {/* Motorista */}
+      {profile?.tipo === 'motorista' && (
+        <>
+          <Route path="/" element={<DriverDashboard />} />
+          <Route path="/earnings" element={<Earnings />} />
+          <Route path="/trips/:id" element={<TripDetails />} />
+          <Route path="/profile" element={<Profile />} />
+        </>
+      )}
 
-  if (profile?.tipo === 'admin') {
-    return (
-      <Routes>
-        <Route path="/" element={<AdminDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    )
-  }
+      {/* Admin */}
+      {profile?.tipo === 'admin' && (
+        <>
+          <Route path="/" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+        </>
+      )}
 
-  return <Navigate to="/login" replace />
+      {/* Se não encaixar em nenhum tipo, redireciona */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
 }
 
 function App() {
