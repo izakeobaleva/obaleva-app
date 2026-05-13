@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react'
 import { MapPin } from 'lucide-react'
 
@@ -10,3 +11,12 @@ export const MapWithPersonCar = () => (
     </div>
   </div>
 )
+=======
+export function MapWithPersonCar() {
+  return (
+    <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded-lg">
+      <p className="text-gray-500 text-lg">🗺️ Mapa com localização</p>
+    </div>
+  )
+}
+>>>>>>> f9fab54ce8b57aa4cace2f2e9bce17804474d780

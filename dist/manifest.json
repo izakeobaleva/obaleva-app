@@ -1,0 +1,16 @@
+{
+  "name": "OBALEVA",
+  "short_name": "OBALEVA",
+  "description": "Aplicativo de mobilidade urbana",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#6B21A8",
+  "theme_color": "#6B21A8",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

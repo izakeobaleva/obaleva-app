@@ -1,0 +1,35 @@
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Home } from 'lucide-react';
+
+export default function NotFound() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-100px] right-[-100px] w-[300px] h-[300px] bg-[#F4D03F]/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-50px] left-[-50px] w-[250px] h-[250px] bg-[#6B2D8C]/20 rounded-full blur-[100px]" />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center relative z-10"
+      >
+        <div className="text-8xl font-bold text-[#F4D03F]/30 mb-4">404</div>
+        <h1 className="text-3xl font-bold text-white mb-2">Página não encontrada</h1>
+        <p className="text-[#A0A0B0] mb-8 max-w-md">
+          A página que você procura não existe ou foi movida.
+        </p>
+        <button
+          onClick={() => navigate('/')}
+          className="rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all inline-flex items-center gap-2 px-8 py-3 text-sm"
+        >
+          <Home size={18} />
+          Voltar ao início
+        </button>
+      </motion.div>
+    </div>
+  );
+}

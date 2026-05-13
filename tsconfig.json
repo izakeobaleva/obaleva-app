@@ -12,9 +12,21 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
+<<<<<<< HEAD
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"]
+=======
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+>>>>>>> f9fab54ce8b57aa4cace2f2e9bce17804474d780
 }

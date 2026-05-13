@@ -1,0 +1,16 @@
+{
+  "name": "ObaLeve",
+  "short_name": "ObaLeve",
+  "description": "Mobilidade urbana premium",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#6B21A8",
+  "theme_color": "#6B21A8",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
