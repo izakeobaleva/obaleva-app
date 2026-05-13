@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { toast } from 'sonner'
-import { Globe, Save, ExternalLink, Copy } from 'lucide-react'
+import { Globe, Save, ExternalLink, Copy, ExternalLink as LinkIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export default function DominioConfig() {
@@ -137,59 +137,108 @@ export default function DominioConfig() {
           </div>
         </div>
 
-        {/* Preview / Ajuda */}
+        {/* Guia Vercel */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-white/80">Como configurar</h3>
+          <h3 className="text-sm font-semibold text-white/80">Guia Vercel</h3>
           
           <div className="bg-[#1A1528] rounded-2xl p-5 border border-white/10 space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-[#F4D03F]/20 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-[#F4D03F] font-bold text-sm">1</span>
-              </div>
-              <div>
-                <p className="text-white font-medium text-sm">Adquira um domínio</p>
-                <p className="text-xs text-[#A0A0B0] mt-1">
-                  Compre em serviços como GoDaddy, HostGator, Registro.br ou Cloudflare.
-                </p>
-              </div>
+            {/* Passo a passo com prints mentais */}
+            <div className="bg-[#0F0B1A] rounded-xl p-4 border border-white/10">
+              <h4 className="text-white font-bold text-sm mb-3">Passo a passo para adicionar domínio na Vercel:</h4>
+              
+              <ol className="space-y-4 text-sm">
+                <li className="flex items-start gap-3">
+                  <span className="bg-[#F4D03F] text-[#1E1E2F] w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">1</span>
+                  <div>
+                    <p className="text-white font-medium">Acesse o painel da Vercel</p>
+                    <a 
+                      href="https://vercel.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-[#F4D03F] hover:underline flex items-center gap-1 mt-1 text-xs"
+                    >
+                      <LinkIcon size={12} />
+                      vercel.com
+                    </a>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="bg-[#F4D03F] text-[#1E1E2F] w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">2</span>
+                  <div>
+                    <p className="text-white font-medium">Clique no seu projeto</p>
+                    <p className="text-[#A0A0B0] text-xs mt-1">Encontre o projeto "obaleva" na lista de projetos.</p>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="bg-[#F4D03F] text-[#1E1E2F] w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">3</span>
+                  <div>
+                    <p className="text-white font-medium">Vá em Settings (Configurações)</p>
+                    <p className="text-[#A0A0B0] text-xs mt-1">Menu superior: <strong className="text-white">Overview {'>'} Deployments {'>'} Settings</strong></p>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="bg-[#F4D03F] text-[#1E1E2F] w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">4</span>
+                  <div>
+                    <p className="text-white font-medium">Clique em "Domains"</p>
+                    <p className="text-[#A0A0B0] text-xs mt-1">No menu lateral esquerdo, clique em <strong className="text-white">Domains</strong>.</p>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="bg-[#F4D03F] text-[#1E1E2F] w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">5</span>
+                  <div>
+                    <p className="text-white font-medium">Digite seu domínio e clique em "Add"</p>
+                    <p className="text-[#A0A0B0] text-xs mt-1">Exemplo: <code className="text-[#F4D03F]">obaleva.com.br</code></p>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="bg-[#F4D03F] text-[#1E1E2F] w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">6</span>
+                  <div>
+                    <p className="text-white font-medium">Copie as configurações DNS que aparecerem</p>
+                    <p className="text-[#A0A0B0] text-xs mt-1">A Vercel vai mostrar registros CNAME e/ou A para você adicionar no seu provedor de domínio.</p>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="bg-[#F4D03F] text-[#1E1E2F] w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">7</span>
+                  <div>
+                    <p className="text-white font-medium">Configure o DNS no seu provedor</p>
+                    <p className="text-[#A0A0B0] text-xs mt-1">Vá no site onde você comprou o domínio (Registro.br, GoDaddy, etc.) e adicione os registros que a Vercel pediu.</p>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="bg-[#F4D03F] text-[#1E1E2F] w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">8</span>
+                  <div>
+                    <p className="text-white font-medium">Aguarde a propagação (5 min a 24h)</p>
+                    <p className="text-[#A0A0B0] text-xs mt-1">A Vercel vai emitir um certificado SSL automático. Quando aparecer "Valid" no Domains, está pronto!</p>
+                  </div>
+                </li>
+              </ol>
             </div>
 
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-[#F4D03F]/20 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-[#F4D03F] font-bold text-sm">2</span>
-              </div>
-              <div>
-                <p className="text-white font-medium text-sm">Aponte o DNS para a Vercel</p>
-                <p className="text-xs text-[#A0A0B0] mt-1">
-                  No painel do seu domínio, crie um registro CNAME apontando para cname.vercel-dns.com
-                </p>
-              </div>
+            <div className="bg-[#0F0B1A] rounded-xl p-4 border border-yellow-500/20">
+              <p className="text-yellow-400 font-medium text-sm mb-1">⚠️ Importante</p>
+              <p className="text-[#A0A0B0] text-xs">
+                Se você usa <strong className="text-white">Cloudflare</strong>, desative o proxy (laranja {'>'} cinza) nos registros DNS para funcionar com a Vercel.
+              </p>
             </div>
 
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-[#F4D03F]/20 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-[#F4D03F] font-bold text-sm">3</span>
-              </div>
-              <div>
-                <p className="text-white font-medium text-sm">Adicione na Vercel</p>
-                <p className="text-xs text-[#A0A0B0] mt-1">
-                  Acesse: Vercel.com {'>'} Projeto obaleva {'>'} Settings {'>'} Domains
-                  <br />
-                  Adicione seu domínio e siga as instruções.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-[#F4D03F]/20 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-[#F4D03F] font-bold text-sm">4</span>
-              </div>
-              <div>
-                <p className="text-white font-medium text-sm">Salve aqui no painel</p>
-                <p className="text-xs text-[#A0A0B0] mt-1">
-                  Volte aqui, digite seu domínio e clique em salvar. Pronto!
-                </p>
-              </div>
+            <div className="bg-[#0F0B1A] rounded-xl p-4 border border-white/10">
+              <p className="text-white font-medium text-sm mb-1">📹 Prefere vídeo?</p>
+              <a 
+                href="https://www.youtube.com/results?search_query=como+adicionar+dominio+na+vercel" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[#F4D03F] hover:underline flex items-center gap-1 text-xs"
+              >
+                <ExternalLink size={12} />
+                Pesquise no YouTube: "como adicionar domínio na Vercel"
+              </a>
             </div>
           </div>
         </div>
