@@ -7,7 +7,7 @@
 @layer base {
   html {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-    font-size: 15px;
+    font-size: 16px; /* Aumentado de 15px para 16px */
   }
   body {
     @apply bg-[#0F0B1A] text-[#F0F0F5];
@@ -19,10 +19,10 @@
   .btn-premium {
     @apply relative overflow-hidden font-bold shadow-lg transition-all duration-200 text-[#1E1E2F];
     background: linear-gradient(135deg, #FFD966 0%, #F4D03F 100%);
-    padding: 0.35rem 1rem;
+    padding: 0.6rem 1.2rem;
     border-radius: 2rem;
-    font-size: 0.85rem;
-    line-height: 1.4;
+    font-size: 1rem;
+    line-height: 1.5;
     box-shadow: 0 4px 14px 0 rgba(244, 208, 63, 0.3);
   }
   .btn-premium:hover {
@@ -34,9 +34,9 @@
   }
 
   .btn-outline-dark {
-    @apply border border-white/20 bg-transparent text-white/90 px-3 py-1 transition hover:bg-white/10 font-semibold;
-    font-size: 0.85rem;
-    line-height: 1.4;
+    @apply border border-white/20 bg-transparent text-white/90 px-4 py-2 transition hover:bg-white/10 font-semibold;
+    font-size: 1rem;
+    line-height: 1.5;
     border-radius: 2rem;
   }
 
@@ -55,48 +55,48 @@
   }
 
   .input-compact {
-    @apply flex items-center gap-2 bg-[#1A1528] border border-white/10 rounded-2xl px-3 py-1;
-    font-size: 0.85rem;
-    line-height: 1.4;
+    @apply flex items-center gap-2 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-2.5;
+    font-size: 0.95rem;
+    line-height: 1.5;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(244, 208, 63, 0.3);
-    border-radius: 2px;
+    border-radius: 3px;
   }
 }
 
 /* Botão de voltar com área de toque ampliada no mobile */
 .back-button {
   @apply flex items-center justify-center;
-  min-width: 52px;
-  min-height: 52px;
-  border-radius: 16px;
-  padding: 14px;
+  min-width: 56px;
+  min-height: 56px;
+  border-radius: 18px;
+  padding: 16px;
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
 .back-button:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .back-button:active {
   transform: scale(0.92);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Botão de voltar estilo outline específico */
 .back-button-outline {
   @apply back-button;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
 }
 
 .back-button-outline:active {
