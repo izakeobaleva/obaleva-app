@@ -63,7 +63,7 @@ export const Index = () => {
 
       <div className="flex-1 flex flex-col relative z-10">
         {/* Header */}
-        <div className="pt-10 pb-6 px-6 text-center">
+        <div className="pt-10 pb-6 px-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -75,7 +75,7 @@ export const Index = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-extrabold text-white mb-2"
+            className="text-4xl md:text-5xl font-extrabold text-white text-center"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
           >
             OvaLeva
@@ -84,7 +84,7 @@ export const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-lg text-[#A0A0B0] mt-1 font-medium"
+            className="text-lg text-[#A0A0B0] text-center font-medium"
           >
             Mobilidade premium para sua cidade
           </motion.p>
@@ -92,7 +92,7 @@ export const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.25 }}
-            className="text-sm text-[#A0A0B0]/60 mt-1"
+            className="text-sm text-[#A0A0B0]/60 text-center"
           >
             Corridas seguras e motoristas confiáveis
           </motion.p>
@@ -138,7 +138,7 @@ export const Index = () => {
           </motion.div>
         </div>
 
-        {/* Benefícios - ESPAÇAMENTO REDUZIDO */}
+        {/* Benefícios */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
