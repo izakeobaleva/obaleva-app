@@ -54,7 +54,7 @@ export const Login = () => {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 w-full max-w-[380px]"
+          className="relative z-10 w-full max-w-md"
         >
           <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-6">
             <button onClick={() => setShowEmailForm(false)} className="text-[#A0A0B0] hover:text-white transition text-xs flex items-center gap-1 mb-4">
@@ -70,7 +70,7 @@ export const Login = () => {
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-8 py-2.5">
+              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-6 py-2.5">
                 <input 
                   type="email" 
                   placeholder="seu@email.com" 
@@ -81,7 +81,7 @@ export const Login = () => {
                   required 
                 />
               </div>
-              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-8 py-2.5 flex items-center">
+              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-6 py-2.5 flex items-center">
                 <input 
                   type={showPassword ? 'text' : 'password'} 
                   placeholder="Senha" 
@@ -136,9 +136,9 @@ export const Login = () => {
         <div className="absolute bottom-[-50px] right-[-50px] w-[300px] h-[300px] bg-[#6B2D8C]/20 rounded-full blur-[100px]" />
       </div>
 
-      <div className="flex-1 flex flex-col relative z-10">
+      <div className="flex-1 flex flex-col relative z-10 px-4">
         {/* Header */}
-        <div className="pt-12 pb-4 px-8 text-center">
+        <div className="pt-12 pb-4 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -153,12 +153,12 @@ export const Login = () => {
         </div>
 
         {/* Mockup do App */}
-        <div className="px-8 flex justify-center mb-8">
+        <div className="flex justify-center mb-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-[#1A1528] rounded-3xl border border-white/10 p-6 w-full max-w-[300px] shadow-2xl"
+            className="bg-[#1A1528] rounded-3xl border border-white/10 p-6 w-full shadow-2xl"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -199,7 +199,7 @@ export const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="px-8 mb-8"
+          className="mb-8"
         >
           <div className="flex justify-center gap-6 flex-wrap">
             <div className="flex items-center gap-2 bg-[#1A1528]/60 rounded-full px-6 py-2.5 border border-white/10">
@@ -222,7 +222,7 @@ export const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="px-8 max-w-sm mx-auto w-full"
+          className="w-full mx-auto"
         >
           <div className="flex gap-3">
             <button
@@ -245,7 +245,7 @@ export const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="px-8 mt-4 max-w-sm mx-auto w-full"
+          className="w-full mx-auto mt-4"
         >
           <div className="flex gap-3">
             <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-sm font-medium">
