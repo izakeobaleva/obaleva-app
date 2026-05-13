@@ -85,13 +85,13 @@ export function RegisterPassenger() {
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[400px] p-6"
       >
         <div className="flex items-center mb-4">
-          <Link
-            to="/login"
+          <a
+            href="/login"
             className="btn-outline-dark p-2 inline-flex items-center justify-center"
             aria-label="Voltar"
           >
             <ArrowLeft size={20} />
-          </Link>
+          </a>
           <div className="flex-1 text-center -ml-10">
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Criar Conta</h1>
           </div>
