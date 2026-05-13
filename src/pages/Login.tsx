@@ -3,11 +3,12 @@ import { useAuth } from '../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
-import { Car, Chrome, Share2, UserPlus, Truck } from 'lucide-react'
+import { Car, Chrome, Share2, UserPlus, Truck, ChevronLeft } from 'lucide-react'
 
 export const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showEmailForm, setShowEmailForm] = useState(false)
   const { signIn } = useAuth()
   const navigate = useNavigate()
 
@@ -38,53 +39,110 @@ export const Login = () => {
     }
   }
 
+  if (showEmailForm) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+        <div className="bg-[#1A1528]/80 backdrop-blur-lg rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8">
+          <button 
+            onClick={() => setShowEmailForm(false)} 
+            className="flex items-center gap-2 text-[#A0A0B0] hover:text-white transition mb-6"
+          >
+            <ChevronLeft size={20} /> Voltar
+          </button>
+
+          <div className="text-center mb-8">
+            <Car className="text-[#F4D03F] w-12 h-12 mx-auto mb-3" />
+            <h1 className="text-2xl font-bold text-white">OBALEVA</h1>
+            <p className="text-[#A0A0B0] mt-1">Segurança e conforto em cada viagem</p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <p className="text-sm text-[#A0A0B0] mb-2">Seu e-mail</p>
+              <input 
+                type="email" 
+                placeholder="seu@email.com" 
+                className="w-full px-4 py-3 rounded-2xl bg-[#0F0B1A] border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#F4D03F] transition" 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                required 
+              />
+            </div>
+            <div>
+              <p className="text-sm text-[#A0A0B0] mb-2">Sua senha</p>
+              <input 
+                type="password" 
+                placeholder="••••••••" 
+                className="w-full px-4 py-3 rounded-2xl bg-[#0F0B1A] border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#F4D03F] transition" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                required 
+              />
+            </div>
+            
+            <div className="text-right">
+              <button type="button" className="text-[#F4D03F] text-sm hover:underline">
+                Esqueceu a senha?
+              </button>
+            </div>
+            
+            <button type="submit" className="btn-amarelo w-full py-3 rounded-2xl text-lg">Entrar</button>
+          </form>
+
+          <div className="text-center mt-8">
+            <p className="text-[#A0A0B0] text-sm mb-4">Ainda não tem conta?</p>
+            <div className="flex flex-col gap-3">
+              <Link to="/register" className="w-full py-3 rounded-2xl border border-white/20 text-white text-center hover:bg-white/5 transition flex items-center justify-center gap-2">
+                <UserPlus size={18} /> Criar conta como Passageiro
+              </Link>
+              <Link to="/register-driver" className="w-full py-3 rounded-2xl border border-white/20 text-white text-center hover:bg-white/5 transition flex items-center justify-center gap-2">
+                <Truck size={18} /> Criar conta como Motorista
+              </Link>
+            </div>
+          </div>
+
+          <button 
+            onClick={handleShare} 
+            className="w-full mt-6 py-3 flex items-center justify-center gap-2 text-[#A0A0B0] hover:text-white transition"
+          >
+            <Share2 size={18} /> Compartilhar ObaLeva
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
       <div className="bg-[#1A1528]/80 backdrop-blur-lg rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <Car className="text-[#F4D03F] w-12 h-12 mx-auto mb-3" />
-          <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
-          <p className="text-[#A0A0B0] mt-1">Acesse sua conta</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input 
-            type="email" 
-            placeholder="E-mail" 
-            className="w-full px-4 py-3 rounded-2xl bg-[#0F0B1A] border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#F4D03F] transition" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            required 
-          />
-          <input 
-            type="password" 
-            placeholder="Senha" 
-            className="w-full px-4 py-3 rounded-2xl bg-[#0F0B1A] border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#F4D03F] transition" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            required 
-          />
-          <button type="submit" className="btn-amarelo w-full py-3 rounded-2xl">Entrar</button>
-        </form>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-          <div className="relative flex justify-center text-xs"><span className="bg-[#1A1528] px-2 text-[#A0A0B0]">ou</span></div>
+          <div className="w-20 h-20 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Car className="text-[#F4D03F] w-10 h-10" />
+          </div>
+          <h1 className="text-3xl font-bold text-white">ObaLeva</h1>
+          <p className="text-[#A0A0B0] mt-2">Segurança e conforto em cada viagem</p>
         </div>
 
         <button 
           onClick={handleGoogleLogin} 
-          className="w-full py-3 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition mb-4"
+          className="w-full py-3 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-3 hover:bg-white/10 transition mb-4 text-lg"
         >
-          <Chrome size={18} /> Entrar com Google
+          <Chrome size={22} /> Continuar com Google
+        </button>
+
+        <button 
+          onClick={() => setShowEmailForm(true)} 
+          className="w-full py-3 rounded-2xl border border-[#F4D03F]/30 text-[#F4D03F] flex items-center justify-center gap-2 hover:bg-[#F4D03F]/5 transition mb-6"
+        >
+          Entre com e-mail
         </button>
 
         <div className="flex flex-col gap-3">
-          <Link to="/register" className="w-full py-3 rounded-2xl border border-white/20 text-white text-center hover:bg-white/5 transition flex items-center justify-center gap-2">
-            <UserPlus size={18} /> Cadastrar Passageiro
+          <Link to="/register" className="w-full py-3 rounded-2xl border border-white/20 text-white text-center hover:bg-white/5 transition">
+            Criar conta como Passageiro
           </Link>
-          <Link to="/register-driver" className="w-full py-3 rounded-2xl border border-white/20 text-white text-center hover:bg-white/5 transition flex items-center justify-center gap-2">
-            <Truck size={18} /> Cadastrar Motorista
+          <Link to="/register-driver" className="w-full py-3 rounded-2xl border border-white/20 text-white text-center hover:bg-white/5 transition">
+            Criar conta como Motorista
           </Link>
         </div>
 
@@ -92,7 +150,7 @@ export const Login = () => {
           onClick={handleShare} 
           className="w-full mt-6 py-3 flex items-center justify-center gap-2 text-[#A0A0B0] hover:text-white transition"
         >
-          <Share2 size={18} /> Compartilhar OBALEVA
+          <Share2 size={18} /> Compartilhar ObaLeva
         </button>
       </div>
     </div>
