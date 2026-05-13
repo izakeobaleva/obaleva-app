@@ -14,7 +14,7 @@ export default function LandingEditor() {
     title: 'Mobilidade premium para sua cidade',
     subtitle: 'Corridas rápidas, motoristas confiáveis e um app que se adapta a você.',
     ctaText: 'Baixar APK',
-    appUrl: 'https://obaleva-oficial.vercel.app',
+    appUrl: 'https://ovaleva-oficial.vercel.app',
   })
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function LandingEditor() {
 
   async function checkApkExists() {
     try {
-      const response = await fetch('/apk/obaleve.apk', { method: 'HEAD' })
+      const response = await fetch('/apk/ovaleva.apk', { method: 'HEAD' })
       setHasApk(response.ok)
     } catch {
       setHasApk(false)
@@ -91,7 +91,7 @@ export default function LandingEditor() {
     setApkUploading(true)
     try {
       const fileExt = 'apk'
-      const fileName = `obaleve_${Date.now()}.${fileExt}`
+      const fileName = `ovaleva_${Date.now()}.${fileExt}`
       
       const { data, error } = await supabase.storage
         .from('public')

@@ -16,7 +16,6 @@ export default function Divulgacao() {
   }, [])
 
   async function loadData() {
-    // Carregar APK
     const { data: apkData } = await supabase
       .from('app_config')
       .select('value')
@@ -27,7 +26,6 @@ export default function Divulgacao() {
       setApkUrl(apkData.value)
     }
 
-    // Carregar domínio personalizado
     const { data: dominioData } = await supabase
       .from('app_config')
       .select('value')
@@ -43,7 +41,7 @@ export default function Divulgacao() {
     const url = `${dominio}/divulgar?ref=${ref}`
     if (navigator.share) {
       await navigator.share({
-        title: 'OBALEVA',
+        title: 'OvaLeva',
         text: 'Mobilidade premium para sua cidade',
         url
       })
@@ -70,7 +68,7 @@ export default function Divulgacao() {
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
-            OBALEVA
+            OvaLeva
           </h1>
           
           <p className="text-lg text-[#A0A0B0] mb-8 leading-relaxed">
@@ -84,7 +82,7 @@ export default function Divulgacao() {
               className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-3 text-lg"
             >
               <Share2 size={22} />
-              Compartilhar ObaLeva
+              Compartilhar OvaLeva
             </motion.button>
 
             {apkUrl && (
@@ -110,7 +108,7 @@ export default function Divulgacao() {
 
       <div className="text-center py-6 relative z-10">
         <p className="text-xs text-[#A0A0B0]">
-          <strong className="text-white">OBALEVA</strong> &copy; 2025 &mdash; Mobilidade premium
+          <strong className="text-white">OvaLeva</strong> &copy; 2025 &mdash; Mobilidade premium
         </p>
       </div>
     </div>

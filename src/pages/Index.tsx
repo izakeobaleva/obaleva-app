@@ -33,7 +33,7 @@ export const Index = () => {
   const handleShare = async () => {
     const url = `${dominio}/divulgar`
     if (navigator.share) {
-      try { await navigator.share({ title: 'OBALEVA', text: 'Mobilidade premium na palma da sua mão!', url }) } catch {}
+      try { await navigator.share({ title: 'OvaLeva', text: 'Mobilidade premium na palma da sua mão!', url }) } catch {}
     } else {
       await navigator.clipboard.writeText(url)
     }
@@ -62,7 +62,7 @@ export const Index = () => {
       </div>
 
       <div className="flex-1 flex flex-col relative z-10">
-        {/* Header - Mais espaço e fonte maior */}
+        {/* Header */}
         <div className="pt-10 pb-6 px-6 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -78,7 +78,7 @@ export const Index = () => {
             className="text-4xl md:text-5xl font-extrabold text-white mb-2"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
           >
-            OBALEVA
+            OvaLeva
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -111,7 +111,7 @@ export const Index = () => {
                 <div className="w-7 h-7 bg-[#F4D03F]/20 rounded-xl flex items-center justify-center">
                   <Car size={16} className="text-[#F4D03F]" />
                 </div>
-                <span className="text-white font-bold text-sm">ObaLeve</span>
+                <span className="text-white font-bold text-sm">OvaLeva</span>
                 <div className="w-7 h-7" />
               </div>
               <div className="bg-[#0F0B1A] rounded-2xl h-48 flex items-center justify-center border border-white/10">
@@ -132,7 +132,7 @@ export const Index = () => {
                 </div>
               </div>
               <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-3.5 text-center shadow-lg shadow-[#F4D03F]/20">
-                <span className="text-[#1E1E2F] font-bold text-base">🚗 Solicitar ObaLeva</span>
+                <span className="text-[#1E1E2F] font-bold text-base">🚗 Solicitar OvaLeva</span>
               </div>
             </div>
           </motion.div>
@@ -161,14 +161,13 @@ export const Index = () => {
           </div>
         </motion.div>
 
-        {/* Botões - Mais largos e confortáveis */}
+        {/* Botões */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="px-6 space-y-3 max-w-md mx-auto w-full"
         >
-          {/* Linha: Google | E-mail */}
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={handleGoogleLogin}
@@ -191,7 +190,6 @@ export const Index = () => {
             </button>
           </div>
 
-          {/* Linha: Passageiro | Motorista */}
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => navigate('/register')}
@@ -214,7 +212,6 @@ export const Index = () => {
             </button>
           </div>
 
-          {/* Compartilhar */}
           <button
             onClick={handleShare}
             className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]"
@@ -223,7 +220,6 @@ export const Index = () => {
             Compartilhar App
           </button>
 
-          {/* Baixar APK */}
           {apkUrl && (
             <a
               href={apkUrl}
@@ -236,10 +232,9 @@ export const Index = () => {
           )}
         </motion.div>
 
-        {/* Footer - Mais visível */}
         <div className="text-center py-8 mt-auto">
           <p className="text-sm text-[#A0A0B0]">
-            <strong className="text-white font-bold">OBALEVA</strong> &copy; 2025
+            <strong className="text-white font-bold">OvaLeva</strong> &copy; 2025
           </p>
           <p className="text-xs text-[#A0A0B0]/50 mt-1">Mobilidade premium para sua cidade</p>
         </div>

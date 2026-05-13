@@ -37,7 +37,7 @@ export default function AppDivulgacao() {
     const url = `${dominio}/divulgar?ref=${ref}`
     if (navigator.share) {
       await navigator.share({
-        title: 'OBALEVA',
+        title: 'OvaLeva',
         text: 'Mobilidade premium na palma da sua mão!',
         url
       })
@@ -54,7 +54,6 @@ export default function AppDivulgacao() {
       </div>
 
       <div className="flex-1 flex flex-col relative z-10">
-        {/* Header */}
         <div className="pt-8 pb-4 px-6 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -64,12 +63,11 @@ export default function AppDivulgacao() {
             <Car className="text-[#F4D03F] w-10 h-10" />
           </motion.div>
           <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
-            OBALEVA
+            OvaLeva
           </h1>
           <p className="text-[#A0A0B0] text-sm mt-1">Mobilidade premium para sua cidade</p>
         </div>
 
-        {/* Mockup do App */}
         <div className="px-6 flex justify-center mb-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -77,17 +75,15 @@ export default function AppDivulgacao() {
             transition={{ delay: 0.2 }}
             className="bg-[#1A1528] rounded-3xl border border-white/10 p-5 w-full max-w-[280px] shadow-2xl"
           >
-            {/* Tela do app */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="w-6 h-6 bg-[#F4D03F]/20 rounded-lg flex items-center justify-center">
                   <Car size={14} className="text-[#F4D03F]" />
                 </div>
-                <span className="text-white text-xs font-semibold">ObaLeve</span>
+                <span className="text-white text-xs font-semibold">OvaLeva</span>
                 <div className="w-6 h-6" />
               </div>
               
-              {/* Mapa placeholder */}
               <div className="bg-[#0F0B1A] rounded-2xl h-32 flex items-center justify-center border border-white/10">
                 <div className="text-center">
                   <Smartphone size={28} className="text-[#F4D03F]/50 mx-auto mb-1" />
@@ -95,7 +91,6 @@ export default function AppDivulgacao() {
                 </div>
               </div>
 
-              {/* Inputs */}
               <div className="space-y-1.5">
                 <div className="bg-[#0F0B1A] rounded-xl p-2.5 border border-white/10 flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full" />
@@ -107,15 +102,13 @@ export default function AppDivulgacao() {
                 </div>
               </div>
 
-              {/* Botão Solicitar */}
               <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-2.5 text-center">
-                <span className="text-[#1E1E2F] font-bold text-xs">🚗 Solicitar Carona</span>
+                <span className="text-[#1E1E2F] font-bold text-xs">🚗 Solicitar OvaLeva</span>
               </div>
             </div>
           </motion.div>
         </div>
 
-        {/* Benefícios resumidos */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -138,7 +131,6 @@ export default function AppDivulgacao() {
           </div>
         </motion.div>
 
-        {/* Botões */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -165,10 +157,9 @@ export default function AppDivulgacao() {
           </button>
         </motion.div>
 
-        {/* Footer */}
         <div className="text-center py-6 mt-auto">
           <p className="text-xs text-[#A0A0B0]">
-            <strong className="text-white">OBALEVA</strong> &copy; 2025
+            <strong className="text-white">OvaLeva</strong> &copy; 2025
           </p>
         </div>
       </div>

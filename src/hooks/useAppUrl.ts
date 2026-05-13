@@ -1,3 +1,3 @@
 export function useAppUrl() {
-  return 'https://obaleva.vercel.app';
+  return 'https://ovaleva.vercel.app';
 }

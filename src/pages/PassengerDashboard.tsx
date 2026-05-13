@@ -98,7 +98,7 @@ export function PassengerDashboard() {
           className="text-2xl font-bold bg-gradient-to-r from-[#F4D03F] to-amber-400 bg-clip-text text-transparent"
           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
         >
-          ObaLeve
+          OvaLeva
         </motion.h1>
         <div className="flex items-center gap-3">
           <span className="text-sm text-[#A0A0B0] hidden sm:block">{user?.email}</span>
@@ -190,7 +190,7 @@ export function PassengerDashboard() {
                 Buscando motorista...
               </span>
             ) : (
-              <span className="flex items-center justify-center gap-2">🚗 Solicitar Carona</span>
+              <span className="flex items-center justify-center gap-2">🚗 Solicitar OvaLeva</span>
             )}
           </motion.button>
         </div>
