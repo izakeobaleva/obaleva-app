@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Download, Share2 } from 'lucide-react'
+import { Car, Share2, Download } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
@@ -9,25 +9,38 @@ export default function Divulgacao() {
   const [searchParams] = useSearchParams()
   const ref = searchParams.get('ref') || 'divulgacao'
   const [apkUrl, setApkUrl] = useState('')
+  const [dominio, setDominio] = useState(window.location.origin)
 
   useEffect(() => {
-    loadApkUrl()
+    loadData()
   }, [])
 
-  async function loadApkUrl() {
-    const { data } = await supabase
+  async function loadData() {
+    // Carregar APK
+    const { data: apkData } = await supabase
       .from('app_config')
       .select('value')
       .eq('key', 'apk_url')
       .maybeSingle()
     
-    if (data?.value) {
-      setApkUrl(data.value)
+    if (apkData?.value) {
+      setApkUrl(apkData.value)
+    }
+
+    // Carregar domínio personalizado
+    const { data: dominioData } = await supabase
+      .from('app_config')
+      .select('value')
+      .eq('key', 'app_domain')
+      .maybeSingle()
+    
+    if (dominioData?.value) {
+      setDominio(String(dominioData.value))
     }
   }
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/divulgar?ref=${ref}`
+    const url = `${dominio}/divulgar?ref=${ref}`
     if (navigator.share) {
       await navigator.share({
         title: 'OBALEVA',
@@ -36,7 +49,6 @@ export default function Divulgacao() {
       })
     } else {
       await navigator.clipboard.writeText(url)
-      // toast não precisa, só feedback visual
     }
   }
 
