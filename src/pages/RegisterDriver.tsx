@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
@@ -13,6 +14,7 @@ import { DriverContract } from '../components/DriverContract'
 type Etapa = 1 | 2 | 3 | 4
 
 export function RegisterDriver() {
+  const navigate = useNavigate()
   const [etapa, setEtapa] = useState<Etapa>(1)
   const [nome, setNome] = useState('')
   const [cpf, setCpf] = useState('')
@@ -122,7 +124,7 @@ export function RegisterDriver() {
       })
 
       toast.success('Cadastro realizado com sucesso! Aguarde a aprovação.', { duration: 5000, icon: '✅' })
-      window.location.href = '/login'
+      navigate('/login')
     } catch (err: any) {
       toast.error(err.message || 'Erro ao cadastrar')
     } finally {
@@ -476,7 +478,7 @@ export function RegisterDriver() {
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-sm mx-auto p-4"
       >
         <div className="flex items-center mb-3">
-          <button onClick={() => etapa > 1 ? setEtapa((etapa - 1) as Etapa) : window.location.href = '/login'} className="btn-outline-dark p-2" type="button">
+          <button onClick={() => etapa > 1 ? setEtapa((etapa - 1) as Etapa) : navigate('/login')} className="btn-outline-dark p-2" type="button">
             <ArrowLeft size={18} />
           </button>
           <div className="flex-1 text-center -ml-9">

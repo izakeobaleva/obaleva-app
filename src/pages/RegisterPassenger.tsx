@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Check, Car } from 'lucide-react'
 
 export function RegisterPassenger() {
+  const navigate = useNavigate()
   const [nome, setNome] = useState('')
   const [cpf, setCpf] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -63,7 +65,7 @@ export function RegisterPassenger() {
   }
 
   function goToLogin() {
-    window.location.href = '/login'
+    navigate('/login')
   }
 
   if (success) {
@@ -105,7 +107,7 @@ export function RegisterPassenger() {
       >
         <div className="flex items-center mb-4">
           <motion.button
-            onClick={goToLogin}
+            onClick={() => navigate('/login')}
             className="btn-outline-dark p-2"
             type="button"
             whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.15)' }}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
@@ -6,6 +7,7 @@ import { Car, Chrome, Mail, Eye, EyeOff, ArrowRight, UserPlus, Truck } from 'luc
 import { motion } from 'framer-motion'
 
 export const Login = () => {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -96,7 +98,7 @@ export const Login = () => {
             </div>
             
             <div className="text-right">
-              <button onClick={() => window.location.href = '/forgot-password'} className="text-[#F4D03F] text-[10px] hover:underline" type="button">
+              <button onClick={() => navigate('/forgot-password')} className="text-[#F4D03F] text-[10px] hover:underline" type="button">
                 Esqueceu a senha?
               </button>
             </div>
@@ -114,10 +116,10 @@ export const Login = () => {
           <div className="mt-4 pt-3 border-t border-white/10 text-center space-y-2">
             <p className="text-[#A0A0B0] text-[10px]">Ainda não tem conta?</p>
             <div className="flex gap-2">
-              <button onClick={() => window.location.href = '/register'} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-[10px]">
+              <button onClick={() => navigate('/register')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-[10px]">
                 <UserPlus size={12} /> Passageiro
               </button>
-              <button onClick={() => window.location.href = '/register-driver'} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-[10px]">
+              <button onClick={() => navigate('/register-driver')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-[10px]">
                 <Truck size={12} /> Motorista
               </button>
             </div>
@@ -160,10 +162,10 @@ export const Login = () => {
         </button>
 
         <div className="flex gap-2 mt-5">
-          <button onClick={() => window.location.href = '/register'} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
+          <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
             <UserPlus size={14} /> Passageiro
           </button>
-          <button onClick={() => window.location.href = '/register-driver'} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
+          <button onClick={() => navigate('/register-driver')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
             <Truck size={14} /> Motorista
           </button>
         </div>
