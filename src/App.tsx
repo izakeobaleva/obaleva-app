@@ -16,6 +16,7 @@ import Profile from './pages/Profile'
 import Trips from './pages/Trips'
 import TripDetails from './pages/TripDetails'
 import Earnings from './pages/Earnings'
+import Divulgacao from './pages/Divulgacao'
 import NotFound from './pages/NotFound'
 
 function AppRoutes() {
@@ -38,6 +39,7 @@ function AppRoutes() {
         <Route path="/register-driver" element={<RegisterDriver />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/divulgar" element={<Divulgacao />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -73,6 +75,8 @@ function AppRoutes() {
           <Route path="/admin" element={<AdminDashboard />} />
         </>
       )}
+
+      <Route path="/divulgar" element={<Divulgacao />} />
 
       {/* Se não encaixar em nenhum tipo, redireciona */}
       <Route path="*" element={<Navigate to="/" replace />} />
