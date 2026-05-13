@@ -29,26 +29,25 @@ function AppRoutes() {
     </div>
   )
 
-  // Rotas públicas (usuário NÃO logado)
-  if (!user) {
-    return (
-      <Routes>
-        <Route path="/" element={<AppDivulgacao />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/register" element={<RegisterPassenger />} />
-        <Route path="/register-driver" element={<RegisterDriver />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/update-password" element={<UpdatePassword />} />
-        <Route path="/divulgar" element={<AppDivulgacao />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    )
-  }
+  // Rotas públicas (acessíveis com ou sem login)
+  const publicRoutes = (
+    <>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<RegisterPassenger />} />
+      <Route path="/register-driver" element={<RegisterDriver />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/update-password" element={<UpdatePassword />} />
+      <Route path="/admin" element={<AdminLogin />} />
+      <Route path="/divulgar" element={<AppDivulgacao />} />
+      <Route path="/landing" element={<Divulgacao />} />
+    </>
+  )
 
   // Rotas protegidas por tipo de usuário
   return (
     <Routes>
+      {publicRoutes}
+
       {/* Passageiro */}
       {profile?.tipo === 'passageiro' && (
         <>
@@ -77,10 +76,19 @@ function AppRoutes() {
         </>
       )}
 
-      <Route path="/divulgar" element={<AppDivulgacao />} />
+      {/* Redirecionamento baseado no status do usuário */}
+      <Route path="/" element={
+        user ? (
+          profile?.tipo === 'passageiro' ? <PassengerDashboard /> :
+          profile?.tipo === 'motorista' ? <DriverDashboard /> :
+          profile?.tipo === 'admin' ? <AdminDashboard /> :
+          <Navigate to="/login" replace />
+        ) : (
+          <AppDivulgacao />
+        )
+      } />
 
-      {/* Se não encaixar em nenhum tipo, redireciona */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
