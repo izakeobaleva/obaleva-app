@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
 
 export function RegisterPassenger() {
+  const navigate = useNavigate()
   const [nome, setNome] = useState('')
   const [cpf, setCpf] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -63,7 +64,7 @@ export function RegisterPassenger() {
       if (insertPassError) console.warn('Erro ao inserir em passageiros:', insertPassError)
 
       toast.success('Conta criada com sucesso!')
-      window.location.href = '/login'
+      navigate('/login')
     } catch (err: any) {
       toast.error(err.message || 'Erro ao cadastrar')
     } finally {
@@ -84,13 +85,14 @@ export function RegisterPassenger() {
         className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[400px] p-6"
       >
         <div className="flex items-center mb-4">
-          <a
-            href="/login"
-            className="btn-outline-dark p-2 inline-flex items-center justify-center no-underline"
+          <button
+            onClick={() => navigate('/login')}
+            className="btn-outline-dark p-2 inline-flex items-center justify-center"
             aria-label="Voltar"
+            type="button"
           >
             <ArrowLeft size={20} />
-          </a>
+          </button>
           <div className="flex-1 text-center -ml-10">
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Criar Conta</h1>
           </div>
