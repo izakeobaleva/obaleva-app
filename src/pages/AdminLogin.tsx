@@ -17,35 +17,23 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      console.log('Tentando login com:', email)
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        console.error('Erro auth:', error)
-        throw error
-      }
+      if (error) throw error
 
-      console.log('Login bem sucedido, user ID:', data.user.id)
-
-      // Verificar se é admin
       const { data: profile, error: profileError } = await supabase
         .from('usuarios')
         .select('tipo')
         .eq('id', data.user.id)
         .single()
 
-      console.log('Perfil encontrado:', profile, 'Erro:', profileError)
-
-      if (profileError) {
-        // Se deu erro ao buscar perfil, vamos tentar verificar se existe
-        const { data: allProfiles } = await supabase
-          .from('usuarios')
-          .select('*')
-          .eq('email', email)
-        
-        console.log('Todos os perfis com este email:', allProfiles)
+      if (profileError || !profile) {
+        await supabase.auth.signOut()
+        toast.error('Usuário não encontrado na base de dados')
+        setLoading(false)
+        return
       }
 
-      if (!profile || profile.tipo !== 'admin') {
+      if (profile.tipo !== 'admin') {
         await supabase.auth.signOut()
         toast.error('Acesso restrito apenas para administradores')
         setLoading(false)
@@ -55,14 +43,9 @@ export default function AdminLogin() {
       toast.success('Bem-vindo ao painel admin!')
       navigate('/admin')
     } catch (err: any) {
-      console.error('Erro completo:', err)
       toast.error(err.message || 'Erro ao fazer login')
     }
     setLoading(false)
-  }
-
-  const handleGoogleLogin = async () => {
-    toast.error('Login com Google não disponível para admin')
   }
 
   return (
@@ -77,18 +60,14 @@ export default function AdminLogin() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 w-full max-w-[400px]"
       >
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#F4D03F]/20">
             <Shield className="text-[#F4D03F]" size={40} />
           </div>
-          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
-            Admin ObaLeve
-          </h1>
+          <h1 className="text-3xl font-bold text-white">Admin ObaLeve</h1>
           <p className="text-[#A0A0B0] mt-2">Acesso restrito para administradores</p>
         </div>
 
-        {/* Form */}
         <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-6">
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
@@ -159,7 +138,6 @@ export default function AdminLogin() {
           </div>
         </div>
 
-        {/* Informações extras */}
         <div className="mt-4 text-center">
           <div className="inline-flex items-center gap-2 bg-[#1A1528] rounded-2xl px-4 py-2 border border-white/10">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
