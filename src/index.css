@@ -75,10 +75,10 @@
 /* Botão de voltar com área de toque ampliada no mobile */
 .back-button {
   @apply flex items-center justify-center;
-  min-width: 48px;
-  min-height: 48px;
+  min-width: 52px;
+  min-height: 52px;
   border-radius: 16px;
-  padding: 12px;
+  padding: 14px;
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
