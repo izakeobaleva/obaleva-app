@@ -72,6 +72,38 @@
   }
 }
 
+/* Botão de voltar com área de toque ampliada no mobile */
+.back-button {
+  @apply flex items-center justify-center;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 16px;
+  padding: 12px;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.back-button:active {
+  transform: scale(0.92);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Botão de voltar estilo outline específico */
+.back-button-outline {
+  @apply back-button;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.back-button-outline:active {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 @layer components {
   .btn-amarelo {
     @apply btn-premium;
