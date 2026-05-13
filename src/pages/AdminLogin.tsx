@@ -17,17 +17,35 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
+      console.log('Tentando login com:', email)
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
+      if (error) {
+        console.error('Erro auth:', error)
+        throw error
+      }
+
+      console.log('Login bem sucedido, user ID:', data.user.id)
 
       // Verificar se é admin
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('usuarios')
         .select('tipo')
         .eq('id', data.user.id)
         .single()
 
-      if (profile?.tipo !== 'admin') {
+      console.log('Perfil encontrado:', profile, 'Erro:', profileError)
+
+      if (profileError) {
+        // Se deu erro ao buscar perfil, vamos tentar verificar se existe
+        const { data: allProfiles } = await supabase
+          .from('usuarios')
+          .select('*')
+          .eq('email', email)
+        
+        console.log('Todos os perfis com este email:', allProfiles)
+      }
+
+      if (!profile || profile.tipo !== 'admin') {
         await supabase.auth.signOut()
         toast.error('Acesso restrito apenas para administradores')
         setLoading(false)
@@ -35,11 +53,16 @@ export default function AdminLogin() {
       }
 
       toast.success('Bem-vindo ao painel admin!')
-      navigate('/')
+      navigate('/admin')
     } catch (err: any) {
+      console.error('Erro completo:', err)
       toast.error(err.message || 'Erro ao fazer login')
     }
     setLoading(false)
+  }
+
+  const handleGoogleLogin = async () => {
+    toast.error('Login com Google não disponível para admin')
   }
 
   return (
