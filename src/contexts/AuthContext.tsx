@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        await fetchProfile(session.user.id)
+        await fetchProfile(session.user.id, session.user)
       } else {
         setProfile(null)
       }
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        await fetchProfile(session.user.id)
+        await fetchProfile(session.user.id, session.user)
       }
     } catch (err) {
       console.error('Erro ao inicializar auth:', err)
@@ -61,8 +61,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false)
   }
 
-  async function fetchProfile(userId: string) {
+  async function fetchProfile(userId: string, user?: User) {
     try {
+      // Tenta buscar da tabela usuarios
       const { data, error } = await supabase
         .from('usuarios')
         .select('id, nome_completo, email, tipo, telefone, cpf, foto_url')
@@ -71,26 +72,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) {
         console.error('Erro ao buscar perfil:', error.message)
-        setProfile(null)
-      } else if (data) {
-        console.log('Perfil carregado:', data.tipo)
-        setProfile(data)
-      } else {
-        console.warn('Perfil não encontrado para o usuário:', userId)
-        setProfile(null)
       }
+
+      if (data) {
+        console.log('Perfil carregado da tabela:', data.tipo)
+        setProfile(data)
+        setLoading(false)
+        return
+      }
+
+      // Fallback: usar user_metadata se não encontrou na tabela
+      const metaTipo = user?.user_metadata?.tipo
+      const metaNome = user?.user_metadata?.nome_completo || user?.email?.split('@')[0] || 'Usuário'
+      
+      if (metaTipo && (metaTipo === 'passageiro' || metaTipo === 'motorista' || metaTipo === 'admin')) {
+        console.log('Perfil carregado do metadata:', metaTipo)
+        setProfile({
+          id: userId,
+          nome_completo: metaNome,
+          email: user?.email || '',
+          tipo: metaTipo,
+        })
+        setLoading(false)
+        return
+      }
+
+      console.warn('Perfil não encontrado para o usuário:', userId)
+      setProfile(null)
     } catch (err) {
       console.error('Erro inesperado ao buscar perfil:', err)
       setProfile(null)
     }
+    setLoading(false)
   }
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
-    
-    // Após login bem-sucedido, o onAuthStateChange vai disparar
-    // e carregar o profile automaticamente
   }
 
   const signOut = async () => {

@@ -23,6 +23,8 @@ import NotFound from './pages/NotFound'
 function AppRoutes() {
   const { user, profile, loading } = useAuth()
 
+  console.log('🧭 AppRoutes:', { user: !!user, profile: profile?.tipo, loading })
+
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0F0B1A]">
       <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
