@@ -8,9 +8,10 @@ import Corridas from './Admin/Corridas'
 import Financeiro from './Admin/Financeiro'
 import LandingEditor from './Admin/LandingEditor'
 import LogoEditor from './Admin/LogoEditor'
-import { Shield, ArrowLeft, Image } from 'lucide-react'
+import DominioConfig from './Admin/DominioConfig'
+import { Shield, ArrowLeft, Image, Globe } from 'lucide-react'
 
-type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'landing' | 'logo'
+type Tab = 'motoristas' | 'passageiros' | 'corridas' | 'financeiro' | 'landing' | 'logo' | 'dominio'
 
 export default function AdminDashboard() {
   const { signOut } = useAuth()
@@ -31,6 +32,7 @@ export default function AdminDashboard() {
     { id: 'financeiro', label: 'Financeiro' },
     { id: 'landing', label: 'Landing Page' },
     { id: 'logo', label: 'Logo', icon: Image },
+    { id: 'dominio', label: 'Domínio', icon: Globe },
   ]
 
   const renderTabContent = () => {
@@ -41,6 +43,7 @@ export default function AdminDashboard() {
       case 'financeiro': return <Financeiro />
       case 'landing': return <LandingEditor />
       case 'logo': return <LogoEditor />
+      case 'dominio': return <DominioConfig />
       default: return <Motoristas />
     }
   }
