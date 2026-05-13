@@ -69,8 +69,8 @@ export default function Entrar() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'ObaLeve',
-          text: 'Mobilidade premium para sua cidade. Baixe o app ObaLeve!',
+          title: 'ObaLeva',
+          text: 'Mobilidade premium para sua cidade. Baixe o app ObaLeva!',
           url: landingUrl,
         });
       } catch (err) {
@@ -105,7 +105,7 @@ export default function Entrar() {
               <Car size={26} className="text-[#1E1E2F]" />
             </div>
           </motion.div>
-          <h1 className="text-4xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+          <h1 className="text-4xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</h1>
           <p className="text-[#A0A0B0] text-base mt-0">Segurança e conforto em cada viagem</p>
         </div>
 
@@ -221,7 +221,7 @@ export default function Entrar() {
             className="text-[#A0A0B0] hover:text-[#F4D03F] transition-all flex items-center justify-center gap-2 mx-auto text-sm"
           >
             <Share2 size={16} />
-            Compartilhar ObaLeve
+            Compartilhar ObaLeva
           </button>
         </motion.div>
       </motion.div>
