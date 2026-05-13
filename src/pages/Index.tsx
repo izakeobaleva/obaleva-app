@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Share2, Download, Smartphone, Shield, Star } from 'lucide-react'
+import { Car, Share2, Download, Smartphone, Shield, Star, Mail } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
@@ -76,13 +76,13 @@ export const Index = () => {
           <p className="text-[#A0A0B0] text-sm mt-1">Mobilidade premium para sua cidade</p>
         </div>
 
-        {/* Mockup do App */}
+        {/* Mockup do App - com mais espaço horizontal */}
         <div className="px-5 flex justify-center mb-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-[#1A1528] rounded-3xl border border-white/10 p-6 w-full max-w-[300px] shadow-2xl"
+            className="bg-[#1A1528] rounded-3xl border border-white/10 p-7 w-full max-w-[320px] shadow-2xl"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ export const Index = () => {
                 <span className="text-white text-xs font-semibold">ObaLeve</span>
                 <div className="w-6 h-6" />
               </div>
-              <div className="bg-[#0F0B1A] rounded-2xl h-36 flex items-center justify-center border border-white/10">
+              <div className="bg-[#0F0B1A] rounded-2xl h-40 flex items-center justify-center border border-white/10">
                 <div className="text-center">
                   <Smartphone size={28} className="text-[#F4D03F]/50 mx-auto mb-1" />
                   <p className="text-[#A0A0B0] text-[10px]">Mapa ao vivo</p>
@@ -138,18 +138,18 @@ export const Index = () => {
           </div>
         </motion.div>
 
-        {/* Botões */}
+        {/* Botões - mais largos */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="px-5 space-y-3 max-w-sm mx-auto w-full"
+          className="px-6 space-y-3 max-w-sm mx-auto w-full"
         >
           {/* Linha: Google | E-mail */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <button
               onClick={handleGoogleLogin}
-              className="py-4 px-4 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm"
+              className="py-5 px-5 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-sm"
             >
               <svg width="18" height="18" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -161,21 +161,18 @@ export const Index = () => {
             </button>
             <button
               onClick={() => navigate('/login')}
-              className="py-4 px-4 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm"
+              className="py-5 px-5 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-sm"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-              </svg>
+              <Mail size={16} />
               E-mail
             </button>
           </div>
 
           {/* Linha: Passageiro | Motorista */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => navigate('/register')}
-              className="py-4 px-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
+              className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all text-sm flex items-center justify-center gap-3"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -187,7 +184,7 @@ export const Index = () => {
             </button>
             <button
               onClick={() => navigate('/register-driver')}
-              className="py-4 px-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
+              className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all text-sm flex items-center justify-center gap-3"
             >
               <Car size={16} />
               Motorista
@@ -197,7 +194,7 @@ export const Index = () => {
           {/* Compartilhar */}
           <button
             onClick={handleShare}
-            className="w-full py-4 px-4 rounded-2xl font-bold border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all text-xs flex items-center justify-center gap-2"
+            className="w-full py-5 px-5 rounded-2xl font-bold border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all text-xs flex items-center justify-center gap-3"
           >
             <Share2 size={14} />
             Compartilhar App
@@ -208,7 +205,7 @@ export const Index = () => {
             <a
               href={apkUrl}
               download
-              className="w-full py-4 px-4 rounded-2xl font-bold border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all text-xs flex items-center justify-center gap-2"
+              className="w-full py-5 px-5 rounded-2xl font-bold border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all text-xs flex items-center justify-center gap-3"
             >
               <Download size={14} />
               Baixar APK
