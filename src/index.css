@@ -59,6 +59,17 @@
     font-size: 0.85rem;
     line-height: 1.4;
   }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(244, 208, 63, 0.3);
+    border-radius: 2px;
+  }
 }
 
 @layer components {
