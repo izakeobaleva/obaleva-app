@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowLeft } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { StepIndicator } from '../components/driver-registration/StepIndicator'
 import { PersonalDataStep } from '../components/driver-registration/PersonalDataStep'
@@ -88,7 +89,6 @@ export function RegisterDriver() {
 
     setLoading(true)
     try {
-      // Criar auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -102,7 +102,6 @@ export function RegisterDriver() {
 
       const userId = authData.user.id
 
-      // Inserir na tabela usuarios
       const { error: userError } = await supabase.from('usuarios').insert({
         id: userId,
         nome_completo: nome,
@@ -117,7 +116,6 @@ export function RegisterDriver() {
 
       if (userError) throw userError
 
-      // Inserir na tabela motoristas
       const { error: motoristaError } = await supabase.from('motoristas').insert({
         id: userId,
         status: 'pendente',
@@ -211,13 +209,8 @@ export function RegisterDriver() {
         className="relative z-10 w-full max-w-md"
       >
         <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-5">
-          {/* Header */}
           <div className="flex items-center gap-3 mb-3">
-            <button
-              onClick={handleBack}
-              className="back-button-outline"
-              type="button"
-            >
+            <button onClick={handleBack} className="back-button-outline" type="button">
               <ArrowLeft size={22} />
             </button>
             <div>
@@ -239,102 +232,62 @@ export function RegisterDriver() {
               >
                 {etapa === 1 && (
                   <PersonalDataStep
-                    nome={nome}
-                    cpf={cpf}
-                    dataNascimento={dataNascimento}
-                    email={email}
-                    telefone={telefone}
-                    password={password}
-                    confirmPassword={confirmPassword}
-                    onNomeChange={setNome}
-                    onCpfChange={setCpf}
-                    onDataNascimentoChange={setDataNascimento}
-                    onEmailChange={setEmail}
-                    onTelefoneChange={setTelefone}
-                    onPasswordChange={setPassword}
-                    onConfirmPasswordChange={setConfirmPassword}
+                    nome={nome} cpf={cpf} dataNascimento={dataNascimento}
+                    email={email} telefone={telefone} password={password} confirmPassword={confirmPassword}
+                    onNomeChange={setNome} onCpfChange={setCpf} onDataNascimentoChange={setDataNascimento}
+                    onEmailChange={setEmail} onTelefoneChange={setTelefone}
+                    onPasswordChange={setPassword} onConfirmPasswordChange={setConfirmPassword}
                     formatarCpf={formatarCpf}
                   />
                 )}
                 {etapa === 2 && (
                   <AddressStep
-                    cep={cep}
-                    logradouro={logradouro}
-                    numero={numero}
-                    complemento={complemento}
-                    bairro={bairro}
-                    cidade={cidade}
-                    estado={estado}
-                    onCepChange={setCep}
-                    onLogradouroChange={setLogradouro}
-                    onNumeroChange={setNumero}
-                    onComplementoChange={setComplemento}
-                    onBairroChange={setBairro}
-                    onCidadeChange={setCidade}
-                    onEstadoChange={setEstado}
-                    buscarCep={buscarCep}
-                    formatarCep={formatarCep}
+                    cep={cep} logradouro={logradouro} numero={numero} complemento={complemento}
+                    bairro={bairro} cidade={cidade} estado={estado}
+                    onCepChange={setCep} onLogradouroChange={setLogradouro} onNumeroChange={setNumero}
+                    onComplementoChange={setComplemento} onBairroChange={setBairro}
+                    onCidadeChange={setCidade} onEstadoChange={setEstado}
+                    buscarCep={buscarCep} formatarCep={formatarCep}
                   />
                 )}
                 {etapa === 3 && (
                   <DocumentsStep
-                    frenteCnh={frenteCnh}
-                    versoCnh={versoCnh}
-                    selfieCnh={selfieCnh}
-                    crlv={crlv}
+                    frenteCnh={frenteCnh} versoCnh={versoCnh} selfieCnh={selfieCnh} crlv={crlv}
                     certidaoAntecedentes={certidaoAntecedentes}
-                    modeloVeiculo={modeloVeiculo}
-                    placaVeiculo={placaVeiculo}
-                    anoVeiculo={anoVeiculo}
-                    corVeiculo={corVeiculo}
-                    onFrenteCnhChange={setFrenteCnh}
-                    onVersoCnhChange={setVersoCnh}
-                    onSelfieCnhChange={setSelfieCnh}
-                    onCrlvChange={setCrlv}
+                    modeloVeiculo={modeloVeiculo} placaVeiculo={placaVeiculo} anoVeiculo={anoVeiculo} corVeiculo={corVeiculo}
+                    onFrenteCnhChange={setFrenteCnh} onVersoCnhChange={setVersoCnh}
+                    onSelfieCnhChange={setSelfieCnh} onCrlvChange={setCrlv}
                     onCertidaoChange={setCertidaoAntecedentes}
-                    onModeloChange={setModeloVeiculo}
-                    onPlacaChange={setPlacaVeiculo}
-                    onAnoChange={setAnoVeiculo}
-                    onCorChange={setCorVeiculo}
+                    onModeloChange={setModeloVeiculo} onPlacaChange={setPlacaVeiculo}
+                    onAnoChange={setAnoVeiculo} onCorChange={setCorVeiculo}
                   />
                 )}
                 {etapa === 4 && (
                   <ReviewStep
-                    nome={nome}
-                    cpf={cpf}
-                    modeloVeiculo={modeloVeiculo}
-                    placaVeiculo={placaVeiculo}
+                    nome={nome} cpf={cpf} modeloVeiculo={modeloVeiculo} placaVeiculo={placaVeiculo}
                     temDocumentos={!!frenteCnh && !!versoCnh && !!selfieCnh && !!crlv}
-                    contratoAceito={contratoAceito}
-                    onContratoChange={setContratoAceito}
+                    contratoAceito={contratoAceito} onContratoChange={setContratoAceito}
                   />
                 )}
               </motion.div>
             </AnimatePresence>
 
             <FormActions
-              etapa={etapa}
-              totalEtapas={totalEtapas}
-              loading={loading}
-              disabled={etapa === 4 && !contratoAceito}
+              etapa={etapa} totalEtapas={totalEtapas}
+              loading={loading} disabled={etapa === 4 && !contratoAceito}
               onNext={handleNext}
             />
           </form>
 
-          {/* Links */}
           {etapa === 1 && (
             <div className="mt-3 text-center">
               <p className="text-[10px] text-[#A0A0B0]">
                 Já tem conta?{' '}
-                <button onClick={() => navigate('/login')} className="text-[#F4D03F] hover:underline font-medium">
-                  Entrar
-                </button>
+                <button onClick={() => navigate('/login')} className="text-[#F4D03F] hover:underline font-medium">Entrar</button>
               </p>
               <p className="text-[10px] text-[#A0A0B0] mt-1">
                 É passageiro?{' '}
-                <button onClick={() => navigate('/register')} className="text-[#F4D03F] hover:underline font-medium">
-                  Cadastre-se aqui
-                </button>
+                <button onClick={() => navigate('/register')} className="text-[#F4D03F] hover:underline font-medium">Cadastre-se aqui</button>
               </p>
             </div>
           )}

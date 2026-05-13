@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, User, Mail, Lock, Phone, Eye, EyeOff, Car } from 'lucide-react'
+import { ArrowLeft, User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
 
