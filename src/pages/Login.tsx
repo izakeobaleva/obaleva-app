@@ -88,8 +88,8 @@ export default function Entrar() {
               <Car size={32} className="text-[#1E1E2F]" />
             </div>
           </motion.div>
-          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
-          <p className="text-[#A0A0B0] text-sm mt-0.5">Segurança e conforto em cada viagem</p>
+          <h1 className="text-4xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+          <p className="text-[#A0A0B0] text-base mt-1">Segurança e conforto em cada viagem</p>
         </div>
 
         <motion.button

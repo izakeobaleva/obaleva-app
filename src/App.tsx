@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
-import Login from './pages/Login';
+import Entrar from './pages/Login';
 import RegisterPassenger from './pages/RegisterPassenger';
 import RegisterDriver from './pages/RegisterDriver';
 import ForgotPassword from './pages/ForgotPassword';
@@ -23,8 +23,8 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Entrar />} />
+          <Route path="/login" element={<Entrar />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/register" element={<RegisterPassenger />} />
           <Route path="/register-driver" element={<RegisterDriver />} />
