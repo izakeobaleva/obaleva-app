@@ -39,6 +39,20 @@ export const Index = () => {
     }
   }
 
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        }
+      })
+      if (error) throw error
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao fazer login com Google')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -134,7 +148,7 @@ export const Index = () => {
           {/* Linha: Google | E-mail */}
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => navigate('/login')}
+              onClick={handleGoogleLogin}
               className="py-3.5 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm"
             >
               <svg width="16" height="16" viewBox="0 0 24 24">
