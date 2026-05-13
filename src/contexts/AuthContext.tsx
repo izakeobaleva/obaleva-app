@@ -34,12 +34,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initAuth()
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log('🔄 Auth state changed:', _event, session?.user?.email)
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
+        setLoading(true)
         await fetchProfile(session.user.id, session.user)
+        setLoading(false)
       } else {
         setProfile(null)
+        setLoading(false)
       }
     })
 
@@ -49,20 +53,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   async function initAuth() {
     setLoading(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) {
+        console.error('❌ Erro ao buscar sessão:', error.message)
+      }
+      console.log('🔍 Sessão inicial:', session?.user?.email || 'Nenhuma sessão')
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
         await fetchProfile(session.user.id, session.user)
       }
     } catch (err) {
-      console.error('Erro ao inicializar auth:', err)
+      console.error('❌ Erro ao inicializar auth:', err)
     }
     setLoading(false)
   }
 
   async function fetchProfile(userId: string, user?: User) {
     try {
+      console.log('🔍 Buscando perfil para:', userId)
+      
       // Tenta buscar da tabela usuarios
       const { data, error } = await supabase
         .from('usuarios')
@@ -71,44 +81,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .maybeSingle()
 
       if (error) {
-        console.error('Erro ao buscar perfil:', error.message)
+        console.error('❌ Erro ao buscar perfil na tabela:', error.message)
       }
 
       if (data) {
-        console.log('Perfil carregado da tabela:', data.tipo)
+        console.log('✅ Perfil carregado da tabela:', data.tipo, data.email)
         setProfile(data)
-        setLoading(false)
         return
       }
 
       // Fallback: usar user_metadata se não encontrou na tabela
       const metaTipo = user?.user_metadata?.tipo
       const metaNome = user?.user_metadata?.nome_completo || user?.email?.split('@')[0] || 'Usuário'
+      console.log('ℹ️ Perfil não encontrado na tabela. Metadata:', { metaTipo, metaNome })
       
       if (metaTipo && (metaTipo === 'passageiro' || metaTipo === 'motorista' || metaTipo === 'admin')) {
-        console.log('Perfil carregado do metadata:', metaTipo)
+        console.log('✅ Perfil carregado do metadata:', metaTipo)
         setProfile({
           id: userId,
           nome_completo: metaNome,
           email: user?.email || '',
           tipo: metaTipo,
         })
-        setLoading(false)
         return
       }
 
-      console.warn('Perfil não encontrado para o usuário:', userId)
+      console.warn('⚠️ Perfil não encontrado para o usuário:', userId)
       setProfile(null)
     } catch (err) {
-      console.error('Erro inesperado ao buscar perfil:', err)
+      console.error('❌ Erro inesperado ao buscar perfil:', err)
       setProfile(null)
     }
-    setLoading(false)
   }
 
   const signIn = async (email: string, password: string) => {
+    console.log('🔑 Tentando login:', email)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
+    if (error) {
+      console.error('❌ Erro no login:', error.message)
+      throw error
+    }
+    console.log('✅ Login bem-sucedido!')
   }
 
   const signOut = async () => {
