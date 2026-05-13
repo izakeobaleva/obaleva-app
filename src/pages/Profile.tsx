@@ -18,7 +18,7 @@ export default function Perfil() {
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
       <header className="glass-header sticky top-0 z-20 px-6 py-4 flex items-center gap-3">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="btn-outline-dark p-2"
           aria-label="Voltar"
         >

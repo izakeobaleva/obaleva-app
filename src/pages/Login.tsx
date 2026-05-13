@@ -95,6 +95,13 @@ function LoginPage() {
                 <Zap size={14} />
                 <span>Cadastro rápido</span>
               </div>
+
+              <button
+                onClick={() => navigate('/')}
+                className="w-full py-3 rounded-2xl text-[#A0A0B0] hover:text-white transition-all text-sm mt-2"
+              >
+                Voltar para o início
+              </button>
             </motion.div>
           ) : (
             <motion.div
@@ -105,7 +112,7 @@ function LoginPage() {
               className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-6"
             >
               <div className="flex items-center gap-3 mb-4">
-                <button onClick={() => setShowEmailForm(false)} className="back-button-outline" type="button">
+                <button onClick={() => navigate('/')} className="back-button-outline" type="button">
                   <ArrowLeft size={22} />
                 </button>
                 <h2 className="text-lg font-bold text-white">Entrar</h2>
@@ -170,6 +177,12 @@ function LoginPage() {
                     Cadastre-se
                   </button>
                 </p>
+                <button
+                  onClick={() => navigate('/')}
+                  className="text-xs text-[#A0A0B0] hover:text-white transition mt-2"
+                >
+                  Voltar para o início
+                </button>
               </div>
             </motion.div>
           )}

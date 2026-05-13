@@ -46,7 +46,6 @@ export default function TripDetails() {
     if (!id) return
     setLoading(true)
     
-    // Buscar a corrida primeiro
     const { data: corrida, error } = await supabase
       .from('corridas')
       .select('*')
@@ -55,13 +54,12 @@ export default function TripDetails() {
 
     if (error || !corrida) {
       toast.error('Erro ao carregar detalhes da corrida')
-      navigate(-1)
+      navigate('/')
       return
     }
 
     setTrip(corrida)
 
-    // Buscar nome do passageiro
     if (corrida.passageiro_id) {
       const { data: pData } = await supabase
         .from('usuarios')
@@ -71,7 +69,6 @@ export default function TripDetails() {
       if (pData?.nome_completo) setPassageiroNome(pData.nome_completo)
     }
 
-    // Buscar nome do motorista
     if (corrida.motorista_id) {
       const { data: mData } = await supabase
         .from('usuarios')
@@ -115,7 +112,7 @@ export default function TripDetails() {
       <header className="glass-header sticky top-0 z-20 px-6 py-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="btn-outline-dark p-2"
           >
             <ArrowLeft size={20} />
