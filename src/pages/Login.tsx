@@ -168,10 +168,11 @@ export const Login = () => {
                 <span className="text-white text-[10px] font-semibold">ObaLeve</span>
                 <div className="w-5 h-5" />
               </div>
-              
-              <div className="bg-[#0F0B1A] rounded-2xl h-20 flex items-center justify-center border border-white/10">
+
+              {/* Mapa ao vivo com altura aumentada */}
+              <div className="bg-[#0F0B1A] rounded-2xl h-40 flex items-center justify-center border border-white/10">
                 <div className="text-center">
-                  <Smartphone size={20} className="text-[#F4D03F]/50 mx-auto mb-1" />
+                  <Smartphone size={24} className="text-[#F4D03F]/50 mx-auto mb-1" />
                   <p className="text-[#A0A0B0] text-[10px]">Mapa ao vivo</p>
                 </div>
               </div>
