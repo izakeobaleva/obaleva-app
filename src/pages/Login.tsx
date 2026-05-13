@@ -115,10 +115,10 @@ export const Login = () => {
             <div className="mt-4 pt-4 border-t border-white/10 text-center space-y-3">
               <p className="text-[#A0A0B0] text-xs">Ainda não tem conta?</p>
               <div className="flex gap-2">
-                <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
+                <button onClick={() => navigate('/register')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-[10px]">
                   Passageiro
                 </button>
-                <button onClick={() => navigate('/register-driver')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
+                <button onClick={() => navigate('/register-driver')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-[10px]">
                   Motorista
                 </button>
               </div>
@@ -227,15 +227,15 @@ export const Login = () => {
           <div className="flex gap-2">
             <button
               onClick={handleGoogleLogin}
-              className="flex-1 py-2.5 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-xs font-medium"
+              className="flex-1 py-2 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-1.5 hover:bg-white/10 transition text-[10px] font-medium"
             >
-              <Chrome size={16} /> Google
+              <Chrome size={14} /> Google
             </button>
             <button
               onClick={() => setShowEmailForm(true)}
-              className="flex-1 py-2.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs shadow-lg"
+              className="flex-1 py-2 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-1.5 text-[10px] shadow-lg"
             >
-              <Mail size={16} /> E-mail
+              <Mail size={14} /> E-mail
             </button>
           </div>
         </motion.div>
@@ -245,13 +245,13 @@ export const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="px-6 mt-3 max-w-xs mx-auto w-full"
+          className="px-6 mt-2 max-w-xs mx-auto w-full"
         >
           <div className="flex gap-2">
-            <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
+            <button onClick={() => navigate('/register')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-[10px] font-medium">
               Passageiro
             </button>
-            <button onClick={() => navigate('/register-driver')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
+            <button onClick={() => navigate('/register-driver')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-[10px] font-medium">
               Motorista
             </button>
           </div>
