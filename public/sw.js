@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ovaleva-v1'
+const CACHE_NAME = 'obaleva-v1'
 const urlsToCache = [
   '/',
   '/index.html',

@@ -37,7 +37,7 @@ export default function AppDivulgacao() {
     const url = `${dominio}/divulgar?ref=${ref}`
     if (navigator.share) {
       await navigator.share({
-        title: 'OvaLeva',
+        title: 'ObaLeva',
         text: 'Mobilidade premium na palma da sua mão!',
         url
       })
@@ -63,7 +63,7 @@ export default function AppDivulgacao() {
             <Car className="text-[#F4D03F] w-10 h-10" />
           </motion.div>
           <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
-            OvaLeva
+            ObaLeva
           </h1>
           <p className="text-[#A0A0B0] text-sm mt-1">Mobilidade premium para sua cidade</p>
         </div>
@@ -80,7 +80,7 @@ export default function AppDivulgacao() {
                 <div className="w-6 h-6 bg-[#F4D03F]/20 rounded-lg flex items-center justify-center">
                   <Car size={14} className="text-[#F4D03F]" />
                 </div>
-                <span className="text-white text-xs font-semibold">OvaLeva</span>
+                <span className="text-white text-xs font-semibold">ObaLeva</span>
                 <div className="w-6 h-6" />
               </div>
               
@@ -103,7 +103,7 @@ export default function AppDivulgacao() {
               </div>
 
               <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-2.5 text-center">
-                <span className="text-[#1E1E2F] font-bold text-xs">🚗 Solicitar OvaLeva</span>
+                <span className="text-[#1E1E2F] font-bold text-xs">🚗 Solicitar ObaLeva</span>
               </div>
             </div>
           </motion.div>
@@ -159,7 +159,7 @@ export default function AppDivulgacao() {
 
         <div className="text-center py-6 mt-auto">
           <p className="text-xs text-[#A0A0B0]">
-            <strong className="text-white">OvaLeva</strong> &copy; 2025
+            <strong className="text-white">ObaLeva</strong> &copy; 2025
           </p>
         </div>
       </div>

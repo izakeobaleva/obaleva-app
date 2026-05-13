@@ -33,7 +33,7 @@ export const Index = () => {
   const handleShare = async () => {
     const url = `${dominio}/divulgar`
     if (navigator.share) {
-      try { await navigator.share({ title: 'OvaLeva', text: 'Mobilidade premium na palma da sua mão!', url }) } catch {}
+      try { await navigator.share({ title: 'ObaLeva', text: 'Mobilidade premium na palma da sua mão!', url }) } catch {}
     } else {
       await navigator.clipboard.writeText(url)
     }
@@ -78,7 +78,7 @@ export const Index = () => {
             className="text-4xl md:text-5xl font-extrabold text-white text-center"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
           >
-            OvaLeva
+            ObaLeva
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -98,7 +98,7 @@ export const Index = () => {
           </motion.p>
         </div>
 
-        {/* Mockup do App - mesma largura dos botões (max-w-md) */}
+        {/* Mockup do App */}
         <div className="px-6 flex justify-center mb-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -111,7 +111,7 @@ export const Index = () => {
                 <div className="w-7 h-7 bg-[#F4D03F]/20 rounded-xl flex items-center justify-center">
                   <Car size={16} className="text-[#F4D03F]" />
                 </div>
-                <span className="text-white font-bold text-sm">OvaLeva</span>
+                <span className="text-white font-bold text-sm">ObaLeva</span>
                 <div className="w-7 h-7" />
               </div>
               <div className="bg-[#0F0B1A] rounded-2xl h-40 flex items-center justify-center border border-white/10">
@@ -132,7 +132,7 @@ export const Index = () => {
                 </div>
               </div>
               <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-3 text-center shadow-lg shadow-[#F4D03F]/20">
-                <span className="text-[#1E1E2F] font-bold text-base">🚗 Solicitar OvaLeva</span>
+                <span className="text-[#1E1E2F] font-bold text-base">🚗 Solicitar ObaLeva</span>
               </div>
             </div>
           </motion.div>
@@ -234,7 +234,7 @@ export const Index = () => {
 
         <div className="text-center py-8 mt-auto">
           <p className="text-sm text-[#A0A0B0]">
-            <strong className="text-white font-bold">OvaLeva</strong> &copy; 2025
+            <strong className="text-white font-bold">ObaLeva</strong> &copy; 2025
           </p>
           <p className="text-xs text-[#A0A0B0]/50 mt-1">Mobilidade premium para sua cidade</p>
         </div>

@@ -130,7 +130,7 @@ export function DriverDashboard() {
     <div className="min-h-screen bg-[#0F0B1A] pb-24">
       <header className="glass-header sticky top-0 z-20 flex justify-between items-center px-6 py-4">
         <div>
-          <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>OvaLeva</h1>
+          <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</h1>
           <p className="text-xs text-[#A0A0B0]">Motorista</p>
         </div>
         <button onClick={signOut} className="btn-outline-dark px-4 py-2 text-sm">Sair</button>
