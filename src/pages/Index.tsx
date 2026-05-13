@@ -138,25 +138,25 @@ export const Index = () => {
           </motion.div>
         </div>
 
-        {/* Benefícios */}
+        {/* Benefícios - ESPAÇAMENTO REDUZIDO */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
           className="px-6 mb-6"
         >
-          <div className="flex justify-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2 bg-[#1A1528]/80 rounded-full px-4 py-2 border border-white/10 shadow-sm">
-              <Shield size={16} className="text-green-400" />
-              <span className="text-white text-sm font-medium">Seguro</span>
+          <div className="flex justify-center gap-2">
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/80 rounded-full px-3 py-1.5 border border-white/10 shadow-sm">
+              <Shield size={14} className="text-green-400 shrink-0" />
+              <span className="text-white text-xs font-medium">Seguro</span>
             </div>
-            <div className="flex items-center gap-2 bg-[#1A1528]/80 rounded-full px-4 py-2 border border-white/10 shadow-sm">
-              <Star size={16} className="text-[#F4D03F]" />
-              <span className="text-white text-sm font-medium">4.8★ Avaliação</span>
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/80 rounded-full px-3 py-1.5 border border-white/10 shadow-sm">
+              <Star size={14} className="text-[#F4D03F] shrink-0" />
+              <span className="text-white text-xs font-medium">4.8★ Avaliação</span>
             </div>
-            <div className="flex items-center gap-2 bg-[#1A1528]/80 rounded-full px-4 py-2 border border-white/10 shadow-sm">
-              <Smartphone size={16} className="text-blue-400" />
-              <span className="text-white text-sm font-medium">Rápido</span>
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/80 rounded-full px-3 py-1.5 border border-white/10 shadow-sm">
+              <Smartphone size={14} className="text-blue-400 shrink-0" />
+              <span className="text-white text-xs font-medium">Rápido</span>
             </div>
           </div>
         </motion.div>
