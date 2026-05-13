@@ -32,6 +32,7 @@ function AppRoutes() {
   // Rotas públicas (acessíveis com ou sem login)
   const publicRoutes = (
     <>
+      <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterPassenger />} />
       <Route path="/register-driver" element={<RegisterDriver />} />
@@ -51,7 +52,7 @@ function AppRoutes() {
       {/* Passageiro */}
       {profile?.tipo === 'passageiro' && (
         <>
-          <Route path="/" element={<PassengerDashboard />} />
+          <Route path="/dashboard" element={<PassengerDashboard />} />
           <Route path="/trips" element={<Trips />} />
           <Route path="/trips/:id" element={<TripDetails />} />
           <Route path="/profile" element={<Profile />} />
@@ -61,7 +62,7 @@ function AppRoutes() {
       {/* Motorista */}
       {profile?.tipo === 'motorista' && (
         <>
-          <Route path="/" element={<DriverDashboard />} />
+          <Route path="/dashboard" element={<DriverDashboard />} />
           <Route path="/earnings" element={<Earnings />} />
           <Route path="/trips/:id" element={<TripDetails />} />
           <Route path="/profile" element={<Profile />} />
@@ -71,22 +72,10 @@ function AppRoutes() {
       {/* Admin */}
       {profile?.tipo === 'admin' && (
         <>
-          <Route path="/" element={<AdminDashboard />} />
+          <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </>
       )}
-
-      {/* Redirecionamento baseado no status do usuário */}
-      <Route path="/" element={
-        user ? (
-          profile?.tipo === 'passageiro' ? <PassengerDashboard /> :
-          profile?.tipo === 'motorista' ? <DriverDashboard /> :
-          profile?.tipo === 'admin' ? <AdminDashboard /> :
-          <Navigate to="/login" replace />
-        ) : (
-          <AppDivulgacao />
-        )
-      } />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
