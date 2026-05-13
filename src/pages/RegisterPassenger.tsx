@@ -84,7 +84,7 @@ export function RegisterPassenger() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[380px] p-8 text-center"
+          className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-sm p-8 text-center"
         >
           <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check size={32} className="text-green-400" />
@@ -103,7 +103,7 @@ export function RegisterPassenger() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] py-5 px-5">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
@@ -112,121 +112,92 @@ export function RegisterPassenger() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-[420px] mx-auto p-6"
+        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-sm mx-auto p-5"
       >
-        <div className="flex items-center mb-6">
+        <div className="flex items-center mb-4">
           <button
             onClick={() => window.location.href = '/login'}
-            className="btn-outline-dark p-2 inline-flex items-center justify-center"
+            className="btn-outline-dark p-2"
             type="button"
           >
             <ArrowLeft size={20} />
           </button>
           <div className="flex-1 text-center -ml-10">
-            <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
-              Criar Conta
-            </h1>
+            <h1 className="text-lg font-bold text-white">Cadastro</h1>
           </div>
         </div>
 
-        <div className="text-center mb-6">
-          <div className="w-14 h-14 bg-[#F4D03F]/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
-            <Car size={28} className="text-[#F4D03F]" />
+        <div className="flex items-center gap-3 mb-4 justify-center">
+          <div className="w-10 h-10 bg-[#F4D03F]/20 rounded-xl flex items-center justify-center">
+            <Car size={22} className="text-[#F4D03F]" />
           </div>
-          <p className="text-xs text-[#A0A0B0]">Preencha seus dados para se cadastrar</p>
+          <div>
+            <p className="text-white font-bold text-sm">OBALEVA</p>
+            <p className="text-[#A0A0B0] text-[10px]">Mobilidade premium</p>
+          </div>
         </div>
 
-        <form onSubmit={handleRegister} className="space-y-3">
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-            <User size={18} className="text-[#F4D03F] shrink-0" />
-            <input type="text" placeholder="Nome completo" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={nome} onChange={e => setNome(e.target.value)} required />
+        <form onSubmit={handleRegister} className="space-y-2.5">
+          <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
+            <User size={16} className="text-[#F4D03F] shrink-0" />
+            <input type="text" placeholder="Nome completo" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={nome} onChange={e => setNome(e.target.value)} required />
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-            <User size={18} className="text-[#F4D03F] shrink-0" />
-            <input type="text" placeholder="CPF" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={cpf} onChange={e => setCpf(formatarCpf(e.target.value))} required maxLength={14} />
+          <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
+            <User size={16} className="text-[#F4D03F] shrink-0" />
+            <input type="text" placeholder="CPF" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={cpf} onChange={e => setCpf(formatarCpf(e.target.value))} required maxLength={14} />
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-            <Phone size={18} className="text-[#F4D03F] shrink-0" />
-            <input type="tel" placeholder="Telefone / WhatsApp" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+          <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
+            <Phone size={16} className="text-[#F4D03F] shrink-0" />
+            <input type="tel" placeholder="Telefone / WhatsApp" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={telefone} onChange={e => setTelefone(e.target.value)} required />
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-            <Mail size={18} className="text-[#F4D03F] shrink-0" />
-            <input type="email" placeholder="E-mail" className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
+          <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
+            <Mail size={16} className="text-[#F4D03F] shrink-0" />
+            <input type="email" placeholder="E-mail" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-            <Lock size={18} className="text-[#F4D03F] shrink-0" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Senha (mín. 6 caracteres)"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-[#A0A0B0] hover:text-white transition shrink-0"
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
+            <Lock size={16} className="text-[#F4D03F] shrink-0" />
+            <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6 caracteres)" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
+              {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-            <Lock size={18} className="text-[#F4D03F] shrink-0" />
-            <input
-              type={showConfirm ? 'text' : 'password'}
-              placeholder="Confirmar senha"
-              className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm(!showConfirm)}
-              className="text-[#A0A0B0] hover:text-white transition shrink-0"
-            >
-              {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+          <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
+            <Lock size={16} className="text-[#F4D03F] shrink-0" />
+            <input type={showConfirm ? 'text' : 'password'} placeholder="Confirmar senha" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} />
+            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
+              {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
 
           <motion.button
-            whileTap={{ scale: 0.98 }}
+            whileTap={{ scale: 0.97 }}
             type="submit"
             disabled={loading}
-            className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3 text-sm disabled:opacity-50 mt-4"
+            className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-2.5 text-xs disabled:opacity-50 mt-1"
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
                 Cadastrando...
               </span>
             ) : (
-              <><ArrowRight size={18} /> Criar conta</>
+              <><ArrowRight size={16} /> Criar conta</>
             )}
           </motion.button>
         </form>
 
-        <div className="mt-5 pt-5 border-t border-white/10 text-center">
-          <p className="text-xs text-[#A0A0B0]">
+        <div className="mt-4 pt-3 border-t border-white/10 text-center">
+          <p className="text-[10px] text-[#A0A0B0]">
             Já tem conta?{' '}
-            <button
-              onClick={() => window.location.href = '/login'}
-              className="text-[#F4D03F] font-semibold hover:underline"
-              type="button"
-            >
-              Entrar
-            </button>
+            <button onClick={() => window.location.href = '/login'} className="text-[#F4D03F] font-semibold hover:underline" type="button">Entrar</button>
           </p>
         </div>
       </motion.div>
