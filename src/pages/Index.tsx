@@ -98,15 +98,15 @@ export const Index = () => {
           </motion.p>
         </div>
 
-        {/* Mockup do App */}
+        {/* Mockup do App - mesma largura dos botões (max-w-md) */}
         <div className="px-6 flex justify-center mb-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-[#1A1528] rounded-3xl border border-white/15 p-8 w-full max-w-[340px] shadow-2xl shadow-black/30"
+            className="bg-[#1A1528] rounded-3xl border border-white/15 p-6 w-full max-w-md shadow-2xl shadow-black/30"
           >
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center justify-between mb-1">
                 <div className="w-7 h-7 bg-[#F4D03F]/20 rounded-xl flex items-center justify-center">
                   <Car size={16} className="text-[#F4D03F]" />
@@ -114,24 +114,24 @@ export const Index = () => {
                 <span className="text-white font-bold text-sm">OvaLeva</span>
                 <div className="w-7 h-7" />
               </div>
-              <div className="bg-[#0F0B1A] rounded-2xl h-48 flex items-center justify-center border border-white/10">
+              <div className="bg-[#0F0B1A] rounded-2xl h-40 flex items-center justify-center border border-white/10">
                 <div className="text-center">
-                  <Smartphone size={36} className="text-[#F4D03F]/40 mx-auto mb-2" />
+                  <Smartphone size={32} className="text-[#F4D03F]/40 mx-auto mb-2" />
                   <p className="text-[#A0A0B0] text-sm font-medium">Mapa ao vivo</p>
                   <p className="text-[#A0A0B0]/50 text-xs mt-1">Sua localização em tempo real</p>
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="bg-[#0F0B1A] rounded-xl p-3.5 border border-white/10 flex items-center gap-3">
+                <div className="bg-[#0F0B1A] rounded-xl p-3 border border-white/10 flex items-center gap-3">
                   <div className="w-3 h-3 bg-green-400 rounded-full shrink-0 shadow-lg shadow-green-400/30" />
                   <span className="text-white/50 text-sm">Onde você está?</span>
                 </div>
-                <div className="bg-[#0F0B1A] rounded-xl p-3.5 border border-white/10 flex items-center gap-3">
+                <div className="bg-[#0F0B1A] rounded-xl p-3 border border-white/10 flex items-center gap-3">
                   <div className="w-3 h-3 bg-red-400 rounded-full shrink-0 shadow-lg shadow-red-400/30" />
                   <span className="text-white/50 text-sm">Para onde vai?</span>
                 </div>
               </div>
-              <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-3.5 text-center shadow-lg shadow-[#F4D03F]/20">
+              <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-3 text-center shadow-lg shadow-[#F4D03F]/20">
                 <span className="text-[#1E1E2F] font-bold text-base">🚗 Solicitar OvaLeva</span>
               </div>
             </div>
