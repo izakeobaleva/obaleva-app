@@ -48,27 +48,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   async function initAuth() {
     setLoading(true)
-    const { data: { session } } = await supabase.auth.getSession()
-    setSession(session)
-    setUser(session?.user ?? null)
-    if (session?.user) await fetchProfile(session.user.id)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      setSession(session)
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        await fetchProfile(session.user.id)
+      }
+    } catch (err) {
+      console.error('Erro ao inicializar auth:', err)
+    }
     setLoading(false)
   }
 
   async function fetchProfile(userId: string) {
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('id, nome_completo, email, tipo, telefone, cpf, foto_url')
-      .eq('id', userId)
-      .maybeSingle()
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('id, nome_completo, email, tipo, telefone, cpf, foto_url')
+        .eq('id', userId)
+        .maybeSingle()
 
-    if (error) {
-      console.error('Erro ao buscar perfil:', error.message)
-      setProfile(null)
-    } else if (data) {
-      setProfile(data)
-    } else {
-      console.warn('Perfil não encontrado para o usuário:', userId)
+      if (error) {
+        console.error('Erro ao buscar perfil:', error.message)
+        setProfile(null)
+      } else if (data) {
+        console.log('Perfil carregado:', data.tipo)
+        setProfile(data)
+      } else {
+        console.warn('Perfil não encontrado para o usuário:', userId)
+        setProfile(null)
+      }
+    } catch (err) {
+      console.error('Erro inesperado ao buscar perfil:', err)
       setProfile(null)
     }
   }
@@ -76,6 +88,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
+    
+    // Após login bem-sucedido, o onAuthStateChange vai disparar
+    // e carregar o profile automaticamente
   }
 
   const signOut = async () => {

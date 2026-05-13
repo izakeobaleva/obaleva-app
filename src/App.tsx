@@ -29,10 +29,72 @@ function AppRoutes() {
     </div>
   )
 
-  // Rotas públicas (acessíveis com ou sem login)
-  const publicRoutes = (
-    <>
+  // Se estiver logado, redireciona / e /login para o dashboard certo
+  if (profile?.tipo === 'passageiro') {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<PassengerDashboard />} />
+        <Route path="/trips" element={<Trips />} />
+        <Route path="/trips/:id" element={<TripDetails />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/register" element={<RegisterPassenger />} />
+        <Route path="/register-driver" element={<RegisterDriver />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/divulgar" element={<AppDivulgacao />} />
+        <Route path="/landing" element={<Divulgacao />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    )
+  }
+
+  if (profile?.tipo === 'motorista') {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DriverDashboard />} />
+        <Route path="/earnings" element={<Earnings />} />
+        <Route path="/trips/:id" element={<TripDetails />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/register" element={<RegisterPassenger />} />
+        <Route path="/register-driver" element={<RegisterDriver />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/divulgar" element={<AppDivulgacao />} />
+        <Route path="/landing" element={<Divulgacao />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    )
+  }
+
+  if (profile?.tipo === 'admin') {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route path="/login" element={<Navigate to="/admin" replace />} />
+        <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/register" element={<RegisterPassenger />} />
+        <Route path="/register-driver" element={<RegisterDriver />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/divulgar" element={<AppDivulgacao />} />
+        <Route path="/landing" element={<Divulgacao />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    )
+  }
+
+  // Não logado — mostra páginas públicas
+  return (
+    <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/index" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterPassenger />} />
       <Route path="/register-driver" element={<RegisterDriver />} />
@@ -41,42 +103,6 @@ function AppRoutes() {
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/divulgar" element={<AppDivulgacao />} />
       <Route path="/landing" element={<Divulgacao />} />
-    </>
-  )
-
-  // Rotas protegidas por tipo de usuário
-  return (
-    <Routes>
-      {publicRoutes}
-
-      {/* Passageiro */}
-      {profile?.tipo === 'passageiro' && (
-        <>
-          <Route path="/dashboard" element={<PassengerDashboard />} />
-          <Route path="/trips" element={<Trips />} />
-          <Route path="/trips/:id" element={<TripDetails />} />
-          <Route path="/profile" element={<Profile />} />
-        </>
-      )}
-
-      {/* Motorista */}
-      {profile?.tipo === 'motorista' && (
-        <>
-          <Route path="/dashboard" element={<DriverDashboard />} />
-          <Route path="/earnings" element={<Earnings />} />
-          <Route path="/trips/:id" element={<TripDetails />} />
-          <Route path="/profile" element={<Profile />} />
-        </>
-      )}
-
-      {/* Admin */}
-      {profile?.tipo === 'admin' && (
-        <>
-          <Route path="/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-        </>
-      )}
-
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
