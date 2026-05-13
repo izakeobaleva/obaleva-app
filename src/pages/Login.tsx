@@ -42,7 +42,12 @@ export const Login = () => {
   if (showEmailForm) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-        <div className="bg-[#1A1528]/80 backdrop-blur-lg rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
+        </div>
+
+        <div className="bg-[#1A1528]/80 backdrop-blur-lg rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8 relative z-10">
           <button 
             onClick={() => setShowEmailForm(false)} 
             className="flex items-center gap-2 text-[#A0A0B0] hover:text-white transition mb-6"
@@ -114,7 +119,12 @@ export const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-      <div className="bg-[#1A1528]/80 backdrop-blur-lg rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#F4D03F]/5 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-50px] right-[-50px] w-[300px] h-[300px] bg-[#6B2D8C]/20 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="bg-[#1A1528]/80 backdrop-blur-lg rounded-3xl border border-white/10 shadow-xl w-full max-w-md p-8 relative z-10">
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <Car className="text-[#F4D03F] w-10 h-10" />
