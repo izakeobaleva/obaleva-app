@@ -48,7 +48,7 @@ export default function Entrar() {
 
   const handleShare = async () => {
     const landingUrl = `${appUrl}/landing`;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -77,19 +77,19 @@ export default function Entrar() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 w-full max-w-[380px]"
       >
-        <div className="text-center mb-6">
+        <div className="text-center mb-4">
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-3"
+            className="mb-1"
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-[#F4D03F]/20">
-              <Car size={32} className="text-[#1E1E2F]" />
+            <div className="w-14 h-14 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-[#F4D03F]/20">
+              <Car size={26} className="text-[#1E1E2F]" />
             </div>
           </motion.div>
           <h1 className="text-4xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
-          <p className="text-[#A0A0B0] text-base mt-1">Segurança e conforto em cada viagem</p>
+          <p className="text-[#A0A0B0] text-base mt-0">Segurança e conforto em cada viagem</p>
         </div>
 
         <motion.button
