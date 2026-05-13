@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { 
   User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft, 
@@ -93,12 +93,12 @@ export function RegisterPassenger() {
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Conta criada!</h2>
           <p className="text-[#A0A0B0] text-sm mb-6">Sua conta foi criada com sucesso. Agora faça login para começar.</p>
-          <button
-            onClick={() => window.location.href = '/login'}
-            className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white hover:shadow-lg transition-all text-sm"
+          <Link
+            to="/login"
+            className="w-full py-3 rounded-2xl font-bold bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white hover:shadow-lg transition-all text-sm inline-flex items-center justify-center"
           >
             Ir para o Login
-          </button>
+          </Link>
         </motion.div>
       </div>
     )
@@ -118,14 +118,13 @@ export function RegisterPassenger() {
       >
         {/* Header com botão de voltar */}
         <div className="flex items-center mb-6">
-          <button
-            onClick={() => window.location.href = '/login'}
+          <Link
+            to="/login"
             className="btn-outline-dark p-2 inline-flex items-center justify-center"
             aria-label="Voltar"
-            type="button"
           >
             <ArrowLeft size={20} />
-          </button>
+          </Link>
           <div className="flex-1 text-center -ml-10">
             <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
               Criar Conta
@@ -227,13 +226,9 @@ export function RegisterPassenger() {
         <div className="mt-5 pt-5 border-t border-white/10 text-center">
           <p className="text-xs text-[#A0A0B0]">
             Já tem conta?{' '}
-            <button
-              onClick={() => window.location.href = '/login'}
-              className="text-[#F4D03F] font-semibold hover:underline"
-              type="button"
-            >
+            <Link to="/login" className="text-[#F4D03F] font-semibold hover:underline">
               Entrar
-            </button>
+            </Link>
           </p>
         </div>
       </motion.div>
