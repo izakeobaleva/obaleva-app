@@ -66,40 +66,40 @@ export default function Entrar() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col items-center justify-center p-5">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col items-center justify-center px-4 py-6">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
+        <div className="absolute top-[-50px] left-1/4 w-72 h-72 bg-[#F4D03F]/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-50px] right-1/4 w-72 h-72 bg-[#6B2D8C]/30 rounded-full blur-[100px]" />
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-[380px]"
+        className="relative z-10 w-full max-w-[360px]"
       >
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-4"
+            className="mb-3"
           >
-            <div className="w-20 h-20 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-[#F4D03F]/20">
-              <Car size={40} className="text-[#1E1E2F]" />
+            <div className="w-16 h-16 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-[#F4D03F]/20">
+              <Car size={32} className="text-[#1E1E2F]" />
             </div>
           </motion.div>
-          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
-          <p className="text-[#A0A0B0] text-sm mt-1">Segurança e conforto em cada viagem</p>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeve</h1>
+          <p className="text-[#A0A0B0] text-xs mt-0.5">Segurança e conforto em cada viagem</p>
         </div>
 
         <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="w-full bg-[#1A1528] border border-white/10 rounded-2xl px-5 py-4 text-white font-medium flex items-center justify-center gap-3 hover:bg-white/5 transition-all mb-4"
+          className="w-full bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3.5 text-white font-medium flex items-center justify-center gap-3 hover:bg-white/5 transition-all mb-3 text-sm"
           disabled
         >
-          <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -109,7 +109,7 @@ export default function Entrar() {
           <span className="ml-auto text-[10px] text-[#A0A0B0] bg-white/10 px-2 py-0.5 rounded-full">Em breve</span>
         </motion.button>
 
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <div className="flex-1 h-px bg-white/10" />
           <span className="text-xs text-[#A0A0B0]">Entre com e-mail</span>
           <div className="flex-1 h-px bg-white/10" />
@@ -120,10 +120,10 @@ export default function Entrar() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           onSubmit={handleLogin}
-          className="space-y-3"
+          className="space-y-2.5"
         >
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-            <Mail size={18} className="text-[#F4D03F] shrink-0" />
+            <Mail size={16} className="text-[#F4D03F] shrink-0" />
             <input
               type="email"
               placeholder="Seu e-mail"
@@ -135,7 +135,7 @@ export default function Entrar() {
           </div>
 
           <div className="flex items-center gap-3 bg-[#1A1528] border border-white/10 rounded-2xl px-4 py-3">
-            <Lock size={18} className="text-[#F4D03F] shrink-0" />
+            <Lock size={16} className="text-[#F4D03F] shrink-0" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Sua senha"
@@ -174,15 +174,15 @@ export default function Entrar() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mt-6 space-y-3"
+          className="mt-4 space-y-2.5"
         >
           <p className="text-xs text-[#A0A0B0] text-center">Ainda não tem conta?</p>
           <Link to="/register" className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center flex items-center justify-center gap-2">
-            <User size={18} />
+            <User size={16} />
             Criar conta como Passageiro
           </Link>
           <Link to="/register-driver" className="block w-full rounded-2xl font-semibold bg-transparent border border-white/20 text-white hover:bg-white/5 transition-all py-3 text-sm text-center flex items-center justify-center gap-2">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F4D03F" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#F4D03F" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="9" />
               <line x1="12" y1="3" x2="12" y2="9" />
               <line x1="4.5" y1="9" x2="8.5" y2="11.5" />
@@ -197,7 +197,7 @@ export default function Entrar() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-6 text-center"
+          className="mt-4 text-center"
         >
           <button
             onClick={handleShare}
