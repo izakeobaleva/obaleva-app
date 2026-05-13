@@ -75,6 +75,7 @@ export default function ForgotPassword() {
               <input
                 type="email"
                 placeholder="Seu e-mail cadastrado"
+                autoComplete="email"
                 className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
                 value={email}
                 onChange={e => setEmail(e.target.value)}

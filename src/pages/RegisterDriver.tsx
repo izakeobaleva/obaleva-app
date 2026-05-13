@@ -165,34 +165,92 @@ export function RegisterDriver() {
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <User size={14} className="text-[#F4D03F] shrink-0" />
-        <input type="text" placeholder="Nome completo" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={nome} onChange={e => setNome(e.target.value)} required />
+        <input 
+          type="text" 
+          placeholder="Nome completo" 
+          autoComplete="name"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={nome} 
+          onChange={e => setNome(e.target.value)} 
+          required 
+        />
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <User size={14} className="text-[#F4D03F] shrink-0" />
-        <input type="text" placeholder="CPF" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={cpf} onChange={e => setCpf(formatarCpf(e.target.value))} required maxLength={14} />
+        <input 
+          type="text" 
+          placeholder="CPF" 
+          autoComplete="off"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={cpf} 
+          onChange={e => setCpf(formatarCpf(e.target.value))} 
+          required 
+          maxLength={14} 
+        />
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <Home size={14} className="text-[#F4D03F] shrink-0" />
-        <input type="date" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs [color-scheme:dark]" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} required />
+        <input 
+          type="date" 
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs [color-scheme:dark]" 
+          autoComplete="bday"
+          value={dataNascimento} 
+          onChange={e => setDataNascimento(e.target.value)} 
+          required 
+        />
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <Phone size={14} className="text-[#F4D03F] shrink-0" />
-        <input type="tel" placeholder="Telefone / WhatsApp" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+        <input 
+          type="tel" 
+          placeholder="Telefone / WhatsApp" 
+          autoComplete="tel"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={telefone} 
+          onChange={e => setTelefone(e.target.value)} 
+          required 
+        />
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <Mail size={14} className="text-[#F4D03F] shrink-0" />
-        <input type="email" placeholder="E-mail" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={email} onChange={e => setEmail(e.target.value)} required />
+        <input 
+          type="email" 
+          placeholder="E-mail" 
+          autoComplete="email"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={email} 
+          onChange={e => setEmail(e.target.value)} 
+          required 
+        />
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <Lock size={14} className="text-[#F4D03F] shrink-0" />
-        <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6 caracteres)" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+        <input 
+          type={showPassword ? 'text' : 'password'} 
+          placeholder="Senha (mín. 6 caracteres)" 
+          autoComplete="new-password"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={password} 
+          onChange={e => setPassword(e.target.value)} 
+          required 
+          minLength={6} 
+        />
         <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
           {showPassword ? <EyeOff size={12} /> : <Eye size={12} />}
         </button>
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <Lock size={14} className="text-[#F4D03F] shrink-0" />
-        <input type={showConfirm ? 'text' : 'password'} placeholder="Confirmar senha" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} />
+        <input 
+          type={showConfirm ? 'text' : 'password'} 
+          placeholder="Confirmar senha" 
+          autoComplete="new-password"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={confirmPassword} 
+          onChange={e => setConfirmPassword(e.target.value)} 
+          required 
+          minLength={6} 
+        />
         <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
           {showConfirm ? <EyeOff size={12} /> : <Eye size={12} />}
         </button>
@@ -210,32 +268,92 @@ export function RegisterDriver() {
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <MapPin size={14} className="text-[#F4D03F] shrink-0" />
-        <input type="text" placeholder="CEP" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={cep} onChange={e => { setCep(formatarCep(e.target.value)); if (e.target.value.replace(/\D/g, '').length === 8) buscarCep(e.target.value) }} required maxLength={9} />
+        <input 
+          type="text" 
+          placeholder="CEP" 
+          autoComplete="postal-code"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={cep} 
+          onChange={e => { 
+            setCep(formatarCep(e.target.value)); 
+            if (e.target.value.replace(/\D/g, '').length === 8) buscarCep(e.target.value) 
+          }} 
+          required 
+          maxLength={9} 
+        />
       </div>
       <div className="flex gap-2">
         <div className="flex-1 flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
           <Home size={14} className="text-[#F4D03F] shrink-0" />
-          <input type="text" placeholder="Logradouro" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={logradouro} onChange={e => setLogradouro(e.target.value)} required />
+          <input 
+            type="text" 
+            placeholder="Logradouro" 
+            autoComplete="street-address"
+            className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+            value={logradouro} 
+            onChange={e => setLogradouro(e.target.value)} 
+            required 
+          />
         </div>
         <div className="w-16 flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
-          <input type="text" placeholder="Nº" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={numero} onChange={e => setNumero(e.target.value)} required />
+          <input 
+            type="text" 
+            placeholder="Nº" 
+            autoComplete="address-line2"
+            className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+            value={numero} 
+            onChange={e => setNumero(e.target.value)} 
+            required 
+          />
         </div>
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <Home size={14} className="text-[#F4D03F] shrink-0" />
-        <input type="text" placeholder="Complemento (opcional)" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={complemento} onChange={e => setComplemento(e.target.value)} />
+        <input 
+          type="text" 
+          placeholder="Complemento (opcional)" 
+          autoComplete="address-line3"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={complemento} 
+          onChange={e => setComplemento(e.target.value)} 
+        />
       </div>
       <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
         <MapPin size={14} className="text-[#F4D03F] shrink-0" />
-        <input type="text" placeholder="Bairro" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={bairro} onChange={e => setBairro(e.target.value)} required />
+        <input 
+          type="text" 
+          placeholder="Bairro" 
+          autoComplete="address-level4"
+          className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+          value={bairro} 
+          onChange={e => setBairro(e.target.value)} 
+          required 
+        />
       </div>
       <div className="flex gap-2">
         <div className="flex-1 flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
           <MapPin size={14} className="text-[#F4D03F] shrink-0" />
-          <input type="text" placeholder="Cidade" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={cidade} onChange={e => setCidade(e.target.value)} required />
+          <input 
+            type="text" 
+            placeholder="Cidade" 
+            autoComplete="address-level2"
+            className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+            value={cidade} 
+            onChange={e => setCidade(e.target.value)} 
+            required 
+          />
         </div>
         <div className="w-14 flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
-          <input type="text" placeholder="UF" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs uppercase" value={estado} onChange={e => setEstado(e.target.value.toUpperCase().slice(0, 2))} required maxLength={2} />
+          <input 
+            type="text" 
+            placeholder="UF" 
+            autoComplete="address-level1"
+            className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs uppercase" 
+            value={estado} 
+            onChange={e => setEstado(e.target.value.toUpperCase().slice(0, 2))} 
+            required 
+            maxLength={2} 
+          />
         </div>
       </div>
     </motion.div>
@@ -265,20 +383,53 @@ export function RegisterDriver() {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
             <Car size={14} className="text-[#F4D03F] shrink-0" />
-            <input type="text" placeholder="Modelo (ex: Toyota Corolla)" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={modeloVeiculo} onChange={e => setModeloVeiculo(e.target.value)} required />
+            <input 
+              type="text" 
+              placeholder="Modelo (ex: Toyota Corolla)" 
+              autoComplete="off"
+              className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+              value={modeloVeiculo} 
+              onChange={e => setModeloVeiculo(e.target.value)} 
+              required 
+            />
           </div>
           <div className="flex gap-2">
             <div className="flex-1 flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
               <Car size={14} className="text-[#F4D03F] shrink-0" />
-              <input type="text" placeholder="Placa" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs uppercase" value={placaVeiculo} onChange={e => setPlacaVeiculo(e.target.value.toUpperCase())} required />
+              <input 
+                type="text" 
+                placeholder="Placa" 
+                autoComplete="off"
+                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs uppercase" 
+                value={placaVeiculo} 
+                onChange={e => setPlacaVeiculo(e.target.value.toUpperCase())} 
+                required 
+              />
             </div>
             <div className="w-16 flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
-              <input type="text" placeholder="Ano" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={anoVeiculo} onChange={e => setAnoVeiculo(e.target.value.replace(/\D/g, '').slice(0, 4))} required maxLength={4} />
+              <input 
+                type="text" 
+                placeholder="Ano" 
+                autoComplete="off"
+                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+                value={anoVeiculo} 
+                onChange={e => setAnoVeiculo(e.target.value.replace(/\D/g, '').slice(0, 4))} 
+                required 
+                maxLength={4} 
+              />
             </div>
           </div>
           <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
             <Car size={14} className="text-[#F4D03F] shrink-0" />
-            <input type="text" placeholder="Cor do veículo" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={corVeiculo} onChange={e => setCorVeiculo(e.target.value)} required />
+            <input 
+              type="text" 
+              placeholder="Cor do veículo" 
+              autoComplete="off"
+              className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+              value={corVeiculo} 
+              onChange={e => setCorVeiculo(e.target.value)} 
+              required 
+            />
           </div>
         </div>
       </div>

@@ -65,6 +65,7 @@ export default function UpdatePassword() {
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Nova senha (mín. 6 caracteres)"
+              autoComplete="new-password"
               className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -86,6 +87,7 @@ export default function UpdatePassword() {
             <input
               type={showConfirm ? 'text' : 'password'}
               placeholder="Confirmar nova senha"
+              autoComplete="new-password"
               className="w-full bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}

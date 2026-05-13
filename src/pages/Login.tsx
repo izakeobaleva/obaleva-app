@@ -69,11 +69,27 @@ export const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
               <Mail size={16} className="text-[#F4D03F] shrink-0" />
-              <input type="email" placeholder="seu@email.com" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={email} onChange={e => setEmail(e.target.value)} required />
+              <input 
+                type="email" 
+                placeholder="seu@email.com" 
+                autoComplete="email"
+                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                required 
+              />
             </div>
             <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
               <Mail size={16} className="text-[#F4D03F] shrink-0" />
-              <input type={showPassword ? 'text' : 'password'} placeholder="••••••••" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" value={password} onChange={e => setPassword(e.target.value)} required />
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="••••••••" 
+                autoComplete="current-password"
+                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                required 
+              />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
                 {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>
