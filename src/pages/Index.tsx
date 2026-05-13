@@ -1,6 +1,6 @@
-import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Car, Smartphone, Shield, Star, ChevronRight, MapPin, Clock, Wallet } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Car, Shield, Clock, Wallet, Star, ChevronRight, MapPin } from 'lucide-react'
 
 export const Index = () => {
   const navigate = useNavigate()
@@ -30,7 +30,7 @@ export const Index = () => {
             </button>
             <button 
               onClick={() => navigate('/register')} 
-              className="btn-amarelo px-6 py-2 rounded-2xl"
+              className="btn-premium px-6 py-2"
             >
               Cadastrar
             </button>
@@ -53,7 +53,7 @@ export const Index = () => {
             <div className="flex gap-4 mt-8">
               <button 
                 onClick={() => navigate('/register')} 
-                className="btn-amarelo px-8 py-4 rounded-2xl text-lg flex items-center gap-2"
+                className="btn-premium px-8 py-4 rounded-2xl text-lg flex items-center gap-2"
               >
                 Criar Conta <ChevronRight size={20} />
               </button>
@@ -131,7 +131,7 @@ export const Index = () => {
           <div className="flex gap-4 justify-center flex-wrap">
             <button 
               onClick={() => navigate('/register')} 
-              className="btn-amarelo px-8 py-4 rounded-2xl text-lg"
+              className="btn-premium px-8 py-4 rounded-2xl text-lg"
             >
               Cadastrar Passageiro
             </button>
