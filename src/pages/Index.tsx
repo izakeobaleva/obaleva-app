@@ -77,12 +77,12 @@ export const Index = () => {
         </div>
 
         {/* Mockup do App */}
-        <div className="px-6 flex justify-center mb-4">
+        <div className="px-5 flex justify-center mb-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-[#1A1528] rounded-3xl border border-white/10 p-5 w-full max-w-[280px] shadow-2xl"
+            className="bg-[#1A1528] rounded-3xl border border-white/10 p-6 w-full max-w-[300px] shadow-2xl"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -92,24 +92,24 @@ export const Index = () => {
                 <span className="text-white text-xs font-semibold">ObaLeve</span>
                 <div className="w-6 h-6" />
               </div>
-              <div className="bg-[#0F0B1A] rounded-2xl h-32 flex items-center justify-center border border-white/10">
+              <div className="bg-[#0F0B1A] rounded-2xl h-36 flex items-center justify-center border border-white/10">
                 <div className="text-center">
                   <Smartphone size={28} className="text-[#F4D03F]/50 mx-auto mb-1" />
                   <p className="text-[#A0A0B0] text-[10px]">Mapa ao vivo</p>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <div className="bg-[#0F0B1A] rounded-xl p-2.5 border border-white/10 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full" />
-                  <span className="text-white/50 text-[10px]">Onde você está?</span>
+                <div className="bg-[#0F0B1A] rounded-xl p-3 border border-white/10 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full shrink-0" />
+                  <span className="text-white/50 text-xs">Onde você está?</span>
                 </div>
-                <div className="bg-[#0F0B1A] rounded-xl p-2.5 border border-white/10 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-red-400 rounded-full" />
-                  <span className="text-white/50 text-[10px]">Para onde vai?</span>
+                <div className="bg-[#0F0B1A] rounded-xl p-3 border border-white/10 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-400 rounded-full shrink-0" />
+                  <span className="text-white/50 text-xs">Para onde vai?</span>
                 </div>
               </div>
-              <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-2.5 text-center">
-                <span className="text-[#1E1E2F] font-bold text-xs">🚗 Solicitar Carona</span>
+              <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-3 text-center">
+                <span className="text-[#1E1E2F] font-bold text-sm">🚗 Solicitar Carona</span>
               </div>
             </div>
           </motion.div>
@@ -143,13 +143,13 @@ export const Index = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="px-6 space-y-3 max-w-xs mx-auto w-full"
+          className="px-5 space-y-3 max-w-sm mx-auto w-full"
         >
           {/* Linha: Google | E-mail */}
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={handleGoogleLogin}
-              className="py-3.5 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm"
+              className="py-4 px-4 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm"
             >
               <svg width="18" height="18" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -161,7 +161,7 @@ export const Index = () => {
             </button>
             <button
               onClick={() => navigate('/login')}
-              className="py-3.5 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm"
+              className="py-4 px-4 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -175,7 +175,7 @@ export const Index = () => {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => navigate('/register')}
-              className="py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
+              className="py-4 px-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -187,7 +187,7 @@ export const Index = () => {
             </button>
             <button
               onClick={() => navigate('/register-driver')}
-              className="py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
+              className="py-4 px-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
             >
               <Car size={16} />
               Motorista
@@ -197,7 +197,7 @@ export const Index = () => {
           {/* Compartilhar */}
           <button
             onClick={handleShare}
-            className="w-full py-3 rounded-2xl font-bold border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all text-xs flex items-center justify-center gap-2"
+            className="w-full py-4 px-4 rounded-2xl font-bold border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all text-xs flex items-center justify-center gap-2"
           >
             <Share2 size={14} />
             Compartilhar App
@@ -208,7 +208,7 @@ export const Index = () => {
             <a
               href={apkUrl}
               download
-              className="w-full py-3 rounded-2xl font-bold border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all text-xs flex items-center justify-center gap-2"
+              className="w-full py-4 px-4 rounded-2xl font-bold border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/5 transition-all text-xs flex items-center justify-center gap-2"
             >
               <Download size={14} />
               Baixar APK
