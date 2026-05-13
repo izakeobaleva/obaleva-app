@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,43 +11,90 @@ import { DocumentsStep } from '../components/driver-registration/DocumentsStep'
 import { ReviewStep } from '../components/driver-registration/ReviewStep'
 import { FormActions } from '../components/driver-registration/FormActions'
 
+const STORAGE_KEY = 'ovaleva_driver_registration'
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch {}
+  return {}
+}
+
+function saveToStorage(data: any) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  } catch {}
+}
+
 export function RegisterDriver() {
   const navigate = useNavigate()
-  const [etapa, setEtapa] = useState(1)
+
+  // Carregar dados salvos ao iniciar
+  const saved = loadFromStorage()
+  const savedStep = saved?.etapa || 1
+
+  const [etapa, setEtapa] = useState(savedStep)
   const totalEtapas = 4
   const [loading, setLoading] = useState(false)
 
   // Personal data
-  const [nome, setNome] = useState('')
-  const [cpf, setCpf] = useState('')
-  const [dataNascimento, setDataNascimento] = useState('')
-  const [email, setEmail] = useState('')
-  const [telefone, setTelefone] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [nome, setNome] = useState(saved?.nome || '')
+  const [cpf, setCpf] = useState(saved?.cpf || '')
+  const [dataNascimento, setDataNascimento] = useState(saved?.dataNascimento || '')
+  const [email, setEmail] = useState(saved?.email || '')
+  const [telefone, setTelefone] = useState(saved?.telefone || '')
+  const [password, setPassword] = useState(saved?.password || '')
+  const [confirmPassword, setConfirmPassword] = useState(saved?.confirmPassword || '')
 
   // Address
-  const [cep, setCep] = useState('')
-  const [logradouro, setLogradouro] = useState('')
-  const [numero, setNumero] = useState('')
-  const [complemento, setComplemento] = useState('')
-  const [bairro, setBairro] = useState('')
-  const [cidade, setCidade] = useState('')
-  const [estado, setEstado] = useState('')
+  const [cep, setCep] = useState(saved?.cep || '')
+  const [logradouro, setLogradouro] = useState(saved?.logradouro || '')
+  const [numero, setNumero] = useState(saved?.numero || '')
+  const [complemento, setComplemento] = useState(saved?.complemento || '')
+  const [bairro, setBairro] = useState(saved?.bairro || '')
+  const [cidade, setCidade] = useState(saved?.cidade || '')
+  const [estado, setEstado] = useState(saved?.estado || '')
 
   // Documents
-  const [frenteCnh, setFrenteCnh] = useState<string | null>(null)
-  const [versoCnh, setVersoCnh] = useState<string | null>(null)
-  const [selfieCnh, setSelfieCnh] = useState<string | null>(null)
-  const [crlv, setCrlv] = useState<string | null>(null)
-  const [certidaoAntecedentes, setCertidaoAntecedentes] = useState<string | null>(null)
-  const [modeloVeiculo, setModeloVeiculo] = useState('')
-  const [placaVeiculo, setPlacaVeiculo] = useState('')
-  const [anoVeiculo, setAnoVeiculo] = useState('')
-  const [corVeiculo, setCorVeiculo] = useState('')
+  const [frenteCnh, setFrenteCnh] = useState<string | null>(saved?.frenteCnh || null)
+  const [versoCnh, setVersoCnh] = useState<string | null>(saved?.versoCnh || null)
+  const [selfieCnh, setSelfieCnh] = useState<string | null>(saved?.selfieCnh || null)
+  const [crlv, setCrlv] = useState<string | null>(saved?.crlv || null)
+  const [certidaoAntecedentes, setCertidaoAntecedentes] = useState<string | null>(saved?.certidaoAntecedentes || null)
+  const [modeloVeiculo, setModeloVeiculo] = useState(saved?.modeloVeiculo || '')
+  const [placaVeiculo, setPlacaVeiculo] = useState(saved?.placaVeiculo || '')
+  const [anoVeiculo, setAnoVeiculo] = useState(saved?.anoVeiculo || '')
+  const [corVeiculo, setCorVeiculo] = useState(saved?.corVeiculo || '')
 
   // Contract
-  const [contratoAceito, setContratoAceito] = useState(false)
+  const [contratoAceito, setContratoAceito] = useState(saved?.contratoAceito || false)
+
+  // Salvar automaticamente sempre que algo mudar
+  useEffect(() => {
+    saveToStorage({
+      etapa,
+      nome, cpf, dataNascimento, email, telefone, password, confirmPassword,
+      cep, logradouro, numero, complemento, bairro, cidade, estado,
+      frenteCnh, versoCnh, selfieCnh, crlv, certidaoAntecedentes,
+      modeloVeiculo, placaVeiculo, anoVeiculo, corVeiculo,
+      contratoAceito,
+    })
+  }, [
+    etapa,
+    nome, cpf, dataNascimento, email, telefone, password, confirmPassword,
+    cep, logradouro, numero, complemento, bairro, cidade, estado,
+    frenteCnh, versoCnh, selfieCnh, crlv, certidaoAntecedentes,
+    modeloVeiculo, placaVeiculo, anoVeiculo, corVeiculo,
+    contratoAceito,
+  ])
+
+  // Limpar storage após cadastro bem-sucedido
+  function clearStorage() {
+    localStorage.removeItem(STORAGE_KEY)
+  }
 
   const formatarCpf = useCallback((value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 11)
@@ -143,6 +190,7 @@ export function RegisterDriver() {
 
       if (motoristaError) throw motoristaError
 
+      clearStorage()
       toast.success('Cadastro enviado para análise! Aguarde aprovação.')
       navigate('/login')
     } catch (err: any) {
