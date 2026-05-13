@@ -217,7 +217,7 @@ export const Login = () => {
           </div>
         </motion.div>
 
-        {/* Botões de Login - lado a lado */}
+        {/* Botões de Login e Cadastro na mesma linha */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -227,13 +227,13 @@ export const Login = () => {
           <div className="flex gap-2">
             <button
               onClick={handleGoogleLogin}
-              className="flex-1 py-3.5 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-xs font-medium"
+              className="flex-1 py-2.5 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-xs font-medium"
             >
               <Chrome size={16} /> Google
             </button>
             <button
               onClick={() => setShowEmailForm(true)}
-              className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs shadow-lg"
+              className="flex-1 py-2.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 text-xs shadow-lg"
             >
               <Mail size={16} /> E-mail
             </button>
@@ -245,7 +245,7 @@ export const Login = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="px-6 mt-5 max-w-xs mx-auto w-full"
+          className="px-6 mt-3 max-w-xs mx-auto w-full"
         >
           <div className="flex gap-2">
             <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
