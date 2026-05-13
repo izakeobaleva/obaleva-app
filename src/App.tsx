@@ -33,7 +33,7 @@ function AppRoutes() {
   if (!user) {
     return (
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<AppDivulgacao />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/register" element={<RegisterPassenger />} />
