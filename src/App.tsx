@@ -23,8 +23,6 @@ import NotFound from './pages/NotFound'
 function AppRoutes() {
   const { user, profile, loading } = useAuth()
 
-  console.log('🧭 AppRoutes:', { user: !!user, profile: profile?.tipo, loading })
-
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0F0B1A]">
       <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
@@ -92,11 +90,10 @@ function AppRoutes() {
     )
   }
 
-  // Não logado — mostra páginas públicas
+  // Não logado — mostra páginas públicas (raiz = Index, a landing page)
   return (
     <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/index" element={<Index />} />
+      <Route path="/" element={<Index />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPassenger />} />
       <Route path="/register-driver" element={<RegisterDriver />} />
