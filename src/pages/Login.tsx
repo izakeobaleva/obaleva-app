@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
-import { Car, Chrome, Mail, Eye, EyeOff, ArrowRight, UserPlus, Truck } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Car, Chrome, Mail, Eye, EyeOff, ChevronRight, Download, Smartphone, Shield, Star, Share2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export const Login = () => {
   const navigate = useNavigate()
@@ -45,135 +45,227 @@ export const Login = () => {
 
   if (showEmailForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-5">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4D03F]/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#6B2D8C]/30 rounded-full blur-[120px]" />
+          <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#F4D03F]/5 rounded-full blur-[150px]" />
+          <div className="absolute bottom-[-50px] right-[-50px] w-[300px] h-[300px] bg-[#6B2D8C]/20 rounded-full blur-[100px]" />
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-sm p-5"
+          className="relative z-10 w-full max-w-[380px]"
         >
-          <button onClick={() => setShowEmailForm(false)} className="text-[#A0A0B0] hover:text-white transition text-xs flex items-center gap-1 mb-3">
-            ← Voltar
-          </button>
+          <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-6">
+            <button onClick={() => setShowEmailForm(false)} className="text-[#A0A0B0] hover:text-white transition text-xs flex items-center gap-1 mb-4">
+              ← Voltar
+            </button>
 
-          <div className="text-center mb-4">
-            <div className="w-12 h-12 bg-[#F4D03F]/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
-              <Car className="text-[#F4D03F]" size={24} />
-            </div>
-            <h1 className="text-xl font-bold text-white">OBALEVA</h1>
-            <p className="text-[#A0A0B0] text-[10px]">Segurança e conforto em cada viagem</p>
-          </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
-              <Mail size={16} className="text-[#F4D03F] shrink-0" />
-              <input 
-                type="email" 
-                placeholder="seu@email.com" 
-                autoComplete="email"
-                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
-                required 
-              />
-            </div>
-            <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-3 py-2.5">
-              <Mail size={16} className="text-[#F4D03F] shrink-0" />
-              <input 
-                type={showPassword ? 'text' : 'password'} 
-                placeholder="••••••••" 
-                autoComplete="current-password"
-                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-xs" 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-                required 
-              />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
-                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
+            <div className="text-center mb-5">
+              <div className="w-16 h-16 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#F4D03F]/20">
+                <Car className="text-[#F4D03F]" size={28} />
+              </div>
+              <h1 className="text-2xl font-bold text-white">ObaLeva</h1>
+              <p className="text-[#A0A0B0] text-xs mt-1">Segurança e conforto em cada viagem</p>
             </div>
             
-            <div className="text-right">
-              <button onClick={() => navigate('/forgot-password')} className="text-[#F4D03F] text-[10px] hover:underline" type="button">
-                Esqueceu a senha?
-              </button>
-            </div>
-            
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-2.5 text-xs disabled:opacity-50"
-            >
-              {loading ? 'Entrando...' : <><ArrowRight size={16} /> Entrar</>}
-            </motion.button>
-          </form>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3">
+                <input 
+                  type="email" 
+                  placeholder="seu@email.com" 
+                  autoComplete="email"
+                  className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" 
+                  value={email} 
+                  onChange={e => setEmail(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 flex items-center">
+                <input 
+                  type={showPassword ? 'text' : 'password'} 
+                  placeholder="Senha" 
+                  autoComplete="current-password"
+                  className="flex-1 bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" 
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)} 
+                  required 
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0 ml-2">
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              
+              <div className="text-right">
+                <button onClick={() => navigate('/forgot-password')} className="text-[#F4D03F] text-xs hover:underline" type="button">
+                  Esqueceu a senha?
+                </button>
+              </div>
+              
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 py-3 text-sm disabled:opacity-50"
+              >
+                {loading ? 'Entrando...' : <><ChevronRight size={18} /> Entrar</>}
+              </motion.button>
+            </form>
 
-          <div className="mt-4 pt-3 border-t border-white/10 text-center space-y-2">
-            <p className="text-[#A0A0B0] text-[10px]">Ainda não tem conta?</p>
-            <div className="flex gap-2">
-              <button onClick={() => navigate('/register')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-[10px]">
-                <UserPlus size={12} /> Passageiro
-              </button>
-              <button onClick={() => navigate('/register-driver')} className="flex-1 py-2 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-[10px]">
-                <Truck size={12} /> Motorista
-              </button>
+            <div className="mt-4 pt-4 border-t border-white/10 text-center space-y-3">
+              <p className="text-[#A0A0B0] text-xs">Ainda não tem conta?</p>
+              <div className="flex gap-2">
+                <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
+                  Passageiro
+                </button>
+                <button onClick={() => navigate('/register-driver')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
+                  Motorista
+                </button>
+              </div>
             </div>
           </div>
-
-          <button onClick={handleShare} className="w-full mt-3 py-2 flex items-center justify-center gap-1.5 text-[#A0A0B0] hover:text-white transition text-[10px]">
-            📤 Compartilhar ObaLeva
-          </button>
         </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#F4D03F]/5 rounded-full blur-[150px]" />
         <div className="absolute bottom-[-50px] right-[-50px] w-[300px] h-[300px] bg-[#6B2D8C]/20 rounded-full blur-[100px]" />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl w-full max-w-sm p-6"
-      >
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Car className="text-[#F4D03F]" size={28} />
+      <div className="flex-1 flex flex-col relative z-10">
+        {/* Header */}
+        <div className="pt-10 pb-2 px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-20 h-20 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#F4D03F]/20"
+          >
+            <Car className="text-[#F4D03F] w-10 h-10" />
+          </motion.div>
+          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
+            OBALEVA
+          </h1>
+          <p className="text-[#A0A0B0] text-sm mt-1">Mobilidade premium para sua cidade</p>
+        </div>
+
+        {/* Mockup do App */}
+        <div className="px-6 flex justify-center mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-[#1A1528] rounded-3xl border border-white/10 p-5 w-full max-w-[280px] shadow-2xl"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-6 h-6 bg-[#F4D03F]/20 rounded-lg flex items-center justify-center">
+                  <Car size={14} className="text-[#F4D03F]" />
+                </div>
+                <span className="text-white text-xs font-semibold">ObaLeve</span>
+                <div className="w-6 h-6" />
+              </div>
+              
+              <div className="bg-[#0F0B1A] rounded-2xl h-32 flex items-center justify-center border border-white/10">
+                <div className="text-center">
+                  <Smartphone size={28} className="text-[#F4D03F]/50 mx-auto mb-1" />
+                  <p className="text-[#A0A0B0] text-[10px]">Mapa ao vivo</p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="bg-[#0F0B1A] rounded-xl p-2.5 border border-white/10 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full" />
+                  <span className="text-white/50 text-[10px]">Onde você está?</span>
+                </div>
+                <div className="bg-[#0F0B1A] rounded-xl p-2.5 border border-white/10 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-400 rounded-full" />
+                  <span className="text-white/50 text-[10px]">Para onde vai?</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-2.5 text-center">
+                <span className="text-[#1E1E2F] font-bold text-xs">🚗 Solicitar Carona</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Benefícios */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="px-6 mb-6"
+        >
+          <div className="flex justify-center gap-4">
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-3 py-1.5 border border-white/10">
+              <Shield size={12} className="text-green-400" />
+              <span className="text-white text-[10px]">Seguro</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-3 py-1.5 border border-white/10">
+              <Star size={12} className="text-[#F4D03F]" />
+              <span className="text-white text-[10px]">4.8★</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-[#1A1528]/60 rounded-full px-3 py-1.5 border border-white/10">
+              <Smartphone size={12} className="text-blue-400" />
+              <span className="text-white text-[10px]">Rápido</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-white">ObaLeva</h1>
-          <p className="text-[#A0A0B0] text-xs mt-1">Segurança e conforto em cada viagem</p>
-        </div>
+        </motion.div>
 
-        <button onClick={handleGoogleLogin} className="w-full py-3 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-sm">
-          <Chrome size={18} /> Continuar com Google
-        </button>
-
-        <button onClick={() => setShowEmailForm(true)} className="w-full py-3 rounded-2xl border border-[#F4D03F]/30 text-[#F4D03F] flex items-center justify-center gap-2 hover:bg-[#F4D03F]/5 transition mt-3 text-sm">
-          <Mail size={16} /> Entre com e-mail
-        </button>
-
-        <div className="flex gap-2 mt-5">
-          <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
-            <UserPlus size={14} /> Passageiro
+        {/* Botões de Login */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="px-6 space-y-3 max-w-xs mx-auto w-full"
+        >
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full py-3.5 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2.5 hover:bg-white/10 transition text-sm font-medium"
+          >
+            <Chrome size={18} /> Continuar com Google
           </button>
-          <button onClick={() => navigate('/register-driver')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition flex items-center justify-center gap-1.5 text-xs">
-            <Truck size={14} /> Motorista
-          </button>
-        </div>
 
-        <button onClick={handleShare} className="w-full mt-4 py-2 flex items-center justify-center gap-1.5 text-[#A0A0B0] hover:text-white transition text-xs">
-          📤 Compartilhar ObaLeva
-        </button>
-      </motion.div>
+          <button
+            onClick={() => setShowEmailForm(true)}
+            className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2.5 text-sm shadow-lg"
+          >
+            <Mail size={18} /> Entrar com e-mail
+          </button>
+        </motion.div>
+
+        {/* Cadastro rápido */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="px-6 mt-5 flex gap-2 max-w-xs mx-auto w-full"
+        >
+          <button onClick={() => navigate('/register')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
+            Passageiro
+          </button>
+          <button onClick={() => navigate('/register-driver')} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-white hover:bg-white/5 transition text-xs font-medium">
+            Motorista
+          </button>
+        </motion.div>
+
+        {/* Compartilhar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="text-center py-4"
+        >
+          <button onClick={handleShare} className="text-[#A0A0B0] hover:text-white transition flex items-center justify-center gap-1.5 text-xs mx-auto">
+            <Share2 size={14} /> Compartilhar App
+          </button>
+        </motion.div>
+      </div>
     </div>
   )
 }
