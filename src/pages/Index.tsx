@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Share2, Download, Smartphone, Shield, Star, Mail, Bug } from 'lucide-react'
+import { Car, Smartphone, Shield, Star, Mail, Bug, Share2, Download } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import { toast } from 'sonner'
+import { useAuth } from '../contexts/AuthContext'
 
 export const Index = () => {
   const navigate = useNavigate()
+  const { user, loading } = useAuth()
   const [apkUrl, setApkUrl] = useState('')
   const [dominio, setDominio] = useState(window.location.origin)
 
@@ -15,19 +16,22 @@ export const Index = () => {
   }, [])
 
   async function loadData() {
-    const { data: apkData } = await supabase
-      .from('app_config')
-      .select('value')
-      .eq('key', 'apk_url')
-      .maybeSingle()
+    const { data: apkData } = await supabase.from('app_config').select('value').eq('key', 'apk_url').maybeSingle()
     if (apkData?.value) setApkUrl(apkData.value)
-
-    const { data: dominioData } = await supabase
-      .from('app_config')
-      .select('value')
-      .eq('key', 'app_domain')
-      .maybeSingle()
+    const { data: dominioData } = await supabase.from('app_config').select('value').eq('key', 'app_domain').maybeSingle()
     if (dominioData?.value) setDominio(String(dominioData.value))
+  }
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      })
+      if (error) throw error
+    } catch (err: any) {
+      console.error(err)
+    }
   }
 
   const handleShare = async () => {
@@ -39,78 +43,42 @@ export const Index = () => {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin,
-        }
-      })
-      if (error) throw error
-    } catch (err: any) {
-      toast.error(err.message || 'Erro ao fazer login com Google')
+  // Se já estiver logado, redireciona
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/', { replace: true })
     }
-  }
+  }, [user, loading])
+
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center">
+      <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#F4D03F]/8 rounded-full blur-[150px]" />
         <div className="absolute bottom-[-50px] right-[-50px] w-[300px] h-[300px] bg-[#6B2D8C]/25 rounded-full blur-[100px]" />
-        <div className="absolute top-1/3 left-[-80px] w-[200px] h-[200px] bg-blue-500/10 rounded-full blur-[120px]" />
       </div>
 
       <div className="flex-1 flex flex-col relative z-10">
-        {/* Header */}
         <div className="pt-10 pb-6 px-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-24 h-24 bg-[#F4D03F]/15 rounded-full flex items-center justify-center mx-auto mb-5 border-2 border-[#F4D03F]/30 shadow-lg shadow-[#F4D03F]/10"
-          >
+          <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="w-24 h-24 bg-[#F4D03F]/15 rounded-full flex items-center justify-center mx-auto mb-5 border-2 border-[#F4D03F]/30 shadow-lg shadow-[#F4D03F]/10">
             <Car className="text-[#F4D03F] w-12 h-12" strokeWidth={2} />
           </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-extrabold text-white text-center"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
-          >
-            ObaLeva
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-lg text-[#A0A0B0] text-center font-medium"
-          >
-            Mobilidade premium para sua cidade
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
-            className="text-sm text-[#A0A0B0]/60 text-center"
-          >
-            Corridas seguras e motoristas confiáveis
-          </motion.p>
+          <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl md:text-5xl font-extrabold text-white text-center" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</motion.h1>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-lg text-[#A0A0B0] text-center font-medium">Mobilidade premium para sua cidade</motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="text-sm text-[#A0A0B0]/60 text-center">Corridas seguras e motoristas confiáveis</motion.p>
         </div>
 
-        {/* Mockup do App */}
+        {/* Preview do app */}
         <div className="px-6 flex justify-center mb-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-[#1A1528] rounded-3xl border border-white/15 p-6 w-full max-w-md shadow-2xl shadow-black/30"
-          >
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-[#1A1528] rounded-3xl border border-white/15 p-6 w-full max-w-md shadow-2xl shadow-black/30">
             <div className="space-y-3">
               <div className="flex items-center justify-between mb-1">
-                <div className="w-7 h-7 bg-[#F4D03F]/20 rounded-xl flex items-center justify-center">
-                  <Car size={16} className="text-[#F4D03F]" />
-                </div>
+                <div className="w-7 h-7 bg-[#F4D03F]/20 rounded-xl flex items-center justify-center"><Car size={16} className="text-[#F4D03F]" /></div>
                 <span className="text-white font-bold text-sm">ObaLeva</span>
                 <div className="w-7 h-7" />
               </div>
@@ -132,19 +100,14 @@ export const Index = () => {
                 </div>
               </div>
               <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-3 text-center shadow-lg shadow-[#F4D03F]/20">
-                <span className="text-[#1E1E2F] font-bold text-base">🚗 Solicitar ObaLeva</span>
+                <span className="text-[#1E1E2F] font-bold text-base"> Solicitar ObaLeva</span>
               </div>
             </div>
           </motion.div>
         </div>
 
         {/* Benefícios */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="px-6 mb-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="px-6 mb-6">
           <div className="flex justify-center gap-2">
             <div className="flex items-center gap-1.5 bg-[#1A1528]/80 rounded-full px-3 py-1.5 border border-white/10 shadow-sm">
               <Shield size={14} className="text-green-400 shrink-0" />
@@ -162,17 +125,9 @@ export const Index = () => {
         </motion.div>
 
         {/* Botões */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="px-6 space-y-3 max-w-md mx-auto w-full"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="px-6 space-y-3 max-w-md mx-auto w-full">
           <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={handleGoogleLogin}
-              className="py-4 px-5 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-base active:scale-[0.98]"
-            >
+            <button onClick={handleGoogleLogin} className="py-4 px-5 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-base active:scale-[0.98]">
               <svg width="20" height="20" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                 <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -181,20 +136,14 @@ export const Index = () => {
               </svg>
               Google
             </button>
-            <button
-              onClick={() => navigate('/login')}
-              className="py-4 px-5 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-base active:scale-[0.98]"
-            >
+            <button onClick={() => navigate('/login')} className="py-4 px-5 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-base active:scale-[0.98]">
               <Mail size={20} />
               E-mail
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => navigate('/register')}
-              className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base flex items-center justify-center gap-3 active:scale-[0.98]"
-            >
+            <button onClick={() => navigate('/register')} className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base flex items-center justify-center gap-3 active:scale-[0.98]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -203,48 +152,32 @@ export const Index = () => {
               </svg>
               Passageiro
             </button>
-            <button
-              onClick={() => navigate('/register-driver')}
-              className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base flex items-center justify-center gap-3 active:scale-[0.98]"
-            >
+            <button onClick={() => navigate('/register-driver')} className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base flex items-center justify-center gap-3 active:scale-[0.98]">
               <Car size={18} strokeWidth={2.5} />
               Motorista
             </button>
           </div>
 
-          <button
-            onClick={handleShare}
-            className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]"
-          >
+          <button onClick={handleShare} className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]">
             <Share2 size={18} />
             Compartilhar App
           </button>
 
           {apkUrl && (
-            <a
-              href={apkUrl}
-              download
-              className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]"
-            >
+            <a href={apkUrl} download className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]">
               <Download size={18} />
               Baixar APK
             </a>
           )}
 
-          {/* Link para Test Login */}
-          <button
-            onClick={() => navigate('/test-login')}
-            className="w-full py-3 rounded-2xl text-xs text-[#A0A0B0]/40 hover:text-[#A0A0B0] transition-all flex items-center justify-center gap-2"
-          >
+          <button onClick={() => navigate('/test-login')} className="w-full py-3 rounded-2xl text-xs text-[#A0A0B0]/40 hover:text-[#A0A0B0] transition-all flex items-center justify-center gap-2">
             <Bug size={14} />
             Criar logins de teste (desenvolvedor)
           </button>
         </motion.div>
 
         <div className="text-center py-8 mt-auto">
-          <p className="text-sm text-[#A0A0B0]">
-            <strong className="text-white font-bold">ObaLeva</strong> &copy; 2025
-          </p>
+          <p className="text-sm text-[#A0A0B0]"><strong className="text-white font-bold">ObaLeva</strong> &copy; 2025</p>
           <p className="text-xs text-[#A0A0B0]/50 mt-1">Mobilidade premium para sua cidade</p>
         </div>
       </div>

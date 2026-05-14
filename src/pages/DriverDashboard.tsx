@@ -6,7 +6,7 @@ import { BottomNav } from '../components/BottomNav';
 import { Skeleton } from '../components/Skeleton';
 import { RatingStars } from '../components/RatingStars';
 import { supabase } from '../lib/supabaseClient';
-import { DollarSign, Star, Clock, TrendingUp, Navigation, Bell } from 'lucide-react';
+import { DollarSign, Star, Clock, TrendingUp, Navigation, Bell, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function DriverDashboard() {
@@ -28,11 +28,12 @@ export function DriverDashboard() {
 
   useEffect(() => {
     const channel = supabase
-      .channel('novas-corridas')
+      .channel('novas-corridas-driver')
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'corridas', filter: `status=eq.pendente` }, 
         (payload) => {
           if (disponivel) {
+            const valor = payload.new.valor || 0;
             toast.custom((t) => (
               <motion.div
                 initial={{ opacity: 0, y: -50 }}
@@ -43,12 +44,13 @@ export function DriverDashboard() {
                   <Bell size={20} className="text-[#F4D03F]" />
                   <div>
                     <p className="font-bold">Nova solicitação!</p>
-                    <p className="text-sm text-[#A0A0B0]">Valor estimado: R$ {payload.new.valor?.toFixed(2) || '0.00'}</p>
+                    <p className="text-sm text-[#A0A0B0]">Valor: R$ {Number(valor).toFixed(2)}</p>
+                    <p className="text-xs text-[#A0A0B0]">Destino: {payload.new.destino || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3">
                   <button 
-                    onClick={() => acceptRide(payload.new.id)}
+                    onClick={() => { acceptRide(payload.new.id); toast.dismiss(t) }}
                     className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] px-4 py-2 rounded-2xl text-sm font-bold flex-1"
                   >
                     Aceitar
@@ -61,7 +63,7 @@ export function DriverDashboard() {
                   </button>
                 </div>
               </motion.div>
-            ), { duration: 15000 });
+            ), { duration: 20000 });
           }
         }
       )
@@ -92,7 +94,6 @@ export function DriverDashboard() {
         totalCorridas: corridas.filter(c => c.status === 'finalizada').length,
       });
     }
-    setLoading(false);
   }
 
   async function acceptRide(rideId: string) {
@@ -105,19 +106,18 @@ export function DriverDashboard() {
       toast.error('Erro ao aceitar corrida');
     } else {
       toast.success('✅ Corrida aceita! Vá até o passageiro.');
+      fetchDriverStats();
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0F0B1A] p-4 space-y-4">
-        <Skeleton className="h-12 w-full bg-white/5" />
-        <Skeleton className="h-28 w-full rounded-2xl bg-white/5" />
-        <Skeleton className="h-64 w-full rounded-2xl bg-white/5" />
-        <Skeleton className="h-32 w-full rounded-2xl bg-white/5" />
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-[#0F0B1A] p-4 space-y-4">
+      <Skeleton className="h-12 w-full bg-white/5" />
+      <Skeleton className="h-28 w-full rounded-2xl bg-white/5" />
+      <Skeleton className="h-64 w-full rounded-2xl bg-white/5" />
+      <Skeleton className="h-32 w-full rounded-2xl bg-white/5" />
+    </div>
+  );
 
   const statCards = [
     { label: 'Corridas Hoje', value: stats.corridasHoje, icon: Clock, color: '#3B82F6' },
@@ -133,15 +133,17 @@ export function DriverDashboard() {
           <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</h1>
           <p className="text-xs text-[#A0A0B0]">Motorista</p>
         </div>
-        <button onClick={signOut} className="btn-outline-dark px-4 py-2 text-sm">Sair</button>
+        <div className="flex gap-2">
+          <button onClick={() => navigate('/profile')} className="btn-outline-dark px-3 py-2 text-sm">Perfil</button>
+          <button onClick={signOut} className="btn-outline-dark px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 border-red-500/30">
+            <LogOut size={16} />
+          </button>
+        </div>
       </header>
 
       <main className="p-4 max-w-lg mx-auto space-y-4">
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="bg-[#1A1528] rounded-2xl border border-white/10 p-5"
-        >
+        {/* Card principal */}
+        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#1A1528] rounded-2xl border border-white/10 p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-[#A0A0B0]">Olá, {user?.email?.split('@')[0] || 'Motorista'}</p>
@@ -149,49 +151,25 @@ export function DriverDashboard() {
               <p className="text-xs text-[#A0A0B0]">ganhos de hoje</p>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                disponivel ? 'bg-green-900/40 text-green-400' : 'bg-white/10 text-[#A0A0B0]'
-              }`}>
+              <div className={`px-4 py-2 rounded-full text-sm font-semibold ${disponivel ? 'bg-green-900/40 text-green-400' : 'bg-white/10 text-[#A0A0B0]'}`}>
                 {disponivel ? '🟢 Online' : '⚫ Offline'}
               </div>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setDisponivel(!disponivel);
-                  if (!disponivel) toast.success('Você está online! Recebendo solicitações.');
-                  else toast('Você ficou offline');
-                }}
-                className={`px-6 py-2.5 rounded-2xl font-bold text-sm transition-all ${
-                  disponivel 
-                    ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
-                    : 'bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F]'
-                }`}
-              >
+              <motion.button whileTap={{ scale: 0.95 }} onClick={() => { setDisponivel(!disponivel); if (!disponivel) toast.success('Você está online!'); else toast('Você ficou offline'); }} className={`px-6 py-2.5 rounded-2xl font-bold text-sm transition-all ${disponivel ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F]'}`}>
                 {disponivel ? 'Ficar Offline' : 'Ficar Online'}
               </motion.button>
             </div>
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="rounded-2xl overflow-hidden border border-white/10"
-        >
+        {/* Mapa */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl overflow-hidden border border-white/10">
           <MapWithPersonCar />
         </motion.div>
 
+        {/* Stats cards */}
         <div className="grid grid-cols-2 gap-3">
           {statCards.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-              whileHover={{ scale: 1.02 }}
-              className="bg-[#1A1528] p-4 rounded-2xl border border-white/10"
-            >
+            <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * index }} whileHover={{ scale: 1.02 }} className="bg-[#1A1528] p-4 rounded-2xl border border-white/10">
               <div className="flex items-center gap-2 mb-2">
                 <div className="p-2 rounded-xl" style={{ backgroundColor: `${stat.color}20` }}>
                   <stat.icon size={16} color={stat.color} />
@@ -203,25 +181,15 @@ export function DriverDashboard() {
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-[#1A1528] rounded-2xl border border-white/10 p-5"
-        >
+        {/* Solicitações */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-[#1A1528] rounded-2xl border border-white/10 p-5">
           <h2 className="font-bold text-white mb-3 flex items-center gap-2">
             <Navigation size={18} className="text-[#F4D03F]" />
             Solicitações Próximas
           </h2>
           <AnimatePresence mode="wait">
             {disponivel ? (
-              <motion.div
-                key="waiting"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center py-6"
-              >
+              <motion.div key="waiting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-6">
                 <div className="animate-pulse">
                   <Clock size={40} className="mx-auto mb-3 text-gray-600" />
                 </div>
@@ -229,13 +197,7 @@ export function DriverDashboard() {
                 <p className="text-xs text-[#A0A0B0] mt-1">Fique atento às notificações</p>
               </motion.div>
             ) : (
-              <motion.div
-                key="offline"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center py-6"
-              >
+              <motion.div key="offline" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-6">
                 <Bell size={40} className="mx-auto mb-3 text-gray-600" />
                 <p className="text-white font-medium">Fique online para receber corridas</p>
                 <p className="text-xs text-[#A0A0B0] mt-1">Ative o status online acima</p>
@@ -247,5 +209,9 @@ export function DriverDashboard() {
 
       <BottomNav role="motorista" />
     </div>
-  );
+  )
+}
+
+function navigate(arg0: string) {
+  throw new Error('Function not implemented.');
 }

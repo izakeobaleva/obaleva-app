@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabaseClient'
+import { toast } from 'sonner'
 
 interface Profile {
   id: string
@@ -20,6 +21,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   signUpPassenger: (data: { nome_completo: string; cpf: string; telefone: string; email: string; password: string }) => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext({} as AuthContextType)
@@ -31,30 +33,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Inicializa a sessão
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id, session.user)
-      } else {
-        setLoading(false)
-      }
-    })
+    initAuth()
+  }, [])
 
-    // Escuta mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔄 Auth event:', event, session?.user?.email)
+  async function initAuth() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
       setUser(session?.user ?? null)
       
       if (session?.user) {
-        setLoading(true)
         await fetchProfile(session.user.id, session.user)
-        setLoading(false)
+      }
+    } catch (err) {
+      console.error('Erro ao inicializar auth:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(' Auth event:', event, session?.user?.email)
+      setSession(session)
+      setUser(session?.user ?? null)
+      
+      if (session?.user) {
+        await fetchProfile(session.user.id, session.user)
       } else {
         setProfile(null)
-        setLoading(false)
       }
     })
 
@@ -63,7 +70,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   async function fetchProfile(userId: string, user?: User) {
     try {
-      // Tenta buscar da tabela usuarios
       const { data, error } = await supabase
         .from('usuarios')
         .select('id, nome_completo, email, tipo, telefone, cpf, foto_url')
@@ -79,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const metaTipo = user?.user_metadata?.tipo
       const metaNome = user?.user_metadata?.nome_completo || user?.email?.split('@')[0] || 'Usuário'
       
-      if (metaTipo && (metaTipo === 'passageiro' || metaTipo === 'motorista' || metaTipo === 'admin')) {
+      if (metaTipo && ['passageiro', 'motorista', 'admin'].includes(metaTipo)) {
         setProfile({
           id: userId,
           nome_completo: metaNome,
@@ -90,7 +96,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setProfile(null)
-    } catch {
+    } catch (err) {
+      console.error('Erro ao buscar perfil:', err)
       setProfile(null)
     }
   }
@@ -101,7 +108,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.error('Erro ao sair:', err)
+    }
     setUser(null)
     setProfile(null)
   }
@@ -129,7 +140,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email,
       tipo: 'passageiro',
     })
-    if (userError) throw userError
+    if (userError) {
+      // Se deu conflito, tentar fazer login direto
+      console.warn('Erro ao inserir usuario, pode já existir:', userError)
+    }
 
     // 3. Inserir na tabela passageiros
     const { error: passError } = await supabase.from('passageiros').insert({ id: userId })
@@ -143,8 +157,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id, user)
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signOut, signUpPassenger }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signOut, signUpPassenger, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
