@@ -47,7 +47,8 @@ export function RegisterPassenger() {
     try {
       await signUpPassenger({ nome_completo: nome, cpf, telefone, email, password })
       toast.success('Conta criada com sucesso!')
-      navigate('/dashboard')
+      // O onAuthStateChange vai atualizar o contexto e o App.tsx redireciona automaticamente
+      navigate('/', { replace: true })
     } catch (err: any) {
       toast.error(err.message || 'Erro ao cadastrar')
     }

@@ -31,12 +31,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    initAuth()
-
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('🔄 Auth state changed:', _event, session?.user?.email)
+    // Inicializa a sessão
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
+      if (session?.user) {
+        fetchProfile(session.user.id, session.user)
+      } else {
+        setLoading(false)
+      }
+    })
+
+    // Escuta mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth event:', event, session?.user?.email)
+      setSession(session)
+      setUser(session?.user ?? null)
+      
       if (session?.user) {
         setLoading(true)
         await fetchProfile(session.user.id, session.user)
@@ -47,32 +58,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     })
 
-    return () => listener?.subscription.unsubscribe()
+    return () => subscription.unsubscribe()
   }, [])
-
-  async function initAuth() {
-    setLoading(true)
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) {
-        console.error('❌ Erro ao buscar sessão:', error.message)
-      }
-      console.log('🔍 Sessão inicial:', session?.user?.email || 'Nenhuma sessão')
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        await fetchProfile(session.user.id, session.user)
-      }
-    } catch (err) {
-      console.error('❌ Erro ao inicializar auth:', err)
-    }
-    setLoading(false)
-  }
 
   async function fetchProfile(userId: string, user?: User) {
     try {
-      console.log('🔍 Buscando perfil para:', userId)
-      
       // Tenta buscar da tabela usuarios
       const { data, error } = await supabase
         .from('usuarios')
@@ -80,23 +70,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq('id', userId)
         .maybeSingle()
 
-      if (error) {
-        console.error('❌ Erro ao buscar perfil na tabela:', error.message)
-      }
-
       if (data) {
-        console.log('✅ Perfil carregado da tabela:', data.tipo, data.email)
         setProfile(data)
         return
       }
 
-      // Fallback: usar user_metadata se não encontrou na tabela
+      // Fallback: usar user_metadata
       const metaTipo = user?.user_metadata?.tipo
       const metaNome = user?.user_metadata?.nome_completo || user?.email?.split('@')[0] || 'Usuário'
-      console.log('ℹ️ Perfil não encontrado na tabela. Metadata:', { metaTipo, metaNome })
       
       if (metaTipo && (metaTipo === 'passageiro' || metaTipo === 'motorista' || metaTipo === 'admin')) {
-        console.log('✅ Perfil carregado do metadata:', metaTipo)
         setProfile({
           id: userId,
           nome_completo: metaNome,
@@ -106,22 +89,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return
       }
 
-      console.warn('⚠️ Perfil não encontrado para o usuário:', userId)
       setProfile(null)
-    } catch (err) {
-      console.error('❌ Erro inesperado ao buscar perfil:', err)
+    } catch {
       setProfile(null)
     }
   }
 
   const signIn = async (email: string, password: string) => {
-    console.log('🔑 Tentando login:', email)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      console.error('❌ Erro no login:', error.message)
-      throw error
-    }
-    console.log('✅ Login bem-sucedido!')
+    if (error) throw error
   }
 
   const signOut = async () => {
@@ -132,64 +108,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUpPassenger = async (data: { nome_completo: string; cpf: string; telefone: string; email: string; password: string }) => {
     const { nome_completo, cpf, telefone, email, password } = data
+
+    // 1. Criar usuário no auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      options: { 
-        data: { nome_completo, tipo: 'passageiro' },
-        emailRedirectTo: window.location.origin + '/dashboard',
-      },
+      options: { data: { nome_completo, tipo: 'passageiro' } }
     })
     if (authError) throw authError
+    if (!authData.user) throw new Error('Erro ao criar usuário')
 
-    // Se o usuário foi criado mas não tem sessão (confirm email ainda ativo no Supabase),
-    // faz login manualmente para criar a sessão
-    if (!authData.session && authData.user) {
-      console.log('ℹ️ Sessão não criada automaticamente. Fazendo login manual...')
-      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (loginError) throw loginError
-      
-      if (!loginData.user) throw new Error('Usuário não encontrado após login')
-      if (!loginData.session) throw new Error('Erro ao criar sessão. Verifique se "Confirm email" está desativado no Supabase.')
-      
-      // Inserir na tabela usuarios
-      const { error: insertUserError } = await supabase.from('usuarios').insert({
-        id: loginData.user.id,
-        nome_completo,
-        cpf,
-        telefone,
-        email,
-        tipo: 'passageiro',
-      })
-      if (insertUserError) throw insertUserError
+    const userId = authData.user.id
 
-      const { error: insertPassError } = await supabase.from('passageiros').insert({
-        id: loginData.user.id,
-      })
-      if (insertPassError) console.warn(insertPassError)
-
-      return // Sai aqui, pois o onAuthStateChange vai atualizar o contexto
-    }
-
-    if (!authData.user) throw new Error('Usuário não criado')
-
-    const { error: insertUserError } = await supabase.from('usuarios').insert({
-      id: authData.user.id,
+    // 2. Inserir na tabela usuarios
+    const { error: userError } = await supabase.from('usuarios').insert({
+      id: userId,
       nome_completo,
       cpf,
       telefone,
       email,
       tipo: 'passageiro',
     })
-    if (insertUserError) throw insertUserError
+    if (userError) throw userError
 
-    const { error: insertPassError } = await supabase.from('passageiros').insert({
-      id: authData.user.id,
-    })
-    if (insertPassError) console.warn(insertPassError)
+    // 3. Inserir na tabela passageiros
+    const { error: passError } = await supabase.from('passageiros').insert({ id: userId })
+    if (passError) console.warn('Erro ao inserir passageiro:', passError)
+
+    // 4. Se não criou sessão automática, fazer login manual
+    if (!authData.session) {
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password })
+      if (loginError) throw loginError
+      if (!loginData.session) throw new Error('Erro ao criar sessão. Verifique "Confirm email" no Supabase.')
+    }
   }
 
   return (
