@@ -131,23 +131,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const userId = authData.user.id
 
-    // 2. Inserir na tabela usuarios
-    const { error: userError } = await supabase.from('usuarios').insert({
+    // 2. Inserir na tabela usuarios (com tratamento de conflito)
+    const { error: userError } = await supabase.from('usuarios').upsert({
       id: userId,
       nome_completo,
       cpf,
       telefone,
       email,
       tipo: 'passageiro',
-    })
-    if (userError) {
-      // Se deu conflito, tentar fazer login direto
-      console.warn('Erro ao inserir usuario, pode já existir:', userError)
+    }, { onConflict: 'id', ignoreDuplicates: false })
+    
+    if (userError && !userError.message.includes('duplicate key')) {
+      throw userError
     }
 
-    // 3. Inserir na tabela passageiros
-    const { error: passError } = await supabase.from('passageiros').insert({ id: userId })
-    if (passError) console.warn('Erro ao inserir passageiro:', passError)
+    // 3. Inserir na tabela passageiros (com tratamento de conflito)
+    const { error: passError } = await supabase.from('passageiros').upsert(
+      { id: userId },
+      { onConflict: 'id', ignoreDuplicates: false }
+    )
+    if (passError && !passError.message.includes('duplicate key')) {
+      console.warn('Erro ao inserir passageiro:', passError)
+    }
 
     // 4. Se não criou sessão automática, fazer login manual
     if (!authData.session) {
