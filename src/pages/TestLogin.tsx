@@ -246,7 +246,8 @@ export default function TestLogin() {
             </motion.button>
 
             <div className="border-t border-white/10 pt-4">
-              <div className="bg-[#0F0B1A] rounded-2xl border border-white/10 p-4">
+              {/* Passageiro */}
+              <div className="bg-[#0F0B1A] rounded-2xl border border-white/10 p-4 mb-3">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
                     <User size={20} className="text-blue-400" />
@@ -288,7 +289,8 @@ export default function TestLogin() {
                 )}
               </div>
 
-              <div className="bg-[#0F0B1A] rounded-2xl border border-white/10 p-4 mt-3">
+              {/* Motorista */}
+              <div className="bg-[#0F0B1A] rounded-2xl border border-white/10 p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
                     <Car size={20} className="text-purple-400" />

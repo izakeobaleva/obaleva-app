@@ -8,6 +8,7 @@ import { RegisterPassenger } from './pages/RegisterPassenger'
 import { RegisterDriver } from './pages/RegisterDriver'
 import { PassengerDashboard } from './pages/PassengerDashboard'
 import { DriverDashboard } from './pages/DriverDashboard'
+import TestLogin from './pages/TestLogin'
 
 function AppRoutes() {
   const { user, profile, loading } = useAuth()
@@ -25,6 +26,7 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<RegisterPassenger />} />
         <Route path="/register-driver" element={<RegisterDriver />} />
+        <Route path="/test-login" element={<TestLogin />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -48,7 +50,6 @@ function AppRoutes() {
     )
   }
 
-  // Fallback para qualquer outro perfil (admin, etc)
   return (
     <Routes>
       <Route path="/" element={<Index />} />
