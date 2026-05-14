@@ -146,14 +146,31 @@ export function RegisterDriver() {
         email,
         password,
         options: {
-          data: { nome_completo: nome, tipo: 'motorista' }
-        }
+          data: { nome_completo: nome, tipo: 'motorista' },
+          emailRedirectTo: window.location.origin + '/driver-dashboard',
+        },
       })
 
       if (authError) throw authError
-      if (!authData.user) throw new Error('Erro ao criar usuário')
 
-      const userId = authData.user.id
+      let userId: string
+
+      // Se não criou sessão automaticamente, faz login manual
+      if (!authData.session && authData.user) {
+        console.log('ℹ️ Sessão não criada automaticamente. Fazendo login manual...')
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+        if (loginError) throw loginError
+        if (!loginData.user) throw new Error('Usuário não encontrado após login')
+        if (!loginData.session) throw new Error('Erro ao criar sessão. Verifique se "Confirm email" está desativado no Supabase.')
+        userId = loginData.user.id
+      } else if (authData.user) {
+        userId = authData.user.id
+      } else {
+        throw new Error('Erro ao criar usuário')
+      }
 
       const { error: userError } = await supabase.from('usuarios').insert({
         id: userId,

@@ -137,11 +137,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
       options: { 
         data: { nome_completo, tipo: 'passageiro' },
-        // Não exige verificação de email - usuario ja entra direto
-      }
+        emailRedirectTo: window.location.origin + '/dashboard',
+      },
     })
     if (authError) throw authError
-    if (!authData.session) throw new Error('Erro ao criar conta. Tente novamente.')
+
+    // Se o usuário foi criado mas não tem sessão (confirm email ainda ativo no Supabase),
+    // faz login manualmente para criar a sessão
+    if (!authData.session && authData.user) {
+      console.log('ℹ️ Sessão não criada automaticamente. Fazendo login manual...')
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (loginError) throw loginError
+      
+      if (!loginData.user) throw new Error('Usuário não encontrado após login')
+      if (!loginData.session) throw new Error('Erro ao criar sessão. Verifique se "Confirm email" está desativado no Supabase.')
+      
+      // Inserir na tabela usuarios
+      const { error: insertUserError } = await supabase.from('usuarios').insert({
+        id: loginData.user.id,
+        nome_completo,
+        cpf,
+        telefone,
+        email,
+        tipo: 'passageiro',
+      })
+      if (insertUserError) throw insertUserError
+
+      const { error: insertPassError } = await supabase.from('passageiros').insert({
+        id: loginData.user.id,
+      })
+      if (insertPassError) console.warn(insertPassError)
+
+      return // Sai aqui, pois o onAuthStateChange vai atualizar o contexto
+    }
+
     if (!authData.user) throw new Error('Usuário não criado')
 
     const { error: insertUserError } = await supabase.from('usuarios').insert({
@@ -150,12 +182,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       cpf,
       telefone,
       email,
-      tipo: 'passageiro'
+      tipo: 'passageiro',
     })
     if (insertUserError) throw insertUserError
 
     const { error: insertPassError } = await supabase.from('passageiros').insert({
-      id: authData.user.id
+      id: authData.user.id,
     })
     if (insertPassError) console.warn(insertPassError)
   }
