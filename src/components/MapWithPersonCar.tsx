@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { MapPin } from 'lucide-react'
 
-export function MapWithPersonCar() {
+export const MapWithPersonCar = memo(() => {
   return (
     <div className="w-full h-64 bg-[#0F0B1A] flex items-center justify-center rounded-lg border border-white/10">
       <div className="text-center text-[#A0A0B0]">
@@ -11,4 +11,4 @@ export function MapWithPersonCar() {
       </div>
     </div>
   )
-}
+})
