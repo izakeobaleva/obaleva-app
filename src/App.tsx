@@ -53,6 +53,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<PassengerDashboard />} />
+        <Route path="/driver-dashboard" element={<Navigate to="/dashboard" replace />} />
         <Route path="/trips" element={<Suspense fallback={<PageLoader />}><Trips /></Suspense>} />
         <Route path="/trips/:id" element={<Suspense fallback={<PageLoader />}><TripDetails /></Suspense>} />
         <Route path="/profile" element={<Suspense fallback={<PageLoader />}><Profile /></Suspense>} />
@@ -70,7 +71,8 @@ function AppRoutes() {
     return (
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DriverDashboard />} />
+        <Route path="/dashboard" element={<Navigate to="/driver-dashboard" replace />} />
+        <Route path="/driver-dashboard" element={<DriverDashboard />} />
         <Route path="/earnings" element={<Suspense fallback={<PageLoader />}><Earnings /></Suspense>} />
         <Route path="/trips/:id" element={<Suspense fallback={<PageLoader />}><TripDetails /></Suspense>} />
         <Route path="/profile" element={<Suspense fallback={<PageLoader />}><Profile /></Suspense>} />
@@ -90,6 +92,7 @@ function AppRoutes() {
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="/admin" element={<Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense>} />
         <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
+        <Route path="/driver-dashboard" element={<Navigate to="/admin" replace />} />
         <Route path="/login" element={<Navigate to="/admin" replace />} />
         <Route path="/register" element={<Suspense fallback={<PageLoader />}><RegisterPassenger /></Suspense>} />
         <Route path="/register-driver" element={<Suspense fallback={<PageLoader />}><RegisterDriver /></Suspense>} />
