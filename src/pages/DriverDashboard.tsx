@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { MapWithPersonCar } from '../components/MapWithPersonCar';
@@ -11,6 +12,7 @@ import { toast } from 'sonner';
 
 export function DriverDashboard() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [disponivel, setDisponivel] = useState(false);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -210,8 +212,4 @@ export function DriverDashboard() {
       <BottomNav role="motorista" />
     </div>
   )
-}
-
-function navigate(arg0: string) {
-  throw new Error('Function not implemented.');
 }

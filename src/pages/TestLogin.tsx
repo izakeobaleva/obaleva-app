@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
-import { User, Car, Copy, Eye, EyeOff, RefreshCw, Users } from 'lucide-react'
+import { User, Car, Copy, Eye, EyeOff, RefreshCw, Users, LogOut, ArrowLeft, CheckCircle, XCircle, Mail } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 function generateRandomEmail(prefix: string) {
   const random = Math.random().toString(36).substring(2, 8)
@@ -16,6 +17,7 @@ function generateRandomPassword() {
 
 export default function TestLogin() {
   const navigate = useNavigate()
+  const { signOut, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState<'passageiro' | 'motorista' | 'bulk' | null>(null)
   const [showPassword, setShowPassword] = useState<'passageiro' | 'motorista' | null>(null)
   const [bulkProgress, setBulkProgress] = useState<{ atual: number; total: number } | null>(null)
@@ -194,6 +196,29 @@ export default function TestLogin() {
     } catch {}
   }
 
+  async function fazerLogin(tipo: 'passageiro' | 'motorista') {
+    const login = logins[tipo]
+    if (!login) return
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: login.email,
+        password: login.password
+      })
+      if (error) throw error
+      toast.success(`Entrando como ${tipo}...`)
+      // Redirecionamento será feito pelo AuthContext/App automaticamente
+    } catch (err: any) {
+      toast.error('Erro ao fazer login: ' + err.message)
+    }
+  }
+
+  async function handleSignOut() {
+    await signOut()
+    toast('Saiu da conta')
+    navigate('/test-login')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -207,9 +232,26 @@ export default function TestLogin() {
         className="relative z-10 w-full max-w-md"
       >
         <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-6">
-          <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-white">Logins de Teste</h1>
-            <p className="text-sm text-[#A0A0B0]">Crie contas de teste rapidamente</p>
+          {/* Header com botão de sair */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => navigate('/')}
+              className="back-button-outline"
+              type="button"
+            >
+              <ArrowLeft size={22} />
+            </button>
+            <div className="text-center flex-1">
+              <h1 className="text-xl font-bold text-white">Logins de Teste</h1>
+              <p className="text-sm text-[#A0A0B0]">Crie contas de teste rapidamente</p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="p-2 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition"
+              title="Sair da conta atual"
+            >
+              <LogOut size={20} />
+            </button>
           </div>
 
           {/* Barra de progresso para criação em massa */}
@@ -272,12 +314,12 @@ export default function TestLogin() {
                       <p className={`text-sm text-white font-medium ${showPassword === 'passageiro' ? '' : 'blur-sm select-none'}`}>{logins.passageiro.password}</p>
                     </div>
                     
-                    <div className="flex gap-2">
-                      <button onClick={() => copyAndLogin('passageiro')} className="flex-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-2xl py-2 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-blue-500/30 transition">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button onClick={() => copyAndLogin('passageiro')} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-2xl py-2 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-blue-500/30 transition">
                         <Copy size={14} /> Copiar
                       </button>
-                      <button onClick={() => { supabase.auth.signOut(); navigate('/') }} className="flex-1 bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] rounded-2xl py-2 text-xs font-bold">
-                        Ir para Login
+                      <button onClick={() => fazerLogin('passageiro')} className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] rounded-2xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 hover:shadow-lg transition">
+                        <Mail size={14} /> Entrar
                       </button>
                     </div>
                   </div>
@@ -315,12 +357,12 @@ export default function TestLogin() {
                       <p className={`text-sm text-white font-medium ${showPassword === 'motorista' ? '' : 'blur-sm select-none'}`}>{logins.motorista.password}</p>
                     </div>
                     
-                    <div className="flex gap-2">
-                      <button onClick={() => copyAndLogin('motorista')} className="flex-1 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-2xl py-2 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-purple-500/30 transition">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button onClick={() => copyAndLogin('motorista')} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-2xl py-2 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-purple-500/30 transition">
                         <Copy size={14} /> Copiar
                       </button>
-                      <button onClick={() => { supabase.auth.signOut(); navigate('/') }} className="flex-1 bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] rounded-2xl py-2 text-xs font-bold">
-                        Ir para Login
+                      <button onClick={() => fazerLogin('motorista')} className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] rounded-2xl py-2 text-xs font-bold flex items-center justify-center gap-1.5 hover:shadow-lg transition">
+                        <Mail size={14} /> Entrar
                       </button>
                     </div>
                   </div>
@@ -334,8 +376,8 @@ export default function TestLogin() {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-white/10">
-            <button onClick={() => navigate('/')} className="w-full py-2.5 rounded-2xl text-sm text-[#A0A0B0] hover:text-white transition">
+          <div className="mt-6 pt-4 border-t border-white/10 flex justify-center">
+            <button onClick={() => navigate('/')} className="text-sm text-[#A0A0B0] hover:text-white transition">
               ← Voltar
             </button>
           </div>
