@@ -22,6 +22,7 @@ const Earnings = lazy(() => import('./pages/Earnings'))
 const Divulgacao = lazy(() => import('./pages/Divulgacao'))
 const AppDivulgacao = lazy(() => import('./pages/AppDivulgacao'))
 const TestLogin = lazy(() => import('./pages/TestLogin'))
+const BulkCreateUsers = lazy(() => import('./pages/BulkCreateUsers'))
 
 // Loader minimalista
 function PageLoader() {
@@ -44,6 +45,7 @@ function AppRoutes() {
       <Route path="/update-password" element={<Suspense fallback={<PageLoader />}><UpdatePassword /></Suspense>} />
       <Route path="/divulgar" element={<Suspense fallback={<PageLoader />}><AppDivulgacao /></Suspense>} />
       <Route path="/landing" element={<Suspense fallback={<PageLoader />}><Divulgacao /></Suspense>} />
+      <Route path="/bulk-create" element={<Suspense fallback={<PageLoader />}><BulkCreateUsers /></Suspense>} />
       <Route path="*" element={<NotFound />} />
     </>
   )
