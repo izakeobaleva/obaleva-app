@@ -55,6 +55,20 @@ export function Login() {
             <h1 className="text-2xl font-bold text-white">OBALEVA</h1>
             <p className="text-[#A0A0B0] mt-1">Segurança e conforto em cada viagem</p>
           </div>
+
+          {/* Botão Google também na tela de email */}
+          <button 
+            onClick={handleGoogleLogin} 
+            className="w-full py-3 rounded-2xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-3 hover:bg-white/10 transition mb-4 text-lg"
+          >
+            <Chrome size={22} /> Continuar com Google
+          </button>
+
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-[#A0A0B0] text-sm">ou</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
