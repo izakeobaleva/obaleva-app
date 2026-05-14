@@ -21,7 +21,7 @@ const TripDetails = lazy(() => import('./pages/TripDetails'))
 const Earnings = lazy(() => import('./pages/Earnings'))
 const Divulgacao = lazy(() => import('./pages/Divulgacao'))
 const AppDivulgacao = lazy(() => import('./pages/AppDivulgacao'))
-const TestLogin = lazy(() => import('./pages/TestLogin').then(m => ({ default: m.TestLogin })))
+const TestLogin = lazy(() => import('./pages/TestLogin'))
 
 // Loader minimalista
 function PageLoader() {
