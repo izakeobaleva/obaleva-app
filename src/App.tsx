@@ -21,6 +21,7 @@ const TripDetails = lazy(() => import('./pages/TripDetails'))
 const Earnings = lazy(() => import('./pages/Earnings'))
 const Divulgacao = lazy(() => import('./pages/Divulgacao'))
 const AppDivulgacao = lazy(() => import('./pages/AppDivulgacao'))
+const TestLogin = lazy(() => import('./pages/TestLogin').then(m => ({ default: m.TestLogin })))
 
 // Loader minimalista
 function PageLoader() {
@@ -59,6 +60,7 @@ function AppRoutes() {
         <Route path="/profile" element={<Suspense fallback={<PageLoader />}><Profile /></Suspense>} />
         <Route path="/register" element={<Suspense fallback={<PageLoader />}><RegisterPassenger /></Suspense>} />
         <Route path="/register-driver" element={<Suspense fallback={<PageLoader />}><RegisterDriver /></Suspense>} />
+        <Route path="/test-login" element={<Suspense fallback={<PageLoader />}><Navigate to="/dashboard" replace /></Suspense>} />
         <Route path="/login" element={<Navigate to="/dashboard" replace />} />
         <Route path="/admin" element={<Suspense fallback={<PageLoader />}><AdminLogin /></Suspense>} />
         {commonRoutes}
@@ -78,6 +80,7 @@ function AppRoutes() {
         <Route path="/profile" element={<Suspense fallback={<PageLoader />}><Profile /></Suspense>} />
         <Route path="/register" element={<Suspense fallback={<PageLoader />}><RegisterPassenger /></Suspense>} />
         <Route path="/register-driver" element={<Suspense fallback={<PageLoader />}><RegisterDriver /></Suspense>} />
+        <Route path="/test-login" element={<Suspense fallback={<PageLoader />}><Navigate to="/driver-dashboard" replace /></Suspense>} />
         <Route path="/login" element={<Navigate to="/dashboard" replace />} />
         <Route path="/admin" element={<Suspense fallback={<PageLoader />}><AdminLogin /></Suspense>} />
         {commonRoutes}
@@ -96,6 +99,7 @@ function AppRoutes() {
         <Route path="/login" element={<Navigate to="/admin" replace />} />
         <Route path="/register" element={<Suspense fallback={<PageLoader />}><RegisterPassenger /></Suspense>} />
         <Route path="/register-driver" element={<Suspense fallback={<PageLoader />}><RegisterDriver /></Suspense>} />
+        <Route path="/test-login" element={<Suspense fallback={<PageLoader />}><Navigate to="/admin" replace /></Suspense>} />
         {commonRoutes}
       </Routes>
     )
@@ -105,6 +109,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
+      <Route path="/test-login" element={<Suspense fallback={<PageLoader />}><TestLogin /></Suspense>} />
       <Route path="/login" element={<Suspense fallback={<PageLoader />}><LoginPage /></Suspense>} />
       <Route path="/register" element={<Suspense fallback={<PageLoader />}><RegisterPassenger /></Suspense>} />
       <Route path="/register-driver" element={<Suspense fallback={<PageLoader />}><RegisterDriver /></Suspense>} />
