@@ -5,9 +5,10 @@
   "type": "module", 
   "scripts": { 
     "dev": "vite", 
-    "build": "node scripts/deploy.js", 
+    "build": "vite build", 
+    "build:prod": "node scripts/deploy.js && vite build",
     "preview": "vite preview",
-    "deploy": "node scripts/deploy.js && vercel --prod"
+    "deploy": "node scripts/deploy.js && vite build && vercel --prod"
   }, 
   "dependencies": { 
     "@supabase/supabase-js": "^2.45.3", 
