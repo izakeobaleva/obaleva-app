@@ -6,7 +6,6 @@
   "scripts": { 
     "dev": "vite", 
     "build": "vite build", 
-    "build:prod": "node scripts/deploy.js && vite build",
     "preview": "vite preview",
     "deploy": "node scripts/deploy.js && vite build && vercel --prod"
   }, 
