@@ -1,0 +1,5 @@
+.dyad
+.env
+*.md
+scripts
+node_modules
