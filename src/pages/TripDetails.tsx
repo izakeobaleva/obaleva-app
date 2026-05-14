@@ -17,7 +17,6 @@ interface TripData {
   destino: string
   status: string
   valor: number
-  metodo_pagamento: string
   distancia_km: number
   tempo_min: number
   created_at: string
@@ -225,12 +224,8 @@ export default function TripDetails() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CreditCard size={18} className="text-[#A0A0B0]" />
-              <span className="text-white">Pagamento</span>
+              <span className="text-white">Data</span>
             </div>
-            <span className="text-white font-medium capitalize">{trip.metodo_pagamento || 'Não informado'}</span>
-          </div>
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-            <span className="text-[#A0A0B0] text-sm">Data</span>
             <span className="text-white text-sm">
               {new Date(trip.created_at).toLocaleString('pt-BR')}
             </span>

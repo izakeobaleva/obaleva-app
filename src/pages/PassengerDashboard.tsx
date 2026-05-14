@@ -32,7 +32,6 @@ export function PassengerDashboard() {
   const navigate = useNavigate();
   const [origem, setOrigem] = useState('');
   const [destino, setDestino] = useState('');
-  const [metodoPagamento, setMetodoPagamento] = useState<'dinheiro' | 'cartao' | 'pix'>('dinheiro');
   const [solicitando, setSolicitando] = useState(false);
   const [loading, setLoading] = useState(true);
   const [recentTrips, setRecentTrips] = useState<any[]>([]);
@@ -72,7 +71,6 @@ export function PassengerDashboard() {
         destino: destino,
         status: 'pendente',
         valor: precoEstimado || 20,
-        metodo_pagamento: metodoPagamento,
       });
       
       if (error) throw error;
@@ -85,7 +83,7 @@ export function PassengerDashboard() {
       toast.error('Erro ao solicitar: ' + err.message);
     }
     setSolicitando(false);
-  }, [destino, origem, precoEstimado, metodoPagamento, user?.id]);
+  }, [destino, origem, precoEstimado, user?.id]);
 
   if (loading) return (
     <div className="min-h-screen bg-[#0F0B1A] p-4 space-y-4">
@@ -139,12 +137,6 @@ export function PassengerDashboard() {
               </div>
             </motion.div>
           )}
-
-          {/* Método de pagamento */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-[#A0A0B0]">Forma de pagamento</label>
-            <PaymentMethodSelector value={metodoPagamento} onChange={setMetodoPagamento} />
-          </div>
 
           {/* Botão solicitar */}
           <motion.button whileTap={{ scale: 0.98 }} onClick={solicitarCorrida} disabled={solicitando} className="btn-premium w-full py-4 rounded-xl text-lg font-bold shadow-lg">
