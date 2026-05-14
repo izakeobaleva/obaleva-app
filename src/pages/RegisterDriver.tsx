@@ -191,8 +191,9 @@ export function RegisterDriver() {
       if (motoristaError) throw motoristaError
 
       clearStorage()
-      toast.success('Cadastro enviado para análise! Aguarde aprovação.')
-      navigate('/login')
+      toast.success('Cadastro enviado para análise!')
+      // Redireciona para o dashboard do motorista
+      navigate('/dashboard')
     } catch (err: any) {
       toast.error(err.message || 'Erro ao cadastrar')
     }

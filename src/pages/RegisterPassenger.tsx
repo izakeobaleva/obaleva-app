@@ -46,8 +46,8 @@ export function RegisterPassenger() {
     setLoading(true)
     try {
       await signUpPassenger({ nome_completo: nome, cpf, telefone, email, password })
-      toast.success('Conta criada com sucesso! Verifique seu e-mail.')
-      navigate('/login')
+      toast.success('Conta criada com sucesso!')
+      navigate('/dashboard')
     } catch (err: any) {
       toast.error(err.message || 'Erro ao cadastrar')
     }

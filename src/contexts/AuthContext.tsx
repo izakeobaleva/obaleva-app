@@ -135,10 +135,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { nome_completo, tipo: 'passageiro' } }
+      options: { 
+        data: { nome_completo, tipo: 'passageiro' },
+        // Não exige verificação de email - usuario ja entra direto
+      }
     })
     if (authError) throw authError
-    if (!authData.session) throw new Error('Verifique seu e-mail para confirmar o cadastro')
+    if (!authData.session) throw new Error('Erro ao criar conta. Tente novamente.')
     if (!authData.user) throw new Error('Usuário não criado')
 
     const { error: insertUserError } = await supabase.from('usuarios').insert({
