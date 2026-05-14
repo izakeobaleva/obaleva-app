@@ -19,6 +19,7 @@ import AdminFullDashboard from './Admin/AdminFullDashboard'
 import LandingEditor from './Admin/LandingEditor'
 import LogoEditor from './Admin/LogoEditor'
 import DominioConfig from './Admin/DominioConfig'
+import EmailConfigCheck from './Admin/EmailConfigCheck'
 
 function AdminDashboard() {
   const { signOut, profile } = useAuth()
@@ -51,6 +52,7 @@ function AdminDashboard() {
     { id: 'logo', label: 'Logo', icon: Image },
     { id: 'dominio', label: 'Domínio', icon: Globe },
     { id: 'suporte', label: 'Suporte', icon: MessageSquare },
+    { id: 'diagnostico', label: 'Diagnóstico', icon: RefreshCw },
   ]
 
   const handleSignOut = async () => {
@@ -70,6 +72,7 @@ function AdminDashboard() {
       case 'logo': return <LogoEditor />
       case 'dominio': return <DominioConfig />
       case 'suporte': return <Suporte />
+      case 'diagnostico': return <EmailConfigCheck />
       default: return <AdminFullDashboard />
     }
   }
