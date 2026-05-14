@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
-import { User, Car, Copy, CheckCircle, Eye, EyeOff, RefreshCw } from 'lucide-react'
+import { User, Car, Copy, Eye, EyeOff, RefreshCw } from 'lucide-react'
 
 function generateRandomEmail(prefix: string) {
   const random = Math.random().toString(36).substring(2, 8)
@@ -14,7 +14,7 @@ function generateRandomPassword() {
   return 'Teste@' + Math.random().toString(36).substring(2, 8)
 }
 
-export function TestLogin() {
+export default function TestLogin() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState<'passageiro' | 'motorista' | null>(null)
   const [showPassword, setShowPassword] = useState<'passageiro' | 'motorista' | null>(null)
@@ -50,7 +50,6 @@ export function TestLogin() {
         throw new Error('Erro ao criar usuário')
       }
 
-      // Inserir na tabela usuarios
       const { error: userError } = await supabase.from('usuarios').insert({
         id: userId,
         nome_completo: nome,
@@ -61,7 +60,6 @@ export function TestLogin() {
       })
       if (userError) throw userError
 
-      // Inserir na tabela passageiros
       await supabase.from('passageiros').insert({ id: userId })
 
       setLogins(prev => ({ ...prev, passageiro: { email, password } }))
@@ -99,7 +97,6 @@ export function TestLogin() {
         throw new Error('Erro ao criar usuário')
       }
 
-      // Inserir na tabela usuarios
       const { error: userError } = await supabase.from('usuarios').insert({
         id: userId,
         nome_completo: nome,
@@ -110,7 +107,6 @@ export function TestLogin() {
       })
       if (userError) throw userError
 
-      // Inserir na tabela motoristas
       await supabase.from('motoristas').insert({
         id: userId,
         status: 'aprovado',
@@ -154,7 +150,6 @@ export function TestLogin() {
           </div>
 
           <div className="space-y-4">
-            {/* Passageiro */}
             <div className="bg-[#0F0B1A] rounded-2xl border border-white/10 p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
@@ -173,54 +168,30 @@ export function TestLogin() {
                     <p className="text-sm text-white font-medium break-all">{logins.passageiro.email}</p>
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-xs text-[#A0A0B0]">Senha:</p>
-                      <button
-                        onClick={() => setShowPassword(showPassword === 'passageiro' ? null : 'passageiro')}
-                        className="text-[#A0A0B0] hover:text-white transition"
-                      >
+                      <button onClick={() => setShowPassword(showPassword === 'passageiro' ? null : 'passageiro')} className="text-[#A0A0B0] hover:text-white transition">
                         {showPassword === 'passageiro' ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                     </div>
-                    <p className={`text-sm text-white font-medium ${showPassword === 'passageiro' ? '' : 'blur-sm select-none'}`}>
-                      {logins.passageiro.password}
-                    </p>
+                    <p className={`text-sm text-white font-medium ${showPassword === 'passageiro' ? '' : 'blur-sm select-none'}`}>{logins.passageiro.password}</p>
                   </div>
                   
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => copyAndLogin('passageiro')}
-                      className="flex-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-2xl py-2 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-blue-500/30 transition"
-                    >
-                      <Copy size={14} />
-                      Copiar
+                    <button onClick={() => copyAndLogin('passageiro')} className="flex-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-2xl py-2 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-blue-500/30 transition">
+                      <Copy size={14} /> Copiar
                     </button>
-                    <button
-                      onClick={() => {
-                        supabase.auth.signOut()
-                        navigate('/')
-                      }}
-                      className="flex-1 bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] rounded-2xl py-2 text-xs font-bold"
-                    >
+                    <button onClick={() => { supabase.auth.signOut(); navigate('/') }} className="flex-1 bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] rounded-2xl py-2 text-xs font-bold">
                       Ir para Login
                     </button>
                   </div>
                 </div>
               ) : (
-                <button
-                  onClick={criarPassageiro}
-                  disabled={loading === 'passageiro'}
-                  className="w-full bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-2xl py-2.5 text-sm font-medium flex items-center justify-center gap-2 hover:bg-blue-500/30 transition disabled:opacity-50"
-                >
-                  {loading === 'passageiro' ? (
-                    <RefreshCw size={16} className="animate-spin" />
-                  ) : (
-                    <User size={16} />
-                  )}
+                <button onClick={criarPassageiro} disabled={loading === 'passageiro'} className="w-full bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-2xl py-2.5 text-sm font-medium flex items-center justify-center gap-2 hover:bg-blue-500/30 transition disabled:opacity-50">
+                  {loading === 'passageiro' ? <RefreshCw size={16} className="animate-spin" /> : <User size={16} />}
                   {loading === 'passageiro' ? 'Criando...' : 'Criar Passageiro Teste'}
                 </button>
               )}
             </div>
 
-            {/* Motorista */}
             <div className="bg-[#0F0B1A] rounded-2xl border border-white/10 p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
@@ -239,48 +210,25 @@ export function TestLogin() {
                     <p className="text-sm text-white font-medium break-all">{logins.motorista.email}</p>
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-xs text-[#A0A0B0]">Senha:</p>
-                      <button
-                        onClick={() => setShowPassword(showPassword === 'motorista' ? null : 'motorista')}
-                        className="text-[#A0A0B0] hover:text-white transition"
-                      >
+                      <button onClick={() => setShowPassword(showPassword === 'motorista' ? null : 'motorista')} className="text-[#A0A0B0] hover:text-white transition">
                         {showPassword === 'motorista' ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                     </div>
-                    <p className={`text-sm text-white font-medium ${showPassword === 'motorista' ? '' : 'blur-sm select-none'}`}>
-                      {logins.motorista.password}
-                    </p>
+                    <p className={`text-sm text-white font-medium ${showPassword === 'motorista' ? '' : 'blur-sm select-none'}`}>{logins.motorista.password}</p>
                   </div>
                   
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => copyAndLogin('motorista')}
-                      className="flex-1 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-2xl py-2 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-purple-500/30 transition"
-                    >
-                      <Copy size={14} />
-                      Copiar
+                    <button onClick={() => copyAndLogin('motorista')} className="flex-1 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-2xl py-2 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-purple-500/30 transition">
+                      <Copy size={14} /> Copiar
                     </button>
-                    <button
-                      onClick={() => {
-                        supabase.auth.signOut()
-                        navigate('/')
-                      }}
-                      className="flex-1 bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] rounded-2xl py-2 text-xs font-bold"
-                    >
+                    <button onClick={() => { supabase.auth.signOut(); navigate('/') }} className="flex-1 bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] rounded-2xl py-2 text-xs font-bold">
                       Ir para Login
                     </button>
                   </div>
                 </div>
               ) : (
-                <button
-                  onClick={criarMotorista}
-                  disabled={loading === 'motorista'}
-                  className="w-full bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-2xl py-2.5 text-sm font-medium flex items-center justify-center gap-2 hover:bg-purple-500/30 transition disabled:opacity-50"
-                >
-                  {loading === 'motorista' ? (
-                    <RefreshCw size={16} className="animate-spin" />
-                  ) : (
-                    <Car size={16} />
-                  )}
+                <button onClick={criarMotorista} disabled={loading === 'motorista'} className="w-full bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-2xl py-2.5 text-sm font-medium flex items-center justify-center gap-2 hover:bg-purple-500/30 transition disabled:opacity-50">
+                  {loading === 'motorista' ? <RefreshCw size={16} className="animate-spin" /> : <Car size={16} />}
                   {loading === 'motorista' ? 'Criando...' : 'Criar Motorista Teste'}
                 </button>
               )}
@@ -288,10 +236,7 @@ export function TestLogin() {
           </div>
 
           <div className="mt-6 pt-4 border-t border-white/10">
-            <button
-              onClick={() => navigate('/')}
-              className="w-full py-2.5 rounded-2xl text-sm text-[#A0A0B0] hover:text-white transition"
-            >
+            <button onClick={() => navigate('/')} className="w-full py-2.5 rounded-2xl text-sm text-[#A0A0B0] hover:text-white transition">
               ← Voltar
             </button>
           </div>
