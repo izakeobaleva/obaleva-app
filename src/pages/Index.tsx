@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Share2, Download, Smartphone, Shield, Star, Mail } from 'lucide-react'
+import { Car, Share2, Download, Smartphone, Shield, Star, Mail, Bug } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
@@ -230,6 +230,15 @@ export const Index = () => {
               Baixar APK
             </a>
           )}
+
+          {/* Link para Test Login */}
+          <button
+            onClick={() => navigate('/test-login')}
+            className="w-full py-3 rounded-2xl text-xs text-[#A0A0B0]/40 hover:text-[#A0A0B0] transition-all flex items-center justify-center gap-2"
+          >
+            <Bug size={14} />
+            Criar logins de teste (desenvolvedor)
+          </button>
         </motion.div>
 
         <div className="text-center py-8 mt-auto">
