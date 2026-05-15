@@ -1,28 +1,23 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Shield, Star, Mail, Share2, Download, LogOut, LayoutDashboard, Home, Search, User, Menu, ArrowRight, MapPin, Send } from 'lucide-react'
+import { Car, Smartphone, Mail, MapPin, Send, Target, Navigation, Compass, Gps } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
-
-const QUICK_OPTIONS = [
-  { label: 'Início', icon: Home, color: '#F4D03F' },
-  { label: 'Buscar', icon: Search, color: '#3B82F6' },
-  { label: 'Perfil', icon: User, color: '#A855F7' },
-  { label: 'Menu', icon: Menu, color: '#22C55E' },
-]
 
 export const Index = () => {
   const navigate = useNavigate()
   const { user, loading, signOut, profile } = useAuth()
   const [apkUrl, setApkUrl] = useState('')
   const [dominio, setDominio] = useState(window.location.origin)
-  const [showPromoPanel, setShowPromoPanel] = useState(false)
-  const [showOptions, setShowOptions] = useState(false)
+  const [origem, setOrigem] = useState('')
+  const [destino, setDestino] = useState('')
   const [compartilhandoLocal, setCompartilhandoLocal] = useState(false)
+  const [coordsAtuais, setCoordsAtuais] = useState<{ lat: number; lng: number } | null>(null)
+  const [velocidade, setVelocidade] = useState(0)
   const watchIdRef = useRef<number | null>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const [solicitando, setSolicitando] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -33,11 +28,53 @@ export const Index = () => {
     }
   }, [])
 
+  useEffect(() => {
+    // Quando o usuário logar, inicia localização automaticamente
+    if (user) {
+      iniciarLocalizacao()
+    }
+    return () => {
+      if (watchIdRef.current) {
+        navigator.geolocation.clearWatch(watchIdRef.current)
+      }
+    }
+  }, [user])
+
   async function loadData() {
     const { data: apkData } = await supabase.from('app_config').select('value').eq('key', 'apk_url').maybeSingle()
     if (apkData?.value) setApkUrl(apkData.value)
-    const { data: dominioData } = await supabase.from('app_config').select('value').eq('key', 'app_domain').maybeSingle()
-    if (dominioData?.value) setDominio(String(dominioData.value))
+  }
+
+  function iniciarLocalizacao() {
+    if (!navigator.geolocation) return
+
+    // Primeiro obtém posição atual
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, speed } = position.coords
+        setCoordsAtuais({ lat: latitude, lng: longitude })
+        setVelocidade(speed || 0)
+        setOrigem(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`)
+        setCompartilhandoLocal(true)
+        toast.success('📍 Localização ativada!')
+      },
+      () => {
+        console.warn('Não foi possível obter localização automática')
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+
+    // Monitora em tempo real
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (newPos) => {
+        const { latitude, longitude, speed } = newPos.coords
+        setCoordsAtuais({ lat: latitude, lng: longitude })
+        setVelocidade(speed || 0)
+        setOrigem(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`)
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 3000 }
+    )
   }
 
   const handleGoogleLogin = async () => {
@@ -52,114 +89,57 @@ export const Index = () => {
     }
   }
 
-  const handleShare = async () => {
-    const url = `${dominio}/divulgar`
-    if (navigator.share) {
-      try { await navigator.share({ title: 'ObaLeva', text: 'Mobilidade premium na palma da sua mão!', url }) } catch {}
-    } else {
-      await navigator.clipboard.writeText(url)
-      toast.success('Link copiado!')
-    }
-  }
-
   const handleSignOut = async () => {
     await signOut()
     toast.success('Saiu da conta!')
-    setShowOptions(false)
+    setCoordsAtuais(null)
+    setCompartilhandoLocal(false)
     if (watchIdRef.current) {
       navigator.geolocation.clearWatch(watchIdRef.current)
       watchIdRef.current = null
     }
   }
 
-  const handleGoToDashboard = () => {
-    const tipo = profile?.tipo
-    if (tipo === 'passageiro') navigate('/passenger')
-    else if (tipo === 'motorista') navigate('/driver')
-    else navigate('/test-login')
+  const solicitarCorrida = async () => {
+    if (!destino) {
+      toast.error('Digite o destino')
+      return
+    }
+    setSolicitando(true)
+    
+    try {
+      const { error } = await supabase.from('corridas').insert({
+        passageiro_id: user?.id,
+        origem: origem || 'Local atual',
+        destino: destino,
+        status: 'pendente',
+        valor: 15 + Math.random() * 25,
+      })
+      
+      if (error) throw error
+      toast.success('🚗 Corrida solicitada! Aguardando motorista...')
+      setDestino('')
+    } catch (err: any) {
+      toast.error('Erro ao solicitar: ' + err.message)
+    }
+    setSolicitando(false)
   }
 
   const handleCompartilharLocalizacao = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocalização não suportada no seu navegador')
+    if (!coordsAtuais) {
+      toast.error('Localização não disponível')
       return
     }
+    
+    const mapsUrl = `https://www.google.com/maps?q=${coordsAtuais.lat},${coordsAtuais.lng}`
+    const texto = `📍 Estou usando o ObaLeva! Veja onde estou:\n${mapsUrl}`
 
-    if (compartilhandoLocal) {
-      // Parar de compartilhar
-      if (watchIdRef.current) {
-        navigator.geolocation.clearWatch(watchIdRef.current)
-        watchIdRef.current = null
-      }
-      setCompartilhandoLocal(false)
-      toast('📍 Compartilhamento de localização desativado')
-      return
+    if (navigator.share) {
+      navigator.share({ title: '📍 Minha localização - ObaLeva', text: texto })
+    } else {
+      navigator.clipboard.writeText(texto)
+      toast.success('📍 Localização copiada!')
     }
-
-    // Iniciar compartilhamento
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords
-        const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
-        
-        if (navigator.share) {
-          navigator.share({
-            title: '📍 Minha localização - ObaLeva',
-            text: `Estou aqui! Veja minha localização em tempo real:`,
-            url: mapsUrl
-          }).catch(() => {})
-        } else {
-          navigator.clipboard.writeText(mapsUrl)
-          toast.success('📍 Link da localização copiado!')
-        }
-
-        // Monitorar localização em tempo real
-        watchIdRef.current = navigator.geolocation.watchPosition(
-          (newPos) => {
-            const { latitude: lat, longitude: lng } = newPos.coords
-            console.log('📍 Localização atualizada:', lat, lng)
-          },
-          () => {},
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
-        )
-
-        setCompartilhandoLocal(true)
-        toast.success('📍 Localização compartilhada!')
-      },
-      () => {
-        toast.error('Não foi possível obter sua localização. Verifique as permissões.')
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
-  }
-
-  const handleEnviarLocalizacao = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocalização não suportada no seu navegador')
-      return
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords
-        const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
-        const texto = `📍 Oi! Estou usando o ObaLeva. Veja onde estou:\n${mapsUrl}`
-
-        if (navigator.share) {
-          navigator.share({
-            title: '📍 Minha localização - ObaLeva',
-            text: texto,
-          }).catch(() => {})
-        } else {
-          navigator.clipboard.writeText(texto)
-          toast.success('📍 Localização copiada para compartilhar!')
-        }
-      },
-      () => {
-        toast.error('Não foi possível obter sua localização.')
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
   }
 
   if (loading) return (
@@ -168,408 +148,247 @@ export const Index = () => {
     </div>
   )
 
-  const promoItems = [
-    {
-      titulo: '🌟 Destaques do ObaLeva',
-      descricao: '',
-      cor: '#F4D03F',
-      icone: '⭐',
-      type: 'highlight' as const,
-      action: () => {}
-    },
-    {
-      titulo: 'Motoristas Parceiros',
-      descricao: 'Ganhe dinheiro dirigindo. Horários flexíveis, ganhos semanais.',
-      cor: '#A855F7',
-      icone: '🚗',
-      action: () => navigate('/register-driver')
-    },
-    {
-      titulo: 'ObaLeva Empresas',
-      descricao: 'Solução corporativa de mobilidade para sua empresa.',
-      cor: '#3B82F6',
-      icone: '💼',
-      action: () => navigate('/register')
-    },
-    {
-      titulo: 'Seguro Viagem',
-      descricao: 'Todas as corridas com seguro de passageiro incluso.',
-      cor: '#22C55E',
-      icone: '🛡️',
-      action: () => navigate('/register')
-    },
-    {
-      titulo: 'Indique e Ganhe',
-      descricao: 'Ganhe bônus para cada amigo que se cadastrar.',
-      cor: '#F59E0B',
-      icone: '🎁',
-      action: handleShare
-    },
-    {
-      titulo: 'ObaLeva Flash',
-      descricao: 'Entregas rápidas. Envie documentos e objetos.',
-      cor: '#EF4444',
-      icone: '⚡',
-      action: () => navigate('/register')
-    },
-  ]
+  // ========== TELA PRINCIPAL QUANDO LOGADO ==========
+  if (user) {
+    return (
+      <div className="min-h-screen bg-[#0F0B1A] flex flex-col">
+        {/* Header minimalista */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-[#F4D03F]/15 rounded-xl flex items-center justify-center border border-[#F4D03F]/20">
+              <Car size={16} className="text-[#F4D03F]" />
+            </div>
+            <span className="text-white font-bold text-sm">ObaLeva</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="bg-green-500/20 px-3 py-1 rounded-full border border-green-500/30 flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-green-400 text-[10px] font-medium">Online</span>
+            </div>
+            <button onClick={handleSignOut} className="px-3 py-1.5 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-[10px] font-medium">
+              Sair
+            </button>
+          </div>
+        </div>
 
+        {/* Mapa ao vivo - ocupa a maior parte da tela */}
+        <div className="flex-1 mx-4 my-2 relative">
+          <div className="bg-[#1A1528] rounded-3xl border border-white/10 h-full w-full relative overflow-hidden">
+            {/* Grid do mapa */}
+            <div className="absolute inset-0 opacity-[0.07]">
+              <div className="grid grid-cols-8 grid-rows-8 h-full">
+                {Array.from({ length: 64 }).map((_, i) => (
+                  <div key={i} className="border border-white/10" />
+                ))}
+              </div>
+            </div>
+
+            {/* Ponto central - localização atual */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="relative"
+              >
+                <div className="w-20 h-20 bg-[#F4D03F]/10 rounded-full absolute -top-8 -left-8 blur-sm" />
+                <div className="w-12 h-12 bg-[#F4D03F]/20 rounded-full absolute -top-4 -left-4" />
+                <div className="w-6 h-6 bg-[#F4D03F] rounded-full flex items-center justify-center shadow-lg shadow-[#F4D03F]/40">
+                  <Target size={14} className="text-[#1E1E2F]" />
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Informações no mapa */}
+            <div className="absolute top-3 left-3 space-y-1.5">
+              <div className="bg-[#0F0B1A]/80 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
+                <Gps size={12} className="text-green-400" />
+                <span className="text-white text-[10px]">
+                  {coordsAtuais ? `${coordsAtuais.lat.toFixed(4)}, ${coordsAtuais.lng.toFixed(4)}` : 'Buscando...'}
+                </span>
+              </div>
+              {velocidade > 0 && (
+                <div className="bg-[#0F0B1A]/80 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
+                  <Compass size={12} className="text-blue-400" />
+                  <span className="text-blue-400 text-[10px]">{velocidade.toFixed(1)} km/h</span>
+                </div>
+              )}
+            </div>
+
+            {/* Botão compartilhar */}
+            <button
+              onClick={handleCompartilharLocalizacao}
+              className="absolute top-3 right-3 bg-[#0F0B1A]/80 backdrop-blur-sm px-3 py-2 rounded-xl border border-white/10 hover:border-[#F4D03F]/30 transition-all flex items-center gap-1.5"
+            >
+              <Send size={14} className="text-[#F4D03F]" />
+              <span className="text-white text-[10px] font-medium">Compartilhar</span>
+            </button>
+
+            {/* Indicador de rua/cidade (mock) */}
+            <div className="absolute bottom-3 left-3 bg-[#0F0B1A]/80 backdrop-blur-sm px-3 py-2 rounded-xl border border-white/10">
+              <div className="flex items-center gap-2">
+                <Navigation size={14} className="text-[#F4D03F]" />
+                <span className="text-white text-[10px]">Sua localização em tempo real</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card inferior com origem, destino e solicitar */}
+        <div className="px-4 pb-6 pt-2">
+          <div className="bg-[#1A1528] rounded-3xl border border-white/10 p-4 space-y-3 shadow-2xl shadow-black/30">
+            {/* Status */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                <span className="text-green-400 text-xs font-medium">Localização ativa</span>
+              </div>
+              <span className="text-[#A0A0B0] text-[10px]">
+                {profile?.tipo === 'motorista' ? '🚗 Motorista' : '🚶 Passageiro'}
+              </span>
+            </div>
+
+            {/* Origem */}
+            <div className="flex items-center gap-3 bg-[#0F0B1A] rounded-2xl px-4 py-3 border border-white/10">
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-2.5 h-2.5 bg-green-400 rounded-full shadow-lg shadow-green-400/30" />
+                <div className="w-px h-5 bg-white/20" />
+                <div className="w-2.5 h-2.5 bg-red-400 rounded-full shadow-lg shadow-red-400/30" />
+              </div>
+              <div className="flex-1 space-y-3">
+                <input
+                  type="text"
+                  placeholder="Sua localização"
+                  className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm"
+                  value={origem || 'Local atual'}
+                  readOnly
+                />
+                <input
+                  type="text"
+                  placeholder="Para onde vai?"
+                  className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm"
+                  value={destino}
+                  onChange={e => setDestino(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Botão Solicitar */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={solicitarCorrida}
+              disabled={solicitando}
+              className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg hover:shadow-[#F4D03F]/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-base"
+            >
+              {solicitando ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Buscando motorista...
+                </>
+              ) : (
+                <>
+                  <Car size={20} strokeWidth={2.5} />
+                  Solicitar ObaLeva
+                </>
+              )}
+            </motion.button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ========== TELA DE LOGIN / CADASTRO ==========
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col">
-      {/* Fundo decorativo */}
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col items-center justify-center p-6">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#F4D03F]/8 rounded-full blur-[150px]" />
         <div className="absolute bottom-[-50px] right-[-50px] w-[300px] h-[300px] bg-[#6B2D8C]/25 rounded-full blur-[100px]" />
       </div>
 
-      <div className="flex-1 flex flex-col relative z-10 pb-[140px]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#F4D03F]/15 rounded-xl flex items-center justify-center border border-[#F4D03F]/20">
-              <Car size={16} className="text-[#F4D03F]" />
-            </div>
-            <span className="text-white font-bold text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ObaLeva</span>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative z-10 w-full max-w-sm text-center"
+      >
+        {/* Logo */}
+        <div className="mb-8">
+          <div className="w-20 h-20 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#F4D03F]/20 shadow-xl shadow-[#F4D03F]/10">
+            <Car size={40} className="text-[#F4D03F]" />
           </div>
-          <div className="flex gap-2">
-            {user && (
-              <>
-                <button onClick={handleGoToDashboard} className="btn-outline-dark px-3 py-1.5 text-xs flex items-center gap-1">
-                  <LayoutDashboard size={14} />
-                  Dashboard
-                </button>
-                <button onClick={handleSignOut} className="px-3 py-1.5 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-xs flex items-center gap-1">
-                  <LogOut size={14} />
-                  Sair
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Título */}
-        <div className="pt-6 pb-4 px-6 text-center">
-          <motion.h1 
-            initial={{ opacity: 0, y: 10 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            className="text-3xl md:text-4xl font-extrabold text-white" 
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
-          >
+          <h1 className="text-4xl font-extrabold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>
             ObaLeva
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            transition={{ delay: 0.1 }}
-            className="text-sm text-[#A0A0B0] font-medium"
-          >
+          </h1>
+          <p className="text-[#A0A0B0] text-sm mt-2 font-medium">
             Mobilidade premium para sua cidade
-          </motion.p>
+          </p>
         </div>
 
-        {/* Preview do app em formato de celular */}
-        <div className="px-4 flex justify-center mb-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.2 }}
-            className="bg-[#1A1528] rounded-3xl border border-white/15 p-5 w-full max-w-sm shadow-2xl shadow-black/30"
-          >
-            <div className="space-y-3">
-              {/* Header do card */}
-              <div className="flex items-center justify-between mb-1">
-                <div className="w-7 h-7 bg-[#F4D03F]/20 rounded-xl flex items-center justify-center">
-                  <Car size={16} className="text-[#F4D03F]" />
-                </div>
-                <span className="text-white font-bold text-sm">ObaLeva</span>
-                <div className="w-7 h-7" />
-              </div>
-
-              {/* Mapa - destaque principal */}
-              <div className="bg-[#0F0B1A] rounded-2xl h-48 flex items-center justify-center border border-white/10 relative overflow-hidden">
-                {/* Grid do mapa */}
-                <div className="absolute inset-0 opacity-10">
-                  <div className="grid grid-cols-6 grid-rows-4 h-full">
-                    {Array.from({ length: 24 }).map((_, i) => (
-                      <div key={i} className="border border-white/10" />
-                    ))}
-                  </div>
-                </div>
-                <div className="text-center relative z-10">
-                  <Smartphone size={40} className="text-[#F4D03F]/60 mx-auto mb-2" />
-                  <p className="text-white font-bold text-base">Mapa ao vivo</p>
-                  <p className="text-[#A0A0B0]/60 text-xs mt-1">Sua localização em tempo real</p>
-                </div>
-                {/* Indicadores no mapa */}
-                <div className="absolute bottom-3 left-3 bg-green-500/20 px-2 py-1 rounded-full border border-green-500/30">
-                  <span className="text-green-400 text-[10px] font-medium">● Online</span>
-                </div>
-                <div className="absolute top-3 right-3 bg-[#F4D03F]/10 px-2 py-1 rounded-full border border-[#F4D03F]/20">
-                  <span className="text-[#F4D03F] text-[10px] font-medium">4.8★</span>
-                </div>
-              </div>
-
-              {/* Campos de origem e destino */}
-              <div className="space-y-2">
-                <div className="bg-[#0F0B1A] rounded-xl p-3 border border-white/10 flex items-center gap-3">
-                  <div className="w-3 h-3 bg-green-400 rounded-full shrink-0 shadow-lg shadow-green-400/30" />
-                  <span className="text-white/50 text-sm">Onde você está?</span>
-                </div>
-                <div className="bg-[#0F0B1A] rounded-xl p-3 border border-white/10 flex items-center gap-3">
-                  <div className="w-3 h-3 bg-red-400 rounded-full shrink-0 shadow-lg shadow-red-400/30" />
-                  <span className="text-white/50 text-sm">Para onde vai?</span>
-                </div>
-              </div>
-
-              {/* Botão Solicitar */}
-              <div className="bg-gradient-to-r from-[#FFD966] to-[#F4D03F] rounded-2xl py-3 text-center shadow-lg shadow-[#F4D03F]/20 cursor-pointer hover:shadow-xl hover:shadow-[#F4D03F]/30 transition-all active:scale-[0.98]">
-                <span className="text-[#1E1E2F] font-bold text-base flex items-center justify-center gap-2">
-                  <Car size={18} strokeWidth={2.5} />
-                  Solicitar ObaLeva
-                </span>
+        {/* Preview rápido do mapa */}
+        <div className="bg-[#1A1528] rounded-3xl border border-white/10 p-4 mb-6 shadow-xl shadow-black/30">
+          <div className="bg-[#0F0B1A] rounded-2xl h-28 flex items-center justify-center border border-white/10 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.06]">
+              <div className="grid grid-cols-4 grid-rows-3 h-full">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div key={i} className="border border-white/10" />
+                ))}
               </div>
             </div>
-          </motion.div>
-        </div>
-
-        {/* Botões de ação */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ delay: 0.35 }}
-          className="px-6 space-y-3 max-w-sm mx-auto w-full flex-1"
-        >
-          {user ? (
-            <>
-              <p className="text-center text-sm text-[#A0A0B0] mb-3">
-                Bem-vindo, <strong className="text-white">{user.email?.split('@')[0] || 'Usuário'}</strong>
-              </p>
-
-              {/* Botões de localização e compartilhamento */}
-              <div className="grid grid-cols-2 gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={handleCompartilharLocalizacao}
-                  className={`p-3 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1.5 ${compartilhandoLocal ? 'bg-green-500/20 border-green-500/40 text-green-400' : 'bg-[#1A1528] border-white/15 text-white hover:bg-white/5'}`}
-                >
-                  <MapPin size={20} className={compartilhandoLocal ? 'animate-pulse' : ''} />
-                  <span className="text-xs font-medium">{compartilhandoLocal ? '📍 Compartilhando' : '📍 Localização'}</span>
-                  {compartilhandoLocal && <span className="text-[10px] text-green-400/70 font-medium animate-pulse">● Ao vivo</span>}
-                </motion.button>
-
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={handleEnviarLocalizacao}
-                  className="p-3 rounded-2xl border border-white/15 bg-[#1A1528] text-white hover:bg-white/5 transition-all flex flex-col items-center justify-center gap-1.5"
-                >
-                  <Send size={20} />
-                  <span className="text-xs font-medium">Compartilhar</span>
-                  <span className="text-[10px] text-[#A0A0B0]">Localização</span>
-                </motion.button>
-              </div>
-
-              {/* Opções Passageiro / Motorista */}
-              <div className="space-y-3">
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => {
-                    if (profile?.tipo === 'passageiro') navigate('/passenger')
-                    else navigate('/register')
-                  }}
-                  className="w-full p-4 rounded-2xl bg-gradient-to-r from-blue-600/20 to-blue-800/20 border border-blue-500/30 hover:border-blue-400/50 transition-all flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-white font-bold text-base">Passageiro</p>
-                      {profile?.tipo === 'passageiro' ? (
-                        <p className="text-blue-400 text-xs">● Seu perfil atual</p>
-                      ) : (
-                        <p className="text-[#A0A0B0] text-xs">Solicite corridas rápidas</p>
-                      )}
-                    </div>
-                  </div>
-                  <ArrowRight size={20} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => {
-                    if (profile?.tipo === 'motorista') navigate('/driver')
-                    else navigate('/register-driver')
-                  }}
-                  className="w-full p-4 rounded-2xl bg-gradient-to-r from-purple-600/20 to-purple-800/20 border border-purple-500/30 hover:border-purple-400/50 transition-all flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                      <Car size={24} className="text-purple-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-white font-bold text-base">Motorista</p>
-                      {profile?.tipo === 'motorista' ? (
-                        <p className="text-purple-400 text-xs">● Seu perfil atual</p>
-                      ) : (
-                        <p className="text-[#A0A0B0] text-xs">Ganhe dinheiro dirigindo</p>
-                      )}
-                    </div>
-                  </div>
-                  <ArrowRight size={20} className="text-purple-400 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-              </div>
-
-              {/* Botões de ação rápidos */}
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <button
-                  onClick={() => navigate('/profile')}
-                  className="py-3 rounded-2xl border border-white/15 text-white hover:bg-white/5 transition-all text-sm font-medium"
-                >
-                  ⚙️ Perfil
-                </button>
-                <button
-                  onClick={handleSignOut}
-                  className="py-3 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm font-medium"
-                >
-                  🚪 Sair
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Botões de entrada - Google e E-mail */}
-              <button 
-                onClick={handleGoogleLogin} 
-                className="w-full py-4 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98]"
-              >
-                <svg width="18" height="18" viewBox="0 0 48 48">
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                  <path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78l7.97-6.19z"/>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-                Entrar com Google
-              </button>
-
-              <button 
-                onClick={() => { navigate('/login'); setShowPromoPanel(true) }} 
-                className="w-full py-4 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98]"
-              >
-                <Mail size={18} />
-                Entrar com E-mail
-              </button>
-
-              {apkUrl && (
-                <a 
-                  href={apkUrl} 
-                  download 
-                  className="block w-full py-3 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm text-center flex items-center justify-center gap-2 active:scale-[0.98]"
-                >
-                  <Download size={16} />
-                  Baixar APK
-                </a>
-              )}
-            </>
-          )}
-        </motion.div>
-      </div>
-
-      {/* Painel Descubra o ObaLeva - acima da barra fixa */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        {/* Painel de propaganda */}
-        <div 
-          onClick={() => setShowPromoPanel(!showPromoPanel)}
-          className="bg-[#1A1528]/80 backdrop-blur-xl border-t border-white/10 px-4 pt-3 cursor-pointer hover:bg-[#1A1528]/90 transition-colors"
-        >
-          <div className="max-w-sm mx-auto flex items-center justify-between mb-2">
-            <h2 className="text-white font-bold text-sm">Descubra o ObaLeva</h2>
-            <span className="text-[#F4D03F] text-xs font-medium">
-              {showPromoPanel ? 'Recolher ▲' : 'Ver todos ▼'}
-            </span>
-          </div>
-
-          {showPromoPanel && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <div 
-                ref={scrollRef}
-                className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide"
-              >
-                {/* Cartão de destaque com Seguro, Avaliação e Rápido */}
-                <div className="bg-gradient-to-br from-[#1A1528] to-[#0F0B1A] rounded-2xl p-4 border border-[#F4D03F]/20 flex-shrink-0 w-[200px]">
-                  <div className="text-center mb-2">
-                    <span className="text-2xl">⭐</span>
-                    <h3 className="text-white font-bold text-sm mt-1">Destaques</h3>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 bg-green-500/10 rounded-xl px-3 py-2 border border-green-500/20">
-                      <Shield size={16} className="text-green-400 shrink-0" />
-                      <span className="text-white text-xs font-medium">Seguro</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-yellow-500/10 rounded-xl px-3 py-2 border border-yellow-500/20">
-                      <Star size={16} className="text-[#F4D03F] shrink-0" />
-                      <span className="text-white text-xs font-medium">4.8★ Avaliação</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-blue-500/10 rounded-xl px-3 py-2 border border-blue-500/20">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                        <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                      </svg>
-                      <span className="text-white text-xs font-medium">Rápido</span>
-                    </div>
-                  </div>
-                </div>
-
-                {promoItems.slice(1).map((item, index) => (
-                  <motion.button
-                    key={item.titulo}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={(e) => { e.stopPropagation(); item.action() }}
-                    className="bg-[#0F0B1A] rounded-2xl p-4 border border-white/10 hover:border-[#F4D03F]/30 transition-all flex-shrink-0 w-[200px] text-left"
-                  >
-                    <div className="text-2xl mb-2">{item.icone}</div>
-                    <h3 className="text-white font-bold text-sm mb-1">{item.titulo}</h3>
-                    <p className="text-[#A0A0B0] text-xs leading-relaxed">{item.descricao}</p>
-                  </motion.button>
-                ))}
-              </div>
-              
-              <div className="flex justify-center gap-1 pb-2">
-                {promoItems.map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`w-1.5 h-1.5 rounded-full transition-all ${i === 0 ? 'bg-[#F4D03F] w-3' : 'bg-white/20'}`}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </div>
-
-        {/* Barra fixa inferior */}
-        <div className="bg-[#1A1528]/95 backdrop-blur-xl border-t border-white/10 px-4 py-3">
-          <div className="flex justify-around items-center max-w-sm mx-auto">
-            {QUICK_OPTIONS.map((option) => (
-              <button
-                key={option.label}
-                className="flex flex-col items-center gap-1 px-4 py-1 rounded-2xl hover:bg-white/5 transition-all min-w-[60px]"
-              >
-                <option.icon size={22} color={option.color} strokeWidth={1.5} />
-                <span className="text-[#A0A0B0] text-[10px] font-medium">{option.label}</span>
-              </button>
-            ))}
+            <div className="text-center relative z-10">
+              <Smartphone size={32} className="text-[#F4D03F]/60 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">Mapa ao vivo</p>
+              <p className="text-[#A0A0B0]/70 text-[10px] mt-0.5">Com localização em tempo real</p>
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Botões de entrada */}
+        <div className="space-y-3">
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleGoogleLogin}
+            className="w-full py-4 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-sm"
+          >
+            <svg width="20" height="20" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Entrar com Google
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/login')}
+            className="w-full py-4 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm"
+          >
+            <Mail size={18} />
+            Entrar com E-mail
+          </motion.button>
+        </div>
+
+        {/* Criar conta */}
+        <p className="text-[#A0A0B0] text-xs mt-6">
+          Não tem conta?{' '}
+          <button onClick={() => navigate('/register')} className="text-[#F4D03F] hover:underline font-medium">
+            Criar conta
+          </button>
+        </p>
+
+        {/* APK */}
+        {apkUrl && (
+          <a
+            href={apkUrl}
+            download
+            className="inline-block mt-4 text-[10px] text-[#A0A0B0] hover:text-white transition underline"
+          >
+            Baixar APK Android
+          </a>
+        )}
+      </motion.div>
     </div>
   )
 }
