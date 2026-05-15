@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 // ==================== COMPONENTES INTERNOS ====================
 
-// BottomNav (barra fixa inferior principal)
+// BottomNav (barra fixa inferior principal) - ALINHADA
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
   const tabs = [
     { id: 'home', label: 'Início', icon: Home },
@@ -16,15 +16,15 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   ];
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#1A1528] border-t border-white/10 z-50">
-      <div className="flex justify-around items-center px-2 py-2">
+      <div className="flex justify-between items-center max-w-md mx-auto px-6 py-2">
         {tabs.map((tab) => {
           const isActive = active === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => onNavigate(tab.id)}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${isActive ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'}`}
-              style={{ minHeight: '56px', minWidth: '70px' }}
+              className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'}`}
+              style={{ minHeight: '56px', minWidth: '64px' }}
             >
               <tab.icon size={22} strokeWidth={isActive ? 2 : 1.5} />
               <span className="text-xs font-medium">{tab.label}</span>
@@ -37,29 +37,29 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   );
 };
 
-// DiscoverBar (segunda barra fixa inferior)
+// DiscoverBar (segunda barra fixa inferior) - ACIMA DA BOTTOMNAV
 const DiscoverBar = () => {
   const cards = [
-    { icon: <Gift size={18} />, title: "1ª corrida grátis", description: "Até R$ 20 de desconto", color: "#F4D03F" },
-    { icon: <Shield size={18} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#6B2D8C" },
-    { icon: <Star size={18} />, title: "Avaliação 4.8★", description: "Motoristas nota 10", color: "#F4D03F" },
-    { icon: <Zap size={18} />, title: "Rápido", description: "Chegada em minutos", color: "#9B59B6" },
+    { icon: <Gift size={20} />, title: "1ª corrida grátis", description: "Até R$ 20 de desconto", color: "#F4D03F" },
+    { icon: <Shield size={20} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#6B2D8C" },
   ];
   return (
-    <div className="mb-20">
-      <div className="flex justify-between items-center px-4 mb-3 mt-2">
-        <h3 className="text-white font-bold text-lg">Descubra o ObaLeva</h3>
-        <button className="flex items-center gap-1 text-[#F4D03F] text-sm font-medium">Ver todos <ChevronRight size={16} /></button>
-      </div>
-      <div className="overflow-x-auto scrollbar-hide px-4 pb-2">
-        <div className="flex flex-row gap-3">
+    <div className="fixed bottom-16 left-0 right-0 z-40">
+      <div className="max-w-md mx-auto px-4">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-white font-bold text-lg">Descubra o ObaLeva</h3>
+          <button className="flex items-center gap-1 text-[#F4D03F] text-sm font-medium">Ver todos <ChevronRight size={16} /></button>
+        </div>
+        <div className="flex gap-4">
           {cards.map((card, idx) => (
-            <div key={idx} className="min-w-[160px] bg-[#1A1528] rounded-2xl p-3 border border-white/10">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2`} style={{ backgroundColor: `${card.color}20` }}>
+            <div key={idx} className="flex-1 bg-[#1A1528] rounded-2xl p-3 border border-white/10 flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center`} style={{ backgroundColor: `${card.color}20` }}>
                 <div style={{ color: card.color }}>{card.icon}</div>
               </div>
-              <h4 className="text-white font-semibold text-sm">{card.title}</h4>
-              <p className="text-[#A0A0B0] text-xs mt-1">{card.description}</p>
+              <div>
+                <h4 className="text-white font-semibold text-sm">{card.title}</h4>
+                <p className="text-[#A0A0B0] text-xs">{card.description}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -92,7 +92,7 @@ const LiveMap = () => {
       <p className="text-[#A0A0B0] text-sm z-10 bg-black/50 px-3 py-1 rounded-full">
         📍 {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Buscando localização...'}
       </p>
-      <p className="text-[#A0A0B0] text-xs mt-2 z-10">Mapa ao vivo (Google Maps em breve)</p>
+      <p className="text-[#A0A0B0] text-xs mt-2 z-10">Mapa ao vivo</p>
     </div>
   );
 };
@@ -119,7 +119,7 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
   </div>
 );
 
-// Dashboard do passageiro (dentro do "celular")
+// Dashboard do passageiro
 const PassengerDashboard = () => (
   <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
     <div className="space-y-3">
@@ -138,7 +138,7 @@ const PassengerDashboard = () => (
   </div>
 );
 
-// Cadastro rápido (quando usuário loga sem perfil)
+// Cadastro rápido
 const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista'; onSuccess: () => void }) => {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
@@ -200,57 +200,28 @@ export const MainScreen = () => {
   const [loginLoading, setLoginLoading] = useState(false);
   const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
 
-  // Função de logout manual
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.reload();
   };
 
-  // Detectar quando a tela fica minimizada ou o app vai para segundo plano
   useEffect(() => {
     let inactivityTimer: NodeJS.Timeout;
-
     const resetTimer = () => {
       if (inactivityTimer) clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
-        // Após 5 minutos sem atividade, faz logout automático
-        if (user) {
-          handleLogout();
-        }
-      }, 5 * 60 * 1000); // 5 minutos
+        if (user) handleLogout();
+      }, 5 * 60 * 1000);
     };
-
-    // Eventos de atividade do usuário
     window.addEventListener('mousemove', resetTimer);
     window.addEventListener('keydown', resetTimer);
     window.addEventListener('click', resetTimer);
-    window.addEventListener('scroll', resetTimer);
-
-    // Detectar quando a página fica invisível (aba minimizada ou celular bloqueado)
-    const handleVisibilityChange = () => {
-      if (document.hidden && user) {
-        // Se a página ficou oculta por mais de 5 minutos, faz logout
-        setTimeout(() => {
-          if (document.hidden) {
-            handleLogout();
-          }
-        }, 5 * 60 * 1000);
-      } else {
-        resetTimer();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    resetTimer(); // Inicia o timer ao carregar
-
+    resetTimer();
     return () => {
       clearTimeout(inactivityTimer);
       window.removeEventListener('mousemove', resetTimer);
       window.removeEventListener('keydown', resetTimer);
       window.removeEventListener('click', resetTimer);
-      window.removeEventListener('scroll', resetTimer);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [user]);
 
@@ -258,18 +229,15 @@ export const MainScreen = () => {
 
   return (
     <div className="min-h-screen bg-[#0F0B1A] pb-32">
-      {/* HEADER COM LOGO E BOTÃO DE SAIR */}
+      {/* HEADER */}
       <div className="bg-[#1A1528] pt-8 pb-4 px-4 border-b border-white/10">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between max-w-md mx-auto">
           <div className="flex items-center gap-2">
             <Car className="text-[#F4D03F]" size={28} />
             <h1 className="text-2xl font-bold text-white">OBALEVA</h1>
           </div>
           {user && (
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-3 py-2 rounded-xl transition"
-            >
+            <button onClick={handleLogout} className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-3 py-2 rounded-xl transition">
               <LogOut size={18} />
               <span className="text-sm">Sair</span>
             </button>
@@ -278,10 +246,9 @@ export const MainScreen = () => {
         <p className="text-[#A0A0B0] text-center text-sm mt-1">Mobilidade premium para sua cidade</p>
       </div>
 
-      {/* CONTEÚDO PRINCIPAL (SIMULA UM CELULAR) */}
+      {/* CONTEÚDO PRINCIPAL */}
       <div className="max-w-md mx-auto p-4">
         <LiveMap />
-
         <div className="mt-3">
           {!user ? (
             <LoginScreen
@@ -317,20 +284,22 @@ export const MainScreen = () => {
             <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
               <Truck className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
               <h2 className="text-white font-bold text-base">Painel do Motorista</h2>
-              <p className="text-[#A0A0B0] text-xs">Aguardando aprovação do administrador</p>
-              <button className="mt-3 px-5 py-1.5 rounded-full bg-green-600 text-white text-sm">🟢 Ficar Online</button>
+              <p className="text-[#A0A0B0] text-xs">Aguardando aprovação</p>
+              <button className="mt-3 px-5 py-1.5 rounded-full bg-green-600 text-white text-sm">🟢 Online</button>
             </div>
           ) : (
             <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
               <Shield className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
               <h2 className="text-white font-bold text-base">Painel Administrativo</h2>
-              <p className="text-[#A0A0B0] text-xs">Gerencie motoristas, passageiros e corridas</p>
             </div>
           )}
         </div>
       </div>
 
+      {/* DISCOVER BAR (ACIMA DA BOTTOMNAV) */}
       <DiscoverBar />
+
+      {/* BOTTOM NAV (BARRA FIXA INFERIOR) */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
   );
