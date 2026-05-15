@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Mail, MapPin, Send, Target, Navigation, Compass, Gps } from 'lucide-react'
+import { Car, Smartphone, Mail, MapPin, Send, Target, Navigation, Compass } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
@@ -201,7 +201,7 @@ export const Index = () => {
             {/* Informações no mapa */}
             <div className="absolute top-3 left-3 space-y-1.5">
               <div className="bg-[#0F0B1A]/80 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
-                <Gps size={12} className="text-green-400" />
+                <MapPin size={12} className="text-green-400" />
                 <span className="text-white text-[10px]">
                   {coordsAtuais ? `${coordsAtuais.lat.toFixed(4)}, ${coordsAtuais.lng.toFixed(4)}` : 'Buscando...'}
                 </span>
