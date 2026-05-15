@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Mail, MapPin, Send, Target, Navigation, Compass } from 'lucide-react'
+import { Car, Smartphone, Mail, MapPin, Send, Target, Navigation } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
@@ -10,22 +10,12 @@ import { BottomNav } from '../components/BottomNav'
 export const Index = () => {
   const navigate = useNavigate()
   const { user, loading, signOut, profile } = useAuth()
-  const [apkUrl, setApkUrl] = useState('')
   const [origem, setOrigem] = useState('')
   const [destino, setDestino] = useState('')
   const [coordsAtuais, setCoordsAtuais] = useState<{ lat: number; lng: number } | null>(null)
   const [velocidade, setVelocidade] = useState(0)
   const watchIdRef = useRef<number | null>(null)
   const [solicitando, setSolicitando] = useState(false)
-
-  useEffect(() => {
-    loadData()
-    return () => {
-      if (watchIdRef.current) {
-        navigator.geolocation.clearWatch(watchIdRef.current)
-      }
-    }
-  }, [])
 
   useEffect(() => {
     if (user) {
@@ -37,11 +27,6 @@ export const Index = () => {
       }
     }
   }, [user])
-
-  async function loadData() {
-    const { data: apkData } = await supabase.from('app_config').select('value').eq('key', 'apk_url').maybeSingle()
-    if (apkData?.value) setApkUrl(apkData.value)
-  }
 
   function iniciarLocalizacao() {
     if (!navigator.geolocation) return
@@ -142,7 +127,7 @@ export const Index = () => {
     </div>
   )
 
-  // ========== TELA PRINCIPAL QUANDO LOGADO ==========
+  // ========== TELA PRINCIPAL QUANDO LOGADO (Solicitar ObaLeva com mapa ao vivo) ==========
   if (user) {
     return (
       <div className="min-h-screen bg-[#0F0B1A] flex flex-col pb-24">
@@ -200,12 +185,6 @@ export const Index = () => {
                   {coordsAtuais ? `${coordsAtuais.lat.toFixed(4)}, ${coordsAtuais.lng.toFixed(4)}` : 'Buscando...'}
                 </span>
               </div>
-              {velocidade > 0 && (
-                <div className="bg-[#0F0B1A]/80 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
-                  <Compass size={12} className="text-blue-400" />
-                  <span className="text-blue-400 text-[10px]">{velocidade.toFixed(1)} km/h</span>
-                </div>
-              )}
             </div>
 
             {/* Botão compartilhar */}
@@ -217,7 +196,7 @@ export const Index = () => {
               <span className="text-white text-[10px] font-medium">Compartilhar</span>
             </button>
 
-            {/* Indicador de rua/cidade (mock) */}
+            {/* Indicador de localização */}
             <div className="absolute bottom-3 left-3 bg-[#0F0B1A]/80 backdrop-blur-sm px-3 py-2 rounded-xl border border-white/10">
               <div className="flex items-center gap-2">
                 <Navigation size={14} className="text-[#F4D03F]" />
@@ -297,7 +276,7 @@ export const Index = () => {
     )
   }
 
-  // ========== TELA DE LOGIN / CADASTRO (não logado) ==========
+  // ========== TELA DE ENTRADA (apenas Google + E-mail + Criar conta) ==========
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col items-center justify-center p-6">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -341,7 +320,7 @@ export const Index = () => {
           </div>
         </div>
 
-        {/* Botões de entrada */}
+        {/* Botões de entrada - apenas Google e E-mail */}
         <div className="space-y-3">
           <motion.button
             whileTap={{ scale: 0.97 }}
@@ -374,17 +353,6 @@ export const Index = () => {
             Criar conta
           </button>
         </p>
-
-        {/* APK */}
-        {apkUrl && (
-          <a
-            href={apkUrl}
-            download
-            className="inline-block mt-4 text-[10px] text-[#A0A0B0] hover:text-white transition underline"
-          >
-            Baixar APK Android
-          </a>
-        )}
       </motion.div>
     </div>
   )
