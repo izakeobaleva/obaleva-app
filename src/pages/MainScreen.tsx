@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, ChevronRight, Chrome, Home, Search, Menu as MenuIcon } from 'lucide-react';
+import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, ChevronRight, Chrome, Home, Search, Menu as MenuIcon, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ==================== COMPONENTES INTERNOS ====================
@@ -55,7 +55,7 @@ const DiscoverBar = () => {
         <div className="flex flex-row gap-3">
           {cards.map((card, idx) => (
             <div key={idx} className="min-w-[160px] bg-[#1A1528] rounded-2xl p-3 border border-white/10">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2" style={{ backgroundColor: `${card.color}20` }}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2`} style={{ backgroundColor: `${card.color}20` }}>
                 <div style={{ color: card.color }}>{card.icon}</div>
               </div>
               <h4 className="text-white font-semibold text-sm">{card.title}</h4>
@@ -200,43 +200,102 @@ export const MainScreen = () => {
   const [loginLoading, setLoginLoading] = useState(false);
   const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
 
-  const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
-    if (error) toast.error('Erro ao logar com Google');
+  // Função de logout manual
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
-    if (error) toast.error('E-mail ou senha inválidos');
-    setLoginLoading(false);
-  };
+  // Detectar quando a tela fica minimizada ou o app vai para segundo plano
+  useEffect(() => {
+    let inactivityTimer: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        // Após 5 minutos sem atividade, faz logout automático
+        if (user) {
+          handleLogout();
+        }
+      }, 5 * 60 * 1000); // 5 minutos
+    };
+
+    // Eventos de atividade do usuário
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    window.addEventListener('click', resetTimer);
+    window.addEventListener('scroll', resetTimer);
+
+    // Detectar quando a página fica invisível (aba minimizada ou celular bloqueado)
+    const handleVisibilityChange = () => {
+      if (document.hidden && user) {
+        // Se a página ficou oculta por mais de 5 minutos, faz logout
+        setTimeout(() => {
+          if (document.hidden) {
+            handleLogout();
+          }
+        }, 5 * 60 * 1000);
+      } else {
+        resetTimer();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    resetTimer(); // Inicia o timer ao carregar
+
+    return () => {
+      clearTimeout(inactivityTimer);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('click', resetTimer);
+      window.removeEventListener('scroll', resetTimer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
 
   if (loading) return <div className="flex items-center justify-center min-h-screen text-white">Carregando...</div>;
 
   return (
     <div className="min-h-screen bg-[#0F0B1A] pb-32">
-      {/* HEADER COM LOGO */}
+      {/* HEADER COM LOGO E BOTÃO DE SAIR */}
       <div className="bg-[#1A1528] pt-8 pb-4 px-4 border-b border-white/10">
-        <div className="flex items-center justify-center gap-2">
-          <Car className="text-[#F4D03F]" size={28} />
-          <h1 className="text-2xl font-bold text-white">OBALEVA</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Car className="text-[#F4D03F]" size={28} />
+            <h1 className="text-2xl font-bold text-white">OBALEVA</h1>
+          </div>
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-3 py-2 rounded-xl transition"
+            >
+              <LogOut size={18} />
+              <span className="text-sm">Sair</span>
+            </button>
+          )}
         </div>
         <p className="text-[#A0A0B0] text-center text-sm mt-1">Mobilidade premium para sua cidade</p>
       </div>
 
       {/* CONTEÚDO PRINCIPAL (SIMULA UM CELULAR) */}
       <div className="max-w-md mx-auto p-4">
-        {/* MAPA AO VIVO (SEMPRE FIXO) */}
         <LiveMap />
 
-        {/* ÁREA DE AÇÃO (DENTRO DO CELULAR) - ESPAÇO INTERNO */}
         <div className="mt-3">
           {!user ? (
             <LoginScreen
-              onGoogleLogin={handleGoogleLogin}
-              onEmailLogin={handleEmailLogin}
+              onGoogleLogin={async () => {
+                const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+                if (error) toast.error('Erro ao logar com Google');
+              }}
+              onEmailLogin={async (e) => {
+                e.preventDefault();
+                setLoginLoading(true);
+                const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
+                if (error) toast.error('E-mail ou senha inválidos');
+                setLoginLoading(false);
+              }}
               loginEmail={loginEmail}
               setLoginEmail={setLoginEmail}
               loginPassword={loginPassword}
@@ -271,10 +330,7 @@ export const MainScreen = () => {
         </div>
       </div>
 
-      {/* DISCOVER BAR (SEGUNDA BARRA FIXA INFERIOR) */}
       <DiscoverBar />
-
-      {/* BOTTOM NAV (PRIMEIRA BARRA FIXA INFERIOR) */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
   );
