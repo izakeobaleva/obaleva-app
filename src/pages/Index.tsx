@@ -5,15 +5,14 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
+import { BottomNav } from '../components/BottomNav'
 
 export const Index = () => {
   const navigate = useNavigate()
   const { user, loading, signOut, profile } = useAuth()
   const [apkUrl, setApkUrl] = useState('')
-  const [dominio, setDominio] = useState(window.location.origin)
   const [origem, setOrigem] = useState('')
   const [destino, setDestino] = useState('')
-  const [compartilhandoLocal, setCompartilhandoLocal] = useState(false)
   const [coordsAtuais, setCoordsAtuais] = useState<{ lat: number; lng: number } | null>(null)
   const [velocidade, setVelocidade] = useState(0)
   const watchIdRef = useRef<number | null>(null)
@@ -29,7 +28,6 @@ export const Index = () => {
   }, [])
 
   useEffect(() => {
-    // Quando o usuário logar, inicia localização automaticamente
     if (user) {
       iniciarLocalizacao()
     }
@@ -48,14 +46,12 @@ export const Index = () => {
   function iniciarLocalizacao() {
     if (!navigator.geolocation) return
 
-    // Primeiro obtém posição atual
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude, speed } = position.coords
         setCoordsAtuais({ lat: latitude, lng: longitude })
         setVelocidade(speed || 0)
         setOrigem(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`)
-        setCompartilhandoLocal(true)
         toast.success('📍 Localização ativada!')
       },
       () => {
@@ -64,7 +60,6 @@ export const Index = () => {
       { enableHighAccuracy: true, timeout: 10000 }
     )
 
-    // Monitora em tempo real
     watchIdRef.current = navigator.geolocation.watchPosition(
       (newPos) => {
         const { latitude, longitude, speed } = newPos.coords
@@ -93,7 +88,6 @@ export const Index = () => {
     await signOut()
     toast.success('Saiu da conta!')
     setCoordsAtuais(null)
-    setCompartilhandoLocal(false)
     if (watchIdRef.current) {
       navigator.geolocation.clearWatch(watchIdRef.current)
       watchIdRef.current = null
@@ -151,7 +145,7 @@ export const Index = () => {
   // ========== TELA PRINCIPAL QUANDO LOGADO ==========
   if (user) {
     return (
-      <div className="min-h-screen bg-[#0F0B1A] flex flex-col">
+      <div className="min-h-screen bg-[#0F0B1A] flex flex-col pb-24">
         {/* Header minimalista */}
         <div className="flex items-center justify-between px-5 pt-4 pb-2">
           <div className="flex items-center gap-2">
@@ -171,8 +165,8 @@ export const Index = () => {
           </div>
         </div>
 
-        {/* Mapa ao vivo - ocupa a maior parte da tela */}
-        <div className="flex-1 mx-4 my-2 relative">
+        {/* Mapa ao vivo - ocupa espaço flexível */}
+        <div className="flex-1 mx-4 my-2 relative" style={{ minHeight: '300px' }}>
           <div className="bg-[#1A1528] rounded-3xl border border-white/10 h-full w-full relative overflow-hidden">
             {/* Grid do mapa */}
             <div className="absolute inset-0 opacity-[0.07]">
@@ -234,7 +228,7 @@ export const Index = () => {
         </div>
 
         {/* Card inferior com origem, destino e solicitar */}
-        <div className="px-4 pb-6 pt-2">
+        <div className="px-4 pb-4 pt-2">
           <div className="bg-[#1A1528] rounded-3xl border border-white/10 p-4 space-y-3 shadow-2xl shadow-black/30">
             {/* Status */}
             <div className="flex items-center justify-between">
@@ -247,7 +241,7 @@ export const Index = () => {
               </span>
             </div>
 
-            {/* Origem */}
+            {/* Origem e Destino */}
             <div className="flex items-center gap-3 bg-[#0F0B1A] rounded-2xl px-4 py-3 border border-white/10">
               <div className="flex flex-col items-center gap-0.5">
                 <div className="w-2.5 h-2.5 bg-green-400 rounded-full shadow-lg shadow-green-400/30" />
@@ -296,11 +290,14 @@ export const Index = () => {
             </motion.button>
           </div>
         </div>
+
+        {/* BottomNav */}
+        <BottomNav role={profile?.tipo === 'motorista' ? 'motorista' : 'passageiro'} />
       </div>
     )
   }
 
-  // ========== TELA DE LOGIN / CADASTRO ==========
+  // ========== TELA DE LOGIN / CADASTRO (não logado) ==========
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col items-center justify-center p-6">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
