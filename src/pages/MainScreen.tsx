@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, Chrome, Home, Search, Menu as MenuIcon, ChevronLeft, ChevronRight, Video, Megaphone, Coffee, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 
-// BottomNav - card flutuante centralizado
+// BottomNav - CENTRALIZADA (mesma largura dos cards)
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
   const tabs = [
     { id: 'home', label: 'Início', icon: Home },
@@ -14,7 +14,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   ];
   return (
     <div className="flex justify-center">
-      <div className="bg-[#1A1528] border border-white/10 rounded-xl max-w-md w-full mx-4">
+      <div className="bg-[#1A1528] border border-white/10 rounded-xl max-w-md w-full">
         <div className="flex justify-between items-center px-4 py-2">
           {tabs.map((tab) => {
             const isActive = active === tab.id;
@@ -37,15 +37,17 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   );
 };
 
-// DiscoverBar - cards com 55% de largura
+// DiscoverBar (cards roláveis - 2 cards visíveis por vez)
 const DiscoverBar = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const amount = scrollRef.current.clientWidth * 0.8;
-      scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+      const scrollAmount = scrollRef.current.clientWidth * 0.8;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
     }
   };
+
   const cards = [
     { icon: <Gift size={20} />, title: "1ª corrida grátis", description: "Até R$ 20 de desconto", color: "#F4D03F", type: "promo" },
     { icon: <Shield size={20} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#6B2D8C", type: "info" },
@@ -56,17 +58,28 @@ const DiscoverBar = () => {
     { icon: <Coffee size={20} />, title: "Parceiros", description: "Descontos exclusivos", color: "#9B59B6", type: "promo" },
     { icon: <Heart size={20} />, title: "ObaLeva Solidário", description: "Doação por corrida", color: "#F4D03F", type: "promo" },
   ];
+
   return (
     <div>
       <div className="relative">
-        <button onClick={() => scroll('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-1 backdrop-blur-sm hover:bg-black/80 transition">
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-1 backdrop-blur-sm hover:bg-black/80 transition"
+        >
           <ChevronLeft size={16} className="text-white" />
         </button>
-        <div ref={scrollRef} className="flex overflow-x-auto scrollbar-hide gap-2.5 pb-1 snap-x snap-mandatory">
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto scrollbar-hide gap-2 pb-1 snap-x snap-mandatory"
+          style={{ scrollSnapType: 'x mandatory' }}
+        >
           {cards.map((card, idx) => (
-            <div key={idx} className="min-w-[55%] max-w-[55%] snap-start bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/50 transition-all cursor-pointer">
+            <div
+              key={idx}
+              className="min-w-[calc(50%-6px)] max-w-[calc(50%-6px)] snap-start bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/50 transition-all cursor-pointer"
+            >
               <div className="flex items-start gap-2.5">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${card.color}20` }}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0`} style={{ backgroundColor: `${card.color}20` }}>
                   <div style={{ color: card.color }}>{card.icon}</div>
                 </div>
                 <div className="flex-1">
@@ -79,7 +92,10 @@ const DiscoverBar = () => {
             </div>
           ))}
         </div>
-        <button onClick={() => scroll('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-1 backdrop-blur-sm hover:bg-black/80 transition">
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-1 backdrop-blur-sm hover:bg-black/80 transition"
+        >
           <ChevronRight size={16} className="text-white" />
         </button>
       </div>
@@ -90,14 +106,16 @@ const DiscoverBar = () => {
 // LiveMap
 const LiveMap = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {}
+        (err) => console.error('Erro ao obter localização:', err)
       );
     }
   }, []);
+
   return (
     <div className="relative h-48 w-full bg-gradient-to-br from-[#2a1a3a] to-[#1a1a2e] rounded-xl flex flex-col items-center justify-center overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center">
@@ -106,15 +124,17 @@ const LiveMap = () => {
           <MapPin size={12} className="text-black" />
         </div>
       </div>
+
       <div className="absolute bottom-1.5 left-1.5 z-10 bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded-full">
         <p className="text-white text-[8px] flex items-center gap-0.5">
           <MapPin size={8} className="text-[#F4D03F]" />
           📍 {userLocation ? `${userLocation.lat.toFixed(2)}, ${userLocation.lng.toFixed(2)}` : 'Buscando...'}
         </p>
       </div>
+
       <div className="absolute top-1.5 left-0 right-0 z-10 text-center">
         <div className="flex items-center justify-center gap-1">
-          <Car size={18} className="text-[#F4D03F]" />
+          <Car className="text-[#F4D03F]" size={18} />
           <h1 className="text-base font-bold text-white drop-shadow-lg">OBALEVA</h1>
         </div>
         <p className="text-white/70 text-[8px] drop-shadow-lg">Mobilidade premium</p>
@@ -134,7 +154,7 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
       <button onClick={onGoogleLogin} className="w-full py-1.5 rounded-lg border border-white/20 bg-white/5 text-white flex items-center justify-center gap-1.5 hover:bg-white/10 transition text-xs">
         <Chrome size={14} /> Entrar com Google
       </button>
-      <div className="relative my-1.5"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center text-[8px]"><span className="bg-[#1A1528] px-1.5 text-[#A0A0B0]">ou</span></div></div>
+      <div className="relative my-1.5"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div><div className="relative flex justify-center text-[8px]"><span className="bg-[#1A1528] px-1.5 text-[#A0A0B0]">ou</span></div></div>
       <form onSubmit={onEmailLogin} className="space-y-1.5">
         <input type="email" placeholder="E-mail" className="w-full p-1.5 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-xs" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
         <input type="password" placeholder="Senha" className="w-full p-1.5 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-xs" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
@@ -172,6 +192,7 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
   const [password, setPassword] = useState('');
   const [placa, setPlaca] = useState('');
   const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -184,9 +205,13 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
       else await supabase.from('motoristas').insert({ id: auth.user.id, status: 'pendente', dados_veiculo: { placa, modelo: 'Não informado', ano: '2024', cor: 'Não informado' } });
       toast.success('Cadastro realizado! Faça login.');
       onSuccess();
-    } catch (err: any) { toast.error(err.message); }
-    finally { setLoading(false); }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-3 border border-white/10">
       <h2 className="text-white font-bold text-xs mb-2">Cadastro {tipo === 'passageiro' ? 'Passageiro' : 'Motorista'}</h2>
@@ -213,24 +238,40 @@ export const MainScreen = () => {
   const [loginLoading, setLoginLoading] = useState(false);
   const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
 
-  const handleLogout = async () => { await supabase.auth.signOut(); window.location.reload(); };
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
 
   useEffect(() => {
-    let t: NodeJS.Timeout;
-    const r = () => { clearTimeout(t); t = setTimeout(() => { if (user) handleLogout(); }, 5 * 60 * 1000); };
-    window.addEventListener('mousemove', r); window.addEventListener('keydown', r); window.addEventListener('click', r);
-    r();
-    return () => { clearTimeout(t); window.removeEventListener('mousemove', r); window.removeEventListener('keydown', r); window.removeEventListener('click', r); };
+    let inactivityTimer: NodeJS.Timeout;
+    const resetTimer = () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => { if (user) handleLogout(); }, 5 * 60 * 1000);
+    };
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    window.addEventListener('click', resetTimer);
+    resetTimer();
+    return () => {
+      clearTimeout(inactivityTimer);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('click', resetTimer);
+    };
   }, [user]);
 
   if (loading) return <div className="flex items-center justify-center min-h-screen text-white">Carregando...</div>;
 
   return (
     <div className="min-h-screen bg-[#0F0B1A]">
-      {/* Container principal - centralizado (sem padding superior) */}
+      {/* TUDO CENTRALIZADO - COM mt-1 (4px) ENTRE BLOCOS */}
       <div className="max-w-md mx-auto px-4">
+        {/* MAPA */}
         <LiveMap />
-        <div className="mt-0.5">
+
+        {/* ÁREA DE AÇÃO - COM 4px ACIMA */}
+        <div className="mt-1">
           {!user ? (
             <LoginScreen
               onGoogleLogin={async () => { const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); if (error) toast.error('Erro ao logar com Google'); }}
@@ -264,11 +305,15 @@ export const MainScreen = () => {
             </div>
           )}
         </div>
-        <div className="mt-0.5">
+
+        {/* CARDS ROLÁVEIS - COM 4px ACIMA */}
+        <div className="mt-1">
           <DiscoverBar />
         </div>
       </div>
-      <div className="mt-0.5">
+
+      {/* BOTTOM NAV - CENTRALIZADA, COM 4px ACIMA */}
+      <div className="mt-1">
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
       </div>
     </div>
