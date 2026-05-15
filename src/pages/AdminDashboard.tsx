@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { 
   BarChart3, Users, Car, DollarSign, Settings, Bell, 
   Globe, Image, MessageSquare, LogOut, Calendar, Menu, X, 
-  ArrowLeft, RefreshCw, ShieldCheck
+  ArrowLeft, RefreshCw, ShieldCheck, Activity
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Corridas from './Admin/Corridas'
@@ -20,6 +20,7 @@ import LandingEditor from './Admin/LandingEditor'
 import LogoEditor from './Admin/LogoEditor'
 import DominioConfig from './Admin/DominioConfig'
 import DiagnosticoSupabase from './Admin/DiagnosticoSupabase'
+import DiagnosticoCompleto from './Admin/DiagnosticoCompleto'
 
 function AdminDashboard() {
   const { signOut, profile } = useAuth()
@@ -52,6 +53,7 @@ function AdminDashboard() {
     { id: 'logo', label: 'Logo', icon: Image },
     { id: 'dominio', label: 'Domínio', icon: Globe },
     { id: 'diagnostico', label: 'Diagnóstico', icon: ShieldCheck },
+    { id: 'diagnostico-completo', label: 'Diagnóstico Completo', icon: Activity },
     { id: 'suporte', label: 'Suporte', icon: MessageSquare },
   ]
 
@@ -72,6 +74,7 @@ function AdminDashboard() {
       case 'logo': return <LogoEditor />
       case 'dominio': return <DominioConfig />
       case 'diagnostico': return <DiagnosticoSupabase />
+      case 'diagnostico-completo': return <DiagnosticoCompleto />
       case 'suporte': return <Suporte />
       default: return <AdminFullDashboard />
     }
