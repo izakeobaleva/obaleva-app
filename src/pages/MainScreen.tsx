@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, Chrome, Home, Search, Menu as MenuIcon, ChevronLeft, ChevronRight, Video, Megaphone, Coffee, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 
-// BottomNav - CENTRALIZADA (mesma largura dos cards)
+// BottomNav - ALINHADA COM O RESTO
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
   const tabs = [
     { id: 'home', label: 'Início', icon: Home },
@@ -14,7 +14,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   ];
   return (
     <div className="flex justify-center">
-      <div className="bg-[#1A1528] border border-white/10 rounded-xl max-w-md w-full">
+      <div className="bg-[#1A1528] border border-white/10 rounded-xl max-w-md w-full mx-4">
         <div className="flex justify-between items-center px-4 py-2">
           {tabs.map((tab) => {
             const isActive = active === tab.id;
@@ -37,7 +37,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   );
 };
 
-// DiscoverBar (cards roláveis - 2 cards visíveis por vez)
+// DiscoverBar (cards roláveis - OTIMIZADOS)
 const DiscoverBar = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -70,13 +70,13 @@ const DiscoverBar = () => {
         </button>
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto scrollbar-hide gap-2 pb-1 snap-x snap-mandatory"
+          className="flex overflow-x-auto scrollbar-hide gap-2.5 pb-1 snap-x snap-mandatory"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {cards.map((card, idx) => (
             <div
               key={idx}
-              className="min-w-[calc(50%-6px)] max-w-[calc(50%-6px)] snap-start bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/50 transition-all cursor-pointer"
+              className="min-w-[calc(50%-3px)] max-w-[calc(50%-3px)] snap-start bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/50 transition-all cursor-pointer"
             >
               <div className="flex items-start gap-2.5">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0`} style={{ backgroundColor: `${card.color}20` }}>
@@ -143,10 +143,10 @@ const LiveMap = () => {
   );
 };
 
-// LoginScreen
+// LoginScreen (p-4)
 const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => (
-  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-    <div className="text-center mb-2">
+  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+    <div className="text-center mb-3">
       <h2 className="text-sm font-bold text-white">Bem-vindo</h2>
       <p className="text-[#A0A0B0] text-[10px]">Entre para solicitar corridas</p>
     </div>
@@ -164,9 +164,9 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
   </div>
 );
 
-// PassengerDashboard
+// PassengerDashboard (p-4)
 const PassengerDashboard = () => (
-  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
     <div className="space-y-2">
       <div className="flex items-center gap-2 bg-[#0F0B1A] p-1.5 rounded-lg">
         <MapPin size={14} className="text-[#F4D03F]" />
@@ -183,7 +183,7 @@ const PassengerDashboard = () => (
   </div>
 );
 
-// CadastroRapido
+// CadastroRapido (p-4)
 const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista'; onSuccess: () => void }) => {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
@@ -213,7 +213,7 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
   };
 
   return (
-    <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+    <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
       <h2 className="text-white font-bold text-xs mb-2">Cadastro {tipo === 'passageiro' ? 'Passageiro' : 'Motorista'}</h2>
       <form onSubmit={handleSubmit} className="space-y-1.5">
         <input placeholder="Nome" className="w-full p-1.5 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-xs" value={nome} onChange={e => setNome(e.target.value)} required />
@@ -265,7 +265,7 @@ export const MainScreen = () => {
 
   return (
     <div className="min-h-screen bg-[#0F0B1A]">
-      {/* TUDO CENTRALIZADO - COM mt-1 (4px) ENTRE BLOCOS */}
+      {/* CONTAINER PRINCIPAL - SEM PADDING VERTICAL */}
       <div className="max-w-md mx-auto px-4">
         {/* MAPA */}
         <LiveMap />
@@ -292,14 +292,14 @@ export const MainScreen = () => {
           ) : profile.tipo === 'passageiro' ? (
             <PassengerDashboard />
           ) : profile.tipo === 'motorista' ? (
-            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-3 border border-white/10 text-center">
+            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
               <Truck className="text-[#F4D03F] w-6 h-6 mx-auto mb-1" />
               <h2 className="text-white font-bold text-xs">Motorista</h2>
               <p className="text-[#A0A0B0] text-[9px]">Aguardando aprovação</p>
               <button className="mt-1.5 px-3 py-0.5 rounded-full bg-green-600 text-white text-[9px]">🟢 Online</button>
             </div>
           ) : (
-            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-3 border border-white/10 text-center">
+            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
               <Shield className="text-[#F4D03F] w-6 h-6 mx-auto mb-1" />
               <h2 className="text-white font-bold text-xs">Admin</h2>
             </div>
