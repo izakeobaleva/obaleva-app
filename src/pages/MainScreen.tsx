@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 // ==================== COMPONENTES INTERNOS ====================
 
-// BottomNav (barra fixa inferior principal)
+// BottomNav (barra fixa inferior principal) - ALINHADA LATERALMENTE
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
   const tabs = [
     { id: 'home', label: 'Início', icon: Home },
@@ -103,7 +103,7 @@ const DiscoverBar = () => {
   );
 };
 
-// Componente de mapa ao vivo
+// Componente de mapa ao vivo com LOGO SOBREPOSTO NO TOPO
 const LiveMap = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -118,17 +118,29 @@ const LiveMap = () => {
 
   return (
     <div className="relative h-64 w-full bg-gradient-to-br from-[#2a1a3a] to-[#1a1a2e] rounded-2xl flex flex-col items-center justify-center overflow-hidden mb-4">
+      {/* Elementos de mapa animados */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-32 h-32 rounded-full bg-[#F4D03F]/10 animate-pulse" />
         <div className="absolute w-8 h-8 rounded-full bg-[#F4D03F] flex items-center justify-center shadow-lg">
           <MapPin size={16} className="text-black" />
         </div>
       </div>
+
+      {/* Localização atual (canto inferior esquerdo) */}
       <div className="absolute bottom-3 left-3 z-10 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
         <p className="text-white text-xs flex items-center gap-1">
           <MapPin size={12} className="text-[#F4D03F]" />
           📍 {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Buscando localização...'}
         </p>
+      </div>
+
+      {/* LOGO E SLOGAN SOBREPOSTOS NO TOPO DO MAPA */}
+      <div className="absolute top-4 left-0 right-0 z-10 text-center">
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <Car className="text-[#F4D03F]" size={28} />
+          <h1 className="text-2xl font-bold text-white drop-shadow-lg">OBALEVA</h1>
+        </div>
+        <p className="text-white/80 text-xs drop-shadow-lg">Mobilidade premium para sua cidade</p>
       </div>
     </div>
   );
@@ -138,7 +150,6 @@ const LiveMap = () => {
 const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => (
   <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-5 border border-white/10 shadow-xl">
     <div className="text-center mb-4">
-      <Car className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
       <h2 className="text-lg font-bold text-white">Bem-vindo</h2>
       <p className="text-[#A0A0B0] text-xs">Entre para solicitar corridas</p>
     </div>
@@ -265,7 +276,7 @@ export const MainScreen = () => {
     <div className="min-h-screen bg-[#0F0B1A] pb-20">
       {/* CONTAINER PRINCIPAL (SIMULA TELA DE CELULAR) */}
       <div className="max-w-md mx-auto px-4 pt-4">
-        {/* MAPA SEMPRE VISÍVEL LOGO ACIMA */}
+        {/* MAPA COM LOGO SOBREPOSTO */}
         <LiveMap />
 
         {/* ÁREA DE AÇÃO (LOGIN / DASHBOARD) */}
@@ -317,7 +328,7 @@ export const MainScreen = () => {
         <DiscoverBar />
       </div>
 
-      {/* BOTTOM NAV */}
+      {/* BOTTOM NAV (ALINHADA LATERALMENTE) */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
   );
