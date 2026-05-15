@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Shield, Star, Mail, Share2, Download, LogOut, LayoutDashboard, Home, Search, User, Menu } from 'lucide-react'
+import { Car, Smartphone, Shield, Star, Mail, Share2, Download, LogOut, LayoutDashboard, Home, Search, User, Menu, ArrowRight } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
@@ -15,10 +15,11 @@ const QUICK_OPTIONS = [
 
 export const Index = () => {
   const navigate = useNavigate()
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, signOut, profile } = useAuth()
   const [apkUrl, setApkUrl] = useState('')
   const [dominio, setDominio] = useState(window.location.origin)
   const [showPromoPanel, setShowPromoPanel] = useState(false)
+  const [showOptions, setShowOptions] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -56,10 +57,11 @@ export const Index = () => {
   const handleSignOut = async () => {
     await signOut()
     toast.success('Saiu da conta!')
+    setShowOptions(false)
   }
 
   const handleGoToDashboard = () => {
-    const tipo = user?.user_metadata?.tipo
+    const tipo = profile?.tipo
     if (tipo === 'passageiro') navigate('/passenger')
     else if (tipo === 'motorista') navigate('/driver')
     else navigate('/test-login')
@@ -259,23 +261,81 @@ export const Index = () => {
         >
           {user ? (
             <>
-              <p className="text-center text-sm text-[#A0A0B0] mb-2">
-                Logado como <strong className="text-white">{user.email}</strong>
+              <p className="text-center text-sm text-[#A0A0B0] mb-3">
+                Bem-vindo, <strong className="text-white">{user.email?.split('@')[0] || 'Usuário'}</strong>
               </p>
-              <button 
-                onClick={handleGoToDashboard} 
-                className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                <LayoutDashboard size={18} />
-                Ir para o Dashboard
-              </button>
-              <button 
-                onClick={handleSignOut} 
-                className="w-full py-4 rounded-2xl font-bold border-2 border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-base active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                <LogOut size={18} />
-                Sair da conta
-              </button>
+
+              {/* Opções Passageiro / Motorista */}
+              <div className="space-y-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    if (profile?.tipo === 'passageiro') navigate('/passenger')
+                    else navigate('/register')
+                  }}
+                  className="w-full p-4 rounded-2xl bg-gradient-to-r from-blue-600/20 to-blue-800/20 border border-blue-500/30 hover:border-blue-400/50 transition-all flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-white font-bold text-base">Passageiro</p>
+                      {profile?.tipo === 'passageiro' ? (
+                        <p className="text-blue-400 text-xs">● Seu perfil atual</p>
+                      ) : (
+                        <p className="text-[#A0A0B0] text-xs">Solicite corridas rápidas</p>
+                      )}
+                    </div>
+                  </div>
+                  <ArrowRight size={20} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    if (profile?.tipo === 'motorista') navigate('/driver')
+                    else navigate('/register-driver')
+                  }}
+                  className="w-full p-4 rounded-2xl bg-gradient-to-r from-purple-600/20 to-purple-800/20 border border-purple-500/30 hover:border-purple-400/50 transition-all flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                      <Car size={24} className="text-purple-400" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-white font-bold text-base">Motorista</p>
+                      {profile?.tipo === 'motorista' ? (
+                        <p className="text-purple-400 text-xs">● Seu perfil atual</p>
+                      ) : (
+                        <p className="text-[#A0A0B0] text-xs">Ganhe dinheiro dirigindo</p>
+                      )}
+                    </div>
+                  </div>
+                  <ArrowRight size={20} className="text-purple-400 group-hover:translate-x-1 transition-transform" />
+                </motion.button>
+              </div>
+
+              {/* Botões de ação rápidos */}
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="py-3 rounded-2xl border border-white/15 text-white hover:bg-white/5 transition-all text-sm font-medium"
+                >
+                  ⚙️ Perfil
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="py-3 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm font-medium"
+                >
+                  🚪 Sair
+                </button>
+              </div>
             </>
           ) : (
             <>
