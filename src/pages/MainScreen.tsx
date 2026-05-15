@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, Chrome, Home, Search, Menu as MenuIcon, LogOut, ChevronLeft, ChevronRight, Video, Megaphone, Coffee, Heart } from 'lucide-react';
+import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, Chrome, Home, Search, Menu as MenuIcon, ChevronLeft, ChevronRight, Video, Megaphone, Coffee, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ==================== COMPONENTES INTERNOS ====================
 
-// BottomNav - CENTRALIZADA DENTRO DO CONTAINER
+// BottomNav - CENTRALIZADA (card flutuante)
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
   const tabs = [
     { id: 'home', label: 'Início', icon: Home },
@@ -51,44 +51,44 @@ const DiscoverBar = () => {
   };
 
   const cards = [
-    { icon: <Gift size={18} />, title: "1ª grátis", description: "Até R$ 20", color: "#F4D03F", type: "promo" },
-    { icon: <Shield size={18} />, title: "Seguro", description: "Proteção total", color: "#6B2D8C", type: "info" },
-    { icon: <Star size={18} />, title: "4.8★", description: "Motoristas top", color: "#F4D03F", type: "info" },
-    { icon: <Zap size={18} />, title: "Rápido", description: "Chegada ágil", color: "#9B59B6", type: "info" },
-    { icon: <Video size={18} />, title: "Tutorial", description: "Como usar", color: "#F4D03F", type: "video" },
-    { icon: <Megaphone size={18} />, title: "Indique", description: "Ganhe R$ 10", color: "#6B2D8C", type: "promo" },
-    { icon: <Coffee size={18} />, title: "Parceiros", description: "Descontos", color: "#9B59B6", type: "promo" },
-    { icon: <Heart size={18} />, title: "Solidário", description: "Doação", color: "#F4D03F", type: "promo" },
+    { icon: <Gift size={20} />, title: "1ª corrida grátis", description: "Até R$ 20 de desconto", color: "#F4D03F", type: "promo" },
+    { icon: <Shield size={20} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#6B2D8C", type: "info" },
+    { icon: <Star size={20} />, title: "Avaliação 4.8★", description: "Motoristas nota 10", color: "#F4D03F", type: "info" },
+    { icon: <Zap size={20} />, title: "Rápido", description: "Chegada em minutos", color: "#9B59B6", type: "info" },
+    { icon: <Video size={20} />, title: "Como funciona?", description: "Assista ao vídeo", color: "#F4D03F", type: "video" },
+    { icon: <Megaphone size={20} />, title: "Indique e ganhe", description: "R$ 10 de crédito", color: "#6B2D8C", type: "promo" },
+    { icon: <Coffee size={20} />, title: "Parceiros", description: "Descontos exclusivos", color: "#9B59B6", type: "promo" },
+    { icon: <Heart size={20} />, title: "ObaLeva Solidário", description: "Doação por corrida", color: "#F4D03F", type: "promo" },
   ];
 
   return (
-    <div className="mt-3">
+    <div>
       <div className="relative">
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-0.5 backdrop-blur-sm hover:bg-black/80 transition"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-1 backdrop-blur-sm hover:bg-black/80 transition"
         >
-          <ChevronLeft size={14} className="text-white" />
+          <ChevronLeft size={16} className="text-white" />
         </button>
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto scrollbar-hide gap-2 pb-1 snap-x snap-mandatory"
+          className="flex overflow-x-auto scrollbar-hide gap-2.5 pb-1 snap-x snap-mandatory"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {cards.map((card, idx) => (
             <div
               key={idx}
-              className="min-w-[calc(50%-4px)] max-w-[calc(50%-4px)] snap-start bg-[#1A1528] rounded-xl p-2 border border-white/10 hover:border-[#F4D03F]/50 transition-all cursor-pointer"
+              className="min-w-[calc(55%-4px)] max-w-[calc(55%-4px)] snap-start bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/50 transition-all cursor-pointer"
             >
-              <div className="flex items-start gap-2">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0`} style={{ backgroundColor: `${card.color}20` }}>
+              <div className="flex items-start gap-2.5">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0`} style={{ backgroundColor: `${card.color}20` }}>
                   <div style={{ color: card.color }}>{card.icon}</div>
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-white font-semibold text-[11px]">{card.title}</h4>
-                  <p className="text-[#A0A0B0] text-[9px] mt-0.5 leading-tight">{card.description}</p>
-                  {card.type === 'video' && <div className="mt-0.5 text-[#F4D03F] text-[8px]">▶️ Assistir</div>}
-                  {card.type === 'promo' && <div className="mt-0.5 inline-block bg-[#F4D03F]/20 text-[#F4D03F] text-[8px] px-1 py-0.5 rounded-full">Promo</div>}
+                  <h4 className="text-white font-semibold text-xs">{card.title}</h4>
+                  <p className="text-[#A0A0B0] text-[10px] mt-0.5 leading-tight">{card.description}</p>
+                  {card.type === 'video' && <div className="mt-1 text-[#F4D03F] text-[9px]">▶️ Assistir</div>}
+                  {card.type === 'promo' && <div className="mt-1 inline-block bg-[#F4D03F]/20 text-[#F4D03F] text-[8px] px-1.5 py-0.5 rounded-full">Promoção</div>}
                 </div>
               </div>
             </div>
@@ -96,9 +96,9 @@ const DiscoverBar = () => {
         </div>
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-0.5 backdrop-blur-sm hover:bg-black/80 transition"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-1 backdrop-blur-sm hover:bg-black/80 transition"
         >
-          <ChevronRight size={14} className="text-white" />
+          <ChevronRight size={16} className="text-white" />
         </button>
       </div>
     </div>
@@ -126,14 +126,12 @@ const LiveMap = () => {
           <MapPin size={12} className="text-black" />
         </div>
       </div>
-
       <div className="absolute bottom-1.5 left-1.5 z-10 bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded-full">
         <p className="text-white text-[8px] flex items-center gap-0.5">
           <MapPin size={8} className="text-[#F4D03F]" />
           📍 {userLocation ? `${userLocation.lat.toFixed(2)}, ${userLocation.lng.toFixed(2)}` : 'Buscando...'}
         </p>
       </div>
-
       <div className="absolute top-1.5 left-0 right-0 z-10 text-center">
         <div className="flex items-center justify-center gap-1">
           <Car className="text-[#F4D03F]" size={18} />
@@ -266,11 +264,13 @@ export const MainScreen = () => {
   if (loading) return <div className="flex items-center justify-center min-h-screen text-white">Carregando...</div>;
 
   return (
-    <div className="min-h-screen bg-[#0F0B1A] pb-4">
-      <div className="max-w-md mx-auto px-4 py-4">
-        <div className="space-y-3">
-          <LiveMap />
-          
+    <div className="min-h-screen bg-[#0F0B1A]">
+      {/* TUDO CENTRALIZADO */}
+      <div className="max-w-md mx-auto px-4 pt-4">
+        <LiveMap />
+        
+        {/* MESMO ESPAÇAMENTO PADRÃO: mt-0.5 = 2px */}
+        <div className="mt-0.5">
           {!user ? (
             <LoginScreen
               onGoogleLogin={async () => { const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); if (error) toast.error('Erro ao logar com Google'); }}
@@ -280,7 +280,7 @@ export const MainScreen = () => {
               loginLoading={loginLoading}
             />
           ) : !profile ? (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex gap-2">
                 <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-1.5 rounded-lg border border-white/20 text-white bg-[#1A1528] text-xs">Passageiro</button>
                 <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-1.5 rounded-lg border border-white/20 text-white bg-[#1A1528] text-xs">Motorista</button>
@@ -303,13 +303,15 @@ export const MainScreen = () => {
               <h2 className="text-white font-bold text-xs">Admin</h2>
             </div>
           )}
+        </div>
 
+        <div className="mt-0.5">
           <DiscoverBar />
         </div>
       </div>
 
-      {/* BOTTOM NAV - CENTRALIZADA */}
-      <div className="mt-3">
+      {/* BOTTOM NAV - CENTRALIZADA card flutuante */}
+      <div className="mt-0.5 pb-4">
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
       </div>
     </div>
