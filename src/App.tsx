@@ -52,20 +52,20 @@ export function AppRoutes() {
 
   return (
     <Routes>
-      {/* Rotas públicas */}
-      <Route path="/" element={!user ? <Index /> : tipo === 'passageiro' ? <Navigate to="/" replace /> : tipo === 'motorista' ? <Navigate to="/" replace /> : <Index />} />
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
-      <Route path="/register" element={!user ? <RegisterPassenger /> : <Navigate to="/" replace />} />
-      <Route path="/register-driver" element={!user ? <RegisterDriver /> : <Navigate to="/" replace />} />
+      {/* Rotas públicas - SEMPRE acessíveis, mesmo logado */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<RegisterPassenger />} />
+      <Route path="/register-driver" element={<RegisterDriver />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/update-password" element={<UpdatePassword />} />
       <Route path="/test-login" element={<TestLogin />} />
       <Route path="/landing" element={<Divulgacao />} />
       <Route path="/divulgar" element={<Divulgacao />} />
       <Route path="/app-divulgacao" element={<AppDivulgacao />} />
+      <Route path="/admin-login" element={<AdminLogin />} />
+      <Route path="/" element={<Index />} />
 
       {/* Admin */}
-      <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/admin/*" element={
         <ProtectedRoute allowedTypes={['admin']}>
           <AdminDashboard />

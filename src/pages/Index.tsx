@@ -1,13 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Shield, Star, Mail, Bug, Share2, Download } from 'lucide-react'
+import { Car, Smartphone, Shield, Star, Mail, Bug, Share2, Download, LogOut } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
+import { toast } from 'sonner'
 
 export const Index = () => {
   const navigate = useNavigate()
-  const { user, loading } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const [apkUrl, setApkUrl] = useState('')
   const [dominio, setDominio] = useState(window.location.origin)
 
@@ -43,12 +44,10 @@ export const Index = () => {
     }
   }
 
-  // Se já estiver logado, redireciona
-  useEffect(() => {
-    if (!loading && user) {
-      navigate('/', { replace: true })
-    }
-  }, [user, loading])
+  const handleSignOut = async () => {
+    await signOut()
+    toast.success('Saiu da conta!')
+  }
 
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center">
@@ -64,7 +63,21 @@ export const Index = () => {
       </div>
 
       <div className="flex-1 flex flex-col relative z-10">
-        <div className="pt-10 pb-6 px-6">
+        {/* Header com botão de sair quando logado */}
+        <div className="flex items-center justify-between px-6 pt-4">
+          <div />
+          {user && (
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm flex items-center gap-2"
+            >
+              <LogOut size={16} />
+              Sair
+            </button>
+          )}
+        </div>
+
+        <div className="pt-4 pb-6 px-6">
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="w-24 h-24 bg-[#F4D03F]/15 rounded-full flex items-center justify-center mx-auto mb-5 border-2 border-[#F4D03F]/30 shadow-lg shadow-[#F4D03F]/10">
             <Car className="text-[#F4D03F] w-12 h-12" strokeWidth={2} />
           </motion.div>
@@ -126,54 +139,71 @@ export const Index = () => {
 
         {/* Botões */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="px-6 space-y-3 max-w-md mx-auto w-full">
-          <div className="grid grid-cols-2 gap-4">
-            <button onClick={handleGoogleLogin} className="py-4 px-5 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-base active:scale-[0.98]">
-              <svg width="20" height="20" viewBox="0 0 48 48">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                <path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-              </svg>
-              Google
-            </button>
-            <button onClick={() => navigate('/login')} className="py-4 px-5 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-base active:scale-[0.98]">
-              <Mail size={20} />
-              E-mail
-            </button>
-          </div>
+          {user ? (
+            <>
+              <p className="text-center text-sm text-[#A0A0B0] mb-2">
+                Logado como <strong className="text-white">{user.email}</strong>
+              </p>
+              <button onClick={() => navigate('/')} className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base active:scale-[0.98]">
+                Ir para o Dashboard
+              </button>
+              <button onClick={handleSignOut} className="w-full py-4 rounded-2xl font-bold border-2 border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-base active:scale-[0.98]">
+                <LogOut size={18} className="inline mr-2" />
+                Sair da conta
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <button onClick={handleGoogleLogin} className="py-4 px-5 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-base active:scale-[0.98]">
+                  <svg width="20" height="20" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  </svg>
+                  Google
+                </button>
+                <button onClick={() => navigate('/login')} className="py-4 px-5 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-3 text-base active:scale-[0.98]">
+                  <Mail size={20} />
+                  E-mail
+                </button>
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <button onClick={() => navigate('/register')} className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base flex items-center justify-center gap-3 active:scale-[0.98]">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-              Passageiro
-            </button>
-            <button onClick={() => navigate('/register-driver')} className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base flex items-center justify-center gap-3 active:scale-[0.98]">
-              <Car size={18} strokeWidth={2.5} />
-              Motorista
-            </button>
-          </div>
+              <div className="grid grid-cols-2 gap-4">
+                <button onClick={() => navigate('/register')} className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base flex items-center justify-center gap-3 active:scale-[0.98]">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Passageiro
+                </button>
+                <button onClick={() => navigate('/register-driver')} className="py-5 px-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base flex items-center justify-center gap-3 active:scale-[0.98]">
+                  <Car size={18} strokeWidth={2.5} />
+                  Motorista
+                </button>
+              </div>
 
-          <button onClick={handleShare} className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]">
-            <Share2 size={18} />
-            Compartilhar App
-          </button>
+              <button onClick={handleShare} className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]">
+                <Share2 size={18} />
+                Compartilhar App
+              </button>
 
-          {apkUrl && (
-            <a href={apkUrl} download className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]">
-              <Download size={18} />
-              Baixar APK
-            </a>
+              {apkUrl && (
+                <a href={apkUrl} download className="w-full py-4 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-[0.98]">
+                  <Download size={18} />
+                  Baixar APK
+                </a>
+              )}
+
+              <button onClick={() => navigate('/test-login')} className="w-full py-3 rounded-2xl text-xs text-[#A0A0B0]/40 hover:text-[#A0A0B0] transition-all flex items-center justify-center gap-2">
+                <Bug size={14} />
+                Criar logins de teste (desenvolvedor)
+              </button>
+            </>
           )}
-
-          <button onClick={() => navigate('/test-login')} className="w-full py-3 rounded-2xl text-xs text-[#A0A0B0]/40 hover:text-[#A0A0B0] transition-all flex items-center justify-center gap-2">
-            <Bug size={14} />
-            Criar logins de teste (desenvolvedor)
-          </button>
         </motion.div>
 
         <div className="text-center py-8 mt-auto">
