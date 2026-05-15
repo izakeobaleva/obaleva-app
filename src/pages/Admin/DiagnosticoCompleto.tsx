@@ -22,133 +22,131 @@ export default function DiagnosticoCompleto() {
     setChecking(true)
     const checks: typeof results = []
 
-    // === 1. VERIFICAÇÃO DAS VARIÁVEIS DE AMBIENTE ===
+    // === 1. VERIFICACAO DAS VARIAVEIS DE AMBIENTE ===
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
     checks.push({
-      categoria: 'Variáveis de Ambiente',
+      categoria: 'Variaveis de Ambiente',
       label: 'VITE_SUPABASE_URL',
       status: supabaseUrl ? 'ok' : 'error',
       message: supabaseUrl 
-        ? `✅ URL configurada: ${supabaseUrl.substring(0, 30)}...`
-        : '❌ VITE_SUPABASE_URL não encontrada no .env'
+        ? `URL configurada: ${supabaseUrl.substring(0, 30)}...`
+        : 'VITE_SUPABASE_URL nao encontrada no .env'
     })
 
     checks.push({
-      categoria: 'Variáveis de Ambiente',
+      categoria: 'Variaveis de Ambiente',
       label: 'VITE_SUPABASE_ANON_KEY',
       status: supabaseKey ? 'ok' : 'error',
       message: supabaseKey 
-        ? `✅ Chave configurada: ${supabaseKey.substring(0, 20)}...`
-        : '❌ VITE_SUPABASE_ANON_KEY não encontrada no .env'
+        ? `Chave configurada: ${supabaseKey.substring(0, 20)}...`
+        : 'VITE_SUPABASE_ANON_KEY nao encontrada no .env'
     })
 
-    // Verificar se a chave corresponde à documentação
+    // Verificar se a chave corresponde a documentacao
     const expectedKey = 'sb_publishable_pSXJ7pWJWlX8oe_wjujHnw_FO8K_Rp7'
     if (supabaseKey && supabaseKey !== expectedKey) {
       checks.push({
-        categoria: 'Variáveis de Ambiente',
+        categoria: 'Variaveis de Ambiente',
         label: 'Conformidade da chave',
         status: 'warn',
-        message: `⚠️ A chave atual difere da documentação.\nAtual: ${supabaseKey.substring(0, 20)}...\nEsperado: ${expectedKey.substring(0, 20)}...\n\nRecomendado: atualizar o .env com a chave da documentação.`,
+        message: `A chave atual difere da documentacao.\nAtual: ${supabaseKey.substring(0, 20)}...\nEsperado: ${expectedKey.substring(0, 20)}...\n\nRecomendado: atualizar o .env com a chave da documentacao.`,
         acao: 'Atualizar .env'
       })
     }
 
-    // === 2. CONEXÃO COM SUPABASE ===
+    // === 2. CONEXAO COM SUPABASE ===
     try {
       const startTime = performance.now()
-      const { data, error } = await supabase.from('usuarios').select('id').limit(1)
+      const { error } = await supabase.from('usuarios').select('id').limit(1)
       const duration = Math.round(performance.now() - startTime)
 
       if (error) throw error
 
       checks.push({
-        categoria: 'Conexão Supabase',
+        categoria: 'Conexao Supabase',
         label: 'API Rest',
         status: 'ok',
-        message: `✅ Conexão estabelecida em ${duration}ms\nTabela "usuarios" acessível`
+        message: `Conexao estabelecida em ${duration}ms\nTabela "usuarios" acessivel`
       })
     } catch (err: any) {
       checks.push({
-        categoria: 'Conexão Supabase',
+        categoria: 'Conexao Supabase',
         label: 'API Rest',
         status: 'error',
-        message: `❌ Erro: ${err.message || 'Não foi possível conectar ao Supabase'}`,
+        message: `Erro: ${err.message || 'Nao foi possivel conectar ao Supabase'}`,
         acao: 'Verificar URL e chave no .env'
       })
     }
 
-    // === 3. AUTENTICAÇÃO (SIGNUP) ===
+    // === 3. AUTENTICACAO (SIGNUP) ===
     try {
-      const testEmail = `diag_${Date.now()}@teste.com'
+      const testEmail = `diag_${Date.now()}@teste.com`
       const { error } = await supabase.auth.signUp({
         email: testEmail,
         password: 'Teste123456',
-        options: { data: { nome_completo: 'Teste Diagnóstico', tipo: 'passageiro' } }
+        options: { data: { nome_completo: 'Teste Diagnostico', tipo: 'passageiro' } }
       })
 
       if (error) {
         if (error.message.includes('already registered') || error.message.includes('User already')) {
           checks.push({
-            categoria: 'Autenticação',
-            label: 'Cadastro de usuários',
+            categoria: 'Autenticacao',
+            label: 'Cadastro de usuarios',
             status: 'ok',
-            message: '✅ SignUp funcionando (email já existe = normal)'
+            message: 'SignUp funcionando (email ja existe = normal)'
           })
         } else {
           checks.push({
-            categoria: 'Autenticação',
-            label: 'Cadastro de usuários',
+            categoria: 'Autenticacao',
+            label: 'Cadastro de usuarios',
             status: 'error',
-            message: `❌ Erro no signUp: ${error.message}\n\nVerifique no Supabase:\nAuthentication → Providers → Email\n"Allow new users to sign up" = ATIVADO\n"Confirm email" = DESATIVADO`,
+            message: `Erro no signUp: ${error.message}\n\nVerifique no Supabase:\nAuthentication - Providers - Email\n"Allow new users to sign up" = ATIVADO\n"Confirm email" = DESATIVADO`,
             acao: 'Abrir Painel Supabase'
           })
         }
       } else {
         checks.push({
-          categoria: 'Autenticação',
-          label: 'Cadastro de usuários',
+          categoria: 'Autenticacao',
+          label: 'Cadastro de usuarios',
           status: 'ok',
-          message: '✅ SignUp funcionando perfeitamente!'
+          message: 'SignUp funcionando perfeitamente!'
         })
       }
     } catch (err: any) {
       checks.push({
-        categoria: 'Autenticação',
-        label: 'Cadastro de usuários',
+        categoria: 'Autenticacao',
+        label: 'Cadastro de usuarios',
         status: 'error',
-        message: `❌ Erro: ${err.message}`
+        message: `Erro: ${err.message}`
       })
     }
 
     // === 4. GOOGLE OAUTH ===
     try {
-      const { data: { providers }, error } = await supabase.auth.getSession()
+      await supabase.auth.getSession()
       
-      // Testar se o provedor Google está configurado
       checks.push({
         categoria: 'Google OAuth',
         label: 'Provedor Google',
         status: 'info',
-        message: `ℹ️ Não é possível verificar via API se o Google OAuth está configurado.\n\nPara verificar manualmente:\n1. Acesse: https://supabase.com\n2. Selecione o projeto "obaleva"\n3. Vá em Authentication → Providers\n4. Verifique se "Google" está ATIVADO\n\nClient ID esperado:\n350779797269-bl1q3edhanact8e3a2jm7voni7ufs08k.apps.googleusercontent.com`,
+        message: `Nao e possivel verificar via API se o Google OAuth esta configurado.\n\nPara verificar manualmente:\n1. Acesse: https://supabase.com\n2. Selecione o projeto "obaleva"\n3. Va em Authentication - Providers\n4. Verifique se "Google" esta ATIVADO\n\nClient ID esperado:\n350779797269-bl1q3edhanact8e3a2jm7voni7ufs08k.apps.googleusercontent.com`,
         acao: 'Abrir Painel Supabase'
       })
 
-      // Testar se o botão de login com Google aparece
       checks.push({
         categoria: 'Google OAuth',
-        label: 'Botão Google no Login',
+        label: 'Botao Google no Login',
         status: 'info',
-        message: '✅ O código possui botão "Continuar com Google" nas páginas:\n- Index.tsx (tela inicial)\n- Login.tsx (tela de login)\n\nEle chama: supabase.auth.signInWithOAuth({ provider: "google" })'
+        message: 'O codigo possui botao "Continuar com Google" nas paginas:\n- Index.tsx (tela inicial)\n- Login.tsx (tela de login)\n\nEle chama: supabase.auth.signInWithOAuth({ provider: "google" })'
       })
     } catch (err: any) {
       checks.push({
         categoria: 'Google OAuth',
         label: 'Provedor Google',
         status: 'error',
-        message: `❌ Erro ao verificar: ${err.message}`
+        message: `Erro ao verificar: ${err.message}`
       })
     }
 
@@ -157,7 +155,7 @@ export default function DiagnosticoCompleto() {
       categoria: 'Supabase Config',
       label: 'Redirect URLs',
       status: 'info',
-      message: `URLs que devem estar cadastradas no Supabase:\n\nAuthentication → URL Configuration:\n\nSite URL:\nhttps://www.obaleva.com.br\n\nRedirect URLs:\n• http://localhost:3000/**\n• http://localhost:32103/**\n• https://obaleva-oficial.vercel.app/**\n• https://www.obaleva.com.br/**\n• https://obaleva.com.br/**\n\nVerifique se estão todas cadastradas.`,
+      message: `URLs que devem estar cadastradas no Supabase:\n\nAuthentication - URL Configuration:\n\nSite URL:\nhttps://www.obaleva.com.br\n\nRedirect URLs:\n* http://localhost:3000/**\n* http://localhost:32103/**\n* https://obaleva-oficial.vercel.app/**\n* https://www.obaleva.com.br/**\n* https://obaleva.com.br/**\n\nVerifique se estao todas cadastradas.`,
       acao: 'Abrir Painel Supabase'
     })
 
@@ -176,10 +174,10 @@ export default function DiagnosticoCompleto() {
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Shield size={22} className="text-[#F4D03F]" />
-              Diagnóstico Completo
+              Diagnostico Completo
             </h2>
             <p className="text-xs text-[#A0A0B0] mt-1">
-              Verifica variáveis de ambiente, conexão Supabase e configurações
+              Verifica variaveis de ambiente, conexao Supabase e configuracoes
             </p>
           </div>
           <button
@@ -212,12 +210,12 @@ export default function DiagnosticoCompleto() {
         {checking ? (
           <div className="text-center py-12 text-[#A0A0B0]">
             <div className="animate-spin h-10 w-10 border-2 border-[#F4D03F] border-t-transparent rounded-full mx-auto mb-4" />
-            <p>Executando diagnósticos...</p>
+            <p>Executando diagnosticos...</p>
           </div>
         ) : (
           <div className="space-y-4">
             {/* Agrupar por categoria */}
-            {['Variáveis de Ambiente', 'Conexão Supabase', 'Autenticação', 'Google OAuth', 'Supabase Config'].map(categoria => {
+            {['Variaveis de Ambiente', 'Conexao Supabase', 'Autenticacao', 'Google OAuth', 'Supabase Config'].map(categoria => {
               const items = results.filter(r => r.categoria === categoria)
               if (items.length === 0) return null
 
@@ -282,13 +280,13 @@ export default function DiagnosticoCompleto() {
 
             {/* Google OAuth - Passo a passo */}
             <div className="mt-6 bg-[#0F0B1A] rounded-xl p-4 border border-white/10">
-              <h3 className="text-white font-bold text-sm mb-3">📋 Como verificar o Google OAuth no Supabase:</h3>
+              <h3 className="text-white font-bold text-sm mb-3">Como verificar o Google OAuth no Supabase:</h3>
               <ol className="text-[#A0A0B0] text-xs space-y-2 list-decimal list-inside">
                 <li>Acesse <strong className="text-white">https://supabase.com</strong> e faça login</li>
                 <li>Selecione o projeto <strong className="text-white">obaleva</strong></li>
-                <li>Vá em <strong className="text-white">Authentication → Providers</strong></li>
+                <li>Va em <strong className="text-white">Authentication - Providers</strong></li>
                 <li>Clique no provedor <strong className="text-white">Google</strong></li>
-                <li>Verifique se está <strong className="text-green-400">ATIVADO</strong> (toggle verde)</li>
+                <li>Verifique se esta <strong className="text-green-400">ATIVADO</strong> (toggle verde)</li>
                 <li>Confirme o <strong className="text-white">Client ID</strong>:
                   <code className="block bg-[#1A1528] text-[#F4D03F] p-2 rounded-lg mt-1 text-[10px] break-all">
                     350779797269-bl1q3edhanact8e3a2jm7voni7ufs08k.apps.googleusercontent.com
@@ -305,7 +303,7 @@ export default function DiagnosticoCompleto() {
 
             {/* .env expected values */}
             <div className="mt-4 bg-[#0F0B1A] rounded-xl p-4 border border-white/10">
-              <h3 className="text-white font-bold text-sm mb-2">📄 Valores esperados do .env:</h3>
+              <h3 className="text-white font-bold text-sm mb-2">Valores esperados do .env:</h3>
               <div className="bg-[#1A1528] rounded-lg p-3 space-y-1">
                 <code className="block text-[#F4D03F] text-xs">VITE_SUPABASE_URL=https://srhwsulafslydpiswpbf.supabase.co</code>
                 <code className="block text-[#F4D03F] text-xs">VITE_SUPABASE_ANON_KEY=sb_publishable_pSXJ7pWJWlX8oe_wjujHnw_FO8K_Rp7</code>
@@ -314,7 +312,7 @@ export default function DiagnosticoCompleto() {
                 onClick={() => {
                   const text = `VITE_SUPABASE_URL=https://srhwsulafslydpiswpbf.supabase.co\nVITE_SUPABASE_ANON_KEY=sb_publishable_pSXJ7pWJWlX8oe_wjujHnw_FO8K_Rp7`
                   navigator.clipboard.writeText(text)
-                  toast.success('Conteúdo do .env copiado!')
+                  toast.success('Conteudo do .env copiado!')
                 }}
                 className="mt-2 text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-xl transition flex items-center gap-1.5"
               >
