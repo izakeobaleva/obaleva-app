@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Shield, Star, Mail, Share2, Download, LogOut, LayoutDashboard, Home, Search, User, Menu, ArrowRight } from 'lucide-react'
+import { Car, Smartphone, Shield, Star, Mail, Share2, Download, LogOut, LayoutDashboard, Home, Search, User, Menu, ArrowRight, MapPin, Send } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
@@ -20,10 +20,17 @@ export const Index = () => {
   const [dominio, setDominio] = useState(window.location.origin)
   const [showPromoPanel, setShowPromoPanel] = useState(false)
   const [showOptions, setShowOptions] = useState(false)
+  const [compartilhandoLocal, setCompartilhandoLocal] = useState(false)
+  const watchIdRef = useRef<number | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadData()
+    return () => {
+      if (watchIdRef.current) {
+        navigator.geolocation.clearWatch(watchIdRef.current)
+      }
+    }
   }, [])
 
   async function loadData() {
@@ -59,6 +66,10 @@ export const Index = () => {
     await signOut()
     toast.success('Saiu da conta!')
     setShowOptions(false)
+    if (watchIdRef.current) {
+      navigator.geolocation.clearWatch(watchIdRef.current)
+      watchIdRef.current = null
+    }
   }
 
   const handleGoToDashboard = () => {
@@ -68,6 +79,89 @@ export const Index = () => {
     else navigate('/test-login')
   }
 
+  const handleCompartilharLocalizacao = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocalização não suportada no seu navegador')
+      return
+    }
+
+    if (compartilhandoLocal) {
+      // Parar de compartilhar
+      if (watchIdRef.current) {
+        navigator.geolocation.clearWatch(watchIdRef.current)
+        watchIdRef.current = null
+      }
+      setCompartilhandoLocal(false)
+      toast('📍 Compartilhamento de localização desativado')
+      return
+    }
+
+    // Iniciar compartilhamento
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
+        
+        if (navigator.share) {
+          navigator.share({
+            title: '📍 Minha localização - ObaLeva',
+            text: `Estou aqui! Veja minha localização em tempo real:`,
+            url: mapsUrl
+          }).catch(() => {})
+        } else {
+          navigator.clipboard.writeText(mapsUrl)
+          toast.success('📍 Link da localização copiado!')
+        }
+
+        // Monitorar localização em tempo real
+        watchIdRef.current = navigator.geolocation.watchPosition(
+          (newPos) => {
+            const { latitude: lat, longitude: lng } = newPos.coords
+            console.log('📍 Localização atualizada:', lat, lng)
+          },
+          () => {},
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+        )
+
+        setCompartilhandoLocal(true)
+        toast.success('📍 Localização compartilhada!')
+      },
+      () => {
+        toast.error('Não foi possível obter sua localização. Verifique as permissões.')
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
+
+  const handleEnviarLocalizacao = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocalização não suportada no seu navegador')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
+        const texto = `📍 Oi! Estou usando o ObaLeva. Veja onde estou:\n${mapsUrl}`
+
+        if (navigator.share) {
+          navigator.share({
+            title: '📍 Minha localização - ObaLeva',
+            text: texto,
+          }).catch(() => {})
+        } else {
+          navigator.clipboard.writeText(texto)
+          toast.success('📍 Localização copiada para compartilhar!')
+        }
+      },
+      () => {
+        toast.error('Não foi possível obter sua localização.')
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
+
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center">
       <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
@@ -75,7 +169,6 @@ export const Index = () => {
   )
 
   const promoItems = [
-    // Cartão com as informações de destaque
     {
       titulo: '🌟 Destaques do ObaLeva',
       descricao: '',
@@ -251,6 +344,29 @@ export const Index = () => {
               <p className="text-center text-sm text-[#A0A0B0] mb-3">
                 Bem-vindo, <strong className="text-white">{user.email?.split('@')[0] || 'Usuário'}</strong>
               </p>
+
+              {/* Botões de localização e compartilhamento */}
+              <div className="grid grid-cols-2 gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleCompartilharLocalizacao}
+                  className={`p-3 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1.5 ${compartilhandoLocal ? 'bg-green-500/20 border-green-500/40 text-green-400' : 'bg-[#1A1528] border-white/15 text-white hover:bg-white/5'}`}
+                >
+                  <MapPin size={20} className={compartilhandoLocal ? 'animate-pulse' : ''} />
+                  <span className="text-xs font-medium">{compartilhandoLocal ? '📍 Compartilhando' : '📍 Localização'}</span>
+                  {compartilhandoLocal && <span className="text-[10px] text-green-400/70 font-medium animate-pulse">● Ao vivo</span>}
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleEnviarLocalizacao}
+                  className="p-3 rounded-2xl border border-white/15 bg-[#1A1528] text-white hover:bg-white/5 transition-all flex flex-col items-center justify-center gap-1.5"
+                >
+                  <Send size={20} />
+                  <span className="text-xs font-medium">Compartilhar</span>
+                  <span className="text-[10px] text-[#A0A0B0]">Localização</span>
+                </motion.button>
+              </div>
 
               {/* Opções Passageiro / Motorista */}
               <div className="space-y-3">
