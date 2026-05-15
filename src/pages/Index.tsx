@@ -1,16 +1,25 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Shield, Star, Mail, Share2, Download, LogOut, LayoutDashboard } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { Car, Smartphone, Shield, Star, Mail, Share2, Download, LogOut, LayoutDashboard, Home, Search, User, Menu } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
+
+const QUICK_OPTIONS = [
+  { label: 'Início', icon: Home, color: '#F4D03F' },
+  { label: 'Buscar', icon: Search, color: '#3B82F6' },
+  { label: 'Perfil', icon: User, color: '#A855F7' },
+  { label: 'Menu', icon: Menu, color: '#22C55E' },
+]
 
 export const Index = () => {
   const navigate = useNavigate()
   const { user, loading, signOut } = useAuth()
   const [apkUrl, setApkUrl] = useState('')
   const [dominio, setDominio] = useState(window.location.origin)
+  const [showPromoPanel, setShowPromoPanel] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadData()
@@ -62,6 +71,44 @@ export const Index = () => {
     </div>
   )
 
+  const promoItems = [
+    {
+      titulo: 'Motoristas Parceiros',
+      descricao: 'Ganhe dinheiro dirigindo. Horários flexíveis, ganhos semanais.',
+      cor: '#A855F7',
+      icone: '🚗',
+      action: () => navigate('/register-driver')
+    },
+    {
+      titulo: 'ObaLeva Empresas',
+      descricao: 'Solução corporativa de mobilidade para sua empresa.',
+      cor: '#3B82F6',
+      icone: '💼',
+      action: () => navigate('/register')
+    },
+    {
+      titulo: 'Seguro Viagem',
+      descricao: 'Todas as corridas com seguro de passageiro incluso.',
+      cor: '#22C55E',
+      icone: '🛡️',
+      action: () => navigate('/register')
+    },
+    {
+      titulo: 'Indique e Ganhe',
+      descricao: 'Ganhe bônus para cada amigo que se cadastrar.',
+      cor: '#F59E0B',
+      icone: '🎁',
+      action: handleShare
+    },
+    {
+      titulo: 'ObaLeva Flash',
+      descricao: 'Entregas rápidas. Envie documentos e objetos.',
+      cor: '#EF4444',
+      icone: '⚡',
+      action: () => navigate('/register')
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col">
       {/* Fundo decorativo */}
@@ -70,7 +117,7 @@ export const Index = () => {
         <div className="absolute bottom-[-50px] right-[-50px] w-[300px] h-[300px] bg-[#6B2D8C]/25 rounded-full blur-[100px]" />
       </div>
 
-      <div className="flex-1 flex flex-col relative z-10">
+      <div className="flex-1 flex flex-col relative z-10 pb-24">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-4">
           <div className="flex items-center gap-2">
@@ -203,100 +250,154 @@ export const Index = () => {
           </div>
         </motion.div>
 
-        {/* Botões de ação */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ delay: 0.35 }}
-          className="px-6 space-y-3 max-w-sm mx-auto w-full"
-        >
-          {user ? (
-            <>
-              <p className="text-center text-sm text-[#A0A0B0] mb-2">
-                Logado como <strong className="text-white">{user.email}</strong>
-              </p>
-              <button 
-                onClick={handleGoToDashboard} 
-                className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base active:scale-[0.98] flex items-center justify-center gap-2"
+        {/* Painel de Propaganda com scroll horizontal */}
+        <div className="px-6 mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-white font-bold text-sm">Descubra o ObaLeva</h2>
+            <button 
+              onClick={() => setShowPromoPanel(!showPromoPanel)}
+              className="text-[#F4D03F] text-xs hover:underline"
+            >
+              {showPromoPanel ? 'Recolher' : 'Ver todos'}
+            </button>
+          </div>
+
+          {showPromoPanel && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4"
+            >
+              <div 
+                ref={scrollRef}
+                className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
               >
-                <LayoutDashboard size={18} />
-                Ir para o Dashboard
-              </button>
-              <button 
-                onClick={handleSignOut} 
-                className="w-full py-4 rounded-2xl font-bold border-2 border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-base active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                <LogOut size={18} />
-                Sair da conta
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                <button 
-                  onClick={handleGoogleLogin} 
-                  className="py-4 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98]"
-                >
-                  <svg width="18" height="18" viewBox="0 0 48 48">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                  </svg>
-                  Google
-                </button>
-                <button 
-                  onClick={() => navigate('/login')} 
-                  className="py-4 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98]"
-                >
-                  <Mail size={18} />
-                  E-mail
-                </button>
+                {promoItems.map((item, index) => (
+                  <motion.button
+                    key={item.titulo}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={item.action}
+                    className="bg-[#1A1528] rounded-2xl p-4 border border-white/10 hover:border-[#F4D03F]/30 transition-all flex-shrink-0 w-[200px] text-left"
+                  >
+                    <div className="text-2xl mb-2">{item.icone}</div>
+                    <h3 className="text-white font-bold text-sm mb-1">{item.titulo}</h3>
+                    <p className="text-[#A0A0B0] text-xs leading-relaxed">{item.descricao}</p>
+                  </motion.button>
+                ))}
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button 
-                  onClick={() => navigate('/register')} 
-                  className="py-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-sm flex items-center justify-center gap-2 active:scale-[0.98]"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                  Passageiro
-                </button>
-                <button 
-                  onClick={() => navigate('/register-driver')} 
-                  className="py-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-sm flex items-center justify-center gap-2 active:scale-[0.98]"
-                >
-                  <Car size={16} strokeWidth={2.5} />
-                  Motorista
-                </button>
+              
+              {/* Indicador de scroll */}
+              <div className="flex justify-center gap-1 mt-2">
+                {promoItems.map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${i === 0 ? 'bg-[#F4D03F] w-3' : 'bg-white/20'}`}
+                  />
+                ))}
               </div>
-
-              <button 
-                onClick={handleShare} 
-                className="w-full py-3 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-2 active:scale-[0.98]"
-              >
-                <Share2 size={16} />
-                Compartilhar App
-              </button>
-
-              {apkUrl && (
-                <a 
-                  href={apkUrl} 
-                  download 
-                  className="block w-full py-3 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm text-center flex items-center justify-center gap-2 active:scale-[0.98]"
-                >
-                  <Download size={16} />
-                  Baixar APK
-                </a>
-              )}
-            </>
+            </motion.div>
           )}
-        </motion.div>
+        </div>
+
+        {/* Botões de ação - substituídos pelo painel quando aberto */}
+        {!showPromoPanel && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.35 }}
+            className="px-6 space-y-3 max-w-sm mx-auto w-full"
+          >
+            {user ? (
+              <>
+                <p className="text-center text-sm text-[#A0A0B0] mb-2">
+                  Logado como <strong className="text-white">{user.email}</strong>
+                </p>
+                <button 
+                  onClick={handleGoToDashboard} 
+                  className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  <LayoutDashboard size={18} />
+                  Ir para o Dashboard
+                </button>
+                <button 
+                  onClick={handleSignOut} 
+                  className="w-full py-4 rounded-2xl font-bold border-2 border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-base active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  <LogOut size={18} />
+                  Sair da conta
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={handleGoogleLogin} 
+                    className="py-4 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98]"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 48 48">
+                      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                      <path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78l7.97-6.19z"/>
+                      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    </svg>
+                    Google
+                  </button>
+                  <button 
+                    onClick={() => { navigate('/login'); setShowPromoPanel(true) }} 
+                    className="py-4 rounded-2xl font-bold border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.98]"
+                  >
+                    <Mail size={18} />
+                    E-mail
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => navigate('/register')} 
+                    className="py-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-sm flex items-center justify-center gap-2 active:scale-[0.98]"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    Passageiro
+                  </button>
+                  <button 
+                    onClick={() => navigate('/register-driver')} 
+                    className="py-5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-sm flex items-center justify-center gap-2 active:scale-[0.98]"
+                  >
+                    <Car size={16} strokeWidth={2.5} />
+                    Motorista
+                  </button>
+                </div>
+
+                <button 
+                  onClick={handleShare} 
+                  className="w-full py-3 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm flex items-center justify-center gap-2 active:scale-[0.98]"
+                >
+                  <Share2 size={16} />
+                  Compartilhar App
+                </button>
+
+                {apkUrl && (
+                  <a 
+                    href={apkUrl} 
+                    download 
+                    className="block w-full py-3 rounded-2xl font-bold border border-white/15 text-[#A0A0B0] hover:text-white hover:bg-white/5 hover:border-white/30 transition-all text-sm text-center flex items-center justify-center gap-2 active:scale-[0.98]"
+                  >
+                    <Download size={16} />
+                    Baixar APK
+                  </a>
+                )}
+              </>
+            )}
+          </motion.div>
+        )}
 
         {/* Footer */}
         <div className="text-center py-8 mt-auto">
@@ -304,6 +405,23 @@ export const Index = () => {
             <strong className="text-white font-bold">ObaLeva</strong> &copy; 2025
           </p>
           <p className="text-xs text-[#A0A0B0]/50 mt-1">Mobilidade premium para sua cidade</p>
+        </div>
+      </div>
+
+      {/* Barra fixa inferior */}
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <div className="bg-[#1A1528]/95 backdrop-blur-xl border-t border-white/10 px-4 py-3">
+          <div className="flex justify-around items-center max-w-sm mx-auto">
+            {QUICK_OPTIONS.map((option) => (
+              <button
+                key={option.label}
+                className="flex flex-col items-center gap-1 px-4 py-1 rounded-2xl hover:bg-white/5 transition-all min-w-[60px]"
+              >
+                <option.icon size={22} color={option.color} strokeWidth={1.5} />
+                <span className="text-[#A0A0B0] text-[10px] font-medium">{option.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
