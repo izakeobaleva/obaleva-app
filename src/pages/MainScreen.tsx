@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, Chrome, Home, Search, Menu as MenuIcon, ChevronLeft, ChevronRight, Video, Megaphone, Coffee, Heart } from 'lucide-react';
 import { toast } from 'sonner';
+import MapComponent from '../components/MapComponent';
 
 // BottomNav - COM ÍCONES E TEXTOS MAIORES
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
@@ -103,47 +104,7 @@ const DiscoverBar = () => {
   );
 };
 
-// LiveMap (ALTURA AUMENTADA)
-const LiveMap = () => {
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => console.error('Erro ao obter localização:', err)
-      );
-    }
-  }, []);
-
-  return (
-    <div className="relative h-56 w-full bg-gradient-to-br from-[#2a1a3a] to-[#1a1a2e] rounded-xl flex flex-col items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-28 h-28 rounded-full bg-[#F4D03F]/10 animate-pulse" />
-        <div className="absolute w-8 h-8 rounded-full bg-[#F4D03F] flex items-center justify-center shadow-lg">
-          <MapPin size={16} className="text-black" />
-        </div>
-      </div>
-
-      <div className="absolute bottom-2 left-2 z-10 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
-        <p className="text-white text-[10px] flex items-center gap-1">
-          <MapPin size={10} className="text-[#F4D03F]" />
-          📍 {userLocation ? `${userLocation.lat.toFixed(2)}, ${userLocation.lng.toFixed(2)}` : 'Buscando...'}
-        </p>
-      </div>
-
-      <div className="absolute top-2 left-0 right-0 z-10 text-center">
-        <div className="flex items-center justify-center gap-1.5 mb-0.5">
-          <Car className="text-[#F4D03F]" size={22} />
-          <h1 className="text-xl font-bold text-white drop-shadow-lg">OBALEVA</h1>
-        </div>
-        <p className="text-white/70 text-[10px] drop-shadow-lg">Mobilidade premium para sua cidade</p>
-      </div>
-    </div>
-  );
-};
-
-// LoginScreen (TAMANHOS AUMENTADOS)
+// Tela de login (TAMANHOS AUMENTADOS)
 const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => (
   <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
     <div className="text-center mb-3">
@@ -164,26 +125,43 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
   </div>
 );
 
-// PassengerDashboard (TAMANHOS AUMENTADOS)
-const PassengerDashboard = () => (
-  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-    <div className="space-y-3">
-      <div className="flex items-center gap-2.5 bg-[#0F0B1A] p-2 rounded-lg">
-        <MapPin size={16} className="text-[#F4D03F]" />
-        <input type="text" placeholder="Onde você está?" className="flex-1 bg-transparent text-white outline-none text-sm" defaultValue="Local atual" />
-      </div>
-      <div className="flex items-center gap-2.5 bg-[#0F0B1A] p-2 rounded-lg">
-        <Navigation size={16} className="text-[#6B2D8C]" />
-        <input type="text" placeholder="Para onde vai?" className="flex-1 bg-transparent text-white outline-none text-sm" />
-      </div>
-      <button className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2">
-        <Car size={14} /> Solicitar ObaLeva
-      </button>
-    </div>
-  </div>
-);
+// Dashboard do passageiro (TAMANHOS AUMENTADOS) - com Google Maps integrado
+const PassengerDashboard = () => {
+  const [origem, setOrigem] = useState('');
+  const [destino, setDestino] = useState('');
 
-// CadastroRapido (TAMANHOS AUMENTADOS)
+  return (
+    <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2.5 bg-[#0F0B1A] p-2 rounded-lg">
+          <MapPin size={16} className="text-green-400 shrink-0" />
+          <input
+            type="text"
+            placeholder="Onde você está?"
+            className="flex-1 bg-transparent text-white outline-none text-sm placeholder-white/40"
+            value={origem}
+            onChange={(e) => setOrigem(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-2.5 bg-[#0F0B1A] p-2 rounded-lg">
+          <Navigation size={16} className="text-[#F4D03F] shrink-0" />
+          <input
+            type="text"
+            placeholder="Para onde vai?"
+            className="flex-1 bg-transparent text-white outline-none text-sm placeholder-white/40"
+            value={destino}
+            onChange={(e) => setDestino(e.target.value)}
+          />
+        </div>
+        <button className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 mt-2">
+          <Car size={14} /> Solicitar ObaLeva
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Cadastro rápido (TAMANHOS AUMENTADOS)
 const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista'; onSuccess: () => void }) => {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
@@ -263,16 +241,16 @@ export const MainScreen = () => {
 
   if (loading) return <div className="flex items-center justify-center min-h-screen text-white">Carregando...</div>;
 
-  return (
-    <div className="min-h-screen bg-[#0F0B1A]">
-      {/* CONTAINER PRINCIPAL - SEM PADDING VERTICAL */}
-      <div className="max-w-md mx-auto px-4">
-        {/* MAPA */}
-        <LiveMap />
+  // Se não estiver logado, mostra a versão antiga (sem mapa do Google)
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#0F0B1A]">
+        <div className="max-w-md mx-auto px-4">
+          {/* MAPA - Google Maps */}
+          <MapComponent height="h-56" />
 
-        {/* ÁREA DE AÇÃO - COM 4px ACIMA */}
-        <div className="mt-1">
-          {!user ? (
+          {/* ÁREA DE AÇÃO */}
+          <div className="mt-1">
             <LoginScreen
               onGoogleLogin={async () => { const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); if (error) toast.error('Erro ao logar com Google'); }}
               onEmailLogin={async (e) => { e.preventDefault(); setLoginLoading(true); const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword }); if (error) toast.error('E-mail ou senha inválidos'); setLoginLoading(false); }}
@@ -280,16 +258,60 @@ export const MainScreen = () => {
               loginPassword={loginPassword} setLoginPassword={setLoginPassword}
               loginLoading={loginLoading}
             />
-          ) : !profile ? (
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Passageiro</button>
-                <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Motorista</button>
-              </div>
-              {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
-              {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
+          </div>
+
+          {/* CARDS ROLÁVEIS */}
+          <div className="mt-1">
+            <DiscoverBar />
+          </div>
+        </div>
+
+        {/* BOTTOM NAV */}
+        <div className="mt-1">
+          <BottomNav active={activeTab} onNavigate={setActiveTab} />
+        </div>
+      </div>
+    );
+  }
+
+  // Se está logado sem perfil
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-[#0F0B1A]">
+        <div className="max-w-md mx-auto px-4">
+          <MapComponent height="h-56" />
+
+          <div className="mt-1 space-y-2">
+            <div className="flex gap-2">
+              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Passageiro</button>
+              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Motorista</button>
             </div>
-          ) : profile.tipo === 'passageiro' ? (
+            {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
+            {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
+          </div>
+
+          <div className="mt-1">
+            <DiscoverBar />
+          </div>
+        </div>
+
+        <div className="mt-1">
+          <BottomNav active={activeTab} onNavigate={setActiveTab} />
+        </div>
+      </div>
+    );
+  }
+
+  // Logado com perfil
+  return (
+    <div className="min-h-screen bg-[#0F0B1A]">
+      <div className="max-w-md mx-auto px-4">
+        {/* MAPA - Google Maps */}
+        <MapComponent height="h-56" />
+
+        {/* ÁREA DE AÇÃO */}
+        <div className="mt-1">
+          {profile.tipo === 'passageiro' ? (
             <PassengerDashboard />
           ) : profile.tipo === 'motorista' ? (
             <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
@@ -306,13 +328,13 @@ export const MainScreen = () => {
           )}
         </div>
 
-        {/* CARDS ROLÁVEIS - COM 4px ACIMA */}
+        {/* CARDS ROLÁVEIS */}
         <div className="mt-1">
           <DiscoverBar />
         </div>
       </div>
 
-      {/* BOTTOM NAV - CENTRALIZADA, COM 4px ACIMA */}
+      {/* BOTTOM NAV */}
       <div className="mt-1">
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
       </div>
