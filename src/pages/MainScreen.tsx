@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, ChevronRight, Chrome, Home, Search, Menu as MenuIcon } from 'lucide-react';
@@ -68,23 +68,52 @@ const DiscoverBar = () => {
   );
 };
 
+// Componente de mapa ao vivo (placeholder)
+const LiveMap = () => {
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (err) => console.error('Erro ao obter localização:', err)
+      );
+    }
+  }, []);
+
+  return (
+    <div className="h-64 bg-gradient-to-br from-[#2a1a3a] to-[#1a1a2e] rounded-2xl flex flex-col items-center justify-center border border-white/10 relative overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-32 h-32 rounded-full bg-[#F4D03F]/10 animate-pulse" />
+        <div className="absolute w-8 h-8 rounded-full bg-[#F4D03F] flex items-center justify-center shadow-lg">
+          <MapPin size={16} className="text-black" />
+        </div>
+      </div>
+      <p className="text-[#A0A0B0] text-sm z-10 bg-black/50 px-3 py-1 rounded-full">
+        📍 {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Buscando localização...'}
+      </p>
+      <p className="text-[#A0A0B0] text-xs mt-2 z-10">Mapa ao vivo (Google Maps em breve)</p>
+    </div>
+  );
+};
+
 // Tela de login dentro do "celular"
 const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => (
-  <div className="bg-[#1A1528] rounded-2xl p-5 border border-white/10">
+  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-5 border border-white/10 shadow-xl">
     <div className="text-center mb-4">
-      <Car className="text-[#F4D03F] w-12 h-12 mx-auto mb-2" />
-      <h2 className="text-xl font-bold text-white">Bem-vindo</h2>
-      <p className="text-[#A0A0B0] text-sm">Entre para solicitar corridas</p>
+      <Car className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
+      <h2 className="text-lg font-bold text-white">Bem-vindo</h2>
+      <p className="text-[#A0A0B0] text-xs">Entre para solicitar corridas</p>
     </div>
     <div className="space-y-3">
-      <button onClick={onGoogleLogin} className="w-full py-3 rounded-xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition">
-        <Chrome size={18} /> Entrar com Google
+      <button onClick={onGoogleLogin} className="w-full py-2.5 rounded-xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-sm">
+        <Chrome size={16} /> Entrar com Google
       </button>
-      <div className="relative my-4"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div><div className="relative flex justify-center text-xs"><span className="bg-[#1A1528] px-2 text-[#A0A0B0]">ou</span></div></div>
-      <form onSubmit={onEmailLogin} className="space-y-3">
-        <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-[#0F0B1A] border border-white/10 text-white" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
-        <input type="password" placeholder="Senha" className="w-full p-3 rounded-xl bg-[#0F0B1A] border border-white/10 text-white" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
-        <button type="submit" disabled={loginLoading} className="btn-amarelo w-full py-3 rounded-xl font-bold">Entrar com E-mail</button>
+      <div className="relative my-3"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div><div className="relative flex justify-center text-xs"><span className="bg-[#1A1528] px-2 text-[#A0A0B0]">ou</span></div></div>
+      <form onSubmit={onEmailLogin} className="space-y-2">
+        <input type="email" placeholder="E-mail" className="w-full p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white text-sm" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
+        <input type="password" placeholder="Senha" className="w-full p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white text-sm" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
+        <button type="submit" disabled={loginLoading} className="btn-amarelo w-full py-2.5 rounded-xl font-bold text-sm">Entrar com E-mail</button>
       </form>
     </div>
   </div>
@@ -92,21 +121,18 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
 
 // Dashboard do passageiro (dentro do "celular")
 const PassengerDashboard = () => (
-  <div className="bg-[#1A1528] rounded-2xl overflow-hidden border border-white/10">
-    <div className="h-48 bg-gray-800 flex items-center justify-center">
-      <p className="text-[#A0A0B0] text-sm">🗺️ Mapa ao vivo (Google Maps em breve)</p>
-    </div>
-    <div className="p-4 space-y-3">
-      <div className="flex items-center gap-3 bg-[#0F0B1A] p-3 rounded-xl">
-        <MapPin size={20} className="text-[#F4D03F]" />
-        <input type="text" placeholder="Onde você está?" className="flex-1 bg-transparent text-white outline-none" defaultValue="Local atual" />
+  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+    <div className="space-y-3">
+      <div className="flex items-center gap-3 bg-[#0F0B1A] p-2.5 rounded-xl">
+        <MapPin size={18} className="text-[#F4D03F]" />
+        <input type="text" placeholder="Onde você está?" className="flex-1 bg-transparent text-white outline-none text-sm" defaultValue="Local atual" />
       </div>
-      <div className="flex items-center gap-3 bg-[#0F0B1A] p-3 rounded-xl">
-        <Navigation size={20} className="text-[#6B2D8C]" />
-        <input type="text" placeholder="Para onde vai?" className="flex-1 bg-transparent text-white outline-none" />
+      <div className="flex items-center gap-3 bg-[#0F0B1A] p-2.5 rounded-xl">
+        <Navigation size={18} className="text-[#6B2D8C]" />
+        <input type="text" placeholder="Para onde vai?" className="flex-1 bg-transparent text-white outline-none text-sm" />
       </div>
-      <button className="btn-amarelo w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-        <Car size={18} /> Solicitar ObaLeva
+      <button className="btn-amarelo w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+        <Car size={16} /> Solicitar ObaLeva
       </button>
     </div>
   </div>
@@ -149,16 +175,16 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
   };
 
   return (
-    <div className="bg-[#1A1528] rounded-2xl p-5 border border-white/10">
-      <h2 className="text-xl font-bold text-white mb-4">Cadastro {tipo === 'passageiro' ? 'Passageiro' : 'Motorista'}</h2>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <input placeholder="Nome completo" className="w-full p-3 rounded-xl bg-[#0F0B1A] border border-white/10 text-white" value={nome} onChange={e => setNome(e.target.value)} required />
-        <input placeholder="CPF" className="w-full p-3 rounded-xl bg-[#0F0B1A] border border-white/10 text-white" value={cpf} onChange={e => setCpf(e.target.value)} required />
-        <input placeholder="Telefone" className="w-full p-3 rounded-xl bg-[#0F0B1A] border border-white/10 text-white" value={telefone} onChange={e => setTelefone(e.target.value)} required />
-        <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-[#0F0B1A] border border-white/10 text-white" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Senha" className="w-full p-3 rounded-xl bg-[#0F0B1A] border border-white/10 text-white" value={password} onChange={e => setPassword(e.target.value)} required />
-        {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-3 rounded-xl bg-[#0F0B1A] border border-white/10 text-white" value={placa} onChange={e => setPlaca(e.target.value)} required />}
-        <button type="submit" disabled={loading} className="btn-amarelo w-full py-3 rounded-xl font-bold">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
+    <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+      <h2 className="text-white font-bold text-base mb-3">Cadastro {tipo === 'passageiro' ? 'Passageiro' : 'Motorista'}</h2>
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <input placeholder="Nome completo" className="w-full p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white text-sm" value={nome} onChange={e => setNome(e.target.value)} required />
+        <input placeholder="CPF" className="w-full p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white text-sm" value={cpf} onChange={e => setCpf(e.target.value)} required />
+        <input placeholder="Telefone" className="w-full p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+        <input type="email" placeholder="E-mail" className="w-full p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
+        <input type="password" placeholder="Senha" className="w-full p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white text-sm" value={password} onChange={e => setPassword(e.target.value)} required />
+        {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-2.5 rounded-xl bg-[#0F0B1A] border border-white/10 text-white text-sm" value={placa} onChange={e => setPlaca(e.target.value)} required />}
+        <button type="submit" disabled={loading} className="btn-amarelo w-full py-2.5 rounded-xl font-bold text-sm">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>
     </div>
   );
@@ -202,41 +228,47 @@ export const MainScreen = () => {
 
       {/* CONTEÚDO PRINCIPAL (SIMULA UM CELULAR) */}
       <div className="max-w-md mx-auto p-4">
-        {!user ? (
-          <LoginScreen
-            onGoogleLogin={handleGoogleLogin}
-            onEmailLogin={handleEmailLogin}
-            loginEmail={loginEmail}
-            setLoginEmail={setLoginEmail}
-            loginPassword={loginPassword}
-            setLoginPassword={setLoginPassword}
-            loginLoading={loginLoading}
-          />
-        ) : !profile ? (
-          <div className="space-y-4">
-            <div className="flex gap-3">
-              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-3 rounded-xl border border-white/20 text-white bg-[#1A1528]">Passageiro</button>
-              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-3 rounded-xl border border-white/20 text-white bg-[#1A1528]">Motorista</button>
+        {/* MAPA AO VIVO (SEMPRE FIXO) */}
+        <LiveMap />
+
+        {/* ÁREA DE AÇÃO (DENTRO DO CELULAR) - ESPAÇO INTERNO */}
+        <div className="mt-3">
+          {!user ? (
+            <LoginScreen
+              onGoogleLogin={handleGoogleLogin}
+              onEmailLogin={handleEmailLogin}
+              loginEmail={loginEmail}
+              setLoginEmail={setLoginEmail}
+              loginPassword={loginPassword}
+              setLoginPassword={setLoginPassword}
+              loginLoading={loginLoading}
+            />
+          ) : !profile ? (
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2.5 rounded-xl border border-white/20 text-white bg-[#1A1528] text-sm">Passageiro</button>
+                <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2.5 rounded-xl border border-white/20 text-white bg-[#1A1528] text-sm">Motorista</button>
+              </div>
+              {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
+              {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
             </div>
-            {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
-            {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
-          </div>
-        ) : profile.tipo === 'passageiro' ? (
-          <PassengerDashboard />
-        ) : profile.tipo === 'motorista' ? (
-          <div className="bg-[#1A1528] rounded-2xl p-5 border border-white/10 text-center">
-            <Truck className="text-[#F4D03F] w-12 h-12 mx-auto mb-2" />
-            <h2 className="text-xl font-bold text-white">Painel do Motorista</h2>
-            <p className="text-[#A0A0B0] text-sm">Aguardando aprovação do administrador</p>
-            <button className="mt-3 px-6 py-2 rounded-full bg-green-600 text-white">🟢 Ficar Online</button>
-          </div>
-        ) : (
-          <div className="bg-[#1A1528] rounded-2xl p-5 border border-white/10 text-center">
-            <Shield className="text-[#F4D03F] w-12 h-12 mx-auto mb-2" />
-            <h2 className="text-xl font-bold text-white">Painel Administrativo</h2>
-            <p className="text-[#A0A0B0] text-sm">Gerencie motoristas, passageiros e corridas</p>
-          </div>
-        )}
+          ) : profile.tipo === 'passageiro' ? (
+            <PassengerDashboard />
+          ) : profile.tipo === 'motorista' ? (
+            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+              <Truck className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
+              <h2 className="text-white font-bold text-base">Painel do Motorista</h2>
+              <p className="text-[#A0A0B0] text-xs">Aguardando aprovação do administrador</p>
+              <button className="mt-3 px-5 py-1.5 rounded-full bg-green-600 text-white text-sm">🟢 Ficar Online</button>
+            </div>
+          ) : (
+            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+              <Shield className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
+              <h2 className="text-white font-bold text-base">Painel Administrativo</h2>
+              <p className="text-[#A0A0B0] text-xs">Gerencie motoristas, passageiros e corridas</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* DISCOVER BAR (SEGUNDA BARRA FIXA INFERIOR) */}
