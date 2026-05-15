@@ -131,7 +131,7 @@ export default function DiagnosticoCompleto() {
         categoria: 'Google OAuth',
         label: 'Provedor Google',
         status: 'info',
-        message: `Nao e possivel verificar via API se o Google OAuth esta configurado.\n\nPara verificar manualmente:\n1. Acesse: https://supabase.com\n2. Selecione o projeto "obaleva"\n3. Va em Authentication - Providers\n4. Verifique se "Google" esta ATIVADO\n\nClient ID esperado:\n350779797269-bl1q3edhanact8e3a2jm7voni7ufs08k.apps.googleusercontent.com`,
+        message: `Nao e possivel verificar via API se o Google OAuth esta configurado.\n\nPara verificar manualmente:\n1. Acesse: https://supabase.com\n2. Selecione o projeto "obaleva"\n3. Va em Authentication - Providers\n4. Verifique se "Google" esta ATIVADO\n\nO Client ID e Client Secret estao salvos no painel do Supabase.`,
         acao: 'Abrir Painel Supabase'
       })
 
@@ -278,7 +278,7 @@ export default function DiagnosticoCompleto() {
               )
             })}
 
-            {/* Google OAuth - Passo a passo */}
+            {/* Google OAuth - Instrucoes */}
             <div className="mt-6 bg-[#0F0B1A] rounded-xl p-4 border border-white/10">
               <h3 className="text-white font-bold text-sm mb-3">Como verificar o Google OAuth no Supabase:</h3>
               <ol className="text-[#A0A0B0] text-xs space-y-2 list-decimal list-inside">
@@ -287,16 +287,7 @@ export default function DiagnosticoCompleto() {
                 <li>Va em <strong className="text-white">Authentication - Providers</strong></li>
                 <li>Clique no provedor <strong className="text-white">Google</strong></li>
                 <li>Verifique se esta <strong className="text-green-400">ATIVADO</strong> (toggle verde)</li>
-                <li>Confirme o <strong className="text-white">Client ID</strong>:
-                  <code className="block bg-[#1A1528] text-[#F4D03F] p-2 rounded-lg mt-1 text-[10px] break-all">
-                    350779797269-bl1q3edhanact8e3a2jm7voni7ufs08k.apps.googleusercontent.com
-                  </code>
-                </li>
-                <li>Confirme o <strong className="text-white">Client Secret</strong>:
-                  <code className="block bg-[#1A1528] text-[#F4D03F] p-2 rounded-lg mt-1 text-[10px] break-all">
-                    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
-                  </code>
-                </li>
+                <li>O <strong className="text-white">Client ID</strong> e <strong className="text-white">Client Secret</strong> estao salvos no painel do Supabase. Consulte a documentacao do projeto para obte-los.</li>
                 <li>Clique em <strong className="text-white">Save</strong> se alterou algo</li>
               </ol>
             </div>
