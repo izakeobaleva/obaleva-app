@@ -75,6 +75,15 @@ export const Index = () => {
   )
 
   const promoItems = [
+    // Cartão com as informações de destaque
+    {
+      titulo: '🌟 Destaques do ObaLeva',
+      descricao: '',
+      cor: '#F4D03F',
+      icone: '⭐',
+      type: 'highlight' as const,
+      action: () => {}
+    },
     {
       titulo: 'Motoristas Parceiros',
       descricao: 'Ganhe dinheiro dirigindo. Horários flexíveis, ganhos semanais.',
@@ -230,29 +239,6 @@ export const Index = () => {
           </motion.div>
         </div>
 
-        {/* Benefícios */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ delay: 0.3 }}
-          className="px-6 mb-6"
-        >
-          <div className="flex justify-center gap-3">
-            <div className="flex items-center gap-1.5 bg-[#1A1528]/80 rounded-full px-3 py-1.5 border border-white/10 shadow-sm">
-              <Shield size={14} className="text-green-400 shrink-0" />
-              <span className="text-white text-xs font-medium">Seguro</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-[#1A1528]/80 rounded-full px-3 py-1.5 border border-white/10 shadow-sm">
-              <Star size={14} className="text-[#F4D03F] shrink-0" />
-              <span className="text-white text-xs font-medium">4.8★ Avaliação</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-[#1A1528]/80 rounded-full px-3 py-1.5 border border-white/10 shadow-sm">
-              <Smartphone size={14} className="text-blue-400 shrink-0" />
-              <span className="text-white text-xs font-medium">Rápido</span>
-            </div>
-          </div>
-        </motion.div>
-
         {/* Botões de ação */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
@@ -401,7 +387,31 @@ export const Index = () => {
                 ref={scrollRef}
                 className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide"
               >
-                {promoItems.map((item, index) => (
+                {/* Cartão de destaque com Seguro, Avaliação e Rápido */}
+                <div className="bg-gradient-to-br from-[#1A1528] to-[#0F0B1A] rounded-2xl p-4 border border-[#F4D03F]/20 flex-shrink-0 w-[200px]">
+                  <div className="text-center mb-2">
+                    <span className="text-2xl">⭐</span>
+                    <h3 className="text-white font-bold text-sm mt-1">Destaques</h3>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 bg-green-500/10 rounded-xl px-3 py-2 border border-green-500/20">
+                      <Shield size={16} className="text-green-400 shrink-0" />
+                      <span className="text-white text-xs font-medium">Seguro</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-yellow-500/10 rounded-xl px-3 py-2 border border-yellow-500/20">
+                      <Star size={16} className="text-[#F4D03F] shrink-0" />
+                      <span className="text-white text-xs font-medium">4.8★ Avaliação</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-blue-500/10 rounded-xl px-3 py-2 border border-blue-500/20">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                        <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                      </svg>
+                      <span className="text-white text-xs font-medium">Rápido</span>
+                    </div>
+                  </div>
+                </div>
+
+                {promoItems.slice(1).map((item, index) => (
                   <motion.button
                     key={item.titulo}
                     initial={{ opacity: 0, x: -20 }}
