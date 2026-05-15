@@ -60,6 +60,7 @@ export function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/update-password" element={<UpdatePassword />} />
       <Route path="/test-login" element={<TestLogin />} />
+      <Route path="/landing" element={<Divulgacao />} />
       <Route path="/divulgar" element={<Divulgacao />} />
       <Route path="/app-divulgacao" element={<AppDivulgacao />} />
 
