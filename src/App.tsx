@@ -59,10 +59,12 @@ export function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/update-password" element={<UpdatePassword />} />
       <Route path="/test-login" element={<TestLogin />} />
+      <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/landing" element={<Divulgacao />} />
       <Route path="/divulgar" element={<Divulgacao />} />
       <Route path="/app-divulgacao" element={<AppDivulgacao />} />
-      <Route path="/admin-login" element={<AdminLogin />} />
+
+      {/* Página inicial - sempre aberta, seja logado ou não */}
       <Route path="/" element={<Index />} />
 
       {/* Admin */}
@@ -72,12 +74,15 @@ export function AppRoutes() {
         </ProtectedRoute>
       } />
 
-      {/* Rotas protegidas */}
-      <Route path="/" element={
-        <ProtectedRoute allowedTypes={['passageiro', 'motorista']}>
-          {tipo === 'passageiro' ? <PassengerDashboard /> : <DriverDashboard />}
-        </ProtectedRoute>
-      } />
+      {/* Dashboard do passageiro */}
+      {user && tipo === 'passageiro' && (
+        <Route path="/passenger" element={<PassengerDashboard />} />
+      )}
+
+      {/* Dashboard do motorista */}
+      {user && tipo === 'motorista' && (
+        <Route path="/driver" element={<DriverDashboard />} />
+      )}
       
       <Route path="/trips" element={
         <ProtectedRoute allowedTypes={['passageiro']}>

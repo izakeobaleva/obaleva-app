@@ -57,6 +57,11 @@ export function PassengerDashboard() {
     [origem, destino]
   );
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   const solicitarCorrida = useCallback(async () => {
     if (!destino) {
       toast.error('Digite o destino');
@@ -78,7 +83,7 @@ export function PassengerDashboard() {
       setOrigem('');
       setDestino('');
       requestCache.delete(`trips_${user?.id}`);
-      fetchRecentTrips(); // Recarrega
+      fetchRecentTrips();
     } catch (err: any) {
       toast.error('Erro ao solicitar: ' + err.message);
     }
@@ -100,7 +105,7 @@ export function PassengerDashboard() {
         <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-2xl font-bold bg-gradient-to-r from-[#F4D03F] to-amber-400 bg-clip-text text-transparent" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</motion.h1>
         <div className="flex gap-2">
           <button onClick={() => navigate('/profile')} className="btn-outline-dark px-4 py-2 text-sm">Perfil</button>
-          <button onClick={signOut} className="btn-outline-dark px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 border-red-500/30">
+          <button onClick={handleSignOut} className="btn-outline-dark px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 border-red-500/30">
             <LogOut size={16} />
           </button>
         </div>
