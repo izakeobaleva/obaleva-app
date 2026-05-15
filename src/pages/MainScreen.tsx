@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, ChevronRight, Chrome, Home, Search, Menu as MenuIcon, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
+import { DiscoverBar } from '../components/DiscoverBar';
 
 // ==================== COMPONENTES INTERNOS ====================
 
@@ -32,37 +33,6 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
             </button>
           );
         })}
-      </div>
-    </div>
-  );
-};
-
-// DiscoverBar (segunda barra fixa inferior) - ACIMA DA BOTTOMNAV
-const DiscoverBar = () => {
-  const cards = [
-    { icon: <Gift size={20} />, title: "1ª corrida grátis", description: "Até R$ 20 de desconto", color: "#F4D03F" },
-    { icon: <Shield size={20} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#6B2D8C" },
-  ];
-  return (
-    <div className="fixed bottom-16 left-0 right-0 z-40">
-      <div className="max-w-md mx-auto px-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-white font-bold text-lg">Descubra o ObaLeva</h3>
-          <button className="flex items-center gap-1 text-[#F4D03F] text-sm font-medium">Ver todos <ChevronRight size={16} /></button>
-        </div>
-        <div className="flex gap-4">
-          {cards.map((card, idx) => (
-            <div key={idx} className="flex-1 bg-[#1A1528] rounded-2xl p-3 border border-white/10 flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center`} style={{ backgroundColor: `${card.color}20` }}>
-                <div style={{ color: card.color }}>{card.icon}</div>
-              </div>
-              <div>
-                <h4 className="text-white font-semibold text-sm">{card.title}</h4>
-                <p className="text-[#A0A0B0] text-xs">{card.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
