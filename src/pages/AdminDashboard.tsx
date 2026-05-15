@@ -21,6 +21,7 @@ import LogoEditor from './Admin/LogoEditor'
 import DominioConfig from './Admin/DominioConfig'
 import DiagnosticoSupabase from './Admin/DiagnosticoSupabase'
 import DiagnosticoCompleto from './Admin/DiagnosticoCompleto'
+import DiagnosticoAutomatico from './Admin/DiagnosticoAutomatico'
 
 function AdminDashboard() {
   const { signOut, profile } = useAuth()
@@ -53,6 +54,7 @@ function AdminDashboard() {
     { id: 'logo', label: 'Logo', icon: Image },
     { id: 'dominio', label: 'Domínio', icon: Globe },
     { id: 'diagnostico', label: 'Diagnóstico', icon: ShieldCheck },
+    { id: 'diagnostico-automatico', label: 'Auto Diagnóstico', icon: Activity },
     { id: 'diagnostico-completo', label: 'Diagnóstico Completo', icon: Activity },
     { id: 'suporte', label: 'Suporte', icon: MessageSquare },
   ]
@@ -74,6 +76,7 @@ function AdminDashboard() {
       case 'logo': return <LogoEditor />
       case 'dominio': return <DominioConfig />
       case 'diagnostico': return <DiagnosticoSupabase />
+      case 'diagnostico-automatico': return <DiagnosticoAutomatico />
       case 'diagnostico-completo': return <DiagnosticoCompleto />
       case 'suporte': return <Suporte />
       default: return <AdminFullDashboard />
