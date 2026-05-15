@@ -1,4 +1,20 @@
-<code>  return (
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabaseClient';
+import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, Chrome, Home, Search, Menu as MenuIcon, LogOut, ChevronLeft, ChevronRight, Video, Megaphone, Coffee, Heart } from 'lucide-react';
+import { toast } from 'sonner';
+
+// ==================== COMPONENTES INTERNOS ====================
+
+// BottomNav - RESPONSIVA DENTRO DO max-w-md
+const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
+  const tabs = [
+    { id: 'home', label: 'Início', icon: Home },
+    { id: 'buscar', label: 'Buscar', icon: Search },
+    { id: 'perfil', label: 'Perfil', icon: User },
+    { id: 'menu', label: 'Menu', icon: MenuIcon },
+  ];
+  return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#1A1528] border-t border-white/10 z-50 flex justify-center">
       <div className="w-full max-w-md px-4 py-2">
         <div className="flex justify-between items-center">
@@ -20,4 +36,279 @@
         </div>
       </div>
     </div>
-  );</code>
+  );
+};
+
+// DiscoverBar (cards roláveis)
+const DiscoverBar = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = scrollRef.current.clientWidth * 0.8;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const cards = [
+    { icon: <Gift size={20} />, title: "1ª corrida grátis", description: "Até R$ 20 de desconto", color: "#F4D03F", type: "promo" },
+    { icon: <Shield size={20} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#6B2D8C", type: "info" },
+    { icon: <Star size={20} />, title: "Avaliação 4.8★", description: "Motoristas nota 10", color: "#F4D03F", type: "info" },
+    { icon: <Zap size={20} />, title: "Rápido", description: "Chegada em minutos", color: "#9B59B6", type: "info" },
+    { icon: <Video size={20} />, title: "Como funciona?", description: "Assista ao vídeo", color: "#F4D03F", type: "video" },
+    { icon: <Megaphone size={20} />, title: "Indique e ganhe", description: "R$ 10 de crédito", color: "#6B2D8C", type: "promo" },
+    { icon: <Coffee size={20} />, title: "Parceiros", description: "Descontos exclusivos", color: "#9B59B6", type: "promo" },
+    { icon: <Heart size={20} />, title: "ObaLeva Solidário", description: "Doação por corrida", color: "#F4D03F", type: "promo" },
+  ];
+
+  return (
+    <div className="mt-4">
+      <div className="relative">
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-1 backdrop-blur-sm hover:bg-black/80 transition"
+        >
+          <ChevronLeft size={16} className="text-white" />
+        </button>
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto scrollbar-hide gap-2.5 snap-x snap-mandatory"
+          style={{ scrollSnapType: 'x mandatory' }}
+        >
+          {cards.map((card, idx) => (
+            <div
+              key={idx}
+              className="min-w-[calc(50%-5px)] max-w-[calc(50%-5px)] snap-start bg-[#1A1528] rounded-xl p-2.5 border border-white/10 hover:border-[#F4D03F]/50 transition-all cursor-pointer"
+            >
+              <div className="flex items-start gap-2.5">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0`} style={{ backgroundColor: `${card.color}20` }}>
+                  <div style={{ color: card.color }}>{card.icon}</div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-white font-semibold text-xs">{card.title}</h4>
+                  <p className="text-[#A0A0B0] text-[10px] mt-0.5 leading-tight">{card.description}</p>
+                  {card.type === 'video' && <div className="mt-1 text-[#F4D03F] text-[9px]">▶️ Assistir</div>}
+                  {card.type === 'promo' && <div className="mt-1 inline-block bg-[#F4D03F]/20 text-[#F4D03F] text-[8px] px-1.5 py-0.5 rounded-full">Promoção</div>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 rounded-full p-1 backdrop-blur-sm hover:bg-black/80 transition"
+        >
+          <ChevronRight size={16} className="text-white" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Componente de mapa ao vivo
+const LiveMap = () => {
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (err) => console.error('Erro ao obter localização:', err)
+      );
+    }
+  }, []);
+
+  return (
+    <div className="relative h-56 w-full bg-gradient-to-br from-[#2a1a3a] to-[#1a1a2e] rounded-xl flex flex-col items-center justify-center overflow-hidden mb-4">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-28 h-28 rounded-full bg-[#F4D03F]/10 animate-pulse" />
+        <div className="absolute w-7 h-7 rounded-full bg-[#F4D03F] flex items-center justify-center shadow-lg">
+          <MapPin size={14} className="text-black" />
+        </div>
+      </div>
+
+      <div className="absolute bottom-2 left-2 z-10 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
+        <p className="text-white text-[9px] flex items-center gap-1">
+          <MapPin size={9} className="text-[#F4D03F]" />
+          📍 {userLocation ? `${userLocation.lat.toFixed(2)}, ${userLocation.lng.toFixed(2)}` : 'Buscando...'}
+        </p>
+      </div>
+
+      <div className="absolute top-2 left-0 right-0 z-10 text-center">
+        <div className="flex items-center justify-center gap-1.5 mb-0.5">
+          <Car className="text-[#F4D03F]" size={20} />
+          <h1 className="text-lg font-bold text-white drop-shadow-lg">OBALEVA</h1>
+        </div>
+        <p className="text-white/70 text-[9px] drop-shadow-lg">Mobilidade premium para sua cidade</p>
+      </div>
+    </div>
+  );
+};
+
+// Tela de login
+const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => (
+  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+    <div className="text-center mb-3">
+      <h2 className="text-base font-bold text-white">Bem-vindo</h2>
+      <p className="text-[#A0A0B0] text-[11px]">Entre para solicitar corridas</p>
+    </div>
+    <div className="space-y-2.5">
+      <button onClick={onGoogleLogin} className="w-full py-2 rounded-lg border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition text-sm">
+        <Chrome size={16} /> Entrar com Google
+      </button>
+      <div className="relative my-2"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div><div className="relative flex justify-center text-[9px]"><span className="bg-[#1A1528] px-2 text-[#A0A0B0]">ou</span></div></div>
+      <form onSubmit={onEmailLogin} className="space-y-2">
+        <input type="email" placeholder="E-mail" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
+        <input type="password" placeholder="Senha" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
+        <button type="submit" disabled={loginLoading} className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm">Entrar</button>
+      </form>
+    </div>
+  </div>
+);
+
+// Dashboard do passageiro
+const PassengerDashboard = () => (
+  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+    <div className="space-y-2.5">
+      <div className="flex items-center gap-2.5 bg-[#0F0B1A] p-2 rounded-lg">
+        <MapPin size={16} className="text-[#F4D03F]" />
+        <input type="text" placeholder="Onde você está?" className="flex-1 bg-transparent text-white outline-none text-sm" defaultValue="Local atual" />
+      </div>
+      <div className="flex items-center gap-2.5 bg-[#0F0B1A] p-2 rounded-lg">
+        <Navigation size={16} className="text-[#6B2D8C]" />
+        <input type="text" placeholder="Para onde vai?" className="flex-1 bg-transparent text-white outline-none text-sm" />
+      </div>
+      <button className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2">
+        <Car size={14} /> Solicitar ObaLeva
+      </button>
+    </div>
+  </div>
+);
+
+// Cadastro rápido
+const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista'; onSuccess: () => void }) => {
+  const [nome, setNome] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [telefone, setTelefone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [placa, setPlaca] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data: auth, error } = await supabase.auth.signUp({ email, password, options: { data: { nome_completo: nome, tipo } } });
+      if (error) throw error;
+      if (!auth.user) throw new Error('Erro ao criar usuário');
+      await supabase.from('usuarios').insert({ id: auth.user.id, nome_completo: nome, cpf, telefone, email, tipo });
+      if (tipo === 'passageiro') await supabase.from('passageiros').insert({ id: auth.user.id });
+      else await supabase.from('motoristas').insert({ id: auth.user.id, status: 'pendente', dados_veiculo: { placa, modelo: 'Não informado', ano: '2024', cor: 'Não informado' } });
+      toast.success('Cadastro realizado! Faça login.');
+      onSuccess();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+      <h2 className="text-white font-bold text-sm mb-3">Cadastro {tipo === 'passageiro' ? 'Passageiro' : 'Motorista'}</h2>
+      <form onSubmit={handleSubmit} className="space-y-2.5">
+        <input placeholder="Nome completo" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={nome} onChange={e => setNome(e.target.value)} required />
+        <input placeholder="CPF" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={cpf} onChange={e => setCpf(e.target.value)} required />
+        <input placeholder="Telefone" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+        <input type="email" placeholder="E-mail" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
+        <input type="password" placeholder="Senha" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={password} onChange={e => setPassword(e.target.value)} required />
+        {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={placa} onChange={e => setPlaca(e.target.value)} required />}
+        <button type="submit" disabled={loading} className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
+      </form>
+    </div>
+  );
+};
+
+// ==================== TELA PRINCIPAL ====================
+
+export const MainScreen = () => {
+  const { user, profile, loading } = useAuth();
+  const [activeTab, setActiveTab] = useState('home');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    let inactivityTimer: NodeJS.Timeout;
+    const resetTimer = () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => { if (user) handleLogout(); }, 5 * 60 * 1000);
+    };
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    window.addEventListener('click', resetTimer);
+    resetTimer();
+    return () => {
+      clearTimeout(inactivityTimer);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('click', resetTimer);
+    };
+  }, [user]);
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen text-white">Carregando...</div>;
+
+  return (
+    <div className="min-h-screen bg-[#0F0B1A] pb-16">
+      {/* CONTAINER PRINCIPAL (TELA DE CELULAR) */}
+      <div className="max-w-md mx-auto px-4 pt-3">
+        <LiveMap />
+        
+        {!user ? (
+          <LoginScreen
+            onGoogleLogin={async () => { const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); if (error) toast.error('Erro ao logar com Google'); }}
+            onEmailLogin={async (e) => { e.preventDefault(); setLoginLoading(true); const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword }); if (error) toast.error('E-mail ou senha inválidos'); setLoginLoading(false); }}
+            loginEmail={loginEmail} setLoginEmail={setLoginEmail}
+            loginPassword={loginPassword} setLoginPassword={setLoginPassword}
+            loginLoading={loginLoading}
+          />
+        ) : !profile ? (
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Passageiro</button>
+              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Motorista</button>
+            </div>
+            {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
+            {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
+          </div>
+        ) : profile.tipo === 'passageiro' ? (
+          <PassengerDashboard />
+        ) : profile.tipo === 'motorista' ? (
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
+            <Truck className="text-[#F4D03F] w-8 h-8 mx-auto mb-1.5" />
+            <h2 className="text-white font-bold text-sm">Painel do Motorista</h2>
+            <p className="text-[#A0A0B0] text-[10px]">Aguardando aprovação</p>
+            <button className="mt-2.5 px-4 py-1 rounded-full bg-green-600 text-white text-[10px]">🟢 Online</button>
+          </div>
+        ) : (
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
+            <Shield className="text-[#F4D03F] w-8 h-8 mx-auto mb-1.5" />
+            <h2 className="text-white font-bold text-sm">Painel Administrativo</h2>
+          </div>
+        )}
+
+        <DiscoverBar />
+      </div>
+
+      {/* BOTTOM NAV - CENTRALIZADA DENTRO DO max-w-md COM flex justify-center */}
+      <BottomNav active={activeTab} onNavigate={setActiveTab} />
+    </div>
+  );
+};
