@@ -26,7 +26,7 @@ const NavButton = memo(({ tab, isActive, onClick }: { tab: any; isActive: boolea
     whileTap={{ scale: 0.9 }}
     onClick={onClick}
     className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${
-      isActive ? 'text-roxo-principal' : 'text-texto-secundario'
+      isActive ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'
     }`}
     style={{ minHeight: '56px', minWidth: '56px' }}
   >
@@ -35,7 +35,7 @@ const NavButton = memo(({ tab, isActive, onClick }: { tab: any; isActive: boolea
     {isActive && (
       <motion.div
         layoutId="bottomNavIndicator"
-        className="w-1 h-1 rounded-full bg-amarelo-principal mt-1"
+        className="w-1 h-1 rounded-full bg-[#F4D03F] mt-1"
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       />
     )}
