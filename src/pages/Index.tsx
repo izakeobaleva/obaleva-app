@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Car, Smartphone, Shield, Star, Mail, Bug, Share2, Download, LogOut } from 'lucide-react'
+import { Car, Smartphone, Shield, Star, Mail, Bug, Share2, Download, LogOut, LayoutDashboard } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
@@ -49,6 +49,13 @@ export const Index = () => {
     toast.success('Saiu da conta!')
   }
 
+  const handleGoToDashboard = () => {
+    const tipo = user?.user_metadata?.tipo
+    if (tipo === 'passageiro') navigate('/passenger')
+    else if (tipo === 'motorista') navigate('/driver')
+    else navigate('/test-login')
+  }
+
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center">
       <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
@@ -63,18 +70,23 @@ export const Index = () => {
       </div>
 
       <div className="flex-1 flex flex-col relative z-10">
-        {/* Header com botão de sair quando logado */}
+        {/* Header com botões de navegação */}
         <div className="flex items-center justify-between px-6 pt-4">
           <div />
-          {user && (
-            <button
-              onClick={handleSignOut}
-              className="px-4 py-2 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm flex items-center gap-2"
-            >
-              <LogOut size={16} />
-              Sair
-            </button>
-          )}
+          <div className="flex gap-2">
+            {user && (
+              <>
+                <button onClick={handleGoToDashboard} className="btn-outline-dark px-4 py-2 text-sm flex items-center gap-2">
+                  <LayoutDashboard size={16} />
+                  Dashboard
+                </button>
+                <button onClick={handleSignOut} className="px-4 py-2 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-sm flex items-center gap-2">
+                  <LogOut size={16} />
+                  Sair
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="pt-4 pb-6 px-6">
@@ -144,7 +156,8 @@ export const Index = () => {
               <p className="text-center text-sm text-[#A0A0B0] mb-2">
                 Logado como <strong className="text-white">{user.email}</strong>
               </p>
-              <button onClick={() => navigate('/')} className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base active:scale-[0.98]">
+              <button onClick={handleGoToDashboard} className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-xl hover:shadow-[#F4D03F]/20 transition-all text-base active:scale-[0.98]">
+                <LayoutDashboard size={18} className="inline mr-2" />
                 Ir para o Dashboard
               </button>
               <button onClick={handleSignOut} className="w-full py-4 rounded-2xl font-bold border-2 border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all text-base active:scale-[0.98]">

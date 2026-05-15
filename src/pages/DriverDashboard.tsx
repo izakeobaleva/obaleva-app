@@ -28,6 +28,11 @@ export function DriverDashboard() {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   useEffect(() => {
     const channel = supabase
       .channel('novas-corridas-driver')
@@ -137,8 +142,8 @@ export function DriverDashboard() {
         </div>
         <div className="flex gap-2">
           <button onClick={() => navigate('/profile')} className="btn-outline-dark px-3 py-2 text-sm">Perfil</button>
-          <button onClick={signOut} className="btn-outline-dark px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 border-red-500/30">
-            <LogOut size={16} />
+          <button onClick={handleSignOut} className="btn-outline-dark px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 border-red-500/30 flex items-center gap-1">
+            <LogOut size={16} /> Sair
           </button>
         </div>
       </header>

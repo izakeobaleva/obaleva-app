@@ -17,7 +17,7 @@ function generateRandomPassword() {
 
 export default function TestLogin() {
   const navigate = useNavigate()
-  const { signOut, loading: authLoading } = useAuth()
+  const { signOut, loading: authLoading, user } = useAuth()
   const [loading, setLoading] = useState<'passageiro' | 'motorista' | 'bulk' | null>(null)
   const [showPassword, setShowPassword] = useState<'passageiro' | 'motorista' | null>(null)
   const [bulkProgress, setBulkProgress] = useState<{ atual: number; total: number } | null>(null)
@@ -207,7 +207,6 @@ export default function TestLogin() {
       })
       if (error) throw error
       toast.success(`Entrando como ${tipo}...`)
-      // Redirecionamento será feito pelo AuthContext/App automaticamente
     } catch (err: any) {
       toast.error('Erro ao fazer login: ' + err.message)
     }
@@ -216,7 +215,7 @@ export default function TestLogin() {
   async function handleSignOut() {
     await signOut()
     toast('Saiu da conta')
-    navigate('/test-login')
+    navigate('/')
   }
 
   return (
@@ -234,24 +233,18 @@ export default function TestLogin() {
         <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-6">
           {/* Header com botão de sair */}
           <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={() => navigate('/')}
-              className="back-button-outline"
-              type="button"
-            >
+            <button onClick={() => navigate('/')} className="back-button-outline" type="button">
               <ArrowLeft size={22} />
             </button>
             <div className="text-center flex-1">
               <h1 className="text-xl font-bold text-white">Logins de Teste</h1>
               <p className="text-sm text-[#A0A0B0]">Crie contas de teste rapidamente</p>
             </div>
-            <button
-              onClick={handleSignOut}
-              className="p-2 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition"
-              title="Sair da conta atual"
-            >
-              <LogOut size={20} />
-            </button>
+            {user && (
+              <button onClick={handleSignOut} className="p-2 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition" title="Sair da conta atual">
+                <LogOut size={20} />
+              </button>
+            )}
           </div>
 
           {/* Barra de progresso para criação em massa */}
@@ -378,7 +371,7 @@ export default function TestLogin() {
 
           <div className="mt-6 pt-4 border-t border-white/10 flex justify-center">
             <button onClick={() => navigate('/')} className="text-sm text-[#A0A0B0] hover:text-white transition">
-              ← Voltar
+              ← Voltar ao início
             </button>
           </div>
         </div>
