@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { Toaster } from 'sonner';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { Header } from '../components/Header';
 import { MapSection } from '../components/MapSection';
 import { LocationInputs } from '../components/LocationInputs';
@@ -15,9 +14,6 @@ import { BottomNav } from '../components/BottomNav';
 import RideStatusModal from '../components/RideStatusModal';
 import { solicitarCorrida, buscarCorridaAtiva, subscribeToRide, cancelarCorrida, Ride, Location } from '../services/rideService';
 
-// ============================================
-// ICONE CHEVRON RIGHT (usado pelo DiscoverBar)
-// ============================================
 const ChevronRight = ({ size, className }: { size: number; className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="m9 18 6-6-6-6"/>
@@ -33,14 +29,57 @@ export const MainScreen = () => {
   const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
   const [pickupAddress, setPickupAddress] = useState('');
   const [dropoffAddress, setDropoffAddress] = useState('');
+  const [pickupLocation, setPickupLocation] = useState<Location | null>(null);
+  const [dropoffLocation, setDropoffLocation] = useState<Location | null>(null);
   
-  // Estado do fluxo de corrida
   const [activeRide, setActiveRide] = useState<Ride | null>(null);
   const [showRideModal, setShowRideModal] = useState(false);
   const [solicitando, setSolicitando] = useState(false);
   const subscriptionRef = useRef<any>(null);
 
-  // Verificar se há corrida ativa ao carregar
+  const handleRequestRide = async () => {
+    if (!user) {
+      alert('🔐 Faça login para solicitar uma corrida!');
+      return;
+    }
+    
+    if (!pickupAddress || !dropoffAddress) {
+      alert('📍 Preencha a origem e o destino!');
+      return;
+    }
+    
+    if (!pickupLocation || !dropoffLocation) {
+      alert('📍 Selecione a origem e destino no mapa!');
+      return;
+    }
+    
+    setSolicitando(true);
+    
+    try {
+      const corrida = await solicitarCorrida(
+        user.id,
+        pickupLocation,
+        dropoffLocation
+      );
+      
+      if (corrida) {
+        setActiveRide(corrida);
+        setShowRideModal(true);
+        
+        setPickupAddress('');
+        setDropoffAddress('');
+        setPickupLocation(null);
+        setDropoffLocation(null);
+        
+        alert('🚗 Corrida solicitada! Buscando motorista...');
+      }
+    } catch (error: any) {
+      alert('Erro ao solicitar corrida: ' + error.message);
+    } finally {
+      setSolicitando(false);
+    }
+  };
+
   useEffect(() => {
     if (user?.id) {
       carregarCorridaAtiva();
@@ -66,72 +105,6 @@ export const MainScreen = () => {
           }, 3000);
         }
       });
-    }
-  }
-
-  async function handleRequestRide() {
-    if (!user) {
-      toast.error('🔐 Faça login para solicitar uma corrida!');
-      return;
-    }
-    
-    if (!pickupAddress || !dropoffAddress) {
-      toast.error('📍 Preencha a origem e o destino!');
-      return;
-    }
-    
-    // Converter endereços em coordenadas mock (em produção seria geocoding)
-    const mockLocation = (address: string): Location => ({
-      lat: -23.5505 + Math.random() * 0.02,
-      lng: -46.6333 + Math.random() * 0.02,
-      address: address,
-    });
-    
-    const origemLoc = mockLocation(pickupAddress);
-    const destinoLoc = mockLocation(dropoffAddress);
-    
-    setSolicitando(true);
-    
-    try {
-      const corrida = await solicitarCorrida(user.id, origemLoc, destinoLoc);
-      
-      if (corrida) {
-        setActiveRide(corrida);
-        setShowRideModal(true);
-        
-        // Limpar campos
-        setPickupAddress('');
-        setDropoffAddress('');
-        
-        toast.success('🚗 Corrida solicitada! Buscando motorista...');
-        
-        // Inscrever para atualizações em tempo real
-        subscriptionRef.current = subscribeToRide(corrida.id, (updatedRide) => {
-          setActiveRide(updatedRide);
-          
-          if (updatedRide.status === 'motorista_em_rota') {
-            toast.success('👨‍✈️ Motorista encontrado! A caminho...');
-          } else if (updatedRide.status === 'motorista_chegou') {
-            toast.success('✅ Motorista chegou!');
-          } else if (updatedRide.status === 'em_andamento') {
-            toast.info('🚗 Corrida em andamento');
-          } else if (updatedRide.status === 'finalizada') {
-            toast.success('🎉 Corrida finalizada! Obrigado!');
-            setTimeout(() => {
-              setShowRideModal(false);
-              setActiveRide(null);
-            }, 3000);
-          } else if (updatedRide.status === 'cancelada') {
-            toast.error('❌ Corrida cancelada');
-            setShowRideModal(false);
-            setActiveRide(null);
-          }
-        });
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Erro ao solicitar corrida');
-    } finally {
-      setSolicitando(false);
     }
   }
 
@@ -213,10 +186,8 @@ export const MainScreen = () => {
         <DiscoverBar />
       </div>
 
-      {/* BOTTOM NAV */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
 
-      {/* MODAL DE CORRIDA EM TEMPO REAL */}
       {showRideModal && activeRide && (
         <RideStatusModal
           ride={activeRide}
