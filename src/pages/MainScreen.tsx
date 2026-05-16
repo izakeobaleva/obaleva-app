@@ -15,6 +15,15 @@ import { BottomNav } from '../components/BottomNav';
 import RideStatusModal from '../components/RideStatusModal';
 import { solicitarCorrida, buscarCorridaAtiva, subscribeToRide, cancelarCorrida, Ride, Location } from '../services/rideService';
 
+// ============================================
+// ICONE CHEVRON RIGHT (usado pelo DiscoverBar)
+// ============================================
+const ChevronRight = ({ size, className }: { size: number; className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m9 18 6-6-6-6"/>
+  </svg>
+);
+
 export const MainScreen = () => {
   const { user, profile, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
@@ -71,6 +80,7 @@ export const MainScreen = () => {
       return;
     }
     
+    // Converter endereços em coordenadas mock (em produção seria geocoding)
     const mockLocation = (address: string): Location => ({
       lat: -23.5505 + Math.random() * 0.02,
       lng: -46.6333 + Math.random() * 0.02,
@@ -88,11 +98,14 @@ export const MainScreen = () => {
       if (corrida) {
         setActiveRide(corrida);
         setShowRideModal(true);
+        
+        // Limpar campos
         setPickupAddress('');
         setDropoffAddress('');
         
         toast.success('🚗 Corrida solicitada! Buscando motorista...');
         
+        // Inscrever para atualizações em tempo real
         subscriptionRef.current = subscribeToRide(corrida.id, (updatedRide) => {
           setActiveRide(updatedRide);
           
@@ -200,8 +213,10 @@ export const MainScreen = () => {
         <DiscoverBar />
       </div>
 
+      {/* BOTTOM NAV */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
 
+      {/* MODAL DE CORRIDA EM TEMPO REAL */}
       {showRideModal && activeRide && (
         <RideStatusModal
           ride={activeRide}
