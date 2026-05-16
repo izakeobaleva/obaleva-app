@@ -9,6 +9,7 @@ import {
 import MapComponent from '../components/MapComponent';
 import { solicitarCorrida, buscarCorridaAtiva, subscribeToRide, cancelarCorrida, Ride } from '../services/rideService';
 import RideStatusModal from '../components/RideStatusModal';
+import RotatingBanner from '../components/RotatingBanner';
 
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
   const tabs = [
@@ -354,6 +355,10 @@ export const MainScreen = () => {
 
         {user && profile?.tipo === 'motorista' && (<div className="bg-[#1A1528] rounded-xl p-5 text-center border-2 border-[#F4D03F]/30 mt-3 shadow-lg"><Truck className="text-[#F4D03F] w-12 h-12 mx-auto mb-2" /><h2 className="text-white font-bold text-lg">Painel do Motorista</h2><p className="text-[#A0A0B0] text-sm mt-1">Aguardando aprovação da equipe ObaLeva</p><button className="mt-3 px-4 py-1.5 rounded-full bg-green-600 text-white text-sm font-medium">🟢 Online</button></div>)}
 
+        {/* BANNER ROTATIVO DE PARCEIROS */}
+        <RotatingBanner />
+
+        {/* DISCOVER BAR */}
         <DiscoverBar />
       </div>
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
