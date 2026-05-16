@@ -140,7 +140,15 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
       </div>
       <form onSubmit={onEmailLogin} className="space-y-2">
         <input type="email" placeholder="E-mail" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
-        <input type="password" placeholder="Senha" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
+        <input 
+          type="password" 
+          placeholder="Senha" 
+          className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" 
+          value={loginPassword} 
+          onChange={e => setLoginPassword(e.target.value)} 
+          autoComplete="current-password"
+          required 
+        />
         <button type="submit" disabled={loginLoading} className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm">
           {loginLoading ? 'Entrando...' : 'Entrar'}
         </button>
@@ -153,7 +161,6 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
 // DASHBOARD DO PASSAGEIRO
 // ============================================
 const PassengerDashboard = ({ 
-  pickupLocation, dropoffLocation, setPickupLocation, setDropoffLocation, 
   pickupAddress, setPickupAddress, dropoffAddress, setDropoffAddress, 
   onRequestRide 
 }: any) => (
@@ -185,155 +192,6 @@ const PassengerDashboard = ({
     </div>
   </div>
 );
-
-// ============================================
-// TELA PRINCIPAL
-// ============================================
-export const MainScreen = () => {
-  const { user, profile, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState('home');
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
-  const [pickupLocation, setPickupLocation] = useState(null);
-  const [dropoffLocation, setDropoffLocation] = useState(null);
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [dropoffAddress, setDropoffAddress] = useState('');
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
-
-  const handleRequestRide = () => {
-    if (!pickupAddress || !dropoffAddress) {
-      toast.error('Por favor, preencha a origem e o destino!');
-      return;
-    }
-    toast.success(`Corrida solicitada! 🚗\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`);
-  };
-
-  useEffect(() => {
-    let inactivityTimer: NodeJS.Timeout;
-    const resetTimer = () => {
-      if (inactivityTimer) clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => { if (user) handleLogout(); }, 5 * 60 * 1000);
-    };
-    window.addEventListener('mousemove', resetTimer);
-    window.addEventListener('keydown', resetTimer);
-    window.addEventListener('click', resetTimer);
-    resetTimer();
-    return () => {
-      clearTimeout(inactivityTimer);
-      window.removeEventListener('mousemove', resetTimer);
-      window.removeEventListener('keydown', resetTimer);
-      window.removeEventListener('click', resetTimer);
-    };
-  }, [user]);
-
-  if (loading) return <div className="flex items-center justify-center min-h-screen text-white">Carregando...</div>;
-
-  return (
-    <div className="min-h-screen bg-[#0F0B1A]">
-      <Toaster position="top-center" richColors />
-      
-      <div className="max-w-md mx-auto px-4">
-        {/* MAPA - altura 220px como solicitado */}
-        <div className="h-[220px] rounded-xl overflow-hidden shadow-lg">
-          <MapComponent
-            pickupLocation={pickupLocation}
-            dropoffLocation={dropoffLocation}
-            onPickupChange={setPickupAddress}
-            onDropoffChange={setDropoffAddress}
-            onLocationSelect={(location: any) => {
-              if (!dropoffAddress) {
-                setPickupLocation(location);
-                setPickupAddress(location.address);
-              } else {
-                setDropoffLocation(location);
-                setDropoffAddress(location.address);
-              }
-            }}
-          />
-        </div>
-
-        {/* ÁREA DE AÇÃO - com mt-1 (4px) */}
-        <div className="mt-1">
-          {!user ? (
-            <LoginScreen
-              onGoogleLogin={async () => { 
-                const { error } = await supabase.auth.signInWithOAuth({ 
-                  provider: 'google', 
-                  options: { redirectTo: window.location.origin } 
-                }); 
-                if (error) toast.error('Erro ao logar com Google'); 
-              }}
-              onEmailLogin={async (e: React.FormEvent) => { 
-                e.preventDefault(); 
-                setLoginLoading(true); 
-                const { error } = await supabase.auth.signInWithPassword({ 
-                  email: loginEmail, 
-                  password: loginPassword 
-                }); 
-                if (error) toast.error('E-mail ou senha inválidos'); 
-                setLoginLoading(false); 
-              }}
-              loginEmail={loginEmail} 
-              setLoginEmail={setLoginEmail}
-              loginPassword={loginPassword} 
-              setLoginPassword={setLoginPassword}
-              loginLoading={loginLoading}
-            />
-          ) : !profile ? (
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Passageiro</button>
-                <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Motorista</button>
-              </div>
-              {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
-              {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
-            </div>
-          ) : profile.tipo === 'passageiro' ? (
-            <PassengerDashboard
-              pickupLocation={pickupLocation}
-              dropoffLocation={dropoffLocation}
-              setPickupLocation={setPickupLocation}
-              setDropoffLocation={setDropoffLocation}
-              pickupAddress={pickupAddress}
-              setPickupAddress={setPickupAddress}
-              dropoffAddress={dropoffAddress}
-              setDropoffAddress={setDropoffAddress}
-              onRequestRide={handleRequestRide}
-            />
-          ) : profile.tipo === 'motorista' ? (
-            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
-              <Truck className="text-[#F4D03F] w-8 h-8 mx-auto mb-1.5" />
-              <h2 className="text-white font-bold text-sm">Painel do Motorista</h2>
-              <p className="text-[#A0A0B0] text-xs">Aguardando aprovação</p>
-              <button className="mt-2 px-4 py-1 rounded-full bg-green-600 text-white text-xs">🟢 Online</button>
-            </div>
-          ) : (
-            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
-              <Shield className="text-[#F4D03F] w-8 h-8 mx-auto mb-1.5" />
-              <h2 className="text-white font-bold text-sm">Painel Administrativo</h2>
-            </div>
-          )}
-        </div>
-
-        {/* CARDS ROLÁVEIS - com mt-1 (4px) */}
-        <div className="mt-1">
-          <DiscoverBar />
-        </div>
-      </div>
-
-      {/* BOTTOM NAV - com mt-1 (4px) */}
-      <div className="mt-1">
-        <BottomNav active={activeTab} onNavigate={setActiveTab} />
-      </div>
-    </div>
-  );
-};
 
 // ============================================
 // COMPONENTE DE CADASTRO RÁPIDO
@@ -395,7 +253,7 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
         <input placeholder="CPF" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={cpf} onChange={e => setCpf(e.target.value)} required />
         <input placeholder="Telefone" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
         <input type="email" placeholder="E-mail" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Senha" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={password} onChange={e => setPassword(e.target.value)} required />
+        <input type="password" placeholder="Senha" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" required />
         {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-2 rounded-lg bg-[#0F0B1A] border border-white/10 text-white text-sm" value={placa} onChange={e => setPlaca(e.target.value)} required />}
         <button type="submit" disabled={loading} className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>
@@ -403,7 +261,154 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
   );
 };
 
-// Importar ChevronRight
+// ============================================
+// TELA PRINCIPAL
+// ============================================
+export const MainScreen = () => {
+  const { user, profile, loading } = useAuth();
+  const [activeTab, setActiveTab] = useState('home');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
+  const [pickupLocation, setPickupLocation] = useState(null);
+  const [dropoffLocation, setDropoffLocation] = useState(null);
+  const [pickupAddress, setPickupAddress] = useState('');
+  const [dropoffAddress, setDropoffAddress] = useState('');
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+
+  const handleRequestRide = () => {
+    if (!pickupAddress || !dropoffAddress) {
+      toast.error('Por favor, preencha a origem e o destino!');
+      return;
+    }
+    toast.success(`Corrida solicitada! 🚗\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`);
+  };
+
+  useEffect(() => {
+    let inactivityTimer: NodeJS.Timeout;
+    const resetTimer = () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => { if (user) handleLogout(); }, 5 * 60 * 1000);
+    };
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    window.addEventListener('click', resetTimer);
+    resetTimer();
+    return () => {
+      clearTimeout(inactivityTimer);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('click', resetTimer);
+    };
+  }, [user]);
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen text-white">Carregando...</div>;
+
+  return (
+    <div className="min-h-screen bg-[#0F0B1A]">
+      <Toaster position="top-center" richColors />
+      
+      <div className="max-w-md mx-auto px-4">
+        {/* MAPA - altura 220px */}
+        <div className="h-[220px] rounded-xl overflow-hidden shadow-lg">
+          <MapComponent
+            pickupLocation={pickupLocation}
+            dropoffLocation={dropoffLocation}
+            onPickupChange={setPickupAddress}
+            onDropoffChange={setDropoffAddress}
+            onLocationSelect={(location: any) => {
+              if (!dropoffAddress) {
+                setPickupLocation(location);
+                setPickupAddress(location.address);
+              } else {
+                setDropoffLocation(location);
+                setDropoffAddress(location.address);
+              }
+            }}
+          />
+        </div>
+
+        {/* ÁREA DE AÇÃO - com mt-1 (4px) */}
+        <div className="mt-1">
+          {!user ? (
+            <LoginScreen
+              onGoogleLogin={async () => { 
+                const { error } = await supabase.auth.signInWithOAuth({ 
+                  provider: 'google', 
+                  options: { redirectTo: window.location.origin } 
+                }); 
+                if (error) toast.error('Erro ao logar com Google'); 
+              }}
+              onEmailLogin={async (e: React.FormEvent) => { 
+                e.preventDefault(); 
+                setLoginLoading(true); 
+                const { error } = await supabase.auth.signInWithPassword({ 
+                  email: loginEmail, 
+                  password: loginPassword 
+                }); 
+                if (error) toast.error('E-mail ou senha inválidos'); 
+                setLoginLoading(false); 
+              }}
+              loginEmail={loginEmail} 
+              setLoginEmail={setLoginEmail}
+              loginPassword={loginPassword} 
+              setLoginPassword={setLoginPassword}
+              loginLoading={loginLoading}
+            />
+          ) : !profile ? (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Passageiro</button>
+                <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2 rounded-lg border border-white/20 text-white bg-[#1A1528] text-sm">Motorista</button>
+              </div>
+              {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
+              {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
+            </div>
+          ) : profile.tipo === 'passageiro' ? (
+            <PassengerDashboard
+              pickupAddress={pickupAddress}
+              setPickupAddress={setPickupAddress}
+              dropoffAddress={dropoffAddress}
+              setDropoffAddress={setDropoffAddress}
+              onRequestRide={handleRequestRide}
+            />
+          ) : profile.tipo === 'motorista' ? (
+            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
+              <Truck className="text-[#F4D03F] w-8 h-8 mx-auto mb-1.5" />
+              <h2 className="text-white font-bold text-sm">Painel do Motorista</h2>
+              <p className="text-[#A0A0B0] text-xs">Aguardando aprovação</p>
+              <button className="mt-2 px-4 py-1 rounded-full bg-green-600 text-white text-xs">🟢 Online</button>
+            </div>
+          ) : (
+            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
+              <Shield className="text-[#F4D03F] w-8 h-8 mx-auto mb-1.5" />
+              <h2 className="text-white font-bold text-sm">Painel Administrativo</h2>
+            </div>
+          )}
+        </div>
+
+        {/* CARDS ROLÁVEIS - com mt-1 (4px) */}
+        <div className="mt-1">
+          <DiscoverBar />
+        </div>
+      </div>
+
+      {/* BOTTOM NAV - com mt-1 (4px) */}
+      <div className="mt-1">
+        <BottomNav active={activeTab} onNavigate={setActiveTab} />
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// ÍCONE CHEVRON RIGHT (SVG inline)
+// ============================================
 const ChevronRight = ({ size, className }: { size: number; className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="m9 18 6-6-6-6"/>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 interface MapComponentProps {
   onLocationSelect?: (location: { lat: number; lng: number; address: string }) => void;
@@ -9,31 +9,39 @@ interface MapComponentProps {
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({
-  onLocationSelect,
-  pickupLocation,
-  dropoffLocation,
   onPickupChange,
   onDropoffChange,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [userLocation, setUserLocation] = useState({ lat: -23.5505, lng: -46.6333 });
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState(false);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  // Carregar o script do Google Maps manualmente
+  // Carregar o script do Google Maps apenas uma vez
   useEffect(() => {
     if (!apiKey) {
       setMapError(true);
       return;
     }
 
-    // Verificar se o script já está carregado
-    if (document.querySelector('#google-maps-script')) {
+    // Verificar se já está carregado
+    if (window.google && window.google.maps) {
       setMapLoaded(true);
       return;
+    }
+
+    // Verificar se o script já foi adicionado
+    if (document.querySelector('#google-maps-script')) {
+      const checkInterval = setInterval(() => {
+        if (window.google && window.google.maps) {
+          clearInterval(checkInterval);
+          setMapLoaded(true);
+        }
+      }, 100);
+      return () => clearInterval(checkInterval);
     }
 
     const script = document.createElement('script');
@@ -41,86 +49,90 @@ const MapComponent: React.FC<MapComponentProps> = ({
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
     script.async = true;
     script.defer = true;
+    
     script.onload = () => {
       setMapLoaded(true);
     };
+    
     script.onerror = () => {
       setMapError(true);
     };
+    
     document.head.appendChild(script);
 
     return () => {
-      // Não remover o script para não afetar outras páginas
+      // Não remover o script
     };
   }, [apiKey]);
 
-  // Inicializar o mapa quando o script carregar
-  useEffect(() => {
-    if (!mapLoaded || !mapRef.current) return;
+  // Inicializar o mapa
+  const initMap = useCallback(() => {
+    if (!mapRef.current || !window.google || !window.google.maps) return;
 
-    const initMap = () => {
-      const newMap = new google.maps.Map(mapRef.current!, {
-        center: userLocation,
-        zoom: 14,
-        disableDefaultUI: true,
-        zoomControl: true,
-        styles: [
-          {
-            featureType: 'poi',
-            stylers: [{ visibility: 'off' }],
-          },
-        ],
-      });
-      setMap(newMap);
+    const defaultPos = { lat: -23.5505, lng: -46.6333 };
 
-      // Adicionar marcador da localização atual
-      new google.maps.Marker({
-        position: userLocation,
-        map: newMap,
-        icon: {
-          url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-          scaledSize: new google.maps.Size(32, 32),
+    const map = new google.maps.Map(mapRef.current, {
+      center: defaultPos,
+      zoom: 14,
+      disableDefaultUI: true,
+      zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
+      styles: [
+        {
+          featureType: 'poi',
+          stylers: [{ visibility: 'off' }],
         },
-      });
-    };
+      ],
+    });
 
-    // Aguardar o google maps estar totalmente carregado
-    if (window.google && window.google.maps) {
-      initMap();
-    } else {
-      const checkGoogle = setInterval(() => {
-        if (window.google && window.google.maps) {
-          clearInterval(checkGoogle);
-          initMap();
-        }
-      }, 100);
-    }
-  }, [mapLoaded, userLocation]);
+    mapInstanceRef.current = map;
 
-  // Obter localização do usuário
-  useEffect(() => {
+    // Tentar obter localização do usuário
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const pos = {
+          const userPos = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
-          setUserLocation(pos);
-          if (map) map.panTo(pos);
+          map.setCenter(userPos);
+          
+          if (markerRef.current) markerRef.current.setMap(null);
+          markerRef.current = new google.maps.Marker({
+            position: userPos,
+            map: map,
+            icon: {
+              url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+              scaledSize: new google.maps.Size(32, 32),
+            },
+          });
         },
-        () => console.log('Usando localização padrão')
+        () => {
+          markerRef.current = new google.maps.Marker({
+            position: defaultPos,
+            map: map,
+            icon: {
+              url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+              scaledSize: new google.maps.Size(32, 32),
+            },
+          });
+        }
       );
     }
-  }, [map]);
+  }, []);
 
-  // Atualizar marcadores quando pickup/dropoff mudar
+  // Inicializar quando o mapa estiver carregado
   useEffect(() => {
-    if (!map || !window.google) return;
+    if (!mapLoaded) return;
 
-    // Limpar marcadores antigos (implementação simplificada)
-    // Para uma versão completa, você precisaria guardar referências
-  }, [map, pickupLocation, dropoffLocation]);
+    const timer = setTimeout(() => {
+      initMap();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [mapLoaded, initMap]);
 
   if (mapError || !apiKey) {
     return (
@@ -149,7 +161,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden">
-      {/* Campos de endereço - versão simplificada sem Autocomplete */}
+      {/* Campos de endereço */}
       <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
         <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
           <div className="flex items-center gap-2 p-2">
