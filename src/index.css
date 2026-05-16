@@ -11,3 +11,46 @@
 body {
   background-color: #0F0B1A;
 }
+
+/* Scrollbar personalizada */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Glass effect */
+.glass-effect {
+  background: rgba(15, 11, 26, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Botão amarelo */
+.btn-amarelo {
+  background: linear-gradient(135deg, #FFD966, #F4D03F);
+  color: #1E1E2F;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.btn-amarelo:hover {
+  box-shadow: 0 4px 20px rgba(244, 208, 63, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-amarelo:active {
+  transform: translateY(0);
+}
+
+/* Animações suaves */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
