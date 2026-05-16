@@ -1,11 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker, Autocomplete } from '@react-google-maps/api';
 
-const containerStyle = {
-  width: '100%',
-  height: '100%',
-};
-
 const defaultCenter = {
   lat: -23.5505,
   lng: -46.6333,
@@ -161,10 +156,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             onUnmount={onUnmount}
             options={{
               styles: [
-                {
-                  featureType: 'poi',
-                  stylers: [{ visibility: 'off' }],
-                },
+                { featureType: 'poi', stylers: [{ visibility: 'off' }] },
               ],
               disableDefaultUI: true,
               zoomControl: true,
@@ -196,12 +188,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
               />
             )}
           </GoogleMap>
-
-          <div className="absolute bottom-3 left-3 right-3 z-10">
-            <button className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm">
-              Solicitar ObaLeva
-            </button>
-          </div>
         </div>
       )}
     </LoadScript>
