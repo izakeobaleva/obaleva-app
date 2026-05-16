@@ -104,36 +104,19 @@ const MapComponent: React.FC<MapComponentProps> = ({
       onLoad={() => setScriptLoaded(true)}
     >
       <div className="relative w-full h-full rounded-xl overflow-hidden">
-        {/* Campos de endereço - SUPERIOR */}
-        <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
-          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
-            <div className="flex items-center gap-2 p-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <div className="flex-1">
-                <Autocomplete onLoad={onPickupLoad} onPlaceChanged={() => onPlaceChanged('pickup')}>
-                  <input
-                    type="text"
-                    placeholder="Onde você está?"
-                    className="w-full bg-transparent text-white text-sm outline-none"
-                    onChange={(e) => onPickupChange?.(e.target.value)}
-                  />
-                </Autocomplete>
-              </div>
+        {/* Logo e nome ObaLeva - SUPERIOR */}
+        <div className="absolute top-3 left-3 right-3 z-10">
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 p-3 flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#F4D03F]/15 rounded-xl flex items-center justify-center border border-[#F4D03F]/20">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F4D03F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
+                <circle cx="6.5" cy="16.5" r="2.5" />
+                <circle cx="16.5" cy="16.5" r="2.5" />
+              </svg>
             </div>
-          </div>
-          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
-            <div className="flex items-center gap-2 p-2">
-              <div className="w-2 h-2 rounded-full bg-red-500" />
-              <div className="flex-1">
-                <Autocomplete onLoad={onDropoffLoad} onPlaceChanged={() => onPlaceChanged('dropoff')}>
-                  <input
-                    type="text"
-                    placeholder="Para onde vai?"
-                    className="w-full bg-transparent text-white text-sm outline-none"
-                    onChange={(e) => onDropoffChange?.(e.target.value)}
-                  />
-                </Autocomplete>
-              </div>
+            <div>
+              <h1 className="text-white font-bold text-base" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</h1>
+              <p className="text-[#A0A0B0] text-[10px]">Mobilidade premium</p>
             </div>
           </div>
         </div>
