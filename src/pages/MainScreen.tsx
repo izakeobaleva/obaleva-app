@@ -20,20 +20,20 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
     { id: 'menu', label: 'Menu', icon: MenuIcon },
   ];
   return (
-    <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-4 z-50">
-      <div className="bg-[#1A1528] border border-[#F4D03F]/20 rounded-2xl max-w-md w-full mx-4 shadow-xl">
-        <div className="flex justify-between items-center px-4 py-2">
+    <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-2 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-2 z-50">
+      <div className="bg-[#1A1528] border border-[#F4D03F]/20 rounded-xl max-w-md w-full mx-4 shadow-lg">
+        <div className="flex justify-between items-center px-3 py-1.5">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => onNavigate(tab.id)}
-              className={`flex flex-col items-center gap-1 transition-all duration-200 ${
+              className={`flex flex-col items-center gap-0.5 transition-all duration-200 ${
                 active === tab.id ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'
               }`}
             >
-              <tab.icon size={24} strokeWidth={active === tab.id ? 2 : 1.5} />
-              <span className="text-xs font-medium">{tab.label}</span>
-              {active === tab.id && <div className="w-1.5 h-1 rounded-full bg-[#F4D03F] mt-0.5 animate-pulse" />}
+              <tab.icon size={22} strokeWidth={active === tab.id ? 2 : 1.5} />
+              <span className="text-[10px] font-medium">{tab.label}</span>
+              {active === tab.id && <div className="w-1 h-1 rounded-full bg-[#F4D03F] mt-0.5" />}
             </button>
           ))}
         </div>
@@ -43,7 +43,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// DISCOVER BAR - CARDS ROLÁVEIS
+// DISCOVER BAR - CARDS ROLÁVEIS (COMPACTADO)
 // ============================================
 const DiscoverBar = () => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -56,152 +56,155 @@ const DiscoverBar = () => {
   };
 
   const cards = [
-    { emoji: "🎁", title: "1ª corrida grátis", desc: "Até R$ 20 off", color: "#F4D03F" },
-    { emoji: "🛡️", title: "Seguro ObaLeva", desc: "Proteção total", color: "#8B5CF6" },
-    { emoji: "⭐", title: "Avaliação 4.8★", desc: "Motoristas top", color: "#F4D03F" },
-    { emoji: "⚡", title: "Rápido", desc: "Chegada rápida", color: "#A855F7" },
-    { emoji: "📹", title: "Como funciona?", desc: "Assista ao vídeo", color: "#F4D03F" },
-    { emoji: "📢", title: "Indique e ganhe", desc: "R$ 10 crédito", color: "#8B5CF6" },
-    { emoji: "☕", title: "Parceiros", desc: "Descontos", color: "#A855F7" },
+    { emoji: "🎁", title: "1ª grátis", desc: "R$20 off", color: "#F4D03F" },
+    { emoji: "🛡️", title: "Seguro", desc: "Proteção", color: "#8B5CF6" },
+    { emoji: "⭐", title: "4.8★", desc: "Top", color: "#F4D03F" },
+    { emoji: "⚡", title: "Rápido", desc: "Minutos", color: "#A855F7" },
+    { emoji: "📹", title: "Como funciona?", desc: "Watch", color: "#F4D03F" },
+    { emoji: "📢", title: "Indique", desc: "R$10", color: "#8B5CF6" },
+    { emoji: "☕", title: "Parceiros", desc: "Off", color: "#A855F7" },
     { emoji: "❤️", title: "Solidário", desc: "Doação", color: "#F4D03F" },
   ];
 
   return (
-    <div className="relative mt-4 mb-28">
-      <button onClick={() => scroll('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#1A1528]/90 rounded-full p-1.5 backdrop-blur-sm border border-[#F4D03F]/30">
-        <ChevronLeft size={16} className="text-[#F4D03F]" />
+    <div className="relative mt-2 mb-20">
+      <button onClick={() => scroll('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#1A1528]/90 rounded-full p-1 backdrop-blur-sm border border-[#F4D03F]/30">
+        <ChevronLeft size={14} className="text-[#F4D03F]" />
       </button>
-      <div ref={scrollRef} className="flex overflow-x-auto scrollbar-hide gap-2 pb-2 px-1">
+      <div ref={scrollRef} className="flex overflow-x-auto scrollbar-hide gap-1.5 pb-1 px-1">
         {cards.map((card, idx) => (
-          <div key={idx} className="min-w-[145px] max-w-[145px] bg-[#1A1528] rounded-xl p-2 border border-[#F4D03F]/10">
-            <div className="flex items-start gap-2">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xl" style={{ backgroundColor: `${card.color}20` }}>
+          <div key={idx} className="min-w-[105px] max-w-[105px] bg-[#1A1528] rounded-lg p-1.5 border border-[#F4D03F]/10">
+            <div className="flex items-center gap-1.5">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-base" style={{ backgroundColor: `${card.color}20` }}>
                 {card.emoji}
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-white font-bold text-xs truncate">{card.title}</h4>
-                <p className="text-[#A0A0B0] text-[9px] truncate">{card.desc}</p>
+                <h4 className="text-white font-bold text-[10px] truncate">{card.title}</h4>
+                <p className="text-[#A0A0B0] text-[8px] truncate">{card.desc}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
-      <button onClick={() => scroll('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#1A1528]/90 rounded-full p-1.5 backdrop-blur-sm border border-[#F4D03F]/30">
-        <ChevronRight size={16} className="text-[#F4D03F]" />
+      <button onClick={() => scroll('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#1A1528]/90 rounded-full p-1 backdrop-blur-sm border border-[#F4D03F]/30">
+        <ChevronRight size={14} className="text-[#F4D03F]" />
       </button>
     </div>
   );
 };
 
 // ============================================
-// LOCATION INPUTS - SEMPRE VISÍVEL
+// LOCATION INPUTS (COMPACTADO)
 // ============================================
-const LocationInputs = ({ pickupAddress, setPickupAddress, dropoffAddress, setDropoffAddress }: any) => (
-  <div className="bg-[#1A1528] rounded-2xl p-3 border border-[#F4D03F]/20">
-    <div className="flex items-center gap-2 mb-2 pb-1 border-b border-white/10">
-      <Map size={14} className="text-[#F4D03F]" />
-      <span className="text-white text-xs font-medium">Definir rota</span>
+const LocationInputs = ({ pickupAddress, setPickupAddress, dropoffAddress, setDropoffAddress, disabled }: any) => (
+  <div className="bg-[#1A1528] rounded-xl p-2 border border-[#F4D03F]/15">
+    <div className="flex items-center gap-1.5 mb-1 pb-0.5 border-b border-white/10">
+      <Map size={12} className="text-[#F4D03F]" />
+      <span className="text-white text-[10px] font-medium">Definir rota</span>
     </div>
     
-    <div className="bg-white/5 rounded-lg border border-white/10 mb-2">
-      <div className="flex items-center gap-2 px-3 py-2.5">
-        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+    <div className="bg-white/5 rounded-lg border border-white/10 mb-1">
+      <div className="flex items-center gap-2 px-2 py-1.5">
+        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
         <input 
           type="text" 
           placeholder="Onde você está?" 
-          className="flex-1 bg-transparent text-white outline-none text-sm"
+          className="flex-1 bg-transparent text-white outline-none text-xs"
           value={pickupAddress} 
           onChange={(e) => setPickupAddress(e.target.value)}
+          disabled={disabled}
         />
       </div>
     </div>
     
     <div className="bg-white/5 rounded-lg border border-white/10">
-      <div className="flex items-center gap-2 px-3 py-2.5">
-        <div className="w-2 h-2 rounded-full bg-red-500" />
+      <div className="flex items-center gap-2 px-2 py-1.5">
+        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
         <input 
           type="text" 
           placeholder="Para onde vai?" 
-          className="flex-1 bg-transparent text-white outline-none text-sm"
+          className="flex-1 bg-transparent text-white outline-none text-xs"
           value={dropoffAddress} 
           onChange={(e) => setDropoffAddress(e.target.value)}
+          disabled={disabled}
         />
       </div>
     </div>
     
     <button 
       onClick={() => { const temp = pickupAddress; setPickupAddress(dropoffAddress); setDropoffAddress(temp); }} 
-      className="mt-2 w-full text-center text-[10px] text-[#A0A0B0] hover:text-[#F4D03F] transition py-1"
+      className="mt-1 w-full text-center text-[9px] text-[#A0A0B0] hover:text-[#F4D03F] transition py-0.5"
+      disabled={disabled}
     >
-      ↕️ Trocar origem e destino
+      ↕️ Trocar
     </button>
   </div>
 );
 
 // ============================================
-// ACTION BUTTON - SEMPRE VISÍVEL
+// ACTION BUTTON (COMPACTADO)
 // ============================================
-const ActionButton = ({ onRequestRide, label, disabled }: any) => (
+const ActionButton = ({ onRequestRide, disabled }: any) => (
   <button 
     onClick={onRequestRide} 
     disabled={disabled} 
-    className={`w-full py-3.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
-      disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98] shadow-lg'
+    className={`w-full py-2 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold flex items-center justify-center gap-2 text-sm transition-all duration-200 ${
+      disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01] active:scale-[0.99] shadow-md'
     }`}
   >
-    <Car size={18} /> {label || "SOLICITAR OBALEVALe"} <ArrowRight size={16} />
+    <Car size={16} /> SOLICITAR OBALEVALe <ArrowRight size={14} />
   </button>
 );
 
 // ============================================
-// LOGIN FORM - ABAIXO DO MAPA (só se não logado)
+// LOGIN FORM (COMPACTADO)
 // ============================================
 const LoginForm = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="bg-[#1A1528] rounded-2xl p-5 border border-[#F4D03F]/20 mt-4">
-      <div className="text-center mb-5">
-        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-[#F4D03F]/20 to-[#8B5CF6]/20 flex items-center justify-center">
-          <Car className="text-[#F4D03F] w-8 h-8" />
+    <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/15 mt-2">
+      <div className="text-center mb-2">
+        <div className="w-10 h-10 mx-auto mb-1 rounded-full bg-gradient-to-br from-[#F4D03F]/20 to-[#8B5CF6]/20 flex items-center justify-center">
+          <Car className="text-[#F4D03F] w-5 h-5" />
         </div>
-        <h2 className="text-lg font-bold text-white">Bem-vindo</h2>
-        <p className="text-[#A0A0B0] text-xs">Faça login para solicitar corridas</p>
+        <h2 className="text-sm font-bold text-white">Bem-vindo</h2>
+        <p className="text-[#A0A0B0] text-[10px]">Faça login para solicitar</p>
       </div>
       
-      <div className="space-y-3">
-        <button onClick={onGoogleLogin} className="w-full py-2.5 rounded-xl border border-[#F4D03F]/30 bg-white/5 text-white flex items-center justify-center gap-2 text-sm">
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
+      <div className="space-y-2">
+        <button onClick={onGoogleLogin} className="w-full py-1.5 rounded-lg border border-[#F4D03F]/30 bg-white/5 text-white flex items-center justify-center gap-2 text-xs">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
             <path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/>
             <path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/>
             <path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/>
             <path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/>
           </svg>
-          Entrar com Google
+          Google
         </button>
         
         <div className="relative">
           <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-          <div className="relative flex justify-center text-xs"><span className="bg-[#1A1528] px-2 text-[#A0A0B0]">ou</span></div>
+          <div className="relative flex justify-center text-[9px]"><span className="bg-[#1A1528] px-2 text-[#A0A0B0]">ou</span></div>
         </div>
 
-        <form onSubmit={onEmailLogin} className="space-y-2">
-          <div className="bg-white/5 rounded-xl border border-white/10">
-            <div className="flex items-center gap-2 px-3 py-2">
-              <span>📧</span>
-              <input type="email" placeholder="E-mail" className="flex-1 bg-transparent text-white outline-none text-sm" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
+        <form onSubmit={onEmailLogin} className="space-y-1.5">
+          <div className="bg-white/5 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <span className="text-xs">📧</span>
+              <input type="email" placeholder="E-mail" className="flex-1 bg-transparent text-white outline-none text-xs" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
             </div>
           </div>
           
-          <div className="bg-white/5 rounded-xl border border-white/10">
-            <div className="flex items-center gap-2 px-3 py-2">
-              <span>🔒</span>
-              <input type={showPassword ? "text" : "password"} placeholder="Senha" className="flex-1 bg-transparent text-white outline-none text-sm" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0]">{showPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button>
+          <div className="bg-white/5 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <span className="text-xs">🔒</span>
+              <input type={showPassword ? "text" : "password"} placeholder="Senha" className="flex-1 bg-transparent text-white outline-none text-xs" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0]">{showPassword ? <EyeOff size={12} /> : <Eye size={12} />}</button>
             </div>
           </div>
           
-          <button type="submit" disabled={loginLoading} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-sm">
+          <button type="submit" disabled={loginLoading} className="w-full py-1.5 rounded-lg bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-xs">
             {loginLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
@@ -211,7 +214,7 @@ const LoginForm = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, log
 };
 
 // ============================================
-// TELA PRINCIPAL - MAPA E CAMPOS SEMPRE VISÍVEIS
+// TELA PRINCIPAL - LAYOUT COMPACTADO
 // ============================================
 export const MainScreen = () => {
   const { user, profile, loading, signOut } = useAuth();
@@ -229,7 +232,7 @@ export const MainScreen = () => {
       return;
     }
     if (!pickupAddress || !dropoffAddress) {
-      toast.error('📍 Por favor, preencha a origem e o destino!');
+      toast.error('📍 Preencha a origem e o destino!');
       return;
     }
     toast.success(`🚗 Corrida solicitada!\n\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`, { duration: 5000 });
@@ -239,10 +242,10 @@ export const MainScreen = () => {
     return (
       <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center animate-bounce">
-            <Car className="text-[#F4D03F] w-6 h-6" />
+          <div className="w-10 h-10 rounded-full bg-[#F4D03F]/20 flex items-center justify-center animate-bounce">
+            <Car className="text-[#F4D03F] w-5 h-5" />
           </div>
-          <p className="text-white text-sm mt-3">Carregando ObaLeva...</p>
+          <p className="text-white text-xs mt-2">Carregando...</p>
         </div>
       </div>
     );
@@ -251,62 +254,56 @@ export const MainScreen = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
       <Toaster position="top-center" richColors />
-      <div className="max-w-md mx-auto px-4 pb-32">
+      <div className="max-w-md mx-auto px-3 pb-24">
         
         {/* CABEÇALHO */}
-        <div className="py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
-              <Car className="text-[#F4D03F] w-3.5 h-3.5" />
+        <div className="py-2 flex justify-between items-center">
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
+              <Car className="text-[#F4D03F] w-3 h-3" />
             </div>
-            <h1 className="text-lg font-bold text-white">OBALEVA</h1>
+            <h1 className="text-base font-bold text-white">OBALEVA</h1>
           </div>
           {user && (
-            <button onClick={signOut} className="text-[#A0A0B0] text-[10px] flex items-center gap-1 hover:text-red-400 transition">
-              <LogOut size={12} /> Sair
+            <button onClick={signOut} className="text-[#A0A0B0] text-[9px] flex items-center gap-0.5 hover:text-red-400 transition">
+              <LogOut size={10} /> Sair
             </button>
           )}
         </div>
 
-        {/* ============================================ */}
-        {/* MAPA - SEMPRE VISÍVEL PARA TODOS */}
-        {/* ============================================ */}
-        <div className="relative h-[220px] rounded-2xl overflow-hidden shadow-xl mb-4">
+        {/* MAPA - 180px */}
+        <div className="relative h-[180px] rounded-xl overflow-hidden shadow-md mb-2">
           <MapComponent />
-          {/* LOGO SOBREPOSTA */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="bg-black/50 backdrop-blur-md rounded-2xl px-5 py-2 border border-[#F4D03F]/40 shadow-xl">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
-                  <Car className="text-[#F4D03F] w-5 h-5" />
+            <div className="bg-black/50 backdrop-blur-md rounded-xl px-3 py-1 border border-[#F4D03F]/40">
+              <div className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
+                  <Car className="text-[#F4D03F] w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-white to-[#F4D03F] bg-clip-text text-transparent">OBALEVA</h1>
-                  <p className="text-[#F4D03F] text-[8px] text-center tracking-wider">MOBILIDADE PREMIUM</p>
+                  <h1 className="text-sm font-bold bg-gradient-to-r from-white to-[#F4D03F] bg-clip-text text-transparent">OBALEVA</h1>
+                  <p className="text-[#F4D03F] text-[7px] text-center">MOBILIDADE PREMIUM</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ORIGEM E DESTINO - SEMPRE VISÍVEL */}
+        {/* ORIGEM E DESTINO */}
         <LocationInputs 
           pickupAddress={pickupAddress}
           setPickupAddress={setPickupAddress}
           dropoffAddress={dropoffAddress}
           setDropoffAddress={setDropoffAddress}
+          disabled={false}
         />
 
-        {/* BOTÃO SOLICITAR - SEMPRE VISÍVEL */}
-        <div className="mt-3">
-          <ActionButton 
-            onRequestRide={handleRequestRide} 
-            label="SOLICITAR OBALEVALe" 
-            disabled={false} 
-          />
+        {/* BOTÃO SOLICITAR */}
+        <div className="mt-2">
+          <ActionButton onRequestRide={handleRequestRide} disabled={false} />
         </div>
 
-        {/* SE NÃO ESTIVER LOGADO, MOSTRA FORMULÁRIO DE LOGIN */}
+        {/* LOGIN (se não logado) */}
         {!user && (
           <LoginForm
             onGoogleLogin={async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }}
@@ -317,40 +314,40 @@ export const MainScreen = () => {
           />
         )}
 
-        {/* SE ESTIVER LOGADO SEM PERFIL, MOSTRA CADASTRO */}
+        {/* CADASTRO (se logado sem perfil) */}
         {user && !profile && (
-          <div className="space-y-2 mt-4">
-            <div className="flex gap-2">
-              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2.5 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm font-medium">Sou Passageiro</button>
-              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2.5 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm font-medium">Sou Motorista</button>
+          <div className="space-y-1.5 mt-2">
+            <div className="flex gap-1.5">
+              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-1.5 rounded-lg border border-[#F4D03F]/30 text-white bg-white/5 text-xs">Passageiro</button>
+              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-1.5 rounded-lg border border-[#F4D03F]/30 text-white bg-white/5 text-xs">Motorista</button>
             </div>
             {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
             {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
           </div>
         )}
 
-        {/* SE ESTIVER LOGADO COMO MOTORISTA */}
+        {/* PAINEL DO MOTORISTA */}
         {user && profile?.tipo === 'motorista' && (
-          <div className="bg-[#1A1528] rounded-2xl p-5 text-center border border-[#F4D03F]/20 mt-4">
-            <Truck className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
-            <h2 className="text-white font-bold">Painel do Motorista</h2>
-            <p className="text-[#A0A0B0] text-xs">Aguardando aprovação</p>
-            <button className="mt-3 px-3 py-1 rounded-full bg-green-600 text-white text-xs">🟢 Online</button>
+          <div className="bg-[#1A1528] rounded-xl p-3 text-center border border-[#F4D03F]/15 mt-2">
+            <Truck className="text-[#F4D03F] w-8 h-8 mx-auto mb-1" />
+            <h2 className="text-white font-bold text-sm">Painel do Motorista</h2>
+            <p className="text-[#A0A0B0] text-[10px]">Aguardando aprovação</p>
+            <button className="mt-2 px-2 py-0.5 rounded-full bg-green-600 text-white text-[10px]">🟢 Online</button>
           </div>
         )}
 
-        {/* DISCOVER BAR - CARDS ROLÁVEIS */}
+        {/* DISCOVER BAR */}
         <DiscoverBar />
       </div>
 
-      {/* BOTTOM NAVIGATION */}
+      {/* BOTTOM NAV */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
   );
 };
 
 // ============================================
-// CADASTRO RÁPIDO
+// CADASTRO RÁPIDO (COMPACTADO)
 // ============================================
 const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista'; onSuccess: () => void }) => {
   const [nome, setNome] = useState('');
@@ -382,19 +379,19 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
   };
 
   return (
-    <div className="bg-[#1A1528] rounded-2xl p-4 border border-[#F4D03F]/20">
-      <h2 className="text-white font-bold text-base mb-3">Cadastro {tipo === 'passageiro' ? 'Passageiro' : 'Motorista'}</h2>
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <input placeholder="Nome completo" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={nome} onChange={e => setNome(e.target.value)} required />
-        <input placeholder="CPF" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={cpf} onChange={e => setCpf(e.target.value)} required />
-        <input placeholder="Telefone" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
-        <input type="email" placeholder="E-mail" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
+    <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/15">
+      <h2 className="text-white font-bold text-sm mb-2">Cadastro {tipo === 'passageiro' ? 'Passageiro' : 'Motorista'}</h2>
+      <form onSubmit={handleSubmit} className="space-y-1.5">
+        <input placeholder="Nome completo" className="w-full p-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs" value={nome} onChange={e => setNome(e.target.value)} required />
+        <input placeholder="CPF" className="w-full p-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs" value={cpf} onChange={e => setCpf(e.target.value)} required />
+        <input placeholder="Telefone" className="w-full p-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+        <input type="email" placeholder="E-mail" className="w-full p-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs" value={email} onChange={e => setEmail(e.target.value)} required />
         <div className="relative">
-          <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm pr-8" value={password} onChange={e => setPassword(e.target.value)} required />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-2.5 text-[#A0A0B0]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+          <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs pr-7" value={password} onChange={e => setPassword(e.target.value)} required />
+          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1.5 text-[#A0A0B0]">{showPassword ? <EyeOff size={12} /> : <Eye size={12} />}</button>
         </div>
-        {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={placa} onChange={e => setPlaca(e.target.value)} required />}
-        <button type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-sm">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
+        {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs" value={placa} onChange={e => setPlaca(e.target.value)} required />}
+        <button type="submit" disabled={loading} className="w-full py-1.5 rounded-lg bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-xs">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>
     </div>
   );
