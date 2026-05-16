@@ -43,7 +43,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// DISCOVER BAR
+// DISCOVER BAR - CARDS ROLÁVEIS
 // ============================================
 const DiscoverBar = () => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -56,14 +56,14 @@ const DiscoverBar = () => {
   };
 
   const cards = [
-    { icon: <Gift size={20} />, title: "1ª corrida grátis", description: "Até R$ 20 off", color: "#F4D03F", badge: "🔥" },
-    { icon: <Shield size={20} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#8B5CF6", badge: "✓" },
-    { icon: <Star size={20} />, title: "Avaliação 4.8★", description: "Motoristas top", color: "#F4D03F", badge: "⭐" },
-    { icon: <Zap size={20} />, title: "Rápido", description: "Chegada rápida", color: "#A855F7", badge: "⚡" },
-    { icon: <Video size={20} />, title: "Como funciona?", description: "Assista", color: "#F4D03F", badge: "▶️" },
-    { icon: <Megaphone size={20} />, title: "Indique e ganhe", description: "R$ 10", color: "#8B5CF6", badge: "🎁" },
-    { icon: <Coffee size={20} />, title: "Parceiros", description: "Descontos", color: "#A855F7", badge: "☕" },
-    { icon: <Heart size={20} />, title: "Solidário", description: "Doação", color: "#F4D03F", badge: "❤️" },
+    { icon: <Gift size={20} />, title: "1ª corrida grátis", description: "Até R$ 20 off", color: "#F4D03F", emoji: "🎁" },
+    { icon: <Shield size={20} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#8B5CF6", emoji: "🛡️" },
+    { icon: <Star size={20} />, title: "Avaliação 4.8★", description: "Motoristas top", color: "#F4D03F", emoji: "⭐" },
+    { icon: <Zap size={20} />, title: "Rápido", description: "Chegada em minutos", color: "#A855F7", emoji: "⚡" },
+    { icon: <Video size={20} />, title: "Como funciona?", description: "Assista ao vídeo", color: "#F4D03F", emoji: "📹" },
+    { icon: <Megaphone size={20} />, title: "Indique e ganhe", description: "R$ 10 crédito", color: "#8B5CF6", emoji: "📢" },
+    { icon: <Coffee size={20} />, title: "Parceiros", description: "Descontos", color: "#A855F7", emoji: "☕" },
+    { icon: <Heart size={20} />, title: "Solidário", description: "Doação", color: "#F4D03F", emoji: "❤️" },
   ];
 
   return (
@@ -76,12 +76,11 @@ const DiscoverBar = () => {
           <div key={idx} className="min-w-[150px] max-w-[150px] bg-[#1A1528] rounded-xl p-2 border border-[#F4D03F]/10">
             <div className="flex items-start gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0`} style={{ backgroundColor: `${card.color}20` }}>
-                <div style={{ color: card.color }}>{card.icon}</div>
+                <span className="text-lg">{card.emoji}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-white font-bold text-xs truncate">{card.title}</h4>
                 <p className="text-[#A0A0B0] text-[9px] truncate">{card.description}</p>
-                <span className="text-[10px] text-[#F4D03F]">{card.badge}</span>
               </div>
             </div>
           </div>
@@ -103,7 +102,7 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
   return (
     <div className="bg-[#1A1528] rounded-2xl p-5 border border-[#F4D03F]/20">
       <div className="text-center mb-5">
-        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
+        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-[#F4D03F]/20 to-[#8B5CF6]/20 flex items-center justify-center">
           <Car className="text-[#F4D03F] w-8 h-8" />
         </div>
         <h2 className="text-lg font-bold text-white">Bem-vindo</h2>
@@ -156,17 +155,18 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
 // ============================================
 const PassengerDashboard = ({ pickupAddress, setPickupAddress, dropoffAddress, setDropoffAddress, onRequestRide }: any) => (
   <div className="space-y-3">
-    {/* 1. MAPA COM LOGO */}
+    {/* 1. MAPA COM LOGO SOBREPOSTO */}
     <div className="relative h-[220px] rounded-2xl overflow-hidden shadow-xl">
       <MapComponent />
-      {/* LOGO SOBREPOSTA */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="bg-black/50 backdrop-blur-md rounded-2xl px-5 py-2 border border-[#F4D03F]/40">
+        <div className="bg-black/50 backdrop-blur-md rounded-2xl px-5 py-2 border border-[#F4D03F]/40 shadow-xl">
           <div className="flex items-center gap-2">
-            <Car className="text-[#F4D03F] w-6 h-6" />
+            <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
+              <Car className="text-[#F4D03F] w-5 h-5" />
+            </div>
             <div>
-              <h1 className="text-xl font-bold text-white">OBALEVA</h1>
-              <p className="text-[#F4D03F] text-[8px] text-center">mobilidade premium</p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-white to-[#F4D03F] bg-clip-text text-transparent">OBALEVA</h1>
+              <p className="text-[#F4D03F] text-[8px] text-center tracking-wider">MOBILIDADE PREMIUM</p>
             </div>
           </div>
         </div>
@@ -182,7 +182,7 @@ const PassengerDashboard = ({ pickupAddress, setPickupAddress, dropoffAddress, s
       
       <div className="bg-white/5 rounded-lg border border-white/10 mb-2">
         <div className="flex items-center gap-2 px-3 py-2">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <input type="text" placeholder="Onde você está?" className="flex-1 bg-transparent text-white outline-none text-sm" value={pickupAddress} onChange={e => setPickupAddress(e.target.value)} />
         </div>
       </div>
@@ -194,13 +194,19 @@ const PassengerDashboard = ({ pickupAddress, setPickupAddress, dropoffAddress, s
         </div>
       </div>
       
-      <button onClick={() => { const temp = pickupAddress; setPickupAddress(dropoffAddress); setDropoffAddress(temp); }} className="mt-2 w-full text-center text-[10px] text-[#A0A0B0] hover:text-[#F4D03F]">
+      <button onClick={() => { const temp = pickupAddress; setPickupAddress(dropoffAddress); setDropoffAddress(temp); }} className="mt-2 w-full text-center text-[10px] text-[#A0A0B0] hover:text-[#F4D03F] transition">
         ↕️ Trocar origem e destino
       </button>
     </div>
 
     {/* 3. BOTÃO SOLICITAR */}
-    <button onClick={onRequestRide} disabled={!pickupAddress || !dropoffAddress} className={`w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold flex items-center justify-center gap-2 ${(!pickupAddress || !dropoffAddress) ? 'opacity-50' : 'hover:scale-[1.02]'}`}>
+    <button 
+      onClick={onRequestRide} 
+      disabled={!pickupAddress || !dropoffAddress} 
+      className={`w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
+        (!pickupAddress || !dropoffAddress) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98] shadow-lg'
+      }`}
+    >
       <Car size={18} /> SOLICITAR OBALEVALe <ArrowRight size={16} />
     </button>
   </div>
@@ -272,18 +278,27 @@ export const MainScreen = () => {
 
   const handleRequestRide = () => {
     if (!pickupAddress || !dropoffAddress) {
-      toast.error('📍 Preencha origem e destino!');
+      toast.error('📍 Por favor, preencha a origem e o destino!');
       return;
     }
-    toast.success(`🚗 Corrida solicitada!\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`);
+    toast.success(`🚗 Corrida solicitada!\n\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`, { duration: 5000 });
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-pulse"><Car className="text-[#F4D03F] w-10 h-10 animate-bounce mx-auto" /><p className="text-white mt-2">Carregando...</p></div></div>;
+    return (
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center animate-bounce">
+            <Car className="text-[#F4D03F] w-6 h-6" />
+          </div>
+          <p className="text-white text-sm mt-3">Carregando ObaLeva...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-[#0F0B1A]">
+    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
       <Toaster position="top-center" richColors />
       <div className="max-w-md mx-auto px-4 pb-32">
         
@@ -295,10 +310,14 @@ export const MainScreen = () => {
             </div>
             <h1 className="text-lg font-bold text-white">OBALEVA</h1>
           </div>
-          {user && <button onClick={signOut} className="text-[#A0A0B0] text-[10px] flex items-center gap-1"><LogOut size={12} /> Sair</button>}
+          {user && (
+            <button onClick={signOut} className="text-[#A0A0B0] text-[10px] flex items-center gap-1 hover:text-red-400 transition">
+              <LogOut size={12} /> Sair
+            </button>
+          )}
         </div>
 
-        {/* CONTEÚDO */}
+        {/* CONTEÚDO PRINCIPAL */}
         {!user ? (
           <LoginScreen
             onGoogleLogin={async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }}
@@ -340,7 +359,7 @@ export const MainScreen = () => {
         <DiscoverBar />
       </div>
 
-      {/* BOTTOM NAV */}
+      {/* BOTTOM NAVIGATION */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
   );
