@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, LoadScript, Marker, Autocomplete } from '@react-google-maps/api';
 
+// IMPORTANTE: Definir libraries fora do componente
 const libraries: ("places")[] = ["places"];
 
 const containerStyle = {
@@ -30,12 +31,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [userLocation, setUserLocation] = useState(defaultCenter);
-  const [mapError, setMapError] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const pickupAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const dropoffAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
+  // Obter localização do usuário
   useEffect(() => {
-    if (navigator.geolocation) {
+    if (navigator.geolocation && scriptLoaded) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const pos = {
@@ -48,15 +52,39 @@ const MapComponent: React.FC<MapComponentProps> = ({
         () => console.log('Usando localização padrão')
       );
     }
-  }, [map]);
+  }, [map, scriptLoaded]);
 
-  const onLoad = React.useCallback((map: google.maps.Map) => {
+  const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
 
-  const onUnmount = React.useCallback(() => {
+  const onUnmount = useCallback(() => {
     setMap(null);
   }, []);
+
+  const onPickupLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    pickupAutocompleteRef.current = autocomplete;
+  };
+
+  const onDropoffLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    dropoffAutocompleteRef.current = autocomplete;
+  };
+
+  const onPlaceChanged = (type: 'pickup' | 'dropoff') => {
+    const autocomplete = type === 'pickup' ? pickupAutocompleteRef.current : dropoffAutocompleteRef.current;
+    if (autocomplete) {
+      const place = autocomplete.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const location = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+          address: place.formatted_address || place.name || '',
+        };
+        if (onLocationSelect) onLocationSelect(location);
+        if (map) map.panTo({ lat: location.lat, lng: location.lng });
+      }
+    }
+  };
 
   if (!apiKey) {
     return (
@@ -73,91 +101,92 @@ const MapComponent: React.FC<MapComponentProps> = ({
     <LoadScript 
       googleMapsApiKey={apiKey} 
       libraries={libraries}
-      onError={() => setMapError(true)}
+      onLoad={() => setScriptLoaded(true)}
     >
-      {!mapError ? (
-        <div className="relative w-full h-full rounded-xl overflow-hidden">
-          {/* Campos de endereço */}
-          <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
-            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
-              <div className="flex items-center gap-2 p-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <input
-                  type="text"
-                  placeholder="Onde você está?"
-                  className="flex-1 bg-transparent text-white text-sm outline-none"
-                  onChange={(e) => onPickupChange?.(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
-              <div className="flex items-center gap-2 p-2">
-                <div className="w-2 h-2 rounded-full bg-red-500" />
-                <input
-                  type="text"
-                  placeholder="Para onde vai?"
-                  className="flex-1 bg-transparent text-white text-sm outline-none"
-                  onChange={(e) => onDropoffChange?.(e.target.value)}
-                />
+      <div className="relative w-full h-full rounded-xl overflow-hidden">
+        {/* Campos de endereço sobrepostos */}
+        <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
+            <div className="flex items-center gap-2 p-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <div className="flex-1">
+                <Autocomplete onLoad={onPickupLoad} onPlaceChanged={() => onPlaceChanged('pickup')}>
+                  <input
+                    type="text"
+                    placeholder="Onde você está?"
+                    className="w-full bg-transparent text-white text-sm outline-none"
+                    onChange={(e) => onPickupChange?.(e.target.value)}
+                  />
+                </Autocomplete>
               </div>
             </div>
           </div>
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
+            <div className="flex items-center gap-2 p-2">
+              <div className="w-2 h-2 rounded-full bg-red-500" />
+              <div className="flex-1">
+                <Autocomplete onLoad={onDropoffLoad} onPlaceChanged={() => onPlaceChanged('dropoff')}>
+                  <input
+                    type="text"
+                    placeholder="Para onde vai?"
+                    className="w-full bg-transparent text-white text-sm outline-none"
+                    onChange={(e) => onDropoffChange?.(e.target.value)}
+                  />
+                </Autocomplete>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={userLocation}
-            zoom={14}
-            onLoad={onLoad}
-            onUnmount={onUnmount}
-            options={{
-              styles: [
-                {
-                  featureType: 'poi',
-                  stylers: [{ visibility: 'off' }],
-                },
-              ],
-              disableDefaultUI: true,
-              zoomControl: true,
-              zoomControlOptions: {
-                position: google.maps.ControlPosition.RIGHT_BOTTOM,
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={userLocation}
+          zoom={14}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
+          options={{
+            styles: [
+              {
+                featureType: 'poi',
+                stylers: [{ visibility: 'off' }],
               },
-            }}
-          >
+            ],
+            disableDefaultUI: true,
+            zoomControl: true,
+          }}
+        >
+          {/* Marcador da localização atual */}
+          {scriptLoaded && (
             <Marker
               position={userLocation}
               icon={{
                 url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                scaledSize: new google.maps.Size(32, 32),
+                scaledSize: new window.google.maps.Size(32, 32),
               }}
             />
-            {pickupLocation && (
-              <Marker
-                position={{ lat: pickupLocation.lat, lng: pickupLocation.lng }}
-                icon={{
-                  url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                  scaledSize: new google.maps.Size(32, 32),
-                }}
-              />
-            )}
-            {dropoffLocation && (
-              <Marker
-                position={{ lat: dropoffLocation.lat, lng: dropoffLocation.lng }}
-                icon={{
-                  url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                  scaledSize: new google.maps.Size(32, 32),
-                }}
-              />
-            )}
-          </GoogleMap>
-        </div>
-      ) : (
-        <div className="w-full h-full bg-[#1A1528] rounded-xl flex items-center justify-center">
-          <div className="text-center p-4">
-            <p className="text-red-400 text-sm">&#10060; Erro ao carregar mapa</p>
-            <p className="text-gray-400 text-xs">Verifique sua chave de API</p>
-          </div>
-        </div>
-      )}
+          )}
+          
+          {pickupLocation && scriptLoaded && (
+            <Marker
+              position={{ lat: pickupLocation.lat, lng: pickupLocation.lng }}
+              icon={{
+                url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                scaledSize: new window.google.maps.Size(32, 32),
+              }}
+            />
+          )}
+          
+          {dropoffLocation && scriptLoaded && (
+            <Marker
+              position={{ lat: dropoffLocation.lat, lng: dropoffLocation.lng }}
+              icon={{
+                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                scaledSize: new window.google.maps.Size(32, 32),
+              }}
+            />
+          )}
+        </GoogleMap>
+      </div>
     </LoadScript>
   );
 };
