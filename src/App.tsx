@@ -1,5 +1,6 @@
 import React from 'react';
-import TestMap from './pages/TestMap';
+import { Toaster } from 'sonner';
+import { MainScreen } from './pages/MainScreen';
 
 function App() {
   console.log('🔵 App iniciado');
@@ -8,7 +9,12 @@ function App() {
   console.log('  VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅' : '❌');
   console.log('  VITE_GOOGLE_MAPS_API_KEY:', import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? '✅' : '❌');
   
-  return <TestMap />;
+  return (
+    <>
+      <Toaster position="top-center" />
+      <MainScreen />
+    </>
+  );
 }
 
 export default App;
