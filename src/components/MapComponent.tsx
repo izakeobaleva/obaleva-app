@@ -1,267 +1,170 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { GoogleMap, Marker, Autocomplete, useJsApiLoader, Circle } from '@react-google-maps/api';
-import { Loader2, MapPin } from 'lucide-react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, LoadScript, Marker, Autocomplete } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
-  height: '100%',
-  borderRadius: '0.75rem',
+  height: '400px',
 };
 
-const darkMapStyles: google.maps.MapTypeStyle[] = [
-  { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#a0a0b0' }] },
-  {
-    featureType: 'road',
-    elementType: 'geometry',
-    stylers: [{ color: '#2a1a3a' }],
-  },
-  { featureType: 'road', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9b59b6' }] },
-  {
-    featureType: 'poi',
-    elementType: 'geometry',
-    stylers: [{ color: '#1a1528' }],
-  },
-  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6b2d8c' }] },
-  {
-    featureType: 'water',
-    elementType: 'geometry',
-    stylers: [{ color: '#0f0b1a' }],
-  },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#6b2d8c' }] },
-  {
-    featureType: 'administrative',
-    elementType: 'geometry',
-    stylers: [{ color: '#1a1528' }],
-  },
-  { featureType: 'administrative', elementType: 'labels.text.fill', stylers: [{ color: '#a0a0b0' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-];
-
-const defaultCenter = { lat: -23.5505, lng: -46.6333 }; // São Paulo
+const defaultCenter = {
+  lat: -23.5505,
+  lng: -46.6333,
+};
 
 interface MapComponentProps {
-  onOriginChange?: (address: string) => void;
-  onDestinationChange?: (address: string) => void;
-  height?: string;
+  onLocationSelect?: (location: { lat: number; lng: number; address: string }) => void;
+  pickupLocation?: { lat: number; lng: number; address: string } | null;
+  dropoffLocation?: { lat: number; lng: number; address: string } | null;
+  onPickupChange?: (value: string) => void;
+  onDropoffChange?: (value: string) => void;
 }
 
-export default function MapComponent({ onOriginChange, onDestinationChange, height = 'h-56' }: MapComponentProps) {
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyBXC6y3jWxCFBMeV77L1F0E4fgu_q6QCaM',
-    libraries: ['places'],
-  });
-
+export const MapComponent: React.FC<MapComponentProps> = ({
+  onLocationSelect,
+  pickupLocation,
+  dropoffLocation,
+  onPickupChange,
+  onDropoffChange,
+}) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [userLocation, setUserLocation] = useState(defaultCenter);
-  const [originPosition, setOriginPosition] = useState<google.maps.LatLngLiteral | null>(null);
-  const [destinationPosition, setDestinationPosition] = useState<google.maps.LatLngLiteral | null>(null);
-  const [originValue, setOriginValue] = useState('');
-  const [destinationValue, setDestinationValue] = useState('');
-  
-  const originAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const destinationAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const originInputRef = useRef<HTMLInputElement>(null);
-  const destinationInputRef = useRef<HTMLInputElement>(null);
+  const pickupAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const dropoffAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setUserLocation(loc);
-          setOriginPosition(loc);
-          setOriginValue(`${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`);
-          if (map) map.panTo(loc);
+        (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(pos);
+          if (map) map.panTo(pos);
         },
-        () => console.warn('Geolocation não disponível'),
-        { enableHighAccuracy: true, timeout: 10000 }
+        () => console.error('Erro ao obter localização')
       );
     }
   }, [map]);
 
-  const onLoad = useCallback((mapInstance: google.maps.Map) => {
-    setMap(mapInstance);
+  const onLoad = useCallback((map: google.maps.Map) => {
+    setMap(map);
   }, []);
 
   const onUnmount = useCallback(() => {
     setMap(null);
   }, []);
 
-  const onOriginAutocompleteLoad = (autocomplete: google.maps.places.Autocomplete) => {
-    originAutocompleteRef.current = autocomplete;
+  const onPickupLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    pickupAutocompleteRef.current = autocomplete;
   };
 
-  const onDestinationAutocompleteLoad = (autocomplete: google.maps.places.Autocomplete) => {
-    destinationAutocompleteRef.current = autocomplete;
+  const onDropoffLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    dropoffAutocompleteRef.current = autocomplete;
   };
 
-  const onOriginPlaceChanged = () => {
-    if (originAutocompleteRef.current) {
-      const place = originAutocompleteRef.current.getPlace();
-      if (place.geometry?.location) {
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        const address = place.formatted_address || place.name || '';
-        setOriginPosition({ lat, lng });
-        setOriginValue(address);
-        map?.panTo({ lat, lng });
-        map?.setZoom(15);
-        if (onOriginChange) onOriginChange(address);
+  const onPlaceChanged = (type: 'pickup' | 'dropoff') => {
+    const autocomplete = type === 'pickup' ? pickupAutocompleteRef.current : dropoffAutocompleteRef.current;
+    if (autocomplete) {
+      const place = autocomplete.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const location = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+          address: place.formatted_address || place.name || '',
+        };
+        if (onLocationSelect) onLocationSelect(location);
+        if (map) map.panTo({ lat: location.lat, lng: location.lng });
       }
     }
   };
-
-  const onDestinationPlaceChanged = () => {
-    if (destinationAutocompleteRef.current) {
-      const place = destinationAutocompleteRef.current.getPlace();
-      if (place.geometry?.location) {
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        const address = place.formatted_address || place.name || '';
-        setDestinationPosition({ lat, lng });
-        setDestinationValue(address);
-        if (onDestinationChange) onDestinationChange(address);
-        
-        if (originPosition) {
-          const bounds = new google.maps.LatLngBounds();
-          bounds.extend(originPosition);
-          bounds.extend({ lat, lng });
-          map?.fitBounds(bounds);
-        } else {
-          map?.panTo({ lat, lng });
-          map?.setZoom(15);
-        }
-      }
-    }
-  };
-
-  if (loadError) {
-    return (
-      <div className={`${height} w-full bg-gradient-to-br from-[#2a1a3a] to-[#1a1a2e] rounded-xl flex items-center justify-center`}>
-        <div className="text-center">
-          <MapPin size={28} className="text-[#F4D03F]/50 mx-auto mb-2" />
-          <p className="text-white/50 text-xs">Erro ao carregar mapa</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className={`${height} w-full bg-gradient-to-br from-[#2a1a3a] to-[#1a1a2e] rounded-xl flex items-center justify-center`}>
-        <Loader2 size={28} className="text-[#F4D03F] animate-spin" />
-      </div>
-    );
-  }
 
   return (
-    <div className={`${height} w-full rounded-xl overflow-hidden relative`}>
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={userLocation}
-        zoom={14}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        options={{
-          styles: darkMapStyles,
-          disableDefaultUI: true,
-          zoomControl: false,
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false,
-          clickableIcons: false,
-        }}
-      >
-        {/* Marcador de localização do usuário */}
-        {originPosition && (
-          <Marker
-            position={originPosition}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 10,
-              fillColor: '#22C55E',
-              fillOpacity: 0.8,
-              strokeColor: '#22C55E',
-              strokeWeight: 2,
-            }}
-            title="Sua localização"
-          />
-        )}
+    <LoadScript
+      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+      libraries={['places']}
+    >
+      <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
+        {/* Campos de endereço sobrepostos no mapa */}
+        <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
+            <div className="flex items-center gap-2 p-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <Autocomplete onLoad={onPickupLoad} onPlaceChanged={() => onPlaceChanged('pickup')}>
+                <input
+                  type="text"
+                  placeholder="Onde você está?"
+                  className="flex-1 bg-transparent text-white text-sm outline-none"
+                  onChange={(e) => onPickupChange?.(e.target.value)}
+                />
+              </Autocomplete>
+            </div>
+          </div>
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
+            <div className="flex items-center gap-2 p-2">
+              <div className="w-2 h-2 rounded-full bg-red-500" />
+              <Autocomplete onLoad={onDropoffLoad} onPlaceChanged={() => onPlaceChanged('dropoff')}>
+                <input
+                  type="text"
+                  placeholder="Para onde vai?"
+                  className="flex-1 bg-transparent text-white text-sm outline-none"
+                  onChange={(e) => onDropoffChange?.(e.target.value)}
+                />
+              </Autocomplete>
+            </div>
+          </div>
+        </div>
 
-        {/* Marcador de destino */}
-        {destinationPosition && (
-          <Marker
-            position={destinationPosition}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 10,
-              fillColor: '#EF4444',
-              fillOpacity: 0.8,
-              strokeColor: '#EF4444',
-              strokeWeight: 2,
-            }}
-            title="Destino"
-          />
-        )}
-
-        {/* Círculo de precisão */}
-        {originPosition && (
-          <Circle
-            center={originPosition}
-            radius={50}
-            options={{
-              fillColor: '#22C55E',
-              fillOpacity: 0.08,
-              strokeColor: '#22C55E',
-              strokeOpacity: 0.2,
-              strokeWeight: 1,
-            }}
-          />
-        )}
-      </GoogleMap>
-
-      {/* Inputs de autocomplete sobrepostos (mobile) */}
-      <div className="absolute top-2 left-2 right-2 z-10 space-y-1.5">
-        <Autocomplete
-          onLoad={onOriginAutocompleteLoad}
-          onPlaceChanged={onOriginPlaceChanged}
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={userLocation}
+          zoom={15}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
+          options={{
+            styles: [
+              {
+                featureType: 'poi',
+                stylers: [{ visibility: 'off' }],
+              },
+            ],
+            disableDefaultUI: true,
+            zoomControl: true,
+          }}
         >
-          <input
-            ref={originInputRef}
-            type="text"
-            placeholder="Onde você está?"
-            value={originValue}
-            onChange={(e) => setOriginValue(e.target.value)}
-            className="w-full bg-black/60 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 text-white text-xs placeholder-white/40 focus:outline-none focus:border-[#F4D03F]/50"
+          <Marker
+            position={userLocation}
+            icon={{
+              url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+              scaledSize: new google.maps.Size(32, 32),
+            }}
           />
-        </Autocomplete>
+          {pickupLocation && (
+            <Marker
+              position={{ lat: pickupLocation.lat, lng: pickupLocation.lng }}
+              icon={{
+                url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                scaledSize: new google.maps.Size(32, 32),
+              }}
+            />
+          )}
+          {dropoffLocation && (
+            <Marker
+              position={{ lat: dropoffLocation.lat, lng: dropoffLocation.lng }}
+              icon={{
+                url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                scaledSize: new google.maps.Size(32, 32),
+              }}
+            />
+          )}
+        </GoogleMap>
 
-        <Autocomplete
-          onLoad={onDestinationAutocompleteLoad}
-          onPlaceChanged={onDestinationPlaceChanged}
-        >
-          <input
-            ref={destinationInputRef}
-            type="text"
-            placeholder="Para onde vai?"
-            value={destinationValue}
-            onChange={(e) => setDestinationValue(e.target.value)}
-            className="w-full bg-black/60 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 text-white text-xs placeholder-white/40 focus:outline-none focus:border-[#F4D03F]/50"
-          />
-        </Autocomplete>
+        <div className="absolute bottom-3 left-3 right-3 z-10">
+          <button className="btn-amarelo w-full py-2 rounded-lg font-bold text-sm">
+            Solicitar ObaLeva
+          </button>
+        </div>
       </div>
-
-      {/* Indicador de localização */}
-      <div className="absolute bottom-2 left-2 z-10 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
-        <p className="text-white text-[8px] flex items-center gap-0.5">
-          <MapPin size={8} className="text-[#F4D03F]" />
-          📍 {userLocation ? `${userLocation.lat.toFixed(2)}, ${userLocation.lng.toFixed(2)}` : 'Buscando...'}
-        </p>
-      </div>
-    </div>
+    </LoadScript>
   );
-}
+};
