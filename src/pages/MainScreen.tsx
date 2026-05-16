@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { 
   User, Truck, Shield, Star, Zap, Gift, Chrome, 
   Home, Search, Menu as MenuIcon, Video, Megaphone, 
-  Coffee, Heart, Wallet, Car 
+  Coffee, Heart, Wallet, Car, MapPin, Navigation, LogOut 
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import MapComponent from '../components/MapComponent';
 
 // ============================================
@@ -20,7 +20,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
     { id: 'menu', label: 'Menu', icon: MenuIcon },
   ];
   return (
-    <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] via-[#0F0B1A] to-transparent pt-4">
+    <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] via-[#0F0B1A] to-transparent pt-4 z-50">
       <div className="bg-[#1A1528] border border-white/10 rounded-2xl max-w-md w-full mx-4 shadow-xl">
         <div className="flex justify-between items-center px-4 py-2">
           {tabs.map((tab) => {
@@ -32,11 +32,10 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
                 className={`flex flex-col items-center gap-1 transition-all duration-200 ${
                   isActive ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'
                 }`}
-                style={{ minHeight: '56px', minWidth: '64px' }}
               >
                 <tab.icon size={24} strokeWidth={isActive ? 2 : 1.5} />
                 <span className="text-xs font-medium">{tab.label}</span>
-                {isActive && <div className="w-1.5 h-1 rounded-full bg-[#F4D03F] mt-0.5 animate-pulse" />}
+                {isActive && <div className="w-1.5 h-1 rounded-full bg-[#F4D03F] mt-0.5" />}
               </button>
             );
           })}
@@ -62,12 +61,12 @@ const DiscoverBar = () => {
   ];
 
   return (
-    <div className="mt-4 mb-24">
+    <div className="mt-4 mb-28">
       <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-2 px-1">
         {cards.map((card, idx) => (
           <div 
             key={idx} 
-            className="min-w-[160px] max-w-[160px] bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/30 transition-all duration-200 hover:scale-105"
+            className="min-w-[160px] max-w-[160px] bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/30 transition-all duration-200"
           >
             <div className="flex items-start gap-2">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0`} 
@@ -79,7 +78,7 @@ const DiscoverBar = () => {
                 <p className="text-[#A0A0B0] text-[10px] mt-0.5 truncate">{card.description}</p>
                 {card.type === 'promo' && (
                   <div className="mt-1 inline-block bg-[#F4D03F]/20 text-[#F4D03F] text-[8px] px-1.5 py-0.5 rounded-full font-bold">
-                    🔥 PROMOÇÃO
+                    🔥 PROMO
                   </div>
                 )}
               </div>
@@ -92,43 +91,31 @@ const DiscoverBar = () => {
 };
 
 // ============================================
-// LOGIN CARD
-// ============================================
-const LoginCard = () => (
-  <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-2xl p-8 border border-white/10 text-center mt-8">
-    <div className="bg-gradient-to-br from-[#F4D03F]/20 to-[#F4D03F]/5 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-5">
-      <Car className="text-[#F4D03F] w-12 h-12" />
-    </div>
-    <h2 className="text-white font-bold text-2xl mb-2">Bem-vindo ao ObaLeva!</h2>
-    <p className="text-[#A0A0B0] text-sm mb-8">Faça login para solicitar corridas</p>
-    <button 
-      onClick={async () => {
-        const { error } = await supabase.auth.signInWithOAuth({ 
-          provider: 'google', 
-          options: { redirectTo: window.location.origin } 
-        });
-        if (error) toast.error('Erro ao fazer login');
-      }}
-      className="w-full py-3 rounded-xl bg-white/5 border border-white/20 text-white flex items-center justify-center gap-3 hover:bg-white/10 transition-all duration-200 font-medium"
-    >
-      <Chrome size={20} /> Entrar com Google
-    </button>
-  </div>
-);
-
-// ============================================
-// PASSENGER DASHBOARD - COM MAPA E LOGO SOBREPOSTA
+// DASHBOARD DO PASSAGEIRO
 // ============================================
 const PassengerDashboard = ({ 
   pickupLocation, dropoffLocation, setPickupLocation, setDropoffLocation, 
   pickupAddress, setPickupAddress, dropoffAddress, setDropoffAddress, 
-  onRequestRide, userBalance 
+  onRequestRide, userBalance, signOut 
 }: any) => (
   <div className="mt-2">
-    {/* ===== CONTAINER DO MAPA COM LOGO SOBREPOSTA ===== */}
+    {/* CABEÇALHO COM SAIR */}
+    <div className="flex justify-between items-center mb-3 px-1">
+      <div className="flex items-center gap-2">
+        <div className="w-2 h-2 rounded-full bg-[#F4D03F] animate-pulse" />
+        <span className="text-[#F4D03F] text-[10px] font-medium">AO VIVO</span>
+      </div>
+      <button 
+        onClick={signOut}
+        className="text-[#A0A0B0] text-[10px] flex items-center gap-1 hover:text-red-400 transition"
+      >
+        <LogOut size={12} /> Sair
+      </button>
+    </div>
+
+    {/* MAPA COM LOGO SOBREPOSTA */}
     <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-      {/* MAPA - Altura de 450px para melhor visualização */}
-      <div className="h-[450px] w-full">
+      <div className="h-[420px] w-full">
         <MapComponent
           pickupLocation={pickupLocation}
           dropoffLocation={dropoffLocation}
@@ -146,7 +133,7 @@ const PassengerDashboard = ({
         />
       </div>
       
-      {/* ===== LOGO SOBREPOSTA AO MAPA (TOP CENTER) ===== */}
+      {/* LOGO SOBREPOSTA AO MAPA */}
       <div className="absolute top-4 left-0 right-0 z-20 flex justify-center pointer-events-none">
         <div className="bg-[#1A1528]/90 backdrop-blur-md rounded-2xl px-6 py-2 border border-[#F4D03F]/40 shadow-xl">
           <div className="flex items-center gap-2">
@@ -162,7 +149,7 @@ const PassengerDashboard = ({
       </div>
     </div>
 
-    {/* ===== BOTÃO COM SALDO INTEGRADO (FORA DO MAPA) ===== */}
+    {/* BOTÃO COM SALDO INTEGRADO */}
     <div className="mt-4 px-1">
       <button 
         onClick={onRequestRide}
@@ -184,10 +171,35 @@ const PassengerDashboard = ({
 );
 
 // ============================================
+// TELA DE LOGIN
+// ============================================
+const LoginCard = () => (
+  <div className="bg-gradient-to-br from-[#1A1528] to-[#0F0B1A] rounded-2xl p-8 border border-white/10 text-center mt-8">
+    <div className="bg-gradient-to-br from-[#F4D03F]/20 to-[#F4D03F]/5 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-5">
+      <Car className="text-[#F4D03F] w-12 h-12" />
+    </div>
+    <h2 className="text-white font-bold text-2xl mb-2">Bem-vindo ao ObaLeva!</h2>
+    <p className="text-[#A0A0B0] text-sm mb-8">Faça login para solicitar corridas</p>
+    <button 
+      onClick={async () => {
+        const { error } = await supabase.auth.signInWithOAuth({ 
+          provider: 'google', 
+          options: { redirectTo: window.location.origin } 
+        });
+        if (error) toast.error('Erro ao fazer login');
+      }}
+      className="w-full py-3 rounded-xl bg-white/5 border border-white/20 text-white flex items-center justify-center gap-3 hover:bg-white/10 transition-all duration-200 font-medium"
+    >
+      <Chrome size={20} /> Entrar com Google
+    </button>
+  </div>
+);
+
+// ============================================
 // TELA PRINCIPAL
 // ============================================
 export const MainScreen = () => {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
   const [pickupLocation, setPickupLocation] = useState(null);
   const [dropoffLocation, setDropoffLocation] = useState(null);
@@ -200,7 +212,7 @@ export const MainScreen = () => {
       toast.error('📍 Por favor, preencha a origem e o destino!');
       return;
     }
-    toast.success(`🚗 Corrida solicitada com sucesso!\n\n📍 De: ${pickupAddress}\n📍 Para: ${dropoffAddress}`, {
+    toast.success(`🚗 Corrida solicitada!\n\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`, {
       duration: 5000,
     });
   };
@@ -217,24 +229,10 @@ export const MainScreen = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#0F0B1A]">
-      {/* CONTEÚDO PRINCIPAL */}
-      <div className="max-w-md mx-auto px-4 pt-2 pb-32">
-        
-        {/* TÍTULO PEQUENO NO TOPO (OPCIONAL) */}
-        <div className="flex justify-between items-center mb-2 px-1">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-[#F4D03F] animate-pulse" />
-            <span className="text-[#F4D03F] text-[10px] font-medium">AO VIVO</span>
-          </div>
-          {user && (
-            <div className="text-[#A0A0B0] text-[10px]">
-              Olá, {profile?.nome_completo?.split(' ')[0] || 'Usuário'}
-            </div>
-          )}
-        </div>
-
-        {/* DASHBOARD DO PASSAGEIRO OU LOGIN */}
+    <div className="min-h-screen bg-[#0F0B1A]">
+      <Toaster position="top-center" richColors />
+      
+      <div className="max-w-md mx-auto px-4 pb-32">
         {!user ? (
           <LoginCard />
         ) : (
@@ -249,14 +247,13 @@ export const MainScreen = () => {
             setDropoffAddress={setDropoffAddress}
             onRequestRide={handleRequestRide}
             userBalance={userBalance}
+            signOut={signOut}
           />
         )}
 
-        {/* DISCOVER BAR - CARDS DE PROMOÇÃO */}
         <DiscoverBar />
       </div>
 
-      {/* BOTTOM NAVIGATION */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
   );
