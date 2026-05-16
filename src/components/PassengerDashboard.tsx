@@ -19,12 +19,10 @@ export const PassengerDashboard = React.memo(({
   onRequestRide,
 }: PassengerDashboardProps) => (
   <div className="space-y-4">
-    {/* 1. Mapa com Logo */}
     <div className="h-[220px] rounded-2xl overflow-hidden shadow-2xl">
       <MapComponent />
     </div>
 
-    {/* 2. Container de Origem e Destino (separado) */}
     <LocationInputs
       pickupAddress={pickupAddress}
       setPickupAddress={setPickupAddress}
@@ -32,7 +30,6 @@ export const PassengerDashboard = React.memo(({
       setDropoffAddress={setDropoffAddress}
     />
 
-    {/* 3. Botão Solicitar ObaLeva */}
     <ActionButton
       onRequestRide={onRequestRide}
       disabled={!pickupAddress || !dropoffAddress}

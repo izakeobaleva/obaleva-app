@@ -34,7 +34,6 @@ export const LoginScreen = ({ onSuccess }: LoginScreenProps) => {
 
   return (
     <div className="bg-gradient-to-br from-[#1A1528] to-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20 shadow-xl">
-      {/* Header do Login */}
       <div className="text-center mb-6">
         <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#F4D03F]/20 to-[#8B5CF6]/20 flex items-center justify-center border-2 border-[#F4D03F]/30">
           <Car className="text-[#F4D03F] w-10 h-10" />
@@ -44,7 +43,6 @@ export const LoginScreen = ({ onSuccess }: LoginScreenProps) => {
       </div>
       
       <div className="space-y-4">
-        {/* Botão Google */}
         <button 
           onClick={handleGoogleLogin} 
           className="w-full py-3 rounded-xl border border-[#F4D03F]/30 bg-white/5 text-white flex items-center justify-center gap-3 hover:bg-white/10 transition-all duration-200 group"
@@ -58,7 +56,6 @@ export const LoginScreen = ({ onSuccess }: LoginScreenProps) => {
           <span className="font-medium">Entrar com Google</span>
         </button>
         
-        {/* Divisor */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10"></div>
@@ -68,7 +65,6 @@ export const LoginScreen = ({ onSuccess }: LoginScreenProps) => {
           </div>
         </div>
 
-        {/* Formulário Email/Senha */}
         <form onSubmit={handleEmailLogin} className="space-y-3">
           <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden focus-within:border-[#F4D03F]/50 transition-all">
             <div className="flex items-center gap-3 px-4 py-3">

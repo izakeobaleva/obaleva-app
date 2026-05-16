@@ -40,9 +40,7 @@ export const DiscoverBar = () => {
           </button>
         </div>
 
-        {/* Cards roláveis horizontalmente */}
         <div className="relative">
-          {/* Botão de scroll esquerdo */}
           <button
             onClick={() => scroll('left')}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 rounded-full p-1 backdrop-blur-sm hover:bg-black/70 transition"
@@ -83,7 +81,6 @@ export const DiscoverBar = () => {
             ))}
           </div>
 
-          {/* Botão de scroll direito */}
           <button
             onClick={() => scroll('right')}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 rounded-full p-1 backdrop-blur-sm hover:bg-black/70 transition"
