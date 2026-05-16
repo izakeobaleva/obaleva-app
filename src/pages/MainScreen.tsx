@@ -255,9 +255,8 @@ export const MainScreen = () => {
       <Toaster position="top-center" richColors />
       
       <div className="max-w-md mx-auto px-4">
-        {/* MAPA - altura 220px com fundo de teste */}
-        <div className="h-[220px] rounded-xl overflow-hidden shadow-lg bg-amber-500/30">
-          {/* Se você vir uma área amarelada, o container existe */}
+        {/* MAPA */}
+        <div className="h-[220px] rounded-xl overflow-hidden shadow-lg">
           <MapComponent
             pickupLocation={pickupLocation}
             dropoffLocation={dropoffLocation}
@@ -275,7 +274,7 @@ export const MainScreen = () => {
           />
         </div>
 
-        {/* ÁREA DE AÇÃO - com mt-1 (4px) */}
+        {/* ÁREA DE AÇÃO */}
         <div className="mt-1">
           {!user ? (
             <LoginScreen
@@ -338,13 +337,13 @@ export const MainScreen = () => {
           )}
         </div>
 
-        {/* CARDS ROLÁVEIS - com mt-1 (4px) */}
+        {/* CARDS ROLÁVEIS */}
         <div className="mt-1">
           <DiscoverBar />
         </div>
       </div>
 
-      {/* BOTTOM NAV - com mt-1 (4px) */}
+      {/* BOTTOM NAV */}
       <div className="mt-1">
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
       </div>
