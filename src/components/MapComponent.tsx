@@ -17,6 +17,7 @@ interface MapComponentProps {
   dropoffLocation?: { lat: number; lng: number; address: string } | null;
   onPickupChange?: (value: string) => void;
   onDropoffChange?: (value: string) => void;
+  height?: string;
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({
@@ -25,12 +26,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
   dropoffLocation,
   onPickupChange,
   onDropoffChange,
+  height = '400px',
 }) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [userLocation, setUserLocation] = useState(defaultCenter);
+  const [mapError, setMapError] = useState<string | null>(null);
   const pickupAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const dropoffAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  useEffect(() => {
+    if (!apiKey) {
+      setMapError('Chave da API do Google Maps não configurada. Verifique o arquivo .env');
+    }
+  }, []);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -80,22 +91,43 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   };
 
-  const handleScriptLoad = () => {
-    setIsScriptLoaded(true);
-  };
+  if (mapError) {
+    return (
+      <div style={{ height }} className="bg-[#0F0B1A] flex items-center justify-center rounded-xl border border-white/10">
+        <div className="text-center p-4">
+          <p className="text-red-400 text-sm mb-2">❌ {mapError}</p>
+          <p className="text-[#A0A0B0] text-xs">Configure a chave no .env e reinicie o servidor</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!apiKey) {
+    return (
+      <div style={{ height }} className="bg-[#0F0B1A] flex items-center justify-center rounded-xl border border-white/10">
+        <div className="text-center p-4">
+          <p className="text-yellow-400 text-sm mb-2">⚠️ Chave da API do Google Maps não encontrada</p>
+          <p className="text-[#A0A0B0] text-xs">Adicione VITE_GOOGLE_MAPS_API_KEY no arquivo .env</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <LoadScript
-      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+      googleMapsApiKey={apiKey}
       libraries={['places']}
-      onLoad={handleScriptLoad}
+      onLoad={() => setIsScriptLoaded(true)}
+      onError={() => {
+        setMapError('Erro ao carregar o Google Maps. Verifique se o domínio está autorizado no Google Cloud Console.');
+      }}
     >
       {isScriptLoaded && (
-        <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
+        <div className="relative w-full rounded-xl overflow-hidden" style={{ height }}>
           <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
             <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
               <div className="flex items-center gap-2 p-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <div className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
                 <Autocomplete onLoad={onPickupLoad} onPlaceChanged={() => onPlaceChanged('pickup')}>
                   <input
                     type="text"
@@ -108,7 +140,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             </div>
             <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
               <div className="flex items-center gap-2 p-2">
-                <div className="w-2 h-2 rounded-full bg-red-500" />
+                <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
                 <Autocomplete onLoad={onDropoffLoad} onPlaceChanged={() => onPlaceChanged('dropoff')}>
                   <input
                     type="text"
@@ -122,7 +154,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           </div>
 
           <GoogleMap
-            mapContainerStyle={containerStyle}
+            mapContainerStyle={{ width: '100%', height }}
             center={userLocation}
             zoom={15}
             onLoad={onLoad}
