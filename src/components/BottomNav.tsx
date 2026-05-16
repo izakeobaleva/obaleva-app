@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Search, User, Menu, Wallet } from 'lucide-react';
+import { Home, Search, User, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
