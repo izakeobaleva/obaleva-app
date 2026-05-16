@@ -5,6 +5,7 @@ import { Car, MapPin, Navigation, User, Truck, Shield, Star, Zap, Gift, Chrome, 
 import { toast } from 'sonner';
 import MapComponent from '../components/MapComponent';
 
+// BottomNav
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
   const tabs = [
     { id: 'home', label: 'Início', icon: Home },
@@ -37,6 +38,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   );
 };
 
+// DiscoverBar
 const DiscoverBar = () => {
   const cards = [
     { icon: <Gift size={24} />, title: "1ª corrida grátis", description: "Até R$ 20 de desconto", color: "#F4D03F", type: "promo" },
@@ -71,6 +73,7 @@ const DiscoverBar = () => {
   );
 };
 
+// Tela de login
 const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => (
   <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10">
     <div className="text-center mb-3">
@@ -91,31 +94,16 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
   </div>
 );
 
-const PassengerDashboard = ({ pickupLocation, dropoffLocation, setPickupLocation, setDropoffLocation, pickupAddress, setPickupAddress, dropoffAddress, setDropoffAddress, onRequestRide }: any) => (
+// PassengerDashboard com botão FORA do mapa
+const PassengerDashboard = ({ onRequestRide, children }: any) => (
   <>
-    <div className="h-[400px]">
-      <MapComponent
-        pickupLocation={pickupLocation}
-        dropoffLocation={dropoffLocation}
-        onPickupChange={setPickupAddress}
-        onDropoffChange={setDropoffAddress}
-        onLocationSelect={(location) => {
-          if (!dropoffAddress) {
-            setPickupLocation(location);
-            setPickupAddress(location.address);
-          } else {
-            setDropoffLocation(location);
-            setDropoffAddress(location.address);
-          }
-        }}
-      />
-    </div>
-    <div className="mt-2 px-4">
+    {children}
+    <div className="mt-2">
       <button 
         onClick={onRequestRide}
-        className="btn-amarelo w-full py-3 rounded-xl font-bold text-base shadow-lg"
+        className="btn-amarelo w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2"
       >
-        Solicitar ObaLeva
+        <Car size={16} /> Solicitar ObaLeva
       </button>
     </div>
   </>
@@ -165,6 +153,8 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
   );
 };
 
+// ==================== TELA PRINCIPAL ====================
+
 export const MainScreen = () => {
   const { user, profile, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
@@ -172,10 +162,6 @@ export const MainScreen = () => {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
-  const [pickupLocation, setPickupLocation] = useState(null);
-  const [dropoffLocation, setDropoffLocation] = useState(null);
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [dropoffAddress, setDropoffAddress] = useState('');
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -183,10 +169,6 @@ export const MainScreen = () => {
   };
 
   const handleRequestRide = () => {
-    if (!pickupLocation || !dropoffLocation) {
-      toast.error('Por favor, preencha a origem e o destino!');
-      return;
-    }
     toast.success('Corrida solicitada! Aguardando motorista...');
   };
 
@@ -231,17 +213,9 @@ export const MainScreen = () => {
             {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
           </div>
         ) : profile.tipo === 'passageiro' ? (
-          <PassengerDashboard
-            pickupLocation={pickupLocation}
-            dropoffLocation={dropoffLocation}
-            setPickupLocation={setPickupLocation}
-            setDropoffLocation={setDropoffLocation}
-            pickupAddress={pickupAddress}
-            setPickupAddress={setPickupAddress}
-            dropoffAddress={dropoffAddress}
-            setDropoffAddress={setDropoffAddress}
-            onRequestRide={handleRequestRide}
-          />
+          <PassengerDashboard onRequestRide={handleRequestRide}>
+            <MapComponent />
+          </PassengerDashboard>
         ) : profile.tipo === 'motorista' ? (
           <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center">
             <Truck className="text-[#F4D03F] w-8 h-8 mx-auto mb-1.5" />
