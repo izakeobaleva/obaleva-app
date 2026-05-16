@@ -94,19 +94,79 @@ const DiscoverBar = () => {
 };
 
 // ============================================
-// TELA DE LOGIN
+// LOCATION INPUTS - SEMPRE VISÍVEL
 // ============================================
-const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => {
+const LocationInputs = ({ pickupAddress, setPickupAddress, dropoffAddress, setDropoffAddress }: any) => (
+  <div className="bg-[#1A1528] rounded-2xl p-3 border border-[#F4D03F]/20">
+    <div className="flex items-center gap-2 mb-2 pb-1 border-b border-white/10">
+      <Map size={14} className="text-[#F4D03F]" />
+      <span className="text-white text-xs font-medium">Definir rota</span>
+    </div>
+    
+    <div className="bg-white/5 rounded-lg border border-white/10 mb-2">
+      <div className="flex items-center gap-2 px-3 py-2.5">
+        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <input 
+          type="text" 
+          placeholder="Onde você está?" 
+          className="flex-1 bg-transparent text-white outline-none text-sm"
+          value={pickupAddress} 
+          onChange={(e) => setPickupAddress(e.target.value)}
+        />
+      </div>
+    </div>
+    
+    <div className="bg-white/5 rounded-lg border border-white/10">
+      <div className="flex items-center gap-2 px-3 py-2.5">
+        <div className="w-2 h-2 rounded-full bg-red-500" />
+        <input 
+          type="text" 
+          placeholder="Para onde vai?" 
+          className="flex-1 bg-transparent text-white outline-none text-sm"
+          value={dropoffAddress} 
+          onChange={(e) => setDropoffAddress(e.target.value)}
+        />
+      </div>
+    </div>
+    
+    <button 
+      onClick={() => { const temp = pickupAddress; setPickupAddress(dropoffAddress); setDropoffAddress(temp); }} 
+      className="mt-2 w-full text-center text-[10px] text-[#A0A0B0] hover:text-[#F4D03F] transition py-1"
+    >
+      ↕️ Trocar origem e destino
+    </button>
+  </div>
+);
+
+// ============================================
+// ACTION BUTTON - SEMPRE VISÍVEL
+// ============================================
+const ActionButton = ({ onRequestRide, label, disabled }: any) => (
+  <button 
+    onClick={onRequestRide} 
+    disabled={disabled} 
+    className={`w-full py-3.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
+      disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98] shadow-lg'
+    }`}
+  >
+    <Car size={18} /> {label || "SOLICITAR OBALEVALe"} <ArrowRight size={16} />
+  </button>
+);
+
+// ============================================
+// LOGIN FORM - ABAIXO DO MAPA (só se não logado)
+// ============================================
+const LoginForm = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="bg-[#1A1528] rounded-2xl p-5 border border-[#F4D03F]/20">
+    <div className="bg-[#1A1528] rounded-2xl p-5 border border-[#F4D03F]/20 mt-4">
       <div className="text-center mb-5">
         <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-[#F4D03F]/20 to-[#8B5CF6]/20 flex items-center justify-center">
           <Car className="text-[#F4D03F] w-8 h-8" />
         </div>
         <h2 className="text-lg font-bold text-white">Bem-vindo</h2>
-        <p className="text-[#A0A0B0] text-xs">Entre para solicitar corridas</p>
+        <p className="text-[#A0A0B0] text-xs">Faça login para solicitar corridas</p>
       </div>
       
       <div className="space-y-3">
@@ -151,66 +211,143 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
 };
 
 // ============================================
-// DASHBOARD DO PASSAGEIRO
+// TELA PRINCIPAL - MAPA E CAMPOS SEMPRE VISÍVEIS
 // ============================================
-const PassengerDashboard = ({ pickupAddress, setPickupAddress, dropoffAddress, setDropoffAddress, onRequestRide }: any) => (
-  <div className="space-y-3">
-    {/* 1. MAPA COM LOGO SOBREPOSTO */}
-    <div className="relative h-[220px] rounded-2xl overflow-hidden shadow-xl">
-      <MapComponent />
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="bg-black/50 backdrop-blur-md rounded-2xl px-5 py-2 border border-[#F4D03F]/40 shadow-xl">
+export const MainScreen = () => {
+  const { user, profile, loading, signOut } = useAuth();
+  const [activeTab, setActiveTab] = useState('home');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
+  const [pickupAddress, setPickupAddress] = useState('');
+  const [dropoffAddress, setDropoffAddress] = useState('');
+
+  const handleRequestRide = () => {
+    if (!user) {
+      toast.error('🔐 Faça login para solicitar uma corrida!');
+      return;
+    }
+    if (!pickupAddress || !dropoffAddress) {
+      toast.error('📍 Por favor, preencha a origem e o destino!');
+      return;
+    }
+    toast.success(`🚗 Corrida solicitada!\n\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`, { duration: 5000 });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center animate-bounce">
+            <Car className="text-[#F4D03F] w-6 h-6" />
+          </div>
+          <p className="text-white text-sm mt-3">Carregando ObaLeva...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
+      <Toaster position="top-center" richColors />
+      <div className="max-w-md mx-auto px-4 pb-32">
+        
+        {/* CABEÇALHO */}
+        <div className="py-3 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
-              <Car className="text-[#F4D03F] w-5 h-5" />
+            <div className="w-7 h-7 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
+              <Car className="text-[#F4D03F] w-3.5 h-3.5" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white to-[#F4D03F] bg-clip-text text-transparent">OBALEVA</h1>
-              <p className="text-[#F4D03F] text-[8px] text-center tracking-wider">MOBILIDADE PREMIUM</p>
+            <h1 className="text-lg font-bold text-white">OBALEVA</h1>
+          </div>
+          {user && (
+            <button onClick={signOut} className="text-[#A0A0B0] text-[10px] flex items-center gap-1 hover:text-red-400 transition">
+              <LogOut size={12} /> Sair
+            </button>
+          )}
+        </div>
+
+        {/* ============================================ */}
+        {/* MAPA - SEMPRE VISÍVEL PARA TODOS */}
+        {/* ============================================ */}
+        <div className="relative h-[220px] rounded-2xl overflow-hidden shadow-xl mb-4">
+          <MapComponent />
+          {/* LOGO SOBREPOSTA */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-black/50 backdrop-blur-md rounded-2xl px-5 py-2 border border-[#F4D03F]/40 shadow-xl">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
+                  <Car className="text-[#F4D03F] w-5 h-5" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-white to-[#F4D03F] bg-clip-text text-transparent">OBALEVA</h1>
+                  <p className="text-[#F4D03F] text-[8px] text-center tracking-wider">MOBILIDADE PREMIUM</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    {/* 2. ORIGEM E DESTINO */}
-    <div className="bg-[#1A1528] rounded-2xl p-3 border border-[#F4D03F]/20">
-      <div className="flex items-center gap-2 mb-2 pb-1 border-b border-white/10">
-        <Map size={14} className="text-[#F4D03F]" />
-        <span className="text-white text-xs font-medium">Definir rota</span>
-      </div>
-      
-      <div className="bg-white/5 rounded-lg border border-white/10 mb-2">
-        <div className="flex items-center gap-2 px-3 py-2.5">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <input type="text" placeholder="Onde você está?" className="flex-1 bg-transparent text-white outline-none text-sm" value={pickupAddress} onChange={e => setPickupAddress(e.target.value)} />
-        </div>
-      </div>
-      
-      <div className="bg-white/5 rounded-lg border border-white/10">
-        <div className="flex items-center gap-2 px-3 py-2.5">
-          <div className="w-2 h-2 rounded-full bg-red-500" />
-          <input type="text" placeholder="Para onde vai?" className="flex-1 bg-transparent text-white outline-none text-sm" value={dropoffAddress} onChange={e => setDropoffAddress(e.target.value)} />
-        </div>
-      </div>
-      
-      <button onClick={() => { const temp = pickupAddress; setPickupAddress(dropoffAddress); setDropoffAddress(temp); }} className="mt-2 w-full text-center text-[10px] text-[#A0A0B0] hover:text-[#F4D03F] transition py-1">
-        ↕️ Trocar origem e destino
-      </button>
-    </div>
+        {/* ORIGEM E DESTINO - SEMPRE VISÍVEL */}
+        <LocationInputs 
+          pickupAddress={pickupAddress}
+          setPickupAddress={setPickupAddress}
+          dropoffAddress={dropoffAddress}
+          setDropoffAddress={setDropoffAddress}
+        />
 
-    {/* 3. BOTÃO SOLICITAR */}
-    <button 
-      onClick={onRequestRide} 
-      disabled={!pickupAddress || !dropoffAddress} 
-      className={`w-full py-3.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
-        (!pickupAddress || !dropoffAddress) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98] shadow-lg'
-      }`}
-    >
-      <Car size={18} /> SOLICITAR OBALEVALe <ArrowRight size={16} />
-    </button>
-  </div>
-);
+        {/* BOTÃO SOLICITAR - SEMPRE VISÍVEL */}
+        <div className="mt-3">
+          <ActionButton 
+            onRequestRide={handleRequestRide} 
+            label="SOLICITAR OBALEVALe" 
+            disabled={false} 
+          />
+        </div>
+
+        {/* SE NÃO ESTIVER LOGADO, MOSTRA FORMULÁRIO DE LOGIN */}
+        {!user && (
+          <LoginForm
+            onGoogleLogin={async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }}
+            onEmailLogin={async (e) => { e.preventDefault(); setLoginLoading(true); const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword }); if (error) toast.error('E-mail ou senha inválidos'); setLoginLoading(false); }}
+            loginEmail={loginEmail} setLoginEmail={setLoginEmail}
+            loginPassword={loginPassword} setLoginPassword={setLoginPassword}
+            loginLoading={loginLoading}
+          />
+        )}
+
+        {/* SE ESTIVER LOGADO SEM PERFIL, MOSTRA CADASTRO */}
+        {user && !profile && (
+          <div className="space-y-2 mt-4">
+            <div className="flex gap-2">
+              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2.5 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm font-medium">Sou Passageiro</button>
+              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2.5 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm font-medium">Sou Motorista</button>
+            </div>
+            {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
+            {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
+          </div>
+        )}
+
+        {/* SE ESTIVER LOGADO COMO MOTORISTA */}
+        {user && profile?.tipo === 'motorista' && (
+          <div className="bg-[#1A1528] rounded-2xl p-5 text-center border border-[#F4D03F]/20 mt-4">
+            <Truck className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
+            <h2 className="text-white font-bold">Painel do Motorista</h2>
+            <p className="text-[#A0A0B0] text-xs">Aguardando aprovação</p>
+            <button className="mt-3 px-3 py-1 rounded-full bg-green-600 text-white text-xs">🟢 Online</button>
+          </div>
+        )}
+
+        {/* DISCOVER BAR - CARDS ROLÁVEIS */}
+        <DiscoverBar />
+      </div>
+
+      {/* BOTTOM NAVIGATION */}
+      <BottomNav active={activeTab} onNavigate={setActiveTab} />
+    </div>
+  );
+};
 
 // ============================================
 // CADASTRO RÁPIDO
@@ -259,108 +396,6 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
         {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={placa} onChange={e => setPlaca(e.target.value)} required />}
         <button type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-sm">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>
-    </div>
-  );
-};
-
-// ============================================
-// TELA PRINCIPAL
-// ============================================
-export const MainScreen = () => {
-  const { user, profile, loading, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState('home');
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [dropoffAddress, setDropoffAddress] = useState('');
-
-  const handleRequestRide = () => {
-    if (!pickupAddress || !dropoffAddress) {
-      toast.error('📍 Por favor, preencha a origem e o destino!');
-      return;
-    }
-    toast.success(`🚗 Corrida solicitada!\n\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`, { duration: 5000 });
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center animate-bounce">
-            <Car className="text-[#F4D03F] w-6 h-6" />
-          </div>
-          <p className="text-white text-sm mt-3">Carregando ObaLeva...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-      <Toaster position="top-center" richColors />
-      <div className="max-w-md mx-auto px-4 pb-32">
-        
-        {/* CABEÇALHO */}
-        <div className="py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
-              <Car className="text-[#F4D03F] w-3.5 h-3.5" />
-            </div>
-            <h1 className="text-lg font-bold text-white">OBALEVA</h1>
-          </div>
-          {user && (
-            <button onClick={signOut} className="text-[#A0A0B0] text-[10px] flex items-center gap-1 hover:text-red-400 transition">
-              <LogOut size={12} /> Sair
-            </button>
-          )}
-        </div>
-
-        {/* CONTEÚDO PRINCIPAL */}
-        {!user ? (
-          <LoginScreen
-            onGoogleLogin={async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }}
-            onEmailLogin={async (e) => { e.preventDefault(); setLoginLoading(true); const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword }); if (error) toast.error('E-mail ou senha inválidos'); setLoginLoading(false); }}
-            loginEmail={loginEmail} setLoginEmail={setLoginEmail}
-            loginPassword={loginPassword} setLoginPassword={setLoginPassword}
-            loginLoading={loginLoading}
-          />
-        ) : !profile ? (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2.5 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm font-medium">Passageiro</button>
-              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2.5 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm font-medium">Motorista</button>
-            </div>
-            {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
-            {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
-          </div>
-        ) : profile.tipo === 'passageiro' ? (
-          <PassengerDashboard
-            pickupAddress={pickupAddress} setPickupAddress={setPickupAddress}
-            dropoffAddress={dropoffAddress} setDropoffAddress={setDropoffAddress}
-            onRequestRide={handleRequestRide}
-          />
-        ) : profile.tipo === 'motorista' ? (
-          <div className="bg-[#1A1528] rounded-2xl p-5 text-center border border-[#F4D03F]/20">
-            <Truck className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
-            <h2 className="text-white font-bold">Painel do Motorista</h2>
-            <p className="text-[#A0A0B0] text-xs">Aguardando aprovação</p>
-            <button className="mt-3 px-3 py-1 rounded-full bg-green-600 text-white text-xs">🟢 Online</button>
-          </div>
-        ) : (
-          <div className="bg-[#1A1528] rounded-2xl p-5 text-center border border-[#F4D03F]/20">
-            <Shield className="text-[#F4D03F] w-10 h-10 mx-auto mb-2" />
-            <h2 className="text-white font-bold">Painel Administrativo</h2>
-          </div>
-        )}
-
-        {/* DISCOVER BAR */}
-        <DiscoverBar />
-      </div>
-
-      {/* BOTTOM NAVIGATION */}
-      <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
   );
 };
