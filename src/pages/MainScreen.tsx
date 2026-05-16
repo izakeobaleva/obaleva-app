@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { 
@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import MapComponent from '../components/MapComponent';
+import { solicitarCorrida, buscarCorridaAtiva, subscribeToRide, cancelarCorrida, Ride, Location } from '../services/rideService';
+import RideStatusModal from '../components/RideStatusModal';
 
 // ============================================
 // BOTTOM NAVIGATION - FAIXA FIXA
@@ -144,7 +146,7 @@ const LocationInputs = ({ pickupAddress, setPickupAddress, dropoffAddress, setDr
 // ============================================
 // ACTION BUTTON (COMPACTADO)
 // ============================================
-const ActionButton = ({ onRequestRide, disabled }: any) => (
+const ActionButton = ({ onRequestRide, disabled, loading }: any) => (
   <button 
     onClick={onRequestRide} 
     disabled={disabled} 
@@ -152,7 +154,11 @@ const ActionButton = ({ onRequestRide, disabled }: any) => (
       disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01] active:scale-[0.99] shadow-md'
     }`}
   >
-    <Car size={16} /> SOLICITAR OBALEVALe <ArrowRight size={14} />
+    {loading ? (
+      <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Buscando...</>
+    ) : (
+      <><Car size={16} /> SOLICITAR OBALEVALe <ArrowRight size={14} /></>
+    )}
   </button>
 );
 
@@ -225,18 +231,120 @@ export const MainScreen = () => {
   const [showCadastroTipo, setShowCadastroTipo] = useState<'passageiro' | 'motorista' | null>(null);
   const [pickupAddress, setPickupAddress] = useState('');
   const [dropoffAddress, setDropoffAddress] = useState('');
+  
+  // Estado do fluxo de corrida
+  const [activeRide, setActiveRide] = useState<Ride | null>(null);
+  const [showRideModal, setShowRideModal] = useState(false);
+  const [solicitando, setSolicitando] = useState(false);
+  const subscriptionRef = useRef<any>(null);
 
-  const handleRequestRide = () => {
+  // Verificar se há corrida ativa ao carregar
+  useEffect(() => {
+    if (user?.id) {
+      carregarCorridaAtiva();
+    }
+    return () => {
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+      }
+    };
+  }, [user]);
+
+  async function carregarCorridaAtiva() {
+    const corrida = await buscarCorridaAtiva(user!.id);
+    if (corrida) {
+      setActiveRide(corrida);
+      setShowRideModal(true);
+      subscriptionRef.current = subscribeToRide(corrida.id, (updatedRide) => {
+        setActiveRide(updatedRide);
+        if (updatedRide.status === 'finalizada' || updatedRide.status === 'cancelada') {
+          setTimeout(() => {
+            setShowRideModal(false);
+            setActiveRide(null);
+          }, 3000);
+        }
+      });
+    }
+  }
+
+  async function handleRequestRide() {
     if (!user) {
       toast.error('🔐 Faça login para solicitar uma corrida!');
       return;
     }
+    
     if (!pickupAddress || !dropoffAddress) {
       toast.error('📍 Preencha a origem e o destino!');
       return;
     }
-    toast.success(`🚗 Corrida solicitada!\n\nDe: ${pickupAddress}\nPara: ${dropoffAddress}`, { duration: 5000 });
-  };
+    
+    // Simular coordenadas a partir do endereço (em produção seria geocoding)
+    const mockLocation = (address: string): Location => ({
+      lat: -23.5505 + Math.random() * 0.02,
+      lng: -46.6333 + Math.random() * 0.02,
+      address: address,
+    });
+    
+    const origemLoc = mockLocation(pickupAddress);
+    const destinoLoc = mockLocation(dropoffAddress);
+    
+    setSolicitando(true);
+    
+    try {
+      const corrida = await solicitarCorrida(user.id, origemLoc, destinoLoc);
+      
+      if (corrida) {
+        setActiveRide(corrida);
+        setShowRideModal(true);
+        setPickupAddress('');
+        setDropoffAddress('');
+        
+        toast.success('🚗 Corrida solicitada! Buscando motorista...');
+        
+        subscriptionRef.current = subscribeToRide(corrida.id, (updatedRide) => {
+          setActiveRide(updatedRide);
+          
+          if (updatedRide.status === 'motorista_em_rota') {
+            toast.success('👨‍✈️ Motorista encontrado! A caminho...');
+          } else if (updatedRide.status === 'motorista_chegou') {
+            toast.success('✅ Motorista chegou!');
+          } else if (updatedRide.status === 'em_andamento') {
+            toast.info('🚗 Corrida em andamento');
+          } else if (updatedRide.status === 'finalizada') {
+            toast.success('🎉 Corrida finalizada! Obrigado!');
+            setTimeout(() => {
+              setShowRideModal(false);
+              setActiveRide(null);
+            }, 3000);
+          } else if (updatedRide.status === 'cancelada') {
+            toast.error('❌ Corrida cancelada');
+            setShowRideModal(false);
+            setActiveRide(null);
+          }
+        });
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao solicitar corrida');
+    } finally {
+      setSolicitando(false);
+    }
+  }
+
+  async function handleCancelRide() {
+    if (activeRide) {
+      const success = await cancelarCorrida(activeRide.id);
+      if (success) {
+        toast.info('Corrida cancelada');
+        setShowRideModal(false);
+        setActiveRide(null);
+        if (subscriptionRef.current) {
+          subscriptionRef.current.unsubscribe();
+        }
+      } else {
+        toast.error('Erro ao cancelar corrida');
+      }
+    }
+  }
 
   if (loading) {
     return (
@@ -300,7 +408,11 @@ export const MainScreen = () => {
 
         {/* BOTÃO SOLICITAR */}
         <div className="mt-2">
-          <ActionButton onRequestRide={handleRequestRide} disabled={false} />
+          <ActionButton 
+            onRequestRide={handleRequestRide} 
+            disabled={solicitando || !pickupAddress || !dropoffAddress}
+            loading={solicitando}
+          />
         </div>
 
         {/* LOGIN (se não logado) */}
@@ -342,6 +454,15 @@ export const MainScreen = () => {
 
       {/* BOTTOM NAV */}
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
+
+      {/* MODAL DE CORRIDA EM TEMPO REAL */}
+      {showRideModal && activeRide && (
+        <RideStatusModal
+          ride={activeRide}
+          onClose={() => setShowRideModal(false)}
+          onCancel={handleCancelRide}
+        />
+      )}
     </div>
   );
 };
