@@ -104,7 +104,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       onLoad={() => setScriptLoaded(true)}
     >
       <div className="relative w-full h-full rounded-xl overflow-hidden">
-        {/* Campos de endereço sobrepostos */}
+        {/* Campos de endereço - SUPERIOR */}
         <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
           <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
             <div className="flex items-center gap-2 p-2">
@@ -186,6 +186,40 @@ const MapComponent: React.FC<MapComponentProps> = ({
             />
           )}
         </GoogleMap>
+
+        {/* Campos de endereço - INFERIOR */}
+        <div className="absolute bottom-3 left-3 right-3 z-10 space-y-2">
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
+            <div className="flex items-center gap-2 p-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <div className="flex-1">
+                <Autocomplete onLoad={onPickupLoad} onPlaceChanged={() => onPlaceChanged('pickup')}>
+                  <input
+                    type="text"
+                    placeholder="Onde você está?"
+                    className="w-full bg-transparent text-white text-sm outline-none"
+                    onChange={(e) => onPickupChange?.(e.target.value)}
+                  />
+                </Autocomplete>
+              </div>
+            </div>
+          </div>
+          <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
+            <div className="flex items-center gap-2 p-2">
+              <div className="w-2 h-2 rounded-full bg-red-500" />
+              <div className="flex-1">
+                <Autocomplete onLoad={onDropoffLoad} onPlaceChanged={() => onPlaceChanged('dropoff')}>
+                  <input
+                    type="text"
+                    placeholder="Para onde vai?"
+                    className="w-full bg-transparent text-white text-sm outline-none"
+                    onChange={(e) => onDropoffChange?.(e.target.value)}
+                  />
+                </Autocomplete>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </LoadScript>
   );
