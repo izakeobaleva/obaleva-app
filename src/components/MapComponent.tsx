@@ -3,7 +3,7 @@ import { GoogleMap, LoadScript, Marker, Autocomplete } from '@react-google-maps/
 
 const containerStyle = {
   width: '100%',
-  height: '400px',
+  height: '100%',
 };
 
 const defaultCenter = {
@@ -19,7 +19,7 @@ interface MapComponentProps {
   onDropoffChange?: (value: string) => void;
 }
 
-export const MapComponent: React.FC<MapComponentProps> = ({
+const MapComponent: React.FC<MapComponentProps> = ({
   onLocationSelect,
   pickupLocation,
   dropoffLocation,
@@ -85,7 +85,6 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       libraries={['places']}
     >
       <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
-        {/* Campos de endereço sobrepostos no mapa */}
         <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
           <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
             <div className="flex items-center gap-2 p-2">
@@ -168,3 +167,5 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     </LoadScript>
   );
 };
+
+export default MapComponent;
