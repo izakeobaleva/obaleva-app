@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker, Autocomplete } from '@react-google-maps/api';
 
+console.log('API Key carregada:', import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? '✅ Sim' : '❌ Não');
+
 const containerStyle = {
   width: '100%',
   height: '100%',
@@ -91,7 +93,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       onLoad={handleScriptLoad}
     >
       {isScriptLoaded && (
-        <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
+        <div className="relative w-full h-full rounded-xl overflow-hidden">
           <div className="absolute top-3 left-3 right-3 z-10 space-y-2">
             <div className="bg-[#1A1528]/90 backdrop-blur-sm rounded-lg border border-white/10 overflow-hidden">
               <div className="flex items-center gap-2 p-2">
