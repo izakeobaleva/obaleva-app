@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { 
-  Car, User, Truck, Shield, Star, Zap, Gift, Chrome, 
+  Car, User, Truck, Shield, Star, Zap, Gift, 
   Home, Search, Menu as MenuIcon, LogOut, ChevronLeft, 
   Video, Megaphone, Coffee, Heart, Eye, EyeOff, Map, ArrowRight
 } from 'lucide-react';
@@ -10,7 +10,7 @@ import { toast, Toaster } from 'sonner';
 import MapComponent from '../components/MapComponent';
 
 // ============================================
-// BOTTOM NAVIGATION
+// BOTTOM NAVIGATION - FAIXA FIXA
 // ============================================
 const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
   const tabs = [
@@ -56,14 +56,14 @@ const DiscoverBar = () => {
   };
 
   const cards = [
-    { icon: <Gift size={20} />, title: "1ª corrida grátis", description: "Até R$ 20 off", color: "#F4D03F", emoji: "🎁" },
-    { icon: <Shield size={20} />, title: "Seguro ObaLeva", description: "Proteção total", color: "#8B5CF6", emoji: "🛡️" },
-    { icon: <Star size={20} />, title: "Avaliação 4.8★", description: "Motoristas top", color: "#F4D03F", emoji: "⭐" },
-    { icon: <Zap size={20} />, title: "Rápido", description: "Chegada em minutos", color: "#A855F7", emoji: "⚡" },
-    { icon: <Video size={20} />, title: "Como funciona?", description: "Assista ao vídeo", color: "#F4D03F", emoji: "📹" },
-    { icon: <Megaphone size={20} />, title: "Indique e ganhe", description: "R$ 10 crédito", color: "#8B5CF6", emoji: "📢" },
-    { icon: <Coffee size={20} />, title: "Parceiros", description: "Descontos", color: "#A855F7", emoji: "☕" },
-    { icon: <Heart size={20} />, title: "Solidário", description: "Doação", color: "#F4D03F", emoji: "❤️" },
+    { emoji: "🎁", title: "1ª corrida grátis", desc: "Até R$ 20 off", color: "#F4D03F" },
+    { emoji: "🛡️", title: "Seguro ObaLeva", desc: "Proteção total", color: "#8B5CF6" },
+    { emoji: "⭐", title: "Avaliação 4.8★", desc: "Motoristas top", color: "#F4D03F" },
+    { emoji: "⚡", title: "Rápido", desc: "Chegada rápida", color: "#A855F7" },
+    { emoji: "📹", title: "Como funciona?", desc: "Assista ao vídeo", color: "#F4D03F" },
+    { emoji: "📢", title: "Indique e ganhe", desc: "R$ 10 crédito", color: "#8B5CF6" },
+    { emoji: "☕", title: "Parceiros", desc: "Descontos", color: "#A855F7" },
+    { emoji: "❤️", title: "Solidário", desc: "Doação", color: "#F4D03F" },
   ];
 
   return (
@@ -73,14 +73,14 @@ const DiscoverBar = () => {
       </button>
       <div ref={scrollRef} className="flex overflow-x-auto scrollbar-hide gap-2 pb-2 px-1">
         {cards.map((card, idx) => (
-          <div key={idx} className="min-w-[150px] max-w-[150px] bg-[#1A1528] rounded-xl p-2 border border-[#F4D03F]/10">
+          <div key={idx} className="min-w-[145px] max-w-[145px] bg-[#1A1528] rounded-xl p-2 border border-[#F4D03F]/10">
             <div className="flex items-start gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0`} style={{ backgroundColor: `${card.color}20` }}>
-                <span className="text-lg">{card.emoji}</span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xl" style={{ backgroundColor: `${card.color}20` }}>
+                {card.emoji}
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-white font-bold text-xs truncate">{card.title}</h4>
-                <p className="text-[#A0A0B0] text-[9px] truncate">{card.description}</p>
+                <p className="text-[#A0A0B0] text-[9px] truncate">{card.desc}</p>
               </div>
             </div>
           </div>
@@ -181,20 +181,20 @@ const PassengerDashboard = ({ pickupAddress, setPickupAddress, dropoffAddress, s
       </div>
       
       <div className="bg-white/5 rounded-lg border border-white/10 mb-2">
-        <div className="flex items-center gap-2 px-3 py-2">
+        <div className="flex items-center gap-2 px-3 py-2.5">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <input type="text" placeholder="Onde você está?" className="flex-1 bg-transparent text-white outline-none text-sm" value={pickupAddress} onChange={e => setPickupAddress(e.target.value)} />
         </div>
       </div>
       
       <div className="bg-white/5 rounded-lg border border-white/10">
-        <div className="flex items-center gap-2 px-3 py-2">
+        <div className="flex items-center gap-2 px-3 py-2.5">
           <div className="w-2 h-2 rounded-full bg-red-500" />
           <input type="text" placeholder="Para onde vai?" className="flex-1 bg-transparent text-white outline-none text-sm" value={dropoffAddress} onChange={e => setDropoffAddress(e.target.value)} />
         </div>
       </div>
       
-      <button onClick={() => { const temp = pickupAddress; setPickupAddress(dropoffAddress); setDropoffAddress(temp); }} className="mt-2 w-full text-center text-[10px] text-[#A0A0B0] hover:text-[#F4D03F] transition">
+      <button onClick={() => { const temp = pickupAddress; setPickupAddress(dropoffAddress); setDropoffAddress(temp); }} className="mt-2 w-full text-center text-[10px] text-[#A0A0B0] hover:text-[#F4D03F] transition py-1">
         ↕️ Trocar origem e destino
       </button>
     </div>
@@ -203,7 +203,7 @@ const PassengerDashboard = ({ pickupAddress, setPickupAddress, dropoffAddress, s
     <button 
       onClick={onRequestRide} 
       disabled={!pickupAddress || !dropoffAddress} 
-      className={`w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
+      className={`w-full py-3.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
         (!pickupAddress || !dropoffAddress) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98] shadow-lg'
       }`}
     >
@@ -248,16 +248,16 @@ const CadastroRapido = ({ tipo, onSuccess }: { tipo: 'passageiro' | 'motorista';
     <div className="bg-[#1A1528] rounded-2xl p-4 border border-[#F4D03F]/20">
       <h2 className="text-white font-bold text-base mb-3">Cadastro {tipo === 'passageiro' ? 'Passageiro' : 'Motorista'}</h2>
       <form onSubmit={handleSubmit} className="space-y-2">
-        <input placeholder="Nome completo" className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={nome} onChange={e => setNome(e.target.value)} required />
-        <input placeholder="CPF" className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={cpf} onChange={e => setCpf(e.target.value)} required />
-        <input placeholder="Telefone" className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
-        <input type="email" placeholder="E-mail" className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
+        <input placeholder="Nome completo" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={nome} onChange={e => setNome(e.target.value)} required />
+        <input placeholder="CPF" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={cpf} onChange={e => setCpf(e.target.value)} required />
+        <input placeholder="Telefone" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={telefone} onChange={e => setTelefone(e.target.value)} required />
+        <input type="email" placeholder="E-mail" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={email} onChange={e => setEmail(e.target.value)} required />
         <div className="relative">
-          <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm pr-8" value={password} onChange={e => setPassword(e.target.value)} required />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2 text-[#A0A0B0]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+          <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm pr-8" value={password} onChange={e => setPassword(e.target.value)} required />
+          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-2.5 text-[#A0A0B0]">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
         </div>
-        {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={placa} onChange={e => setPlaca(e.target.value)} required />}
-        <button type="submit" disabled={loading} className="w-full py-2 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-sm">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
+        {tipo === 'motorista' && <input placeholder="Placa" className="w-full p-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm" value={placa} onChange={e => setPlaca(e.target.value)} required />}
+        <button type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-sm">{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
       </form>
     </div>
   );
@@ -329,8 +329,8 @@ export const MainScreen = () => {
         ) : !profile ? (
           <div className="space-y-2">
             <div className="flex gap-2">
-              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm">Passageiro</button>
-              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm">Motorista</button>
+              <button onClick={() => setShowCadastroTipo('passageiro')} className="flex-1 py-2.5 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm font-medium">Passageiro</button>
+              <button onClick={() => setShowCadastroTipo('motorista')} className="flex-1 py-2.5 rounded-xl border border-[#F4D03F]/30 text-white bg-white/5 text-sm font-medium">Motorista</button>
             </div>
             {showCadastroTipo === 'passageiro' && <CadastroRapido tipo="passageiro" onSuccess={() => window.location.reload()} />}
             {showCadastroTipo === 'motorista' && <CadastroRapido tipo="motorista" onSuccess={() => window.location.reload()} />}
