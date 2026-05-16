@@ -1,18 +1,14 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { Toaster } from 'sonner';
-import { AuthProvider } from './contexts/AuthContext';
-import { MainScreen } from './pages/MainScreen';
+import TestMap from './pages/TestMap';
 
 function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <MainScreen />
-        <Toaster position="top-center" richColors />
-      </BrowserRouter>
-    </AuthProvider>
-  );
+  console.log('🔵 App iniciado');
+  console.log('🔍 Varíáveis de ambiente:');
+  console.log('  VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '✅' : '❌');
+  console.log('  VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅' : '❌');
+  console.log('  VITE_GOOGLE_MAPS_API_KEY:', import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? '✅' : '❌');
+  
+  return <TestMap />;
 }
 
 export default App;
