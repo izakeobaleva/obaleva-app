@@ -20,6 +20,7 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin, loginEmail, setLoginE
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] via-[#120E1F] to-[#1A1528] flex items-center justify-center">
       <div className="max-w-md w-full mx-4">
         
+        {/* Logo */}
         <div className="text-center mb-8 animate-fade-in-down">
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-[#F4D03F]/30 rounded-full blur-xl animate-pulse"></div>
@@ -37,6 +38,7 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin, loginEmail, setLoginE
           </p>
         </div>
 
+        {/* Card de Login */}
         <div className="bg-gradient-to-br from-[#1A1528]/90 to-[#1A1528]/70 backdrop-blur-xl rounded-3xl p-6 border border-[#F4D03F]/20 shadow-2xl animate-fade-in-up">
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-white">Bem-vindo de volta!</h2>
@@ -44,6 +46,7 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin, loginEmail, setLoginE
           </div>
 
           <div className="space-y-4">
+            {/* Google Button */}
             <button 
               onClick={onGoogleLogin} 
               className="w-full py-3.5 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border border-white/15 text-white flex items-center justify-center gap-3 font-medium transition-all duration-300 hover:scale-[1.02] hover:border-[#F4D03F]/50 hover:shadow-lg group"
@@ -52,6 +55,7 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin, loginEmail, setLoginE
               <span>Continuar com Google</span>
             </button>
 
+            {/* Divisor */}
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-white/10"></div>
@@ -61,6 +65,7 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin, loginEmail, setLoginE
               </div>
             </div>
 
+            {/* Formulário */}
             <form onSubmit={onEmailLogin} className="space-y-3">
               <div className={`relative transition-all duration-300 ${isFocused.email ? 'transform scale-[1.02]' : ''}`}>
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -119,12 +124,15 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin, loginEmail, setLoginE
               </button>
             </form>
 
+            {/* ============================================ */}
+            {/* BOTÃO CRIAR CONTA - JÁ ADICIONADO! */}
+            {/* ============================================ */}
             <div className="text-center pt-2">
               <p className="text-[#A0A0B0] text-sm">
                 Não tem uma conta?{' '}
                 <button 
                   onClick={onSignUpClick}
-                  className="text-[#F4D03F] font-bold hover:underline transition-all flex items-center gap-1 inline-flex group"
+                  className="text-[#F4D03F] font-bold hover:underline transition-all inline-flex items-center gap-1 group"
                 >
                   Criar conta grátis
                   <UserPlus size={14} className="group-hover:scale-110 transition" />
@@ -132,6 +140,7 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin, loginEmail, setLoginE
               </p>
             </div>
 
+            {/* Benefícios */}
             <div className="flex justify-center gap-4 mt-4 pt-3 border-t border-white/10">
               <div className="flex items-center gap-1">
                 <Shield size={12} className="text-[#F4D03F]" />
