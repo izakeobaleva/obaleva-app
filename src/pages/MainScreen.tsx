@@ -108,7 +108,7 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
 };
 
 // ============================================
-// TELA DE CADASTRO (SignUpScreen mantido para compatibilidade)
+// TELA DE CADASTRO (SignUpScreen)
 // ============================================
 const SignUpScreen = ({ onBack, onSuccess }: any) => {
   return (
@@ -117,7 +117,7 @@ const SignUpScreen = ({ onBack, onSuccess }: any) => {
 };
 
 // ============================================
-// TELA PRINCIPAL (HOME)
+// TELA PRINCIPAL (HOME) - TELA DE SOLICITAR CORRIDA
 // ============================================
 const HomeScreen = ({ user, onSignOut }: any) => {
   const [pickupAddress, setPickupAddress] = useState('');
@@ -179,6 +179,7 @@ const HomeScreen = ({ user, onSignOut }: any) => {
 
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
+      {/* Header */}
       <div className="flex justify-between items-center py-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
@@ -191,6 +192,7 @@ const HomeScreen = ({ user, onSignOut }: any) => {
         </button>
       </div>
 
+      {/* MAPA */}
       <div className="relative h-[220px] rounded-xl overflow-hidden mb-3">
         <MapComponent
           pickupLocation={pickupLocation}
@@ -209,6 +211,7 @@ const HomeScreen = ({ user, onSignOut }: any) => {
         </div>
       </div>
 
+      {/* CAMPOS ORIGEM E DESTINO */}
       <div className="bg-gradient-to-br from-[#1A1528] to-[#1A1528]/80 rounded-xl p-3 border border-[#F4D03F]/15">
         <div className="bg-white/10 rounded-lg mb-2">
           <div className="flex items-center gap-2 p-3">
@@ -219,17 +222,45 @@ const HomeScreen = ({ user, onSignOut }: any) => {
         <div className="bg-white/10 rounded-lg">
           <div className="flex items-center gap-2 p-3">
             <div className="w-2 h-2 rounded-full bg-red-500" />
-            <input type="text" placeholder="Para onde vai?" className="flex-1 bg-transparent text-white outline-none" value={dropoffAddress} onChange={e => setDropoffAddress(e.target.value)} />
+            <input 
+              type="text" 
+              placeholder="Para onde você vai?"
+              className="flex-1 bg-transparent text-white outline-none text-base font-medium"
+              value={dropoffAddress} 
+              onChange={e => setDropoffAddress(e.target.value)} 
+              autoFocus
+            />
           </div>
         </div>
       </div>
 
-      <button onClick={handleRequestRide} disabled={solicitando || !pickupLocation || !dropoffLocation} className="w-full py-3 mt-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold transition-all hover:scale-[1.02] disabled:opacity-50">
-        {solicitando ? <div className="w-5 h-5 border-2 border-[#1A1528] border-t-transparent rounded-full animate-spin mx-auto" /> : '🚗 SOLICITAR CORRIDA'}
+      {/* BOTÃO SOLICITAR CORRIDA */}
+      <button 
+        onClick={handleRequestRide} 
+        disabled={solicitando || !pickupLocation || !dropoffLocation} 
+        className="w-full py-3 mt-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold transition-all hover:scale-[1.02] disabled:opacity-50"
+      >
+        {solicitando ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-5 h-5 border-2 border-[#1A1528] border-t-transparent rounded-full animate-spin" />
+            Buscando motorista...
+          </div>
+        ) : (
+          '🚗 SOLICITAR CORRIDA'
+        )}
       </button>
 
+      {/* BANNER ROTATIVO */}
       <RotatingBanner />
-      {showRideModal && activeRide && <RideStatusModal ride={activeRide} onClose={() => setShowRideModal(false)} onCancel={handleCancelRide} />}
+
+      {/* MODAL DE ACOMPANHAMENTO */}
+      {showRideModal && activeRide && (
+        <RideStatusModal 
+          ride={activeRide} 
+          onClose={() => setShowRideModal(false)} 
+          onCancel={handleCancelRide} 
+        />
+      )}
     </div>
   );
 };
@@ -248,7 +279,9 @@ const ProfileScreen = ({ user, profile, onSignOut }: any) => (
       <div className="inline-block mt-3 px-4 py-1 rounded-full bg-[#F4D03F]/20">
         <span className="text-[#F4D03F] text-xs font-bold">{profile?.tipo?.toUpperCase() || 'PASSAGEIRO'}</span>
       </div>
-      <button onClick={onSignOut} className="mt-8 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold hover:bg-red-500/30 transition">Sair da conta</button>
+      <button onClick={onSignOut} className="mt-8 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold hover:bg-red-500/30 transition">
+        <span className="flex items-center justify-center gap-2"><LogOut size={16} /> Sair da conta</span>
+      </button>
     </div>
   </div>
 );
@@ -277,7 +310,7 @@ const MenuScreen = () => (
 );
 
 // ============================================
-// MAIN SCREEN PRINCIPAL
+// MAIN SCREEN - VERSÃO CORRIGIDA
 // ============================================
 export const MainScreen = () => {
   const { user, profile, loading, signOut } = useAuth();
@@ -291,6 +324,7 @@ export const MainScreen = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      localStorage.removeItem('onboarding_data');
       window.location.reload();
     } catch (err) {
       window.location.reload();
@@ -308,36 +342,35 @@ export const MainScreen = () => {
     );
   }
 
-  // Se o usuário está logado mas não tem perfil completo, mostrar OnboardingWizard
+  // ✅ USUÁRIO LOGADO E COM PERFIL COMPLETO → VAI DIRETO PARA HOME (TELA DE SOLICITAR CORRIDA)
+  if (user && profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
+        {activeTab === 'home' && <HomeScreen user={user} onSignOut={handleSignOut} />}
+        {activeTab === 'perfil' && <ProfileScreen user={user} profile={profile} onSignOut={handleSignOut} />}
+        {activeTab === 'buscar' && <SearchScreen />}
+        {activeTab === 'menu' && <MenuScreen />}
+        <BottomNav active={activeTab} onNavigate={setActiveTab} />
+      </div>
+    );
+  }
+
+  // ✅ USUÁRIO LOGADO MAS SEM PERFIL COMPLETO → MOSTRA WIZARD DE CADASTRO
   if (user && !profile) {
     return <OnboardingWizard onComplete={() => window.location.reload()} />;
   }
 
-  // Tela SIGNUP (agora usa OnboardingWizard)
+  // ✅ USUÁRIO NÃO LOGADO → MOSTRA TELA DE LOGIN
   if (!user && showSignUp) {
     return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => setShowSignUp(false)} />;
   }
 
-  // Tela LOGIN
-  if (!user) {
-    return (
-      <LoginScreen 
-        onSignUpClick={() => setShowSignUp(true)} 
-        onGoogleLogin={async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }} 
-        onEmailLogin={async (e) => { e.preventDefault(); setLoginLoading(true); const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword }); if (error) alert('E-mail ou senha inválidos'); setLoginLoading(false); }} 
-        loginEmail={loginEmail} setLoginEmail={setLoginEmail} loginPassword={loginPassword} setLoginPassword={setLoginPassword} loginLoading={loginLoading} 
-      />
-    );
-  }
-
-  // App LOGADO
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-      {activeTab === 'home' && <HomeScreen user={user} onSignOut={handleSignOut} />}
-      {activeTab === 'perfil' && <ProfileScreen user={user} profile={profile} onSignOut={handleSignOut} />}
-      {activeTab === 'buscar' && <SearchScreen />}
-      {activeTab === 'menu' && <MenuScreen />}
-      <BottomNav active={activeTab} onNavigate={setActiveTab} />
-    </div>
+    <LoginScreen 
+      onSignUpClick={() => setShowSignUp(true)} 
+      onGoogleLogin={async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }} 
+      onEmailLogin={async (e) => { e.preventDefault(); setLoginLoading(true); const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword }); if (error) alert('E-mail ou senha inválidos'); setLoginLoading(false); }} 
+      loginEmail={loginEmail} setLoginEmail={setLoginEmail} loginPassword={loginPassword} setLoginPassword={setLoginPassword} loginLoading={loginLoading} 
+    />
   );
 };
