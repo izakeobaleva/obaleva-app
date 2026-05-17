@@ -116,6 +116,20 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
     try {
       const nomeCompleto = `${formData.nome} ${formData.sobrenome}`;
       
+      // PRIMEIRO: Verificar se o usuário já existe
+      const { data: existingUser } = await supabase
+        .from('usuarios')
+        .select('email')
+        .eq('email', formData.email)
+        .maybeSingle();
+      
+      if (existingUser) {
+        alert('❌ Este e-mail já está cadastrado! Faça login.');
+        onComplete(); // Volta para tela de login
+        return;
+      }
+      
+      // SEGUNDO: Criar novo usuário
       const { data: auth, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -129,7 +143,15 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('already registered')) {
+          alert('❌ Este e-mail já está cadastrado! Faça login.');
+          onComplete();
+        } else {
+          throw error;
+        }
+        return;
+      }
       
       if (auth.user) {
         await supabase.from('usuarios').insert({
@@ -143,11 +165,20 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         
         await supabase.from('passageiros').insert({ id: auth.user.id });
         
-        alert('✅ Cadastro realizado!');
-        onComplete();
+        alert('✅ Cadastro realizado com sucesso!');
+        
+        // Fazer login automático
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.senha
+        });
+        
+        if (!signInError) {
+          onComplete();
+        }
       }
     } catch (error: any) {
-      alert('Erro: ' + error.message);
+      alert('❌ Erro: ' + error.message);
     } finally {
       setLoading(false);
     }
