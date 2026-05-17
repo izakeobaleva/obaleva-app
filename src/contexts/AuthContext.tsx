@@ -75,6 +75,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user, lastActivity]);
 
   useEffect(() => {
+    // Timeout de segurança: se o auth demorar mais que 3s, força o fim do loading
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.log('⏱️ Timeout: forçando fim do loading');
+        setLoading(false);
+      }
+    }, 3000);
+
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -87,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Erro ao inicializar auth:', err);
       } finally {
         setLoading(false);
+        clearTimeout(timeout);
       }
     };
 
@@ -102,11 +111,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(null);
         }
         setLoading(false);
+        clearTimeout(timeout);
       }
     );
 
     return () => {
       subscription.unsubscribe();
+      clearTimeout(timeout);
     };
   }, []);
 
