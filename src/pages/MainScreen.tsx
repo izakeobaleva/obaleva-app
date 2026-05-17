@@ -32,7 +32,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   );
 };
 
-const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading }: any) => {
+const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading, onSignUpClick }: any) => {
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="max-w-md mx-auto px-4 pb-28 mt-8">
@@ -63,6 +63,113 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
               {loginLoading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
+
+          <div className="text-center mt-4">
+            <p className="text-[#A0A0B0] text-sm">
+              Não tem uma conta?{' '}
+              <button type="button" onClick={onSignUpClick} className="text-[#F4D03F] font-bold hover:underline">
+                Criar conta grátis
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SignUpScreen = ({ onBack, onSuccess }: any) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nome, setNome] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSignUp = async () => {
+    if (!nome || !email || !password) {
+      alert('Preencha todos os campos');
+      return;
+    }
+
+    if (password.length < 6) {
+      alert('A senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const { data: auth, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { nome_completo: nome, tipo: 'passageiro' } }
+      });
+      
+      if (signUpError) throw signUpError;
+      
+      if (auth.user) {
+        await supabase.from('usuarios').insert({
+          id: auth.user.id,
+          nome_completo: nome,
+          email: email,
+          tipo: 'passageiro'
+        });
+        await supabase.from('passageiros').insert({ id: auth.user.id });
+        alert('✅ Conta criada com sucesso! Faça login.');
+        onSuccess();
+      }
+    } catch (error: any) {
+      alert('❌ Erro: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto px-4 pb-28 mt-8">
+      <div className="bg-[#1A1528] rounded-2xl p-6 border-2 border-[#F4D03F]/30">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/30 flex items-center justify-center mb-3">
+            <Car className="w-8 h-8 text-[#F4D03F]" />
+          </div>
+          <h2 className="text-white text-xl font-bold">Criar Conta</h2>
+          <p className="text-[#A0A0B0] text-sm">Cadastre-se para solicitar corridas</p>
+        </div>
+
+        <div className="space-y-3">
+          <div className="bg-white/10 rounded-xl border border-white/15">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <span className="text-lg">👤</span>
+              <input type="text" placeholder="Nome completo" className="flex-1 bg-transparent text-white outline-none" value={nome} onChange={(e) => setNome(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="bg-white/10 rounded-xl border border-white/15">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <span className="text-lg">📧</span>
+              <input type="email" placeholder="E-mail" className="flex-1 bg-transparent text-white outline-none" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="bg-white/10 rounded-xl border border-white/15">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <span className="text-lg">🔒</span>
+              <input type={showPassword ? "text" : "password"} placeholder="Senha (mínimo 6 caracteres)" className="flex-1 bg-transparent text-white outline-none" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
+          </div>
+
+          <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
+            {loading ? 'Criando conta...' : '✅ CRIAR MINHA CONTA'}
+          </button>
+
+          <div className="text-center">
+            <button onClick={onBack} className="text-[#A0A0B0] text-sm hover:text-[#F4D03F] transition">
+              ← Já tenho conta, fazer login
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -210,6 +317,7 @@ const HomeScreenContent = ({ user, onSignOut }: any) => {
 export const MainScreen = () => {
   const { user, profile, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+  const [showSignUp, setShowSignUp] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -221,6 +329,15 @@ export const MainScreen = () => {
     return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-pulse"><Car className="w-12 h-12 text-[#F4D03F] animate-bounce" /><p className="text-white mt-2">Carregando...</p></div></div>;
   }
 
+  if (!user && showSignUp) {
+    return (
+      <>
+        <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => setShowSignUp(false)} />
+        <BottomNav active={activeTab} onNavigate={setActiveTab} />
+      </>
+    );
+  }
+
   if (!user) {
     return (
       <>
@@ -230,6 +347,7 @@ export const MainScreen = () => {
           loginEmail={loginEmail} setLoginEmail={setLoginEmail}
           loginPassword={loginPassword} setLoginPassword={setLoginPassword}
           loginLoading={loginLoading}
+          onSignUpClick={() => setShowSignUp(true)}
         />
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
       </>
