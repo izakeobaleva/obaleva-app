@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Car, Home, Search, User, Menu, MapPin, Chrome } from 'lucide-react';
+import MapComponent from '../components/MapComponent';
 
 // ============================================
 // BOTTOM NAVIGATION
@@ -29,21 +30,10 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// TELA PRINCIPAL (HOME)
+// TELA PRINCIPAL
 // ============================================
-const HomeScreen = ({ user, onSignOut }: any) => {
+const HomeScreen = ({ user, onLogout }: any) => {
   const [destino, setDestino] = useState('');
-  const [mensagem, setMensagem] = useState('');
-
-  const handleConfirmar = () => {
-    if (!destino.trim()) {
-      setMensagem('❌ Digite um destino');
-      setTimeout(() => setMensagem(''), 2000);
-      return;
-    }
-    setMensagem(`✅ Corrida para: ${destino}`);
-    setTimeout(() => setMensagem(''), 2000);
-  };
 
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
@@ -52,21 +42,19 @@ const HomeScreen = ({ user, onSignOut }: any) => {
           <Car size={24} className="text-[#F4D03F]" />
           <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         </div>
-        <button onClick={onSignOut} className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold">
+        <button onClick={onLogout} className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold">
           SAIR
         </button>
       </div>
 
-      <div className="h-[220px] rounded-xl bg-[#1A1528] flex items-center justify-center mb-3 border border-[#F4D03F]/20">
-        <div className="text-center">
-          <MapPin size={32} className="text-[#F4D03F] mx-auto mb-2" />
-          <p className="text-white text-sm">🗺️ Mapa</p>
-          <p className="text-[#A0A0B0] text-xs mt-1">{user?.email}</p>
-        </div>
+      <div className="h-[200px] rounded-xl overflow-hidden mb-3">
+        <MapComponent />
       </div>
 
       <div className="bg-[#1A1528] rounded-xl p-4 border border-[#F4D03F]/20">
-        <h2 className="text-white font-bold text-lg mb-3">Para onde você vai agora?</h2>
+        <h2 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
+          <MapPin size={20} className="text-[#F4D03F]" /> Para onde você vai agora?
+        </h2>
         <input
           type="text"
           placeholder="Digite seu destino..."
@@ -74,14 +62,9 @@ const HomeScreen = ({ user, onSignOut }: any) => {
           value={destino}
           onChange={(e) => setDestino(e.target.value)}
         />
-        <button onClick={handleConfirmar} className="w-full mt-4 py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
+        <button className="w-full mt-4 py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
           Confirmar corrida
         </button>
-        {mensagem && (
-          <div className="mt-3 p-2 text-center text-sm text-white bg-green-500/30 rounded">
-            {mensagem}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -90,7 +73,7 @@ const HomeScreen = ({ user, onSignOut }: any) => {
 // ============================================
 // TELA DE PERFIL
 // ============================================
-const ProfileScreen = ({ user, onSignOut }: any) => (
+const ProfileScreen = ({ user, onLogout }: any) => (
   <div className="max-w-md mx-auto px-4 pb-28 mt-8">
     <div className="bg-[#1A1528] rounded-2xl p-6 text-center border border-[#F4D03F]/20">
       <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
@@ -98,7 +81,7 @@ const ProfileScreen = ({ user, onSignOut }: any) => (
       </div>
       <h2 className="text-white text-xl font-bold">{user?.email?.split('@')[0]}</h2>
       <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <button onClick={onSignOut} className="mt-6 w-full py-3 rounded-xl bg-red-500 text-white font-bold">
+      <button onClick={onLogout} className="mt-6 w-full py-3 rounded-xl bg-red-500 text-white font-bold">
         SAIR
       </button>
     </div>
@@ -110,7 +93,6 @@ const SearchScreen = () => (
     <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
       <Search size={48} className="text-[#F4D03F] mx-auto mb-4" />
       <h2 className="text-white text-xl font-bold">🔍 Buscar</h2>
-      <p className="text-gray-400 mt-2">Em breve</p>
     </div>
   </div>
 );
@@ -120,82 +102,9 @@ const MenuScreen = () => (
     <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
       <Menu size={48} className="text-[#F4D03F] mx-auto mb-4" />
       <h2 className="text-white text-xl font-bold">☰ Menu</h2>
-      <p className="text-gray-400 mt-2">Em breve</p>
     </div>
   </div>
 );
-
-// ============================================
-// TELA DE CADASTRO
-// ============================================
-const SignUpScreen = ({ onBack, onSuccess }: any) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [nome, setNome] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSignUp = async () => {
-    setError('');
-    if (!nome || !email || !password) {
-      setError('Preencha todos os campos');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Senha: mínimo 6 caracteres');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { nome_completo: nome } }
-      });
-      
-      if (error) throw error;
-      
-      if (data.user) {
-        await supabase.from('usuarios').insert({
-          id: data.user.id,
-          nome_completo: nome,
-          email: email,
-          tipo: 'passageiro'
-        });
-        await supabase.from('passageiros').insert({ id: data.user.id });
-        alert('✅ Conta criada! Faça login.');
-        onSuccess();
-      }
-    } catch (error: any) {
-      if (error.message.includes('already registered')) {
-        setError('Este e-mail já está cadastrado');
-      } else {
-        setError(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <button onClick={onBack} className="text-[#A0A0B0] mb-4">← Voltar</button>
-        <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-          <h2 className="text-xl font-bold text-white text-center mb-6">Criar Conta</h2>
-          {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
-          <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
-          <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
-          <input type="password" placeholder="Senha (mínimo 6)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4" value={password} onChange={e => setPassword(e.target.value)} />
-          <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
-            {loading ? 'Criando...' : 'Cadastrar'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ============================================
 // TELA DE LOGIN
@@ -210,9 +119,7 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
     setError('');
     setLoading(true);
     const result = await onLogin(email, password);
-    if (result?.error) {
-      setError('E-mail ou senha inválidos');
-    }
+    if (result?.error) setError('E-mail ou senha inválidos');
     setLoading(false);
   };
 
@@ -246,7 +153,7 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
 
-          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm">Criar nova conta</button>
+          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm">Criar conta</button>
         </div>
       </div>
     </div>
@@ -254,7 +161,73 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
 };
 
 // ============================================
-// MAIN SCREEN
+// TELA DE CADASTRO
+// ============================================
+const SignUpScreen = ({ onBack, onSuccess }: any) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nome, setNome] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSignUp = async () => {
+    setError('');
+    if (!nome || !email || !password) {
+      setError('Preencha todos os campos');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Senha: mínimo 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { nome_completo: nome } }
+      });
+      if (error) throw error;
+      if (data.user) {
+        await supabase.from('usuarios').insert({
+          id: data.user.id,
+          nome_completo: nome,
+          email: email,
+          tipo: 'passageiro'
+        });
+        await supabase.from('passageiros').insert({ id: data.user.id });
+        alert('✅ Conta criada! Faça login.');
+        onSuccess();
+      }
+    } catch (error: any) {
+      setError(error.message.includes('already') ? 'E-mail já cadastrado' : error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        <button onClick={onBack} className="text-[#A0A0B0] mb-4">← Voltar</button>
+        <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
+          <h2 className="text-xl font-bold text-white text-center mb-6">Criar Conta</h2>
+          {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
+          <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
+          <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
+          <input type="password" placeholder="Senha (mínimo 6)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4" value={password} onChange={e => setPassword(e.target.value)} />
+          <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
+            {loading ? 'Criando...' : 'Cadastrar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// MAIN SCREEN PRINCIPAL
 // ============================================
 export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);
@@ -263,13 +236,10 @@ export const MainScreen = () => {
   const [showSignUp, setShowSignUp] = useState(false);
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
       setLoading(false);
-    };
-    
-    checkSession();
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
@@ -280,43 +250,30 @@ export const MainScreen = () => {
 
   const handleLogin = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error) {
-      window.location.reload();
-    }
+    if (!error) window.location.reload();
     return { error: !!error };
   };
 
   const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {
-      console.log(e);
-    }
+    await supabase.auth.signOut();
     localStorage.clear();
     sessionStorage.clear();
     window.location.href = '/';
   };
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ 
-      provider: 'google', 
-      options: { redirectTo: window.location.origin } 
-    });
+    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
-      </div>
-    );
+    return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
   }
 
   if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-        {activeTab === 'home' && <HomeScreen user={user} onSignOut={handleLogout} />}
-        {activeTab === 'perfil' && <ProfileScreen user={user} onSignOut={handleLogout} />}
+        {activeTab === 'home' && <HomeScreen user={user} onLogout={handleLogout} />}
+        {activeTab === 'perfil' && <ProfileScreen user={user} onLogout={handleLogout} />}
         {activeTab === 'buscar' && <SearchScreen />}
         {activeTab === 'menu' && <MenuScreen />}
         <BottomNav active={activeTab} onNavigate={setActiveTab} />

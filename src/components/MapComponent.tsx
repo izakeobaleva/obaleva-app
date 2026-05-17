@@ -1,10 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-interface MapComponentProps {
-  onLocationSelect?: (location: { lat: number; lng: number; address: string }) => void;
-}
-
-const MapComponent: React.FC<MapComponentProps> = () => {
+const MapComponent: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -14,7 +10,6 @@ const MapComponent: React.FC<MapComponentProps> = () => {
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
     script.async = true;
-    script.defer = true;
     script.onload = () => {
       if (window.google && mapRef.current) {
         new window.google.maps.Map(mapRef.current, {
