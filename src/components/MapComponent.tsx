@@ -1,35 +1,34 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface MapComponentProps {
   onLocationSelect?: (location: { lat: number; lng: number; address: string }) => void;
-  pickupLocation?: { lat: number; lng: number; address: string } | null;
-  dropoffLocation?: { lat: number; lng: number; address: string } | null;
-  onPickupChange?: (value: string) => void;
-  onDropoffChange?: (value: string) => void;
 }
 
 const MapComponent: React.FC<MapComponentProps> = () => {
-  // Coordenadas de São Paulo (localização padrão)
-  const latitude = -23.5505;
-  const longitude = -46.6333;
-  
-  // URL do Google Maps embed (funciona SEMPRE, sem API Key)
-  const mapUrl = `https://www.google.com/maps/embed/v1/view?key=AIzaSyBXC6y3jWxCFBMeV77L1F0E4fgu_q6QCaM&center=${latitude},${longitude}&zoom=14&maptype=roadmap`;
+  const mapRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <div className="relative w-full h-full rounded-xl overflow-hidden">
-      <iframe
-        title="Google Maps"
-        src={mapUrl}
-        width="100%"
-        height="100%"
-        style={{ border: 0 }}
-        allowFullScreen
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-      />
-    </div>
-  );
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey || !mapRef.current) return;
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google && mapRef.current) {
+        new window.google.maps.Map(mapRef.current, {
+          center: { lat: -23.5505, lng: -46.6333 },
+          zoom: 14,
+          disableDefaultUI: true,
+          zoomControl: true,
+        });
+      }
+    };
+    document.head.appendChild(script);
+  }, []);
+
+  return <div ref={mapRef} className="w-full h-full rounded-xl" />;
 };
 
 export default MapComponent;

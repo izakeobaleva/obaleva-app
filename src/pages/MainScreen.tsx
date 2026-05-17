@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, LogOut, Home, Search, User, Menu, Eye, EyeOff, MapPin, Navigation, Shield, Star, Zap, Chrome } from 'lucide-react';
+import { Car, Eye, EyeOff, Chrome, Home, Search, User, Menu, LogOut, MapPin, Lock } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
-import RotatingBanner from '../components/RotatingBanner';
-import { solicitarCorrida, buscarCorridaAtiva, subscribeToRide, cancelarCorrida, Ride } from '../services/rideService';
-import RideStatusModal from '../components/RideStatusModal';
 
 // ============================================
 // BOTTOM NAVIGATION
@@ -18,13 +15,12 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
   ];
   return (
     <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-3 z-50">
-      <div className="bg-[#1A1528] border border-[#F4D03F]/30 rounded-2xl max-w-md w-full mx-4 shadow-xl">
-        <div className="flex justify-between items-center px-5 py-3">
+      <div className="bg-[#1A1528] border border-[#F4D03F]/30 rounded-2xl max-w-md w-full mx-4">
+        <div className="flex justify-between px-5 py-3">
           {tabs.map((tab) => (
-            <button key={tab.id} onClick={() => onNavigate(tab.id)} className={`flex flex-col items-center gap-1 transition-all ${active === tab.id ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'}`}>
-              <tab.icon size={24} strokeWidth={active === tab.id ? 2 : 1.5} />
-              <span className="text-xs font-medium">{tab.label}</span>
-              {active === tab.id && <div className="w-2 h-1 rounded-full bg-[#F4D03F] mt-0.5" />}
+            <button key={tab.id} onClick={() => onNavigate(tab.id)} className={`flex flex-col items-center gap-1 ${active === tab.id ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'}`}>
+              <tab.icon size={22} />
+              <span className="text-[10px]">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -32,175 +28,6 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
     </div>
   );
 };
-
-// ============================================
-// TELA PRINCIPAL (HOME)
-// ============================================
-const HomeScreen = ({ user, onSignOut }: any) => {
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [dropoffAddress, setDropoffAddress] = useState('');
-  const [pickupLocation, setPickupLocation] = useState<any>(null);
-  const [dropoffLocation, setDropoffLocation] = useState<any>(null);
-  const [activeRide, setActiveRide] = useState<Ride | null>(null);
-  const [showRideModal, setShowRideModal] = useState(false);
-  const [solicitando, setSolicitando] = useState(false);
-  const subscriptionRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (user?.id) carregarCorridaAtiva();
-    return () => { if (subscriptionRef.current) subscriptionRef.current.unsubscribe(); };
-  }, [user]);
-
-  const carregarCorridaAtiva = async () => {
-    if (user?.id) {
-      const corrida = await buscarCorridaAtiva(user.id);
-      if (corrida) {
-        setActiveRide(corrida);
-        setShowRideModal(true);
-        subscriptionRef.current = subscribeToRide(corrida.id, (updatedRide) => {
-          setActiveRide(updatedRide);
-          if (updatedRide.status === 'finalizada' || updatedRide.status === 'cancelada') {
-            setTimeout(() => { setShowRideModal(false); setActiveRide(null); }, 3000);
-          }
-        });
-      }
-    }
-  };
-
-  const handleRequestRide = async () => {
-    if (!user) { alert('Faça login primeiro!'); return; }
-    if (!pickupLocation || !dropoffLocation) { alert('Selecione origem e destino no mapa!'); return; }
-    setSolicitando(true);
-    try {
-      const corrida = await solicitarCorrida(user.id, pickupLocation, dropoffLocation);
-      if (corrida) {
-        setActiveRide(corrida);
-        setShowRideModal(true);
-        setPickupAddress('');
-        setDropoffAddress('');
-        setPickupLocation(null);
-        setDropoffLocation(null);
-        alert('✅ Corrida solicitada!');
-      }
-    } catch (error: any) { alert('❌ Erro: ' + error.message); } 
-    finally { setSolicitando(false); }
-  };
-
-  const handleCancelRide = async () => {
-    if (activeRide) {
-      const success = await cancelarCorrida(activeRide.id);
-      if (success) { alert('Corrida cancelada'); setShowRideModal(false); setActiveRide(null); if (subscriptionRef.current) subscriptionRef.current.unsubscribe(); } 
-      else { alert('Erro ao cancelar'); }
-    }
-  };
-
-  return (
-    <div className="max-w-md mx-auto px-4 pb-28">
-      {/* Header */}
-      <div className="flex justify-between items-center py-3">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
-            <Car size={18} className="text-[#F4D03F]" />
-          </div>
-          <h1 className="text-xl font-bold text-white">OBALEVA</h1>
-        </div>
-        <button onClick={onSignOut} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-500 text-red-400 text-sm hover:bg-red-500/30 transition">
-          <LogOut size={14} /> Sair
-        </button>
-      </div>
-
-      {/* Mapa */}
-      <div className="relative h-[220px] rounded-xl overflow-hidden mb-3 shadow-lg">
-        <MapComponent
-          pickupLocation={pickupLocation}
-          dropoffLocation={dropoffLocation}
-          onPickupChange={setPickupAddress}
-          onDropoffChange={setDropoffAddress}
-          onLocationSelect={(location: any) => {
-            if (!dropoffAddress) { setPickupLocation(location); setPickupAddress(location.address); } 
-            else { setDropoffLocation(location); setDropoffAddress(location.address); }
-          }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="bg-black/60 backdrop-blur-md rounded-xl px-4 py-1.5 border border-[#F4D03F]/40">
-            <div className="flex items-center gap-2"><Car className="text-[#F4D03F] w-5 h-5" /><span className="text-white font-bold">OBALEVA</span></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Campos */}
-      <div className="bg-gradient-to-br from-[#1A1528] to-[#1A1528]/80 rounded-xl p-3 border border-[#F4D03F]/15">
-        <div className="bg-white/10 rounded-lg mb-2">
-          <div className="flex items-center gap-2 p-3">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <input type="text" placeholder="Onde você está?" className="flex-1 bg-transparent text-white outline-none" value={pickupAddress} onChange={e => setPickupAddress(e.target.value)} />
-          </div>
-        </div>
-        <div className="bg-white/10 rounded-lg">
-          <div className="flex items-center gap-2 p-3">
-            <div className="w-2 h-2 rounded-full bg-red-500" />
-            <input type="text" placeholder="Para onde vai?" className="flex-1 bg-transparent text-white outline-none" value={dropoffAddress} onChange={e => setDropoffAddress(e.target.value)} />
-          </div>
-        </div>
-      </div>
-
-      {/* Botão Solicitar */}
-      <button onClick={handleRequestRide} disabled={solicitando || !pickupLocation || !dropoffLocation} className="w-full py-3 mt-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold transition-all hover:scale-[1.02] disabled:opacity-50">
-        {solicitando ? 'Buscando motorista...' : '🚗 SOLICITAR CORRIDA'}
-      </button>
-
-      {/* Banner Rotativo */}
-      <RotatingBanner />
-
-      {/* Modal da Corrida */}
-      {showRideModal && activeRide && <RideStatusModal ride={activeRide} onClose={() => setShowRideModal(false)} onCancel={handleCancelRide} />}
-    </div>
-  );
-};
-
-// ============================================
-// TELA DE PERFIL
-// ============================================
-const ProfileScreen = ({ user, onSignOut }: any) => (
-  <div className="max-w-md mx-auto px-4 pb-28 mt-8">
-    <div className="bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-2xl p-6 text-center border border-[#F4D03F]/20 shadow-xl">
-      <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-[#F4D03F]/30 to-[#8B5CF6]/20 flex items-center justify-center border-2 border-[#F4D03F]/50">
-        <User size={40} className="text-[#F4D03F]" />
-      </div>
-      <h2 className="text-white text-xl font-bold mt-4">{user?.email?.split('@')[0]}</h2>
-      <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <div className="inline-block mt-3 px-4 py-1 rounded-full bg-[#F4D03F]/20">
-        <span className="text-[#F4D03F] text-xs font-bold">PASSAGEIRO</span>
-      </div>
-      <button onClick={onSignOut} className="mt-8 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold hover:bg-red-500/30 transition">
-        SAIR DA CONTA
-      </button>
-    </div>
-  </div>
-);
-
-// ============================================
-// TELAS PLACEHOLDER
-// ============================================
-const SearchScreen = () => (
-  <div className="max-w-md mx-auto px-4 pb-28 mt-8">
-    <div className="bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
-      <Search size={48} className="text-[#F4D03F] mx-auto mb-4" />
-      <h2 className="text-white text-xl font-bold">🔍 Buscar</h2>
-      <p className="text-gray-400 mt-2">Em breve: histórico e lugares favoritos</p>
-    </div>
-  </div>
-);
-
-const MenuScreen = () => (
-  <div className="max-w-md mx-auto px-4 pb-28 mt-8">
-    <div className="bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
-      <Menu size={48} className="text-[#F4D03F] mx-auto mb-4" />
-      <h2 className="text-white text-xl font-bold">☰ Menu</h2>
-      <p className="text-gray-400 mt-2">Em breve: ajuda, indicação e configurações</p>
-    </div>
-  </div>
-);
 
 // ============================================
 // TELA DE LOGIN
@@ -219,11 +46,11 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
             <Car size={40} className="text-[#F4D03F]" />
           </div>
           <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
-          <p className="text-[#A0A0B0] mt-1">Sua corrida de confiança</p>
+          <p className="text-[#A0A0B0] text-sm mt-1">Sua corrida de confiança</p>
         </div>
 
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-          <button onClick={onGoogleLogin} className="w-full py-3 rounded-xl border border-[#F4D03F]/30 bg-white/10 text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02]">
+          <button onClick={onGoogleLogin} className="w-full py-3 rounded-xl border border-[#F4D03F]/30 bg-white/10 text-white flex items-center justify-center gap-2">
             <Chrome size={20} /> Entrar com Google
           </button>
 
@@ -236,14 +63,14 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
           
           <div className="relative">
             <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4 pr-10" value={password} onChange={e => setPassword(e.target.value)} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? "🙈" : "👁️"}</button>
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
           </div>
 
-          <button onClick={async () => { setLoading(true); await onLogin(email, password); setLoading(false); }} disabled={loading} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
+          <button onClick={async () => { setLoading(true); await onLogin(email, password); setLoading(false); }} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
 
-          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm py-2">Criar nova conta</button>
+          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm">Criar nova conta</button>
         </div>
       </div>
     </div>
@@ -251,17 +78,33 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
 };
 
 // ============================================
-// TELA DE CADASTRO
+// TELA DE CADASTRO ESTILO 99
 // ============================================
 const SignUpScreen = ({ onBack, onSuccess }: any) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [step, setStep] = useState(1);
   const [nome, setNome] = useState('');
+  const [sobrenome, setSobrenome] = useState('');
+  const [email, setEmail] = useState('');
+  const [confirmarEmail, setConfirmarEmail] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [dataNascimento, setDataNascimento] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    if (!nome || !email || !password) {
-      alert('Preencha todos os campos');
+    if (!nome || !sobrenome || !email || !password || !cpf || !dataNascimento) {
+      alert('Preencha todos os campos obrigatórios');
+      return;
+    }
+    if (email !== confirmarEmail) {
+      alert('E-mails não coincidem');
+      return;
+    }
+    if (password !== confirmarSenha) {
+      alert('Senhas não coincidem');
       return;
     }
     if (password.length < 6) {
@@ -271,38 +114,233 @@ const SignUpScreen = ({ onBack, onSuccess }: any) => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { nome_completo: nome } } });
+      const nomeCompleto = `${nome} ${sobrenome}`;
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { nome_completo: nomeCompleto, cpf, data_nascimento: dataNascimento, whatsapp } }
+      });
+      
       if (error) throw error;
+      
       if (data.user) {
-        await supabase.from('usuarios').insert({ id: data.user.id, nome_completo: nome, email: email, tipo: 'passageiro' });
+        await supabase.from('usuarios').insert({
+          id: data.user.id,
+          nome_completo: nomeCompleto,
+          email,
+          telefone: whatsapp,
+          cpf,
+          tipo: 'passageiro'
+        });
         await supabase.from('passageiros').insert({ id: data.user.id });
         alert('✅ Conta criada! Faça login.');
         onSuccess();
       }
     } catch (error: any) {
-      alert('❌ Erro: ' + error.message);
+      alert('❌ ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
+  };
+
+  const formatWhatsapp = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 2) return `(${numbers}`;
+    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  };
+
+  if (step === 1) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <button onClick={onBack} className="text-[#A0A0B0] mb-4">← Voltar</button>
+          <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+                <User size={32} className="text-[#F4D03F]" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Qual seu nome?</h2>
+              <p className="text-[#A0A0B0] text-sm">Como você gostaria de ser chamado?</p>
+            </div>
+            <input type="text" placeholder="Nome" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
+            <input type="text" placeholder="Sobrenome" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={sobrenome} onChange={e => setSobrenome(e.target.value)} />
+            <button onClick={() => setStep(2)} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">Continuar</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <button onClick={() => setStep(1)} className="text-[#A0A0B0] mb-4">← Voltar</button>
+          <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+                <MapPin size={32} className="text-[#F4D03F]" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Seu e-mail</h2>
+              <p className="text-[#A0A0B0] text-sm">Usaremos para enviar recibos</p>
+            </div>
+            <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
+            <input type="email" placeholder="Confirmar e-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={confirmarEmail} onChange={e => setConfirmarEmail(e.target.value)} />
+            <button onClick={() => setStep(3)} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">Continuar</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 3) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <button onClick={() => setStep(2)} className="text-[#A0A0B0] mb-4">← Voltar</button>
+          <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+                <User size={32} className="text-[#F4D03F]" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Dados pessoais</h2>
+              <p className="text-[#A0A0B0] text-sm">Para sua segurança</p>
+            </div>
+            <input type="text" placeholder="CPF" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={cpf} onChange={e => setCpf(formatCPF(e.target.value))} maxLength={14} />
+            <input type="date" placeholder="Data de nascimento" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} />
+            <input type="tel" placeholder="WhatsApp" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={whatsapp} onChange={e => setWhatsapp(formatWhatsapp(e.target.value))} maxLength={15} />
+            <button onClick={() => setStep(4)} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">Continuar</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <button onClick={onBack} className="text-[#A0A0B0] mb-4">← Voltar</button>
+        <button onClick={() => setStep(3)} className="text-[#A0A0B0] mb-4">← Voltar</button>
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-          <h2 className="text-2xl font-bold text-white text-center mb-6">Criar Conta</h2>
-          <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
-          <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
-          <input type="password" placeholder="Senha (mínimo 6 caracteres)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4" value={password} onChange={e => setPassword(e.target.value)} />
-          <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
-            {loading ? 'Criando...' : 'Cadastrar'}
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+              <Lock size={32} className="text-[#F4D03F]" />
+            </div>
+            <h2 className="text-xl font-bold text-white">Crie sua senha</h2>
+            <p className="text-[#A0A0B0] text-sm">Mínimo 6 caracteres</p>
+          </div>
+          <div className="relative">
+            <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3 pr-10" value={password} onChange={e => setPassword(e.target.value)} />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+          </div>
+          <input type="password" placeholder="Confirmar senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)} />
+          <button onClick={handleSignUp} disabled={loading} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
+            {loading ? 'Criando...' : 'Finalizar Cadastro'}
           </button>
         </div>
       </div>
     </div>
   );
 };
+
+// ============================================
+// TELA PRINCIPAL (HOME)
+// ============================================
+const HomeScreen = ({ user, onSignOut }: any) => {
+  const [destino, setDestino] = useState('');
+
+  return (
+    <div className="max-w-md mx-auto px-4 pb-28">
+      {/* Header */}
+      <div className="flex justify-between items-center py-3">
+        <div className="flex items-center gap-2">
+          <Car size={24} className="text-[#F4D03F]" />
+          <h1 className="text-xl font-bold text-white">OBALEVA</h1>
+        </div>
+        <button onClick={onSignOut} className="px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-500 text-red-400 text-sm">
+          <LogOut size={14} className="inline mr-1" /> Sair
+        </button>
+      </div>
+
+      {/* Mapa */}
+      <div className="h-[220px] rounded-xl overflow-hidden mb-3 shadow-lg">
+        <MapComponent />
+      </div>
+
+      {/* Campo Para onde vai? */}
+      <div className="bg-gradient-to-br from-[#1A1528] to-[#1A1528]/80 rounded-xl p-4 border border-[#F4D03F]/20">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
+            <MapPin size={16} className="text-[#F4D03F]" />
+          </div>
+          <span className="text-white font-bold text-lg">Para onde você vai agora?</span>
+        </div>
+        
+        <input
+          type="text"
+          placeholder="Digite seu destino..."
+          className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white outline-none focus:border-[#F4D03F] transition text-base"
+          value={destino}
+          onChange={(e) => setDestino(e.target.value)}
+        />
+        
+        <button className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-base">
+          Confirmar corrida
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// TELA DE PERFIL
+// ============================================
+const ProfileScreen = ({ user, onSignOut }: any) => (
+  <div className="max-w-md mx-auto px-4 pb-28 mt-8">
+    <div className="bg-[#1A1528] rounded-2xl p-6 text-center border border-[#F4D03F]/20">
+      <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+        <User size={40} className="text-[#F4D03F]" />
+      </div>
+      <h2 className="text-white text-xl font-bold">{user?.email?.split('@')[0]}</h2>
+      <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
+      <button onClick={onSignOut} className="mt-6 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold">
+        Sair da conta
+      </button>
+    </div>
+  </div>
+);
+
+// ============================================
+// TELAS PLACEHOLDER
+// ============================================
+const SearchScreen = () => (
+  <div className="max-w-md mx-auto px-4 pb-28 mt-8">
+    <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
+      <Search size={48} className="text-[#F4D03F] mx-auto mb-4" />
+      <h2 className="text-white text-xl font-bold">🔍 Buscar</h2>
+      <p className="text-gray-400 mt-2">Em breve</p>
+    </div>
+  </div>
+);
+
+const MenuScreen = () => (
+  <div className="max-w-md mx-auto px-4 pb-28 mt-8">
+    <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
+      <Menu size={48} className="text-[#F4D03F] mx-auto mb-4" />
+      <h2 className="text-white text-xl font-bold">☰ Menu</h2>
+      <p className="text-gray-400 mt-2">Em breve</p>
+    </div>
+  </div>
+);
 
 // ============================================
 // MAIN SCREEN
