@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, Home, Search, User, Menu, LogOut, MapPin, Chrome, Eye, EyeOff } from 'lucide-react';
+import { Car, Home, Search, User, Menu, MapPin, Chrome } from 'lucide-react';
 
 // ============================================
 // BOTTOM NAVIGATION
@@ -263,7 +263,6 @@ export const MainScreen = () => {
   const [showSignUp, setShowSignUp] = useState(false);
 
   useEffect(() => {
-    // Verificar sessão ao carregar
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
@@ -272,7 +271,6 @@ export const MainScreen = () => {
     
     checkSession();
 
-    // Ouvir mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
@@ -280,27 +278,22 @@ export const MainScreen = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Função de login
   const handleLogin = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (!error) {
-      // Recarregar após login bem sucedido
       window.location.reload();
     }
     return { error: !!error };
   };
 
-  // Função de logout - GARANTIDA
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
     } catch (e) {
       console.log(e);
     }
-    // Limpar tudo
     localStorage.clear();
     sessionStorage.clear();
-    // Forçar recarga
     window.location.href = '/';
   };
 
@@ -319,7 +312,6 @@ export const MainScreen = () => {
     );
   }
 
-  // Usuário logado
   if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
@@ -332,11 +324,9 @@ export const MainScreen = () => {
     );
   }
 
-  // Tela de cadastro
   if (showSignUp) {
     return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => setShowSignUp(false)} />;
   }
 
-  // Tela de login
   return <LoginScreen onLogin={handleLogin} onGoogleLogin={handleGoogleLogin} onSignUp={() => setShowSignUp(true)} />;
 };
