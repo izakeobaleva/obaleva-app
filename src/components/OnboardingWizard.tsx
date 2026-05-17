@@ -118,7 +118,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
     try {
       const nomeCompleto = `${formData.nome} ${formData.sobrenome}`;
       
-      // PRIMEIRO: Verificar se o usuário já existe
+      // Verificar se já existe
       const { data: existingUser } = await supabase
         .from('usuarios')
         .select('email')
@@ -131,7 +131,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         return;
       }
       
-      // SEGUNDO: Criar novo usuário
+      // Criar usuário
       const { data: auth, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -145,15 +145,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         }
       });
       
-      if (error) {
-        if (error.message.includes('already registered')) {
-          alert('❌ Este e-mail já está cadastrado! Faça login.');
-          onComplete();
-        } else {
-          throw error;
-        }
-        return;
-      }
+      if (error) throw error;
       
       if (auth.user) {
         await supabase.from('usuarios').insert({
@@ -167,21 +159,18 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         
         await supabase.from('passageiros').insert({ id: auth.user.id });
         
-        alert('✅ Cadastro realizado com sucesso!');
-        
-        // Fazer login automático
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        // ✅ LOGIN AUTOMÁTICO
+        await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.senha
         });
         
-        if (!signInError) {
-          onComplete();
-        }
+        // ✅ VAI DIRETO PARA O PASSO 6 (TELA DO MAPA)
+        setStep(6);
+        setLoading(false);
       }
     } catch (error: any) {
       alert('❌ Erro: ' + error.message);
-    } finally {
       setLoading(false);
     }
   };
