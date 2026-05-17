@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, ArrowRight, ArrowLeft, Check, MapPin, Navigation, User, Mail, Phone, Lock, Calendar, CreditCard, Smartphone, MessageCircle } from 'lucide-react';
+import { Car, ArrowRight, ArrowLeft, Check, MapPin, Navigation, User, Mail, Phone, Lock, Calendar, CreditCard, Smartphone, MessageCircle, Eye, EyeOff } from 'lucide-react';
 
 interface OnboardingWizardProps {
   onComplete: () => void;
@@ -9,6 +9,8 @@ interface OnboardingWizardProps {
 const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
   
@@ -125,7 +127,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
       
       if (existingUser) {
         alert('❌ Este e-mail já está cadastrado! Faça login.');
-        onComplete(); // Volta para tela de login
+        onComplete();
         return;
       }
       
@@ -369,7 +371,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
             </div>
           )}
 
-          {/* PASSO 5: Criar senha */}
+          {/* PASSO 5: Criar senha - COM BOTÃO MOSTRAR SENHA */}
           {step === 5 && (
             <div className="space-y-4">
               <div className="text-center mb-4">
@@ -377,8 +379,45 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
                 <h2 className="text-2xl font-bold text-white">Crie sua senha</h2>
                 <p className="text-[#A0A0B0] text-sm">Mínimo 6 caracteres</p>
               </div>
-              <input type="password" placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={formData.senha} onChange={e => setFormData({...formData, senha: e.target.value})} />
-              <input type="password" placeholder="Confirmar senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={formData.confirmarSenha} onChange={e => setFormData({...formData, confirmarSenha: e.target.value})} />
+              
+              {/* Campo Senha com botão mostrar */}
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Senha" 
+                  className="w-full p-3 pr-12 rounded-xl bg-white/10 border border-white/15 text-white focus:border-[#F4D03F] transition outline-none" 
+                  value={formData.senha} 
+                  onChange={e => setFormData({...formData, senha: e.target.value})}
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A0A0B0] hover:text-[#F4D03F] transition"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {errors.senha && <p className="text-red-400 text-xs">{errors.senha}</p>}
+              
+              {/* Campo Confirmar Senha com botão mostrar */}
+              <div className="relative">
+                <input 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  placeholder="Confirmar senha" 
+                  className="w-full p-3 pr-12 rounded-xl bg-white/10 border border-white/15 text-white focus:border-[#F4D03F] transition outline-none" 
+                  value={formData.confirmarSenha} 
+                  onChange={e => setFormData({...formData, confirmarSenha: e.target.value})}
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A0A0B0] hover:text-[#F4D03F] transition"
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {errors.confirmarSenha && <p className="text-red-400 text-xs">{errors.confirmarSenha}</p>}
+              
               <div className="flex gap-2">
                 <button onClick={handleBack} className="flex-1 py-3 rounded-xl bg-white/10 text-white">Voltar</button>
                 <button onClick={handleRegister} disabled={loading} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
