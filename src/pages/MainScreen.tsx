@@ -108,7 +108,108 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
 };
 
 // ============================================
-// TELA PRINCIPAL (HOME)
+// TELA DE CADASTRO (SignUpScreen)
+// ============================================
+const SignUpScreen = ({ onBack, onSuccess }: any) => {
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSignUp = async () => {
+    if (!nome || !email || !password) {
+      alert('Preencha todos os campos');
+      return;
+    }
+    if (password.length < 6) {
+      alert('A senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: auth, error } = await supabase.auth.signUp({ 
+        email, 
+        password, 
+        options: { data: { nome_completo: nome, tipo: 'passageiro' } } 
+      });
+      
+      if (error) throw error;
+      
+      if (auth.user) {
+        await supabase.from('usuarios').insert({ 
+          id: auth.user.id, 
+          nome_completo: nome, 
+          email, 
+          tipo: 'passageiro' 
+        });
+        await supabase.from('passageiros').insert({ id: auth.user.id });
+        
+        alert('✅ Conta criada! Faça login.');
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } catch (error: any) {
+      alert('❌ Erro: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4">
+            <Car size={40} className="text-[#F4D03F]" />
+          </div>
+          <h2 className="text-2xl font-bold text-white">Criar Conta</h2>
+          <p className="text-[#A0A0B0] text-sm mt-1">Cadastre-se para começar</p>
+        </div>
+
+        <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10">
+          <div className="space-y-3">
+            <input 
+              type="text" 
+              placeholder="Nome completo" 
+              className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" 
+              value={nome} 
+              onChange={e => setNome(e.target.value)} 
+            />
+            <input 
+              type="email" 
+              placeholder="E-mail" 
+              className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+            />
+            <input 
+              type="password" 
+              placeholder="Senha (mínimo 6 caracteres)" 
+              className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+            />
+            <button 
+              onClick={handleSignUp} 
+              disabled={loading} 
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1A1528] font-bold transition-all hover:shadow-lg disabled:opacity-50"
+            >
+              {loading ? 'Criando...' : 'Criar conta'}
+            </button>
+            <div className="text-center">
+              <button onClick={onBack} className="text-gray-400 text-sm hover:text-[#F4D03F] transition font-medium">
+                ← Já tenho conta
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// TELA PRINCIPAL (HOME) - TELA DE SOLICITAR CORRIDA
 // ============================================
 const HomeScreen = ({ user, onSignOut }: any) => {
   const [pickupAddress, setPickupAddress] = useState('');
@@ -277,7 +378,7 @@ const MenuScreen = () => (
 );
 
 // ============================================
-// MAIN SCREEN - VERSÃO COM DEPURAÇÃO
+// MAIN SCREEN - SOLUÇÃO DEFINITIVA
 // ============================================
 export const MainScreen = () => {
   const { user, profile, loading, signOut } = useAuth();
@@ -286,38 +387,35 @@ export const MainScreen = () => {
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
 
-  // Logs de depuração
-  console.log('\n========== 🖥️ MAINSCREEN ==========');
-  console.log('👤 user:', user?.email || 'null');
-  console.log('📋 profile:', profile?.nome_completo || 'null');
-  console.log('⏳ loading:', loading);
-  console.log('=====================================\n');
+  // Aguardar autenticação ficar pronta
+  useEffect(() => {
+    if (!loading) {
+      setAuthReady(true);
+    }
+  }, [loading]);
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      localStorage.removeItem('onboarding_data');
-      window.location.reload();
-    } catch (err) {
-      window.location.reload();
-    }
+    await signOut();
+    localStorage.clear();
+    window.location.href = '/';
   };
 
-  if (loading) {
+  // Tela de loading
+  if (!authReady) {
     return (
       <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
-        <div className="animate-pulse text-center">
-          <div className="w-16 h-16 rounded-full bg-[#F4D03F]/20 animate-bounce mx-auto mb-3" />
-          <p className="text-white">Carregando ObaLeva...</p>
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-[#F4D03F] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-white">Iniciando...</p>
         </div>
       </div>
     );
   }
 
-  // ✅ USUÁRIO LOGADO E COM PERFIL COMPLETO → VAI DIRETO PARA HOME
+  // ✅ Usuário logado COM perfil → Tela principal
   if (user && profile) {
-    console.log('✅ USUÁRIO COM PERFIL → Indo para HomeScreen');
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
         {activeTab === 'home' && <HomeScreen user={user} onSignOut={handleSignOut} />}
@@ -329,47 +427,45 @@ export const MainScreen = () => {
     );
   }
 
-  // ✅ USUÁRIO LOGADO MAS SEM PERFIL → MOSTRA WIZARD
+  // ✅ Usuário logado SEM perfil → Wizard
   if (user && !profile) {
-    console.log('📝 USUÁRIO SEM PERFIL → Indo para OnboardingWizard');
     return <OnboardingWizard onComplete={() => window.location.reload()} />;
   }
 
-  // ✅ USUÁRIO NÃO LOGADO → MOSTRA LOGIN
-  if (showSignUp) {
-    console.log('🔐 MOSTRANDO SIGNUP');
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4">
-              <Car size={40} className="text-[#F4D03F]" />
-            </div>
-            <h2 className="text-2xl font-bold text-white">Criar Conta</h2>
-            <p className="text-[#A0A0B0] text-sm mt-1">Cadastre-se para começar</p>
-          </div>
-
-          <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10">
-            <div className="space-y-3">
-              <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" />
-              <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" />
-              <input type="password" placeholder="Senha (mínimo 6 caracteres)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" />
-              <button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1A1528] font-bold transition-all hover:shadow-lg">Criar conta</button>
-              <div className="text-center"><button onClick={() => setShowSignUp(false)} className="text-gray-400 text-sm hover:text-[#F4D03F] transition font-medium">← Já tenho conta</button></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // ✅ Usuário não logado → Login
+  if (!user && showSignUp) {
+    return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => setShowSignUp(false)} />;
   }
 
-  console.log('🔐 MOSTRANDO LOGIN');
   return (
     <LoginScreen 
       onSignUpClick={() => setShowSignUp(true)} 
-      onGoogleLogin={async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }} 
-      onEmailLogin={async (e) => { e.preventDefault(); setLoginLoading(true); const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword }); if (error) alert('E-mail ou senha inválidos'); setLoginLoading(false); }} 
-      loginEmail={loginEmail} setLoginEmail={setLoginEmail} loginPassword={loginPassword} setLoginPassword={setLoginPassword} loginLoading={loginLoading} 
+      onGoogleLogin={async () => { 
+        await supabase.auth.signInWithOAuth({ 
+          provider: 'google', 
+          options: { redirectTo: window.location.origin } 
+        }); 
+      }} 
+      onEmailLogin={async (e) => { 
+        e.preventDefault(); 
+        setLoginLoading(true); 
+        const { error } = await supabase.auth.signInWithPassword({ 
+          email: loginEmail, 
+          password: loginPassword 
+        }); 
+        if (error) {
+          alert('❌ E-mail ou senha inválidos');
+        } else {
+          // Forçar recarga após login bem-sucedido
+          window.location.reload();
+        }
+        setLoginLoading(false); 
+      }} 
+      loginEmail={loginEmail} 
+      setLoginEmail={setLoginEmail} 
+      loginPassword={loginPassword} 
+      setLoginPassword={setLoginPassword} 
+      loginLoading={loginLoading} 
     />
   );
 };

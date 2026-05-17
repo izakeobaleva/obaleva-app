@@ -27,7 +27,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
-      console.log('🔍 Buscando perfil para:', userId);
       const { data, error } = await supabase
         .from('usuarios')
         .select('*')
@@ -35,51 +34,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
       
       if (error) {
-        console.error('❌ Erro ao buscar perfil:', error);
+        console.error('Erro ao buscar perfil:', error);
         return null;
       }
       
-      console.log('✅ Perfil encontrado:', data ? data.nome_completo : 'null');
       return data;
     } catch (err) {
-      console.error('❌ Erro ao buscar perfil:', err);
+      console.error('Erro:', err);
       return null;
     }
   };
 
   const refreshSession = async () => {
-    console.log('🔄 refreshSession chamado');
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       setUser(session.user);
       const profileData = await fetchProfile(session.user.id);
       setProfile(profileData);
-    } else {
-      setUser(null);
-      setProfile(null);
     }
   };
 
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        console.log('🔄 Inicializando autenticação...');
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
-          console.log('✅ Sessão encontrada:', session.user.email);
           setUser(session.user);
           const profileData = await fetchProfile(session.user.id);
           setProfile(profileData);
-        } else {
-          console.log('ℹ️ Nenhuma sessão encontrada');
-          setUser(null);
-          setProfile(null);
         }
       } catch (err) {
-        console.error('❌ Erro ao inicializar auth:', err);
+        console.error('Erro ao inicializar auth:', err);
       } finally {
-        console.log('✅ AuthProvider - loading finalizado');
         setLoading(false);
       }
     };
@@ -88,7 +75,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        console.log('🔄 Auth state changed:', _event, session?.user?.email);
         if (session?.user) {
           setUser(session.user);
           const profileData = await fetchProfile(session.user.id);
@@ -107,11 +93,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = async () => {
-    console.log('🔴 SignOut chamado');
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
-    localStorage.removeItem('onboarding_data');
   };
 
   return (
