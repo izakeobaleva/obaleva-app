@@ -6,12 +6,6 @@ export interface Location {
   address: string;
 }
 
-export interface RideRequest {
-  origem: Location;
-  destino: Location;
-  passageiro_id: string;
-}
-
 export interface Ride {
   id: string;
   passageiro_id: string;
@@ -28,7 +22,6 @@ export interface Ride {
   created_at: string;
 }
 
-// Calcular distância entre dois pontos (fórmula de Haversine)
 function calcularDistancia(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dlat = (lat2 - lat1) * Math.PI / 180;
@@ -40,18 +33,18 @@ function calcularDistancia(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
-// Calcular valor da corrida baseado na distância
 function calcularValor(distanciaKm: number): number {
   const valorPorKm = 2.50;
   const taxaBase = 3.00;
   return parseFloat((taxaBase + (distanciaKm * valorPorKm)).toFixed(2));
 }
 
-// Solicitar nova corrida
 export async function solicitarCorrida(passageiro_id: string, origem: Location, destino: Location): Promise<Ride | null> {
   try {
     const distanciaKm = calcularDistancia(origem.lat, origem.lng, destino.lat, destino.lng);
     const valorTotal = calcularValor(distanciaKm);
+
+    console.log('📝 Solicitando corrida...', { pass: passageiro_id, origem: origem.address, destino: destino.address });
 
     const { data, error } = await supabase
       .from('corridas')
@@ -72,45 +65,62 @@ export async function solicitarCorrida(passageiro_id: string, origem: Location, 
 
     if (error) throw error;
 
-    // Simular busca de motorista (opcional — não trava se falhar)
+    console.log('✅ Corrida criada:', data.id);
+
+    // Simular busca de motorista
     simularBuscaMotorista(data.id);
 
     return data;
   } catch (error) {
-    console.error('Erro ao solicitar corrida:', error);
+    console.error('❌ Erro ao solicitar corrida:', error);
     throw error;
   }
 }
 
-// Simular busca por motorista (tenta encontrar, mas não trava)
 async function simularBuscaMotorista(corridaId: string) {
   try {
-    const { data: motoristas } = await supabase
+    console.log('🔍 Buscando motoristas disponíveis...');
+    
+    const { data: motoristas, error } = await supabase
       .from('motoristas')
-      .select('id')
+      .select('id, status, online')
       .eq('status', 'aprovado')
       .limit(1);
 
+    console.log('📊 Motoristas encontrados:', motoristas);
+
+    if (error) {
+      console.error('❌ Erro ao buscar motoristas:', error);
+      return;
+    }
+
     if (motoristas && motoristas.length > 0) {
+      console.log('✅ Motorista encontrado! ID:', motoristas[0].id, 'Status:', motoristas[0].status, 'Online:', motoristas[0].online);
+      
       setTimeout(async () => {
-        await supabase
+        const { error: updateError } = await supabase
           .from('corridas')
           .update({
             motorista_id: motoristas[0].id,
             status: 'motorista_em_rota'
           })
           .eq('id', corridaId);
+
+        if (updateError) {
+          console.error('❌ Erro ao associar motorista:', updateError);
+        } else {
+          console.log('✅ Motorista atribuído à corrida!');
+        }
       }, 3000);
     } else {
-      // Se não tiver motorista, mantém como "buscando_motorista"
-      console.log('⚠️ Nenhum motorista disponível. Corrida aguardando...');
+      console.log('⚠️ Nenhum motorista aprovado disponível.');
+      console.log('💡 Dica: Verifique se existe um motorista com status = "aprovado" na tabela motoristas');
     }
   } catch (err) {
     console.warn('⚠️ Erro ao simular busca de motorista:', err);
   }
 }
 
-// Cancelar corrida
 export async function cancelarCorrida(corridaId: string): Promise<boolean> {
   try {
     const { error } = await supabase
@@ -119,14 +129,14 @@ export async function cancelarCorrida(corridaId: string): Promise<boolean> {
       .eq('id', corridaId);
     
     if (error) throw error;
+    console.log('✅ Corrida cancelada:', corridaId);
     return true;
   } catch (error) {
-    console.error('Erro ao cancelar corrida:', error);
+    console.error('❌ Erro ao cancelar corrida:', error);
     return false;
   }
 }
 
-// Buscar corrida ativa do passageiro
 export async function buscarCorridaAtiva(passageiroId: string): Promise<Ride | null> {
   try {
     const { data, error } = await supabase
@@ -141,13 +151,14 @@ export async function buscarCorridaAtiva(passageiroId: string): Promise<Ride | n
     if (error && error.code !== 'PGRST116') throw error;
     return data;
   } catch (error) {
-    console.error('Erro ao buscar corrida ativa:', error);
+    console.error('❌ Erro ao buscar corrida ativa:', error);
     return null;
   }
 }
 
-// Inscrever para atualizações em tempo real da corrida
 export function subscribeToRide(corridaId: string, callback: (ride: Ride) => void) {
+  console.log('🔔 Inscrevendo para atualizações da corrida:', corridaId);
+  
   const subscription = supabase
     .channel(`corrida_${corridaId}`)
     .on(
@@ -159,6 +170,7 @@ export function subscribeToRide(corridaId: string, callback: (ride: Ride) => voi
         filter: `id=eq.${corridaId}`
       },
       (payload) => {
+        console.log('🔄 Atualização recebida:', payload.new.status);
         callback(payload.new as Ride);
       }
     )

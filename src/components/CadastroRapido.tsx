@@ -23,6 +23,8 @@ export function CadastroRapido({ tipo, onSuccess }: CadastroRapidoProps) {
     e.preventDefault();
     setLoading(true);
     try {
+      console.log('📝 Iniciando cadastro como', tipo);
+      
       const { data: auth, error } = await supabase.auth.signUp({ 
         email, 
         password, 
@@ -30,6 +32,8 @@ export function CadastroRapido({ tipo, onSuccess }: CadastroRapidoProps) {
       });
       if (error) throw error;
       if (!auth.user) throw new Error('Erro ao criar usuário');
+      
+      console.log('✅ Usuário criado no auth:', auth.user.id);
 
       // Inserir na tabela usuarios
       const { error: userError } = await supabase.from('usuarios').insert({ 
@@ -41,6 +45,7 @@ export function CadastroRapido({ tipo, onSuccess }: CadastroRapidoProps) {
         tipo 
       });
       if (userError) throw userError;
+      console.log('✅ Usuário inserido na tabela usuarios');
 
       if (tipo === 'passageiro') {
         await supabase.from('passageiros').insert({ id: auth.user.id });
@@ -54,10 +59,11 @@ export function CadastroRapido({ tipo, onSuccess }: CadastroRapidoProps) {
           .maybeSingle();
         
         if (!existing) {
+          console.log('📝 Inserindo na tabela motoristas...');
           const { error: motError } = await supabase.from('motoristas').insert({ 
             id: auth.user.id, 
-            status: 'aprovar',  // 'pendente' se quiser aprovação manual
-            online: false,
+            status: 'aprovado',  // ALTERADO: aprovado direto em vez de pendente
+            online: true,        // ALTERADO: já inicia online
             dados_veiculo: { 
               placa: placa || 'Não informado', 
               modelo: modelo || 'Não informado', 
@@ -66,12 +72,16 @@ export function CadastroRapido({ tipo, onSuccess }: CadastroRapidoProps) {
             } 
           });
           if (motError) throw motError;
+          console.log('✅ Motorista inserido com sucesso!');
+        } else {
+          console.log('ℹ️ Motorista já existia:', existing);
         }
-        toast.success('✅ Cadastro de motorista realizado! Aguardando aprovação.');
+        toast.success('✅ Cadastro de motorista realizado com sucesso!');
       }
 
       onSuccess();
     } catch (err: any) {
+      console.error('❌ Erro no cadastro:', err);
       toast.error(err.message || 'Erro ao cadastrar');
     } finally {
       setLoading(false);
