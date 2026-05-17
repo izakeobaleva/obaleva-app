@@ -13,8 +13,16 @@ interface HomeScreenContentProps {
 export function HomeScreenContent({ user, onSignOut }: HomeScreenContentProps) {
   const [pickupAddress, setPickupAddress] = useState('');
   const [dropoffAddress, setDropoffAddress] = useState('');
-  const [pickupLocation, setPickupLocation] = useState<any>(null);
-  const [dropoffLocation, setDropoffLocation] = useState<any>(null);
+  const [pickupLocation, setPickupLocation] = useState<any>({
+    lat: -23.5505,
+    lng: -46.6333,
+    address: 'São Paulo - SP'
+  });
+  const [dropoffLocation, setDropoffLocation] = useState<any>({
+    lat: -23.5505,
+    lng: -46.6333,
+    address: 'São Paulo - SP'
+  });
   const [activeRide, setActiveRide] = useState<Ride | null>(null);
   const [showRideModal, setShowRideModal] = useState(false);
   const [solicitando, setSolicitando] = useState(false);
