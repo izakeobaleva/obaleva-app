@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, LogOut, Home, Search, User, Menu } from 'lucide-react';
+import { Car, LogOut, Home, Search, User, Menu, Eye, EyeOff } from 'lucide-react';
 
 // ============================================
 // TELA PRINCIPAL (HOME)
@@ -14,19 +14,22 @@ const HomeScreen = ({ user, onSignOut }: any) => {
           <Car size={24} className="text-[#F4D03F]" />
           <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         </div>
-        <button onClick={onSignOut} className="px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-500 text-red-400 text-sm">
-          <LogOut size={14} className="inline mr-1" /> Sair
+        <button 
+          onClick={onSignOut} 
+          className="px-4 py-2 rounded-lg bg-red-500/30 border border-red-500 text-red-400 text-sm font-bold hover:bg-red-500/50 transition"
+        >
+          <LogOut size={14} className="inline mr-1" /> SAIR
         </button>
       </div>
 
-      {/* Mapa Placeholder */}
+      {/* Mapa */}
       <div className="h-[220px] rounded-xl bg-gradient-to-br from-[#1A1528] to-[#2D2342] flex items-center justify-center mb-3 border border-[#F4D03F]/20">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-[#F4D03F]/20 flex items-center justify-center mx-auto mb-2">
             <Car size={32} className="text-[#F4D03F]" />
           </div>
-          <p className="text-white text-sm">🗺️ Mapa será carregado</p>
-          <p className="text-[#A0A0B0] text-xs mt-1">Localização atual disponível</p>
+          <p className="text-white text-sm">🗺️ Mapa</p>
+          <p className="text-[#A0A0B0] text-xs">Logado: {user?.email}</p>
         </div>
       </div>
 
@@ -40,14 +43,10 @@ const HomeScreen = ({ user, onSignOut }: any) => {
         </div>
       </div>
 
-      {/* Botão */}
+      {/* Botão Solicitar */}
       <button className="w-full py-3 mt-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
         🚗 SOLICITAR CORRIDA
       </button>
-
-      <p className="text-center text-[#A0A0B0] text-xs mt-4">
-        Logado como: {user?.email}
-      </p>
     </div>
   );
 };
@@ -61,10 +60,10 @@ const ProfileScreen = ({ user, profile, onSignOut }: any) => (
       <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
         <User size={40} className="text-[#F4D03F]" />
       </div>
-      <h2 className="text-white text-xl font-bold">{profile?.nome_completo || user?.email}</h2>
+      <h2 className="text-white text-xl font-bold">{profile?.nome_completo || user?.email?.split('@')[0]}</h2>
       <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <button onClick={onSignOut} className="mt-6 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold">
-        Sair da conta
+      <button onClick={onSignOut} className="mt-6 w-full py-3 rounded-xl bg-red-500/30 border border-red-500 text-red-400 font-bold">
+        SAIR DA CONTA
       </button>
     </div>
   </div>
@@ -132,8 +131,10 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await onLogin(email, password);
-    if (error) alert('❌ E-mail ou senha inválidos');
-    setLoading(false);
+    if (error) {
+      alert('❌ E-mail ou senha inválidos');
+      setLoading(false);
+    }
   };
 
   return (
@@ -149,10 +150,26 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
 
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
           <form onSubmit={handleSubmit}>
-            <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input 
+              type="email" 
+              placeholder="E-mail" 
+              className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+              required 
+            />
             <div className="relative">
-              <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4 pr-10" value={password} onChange={e => setPassword(e.target.value)} required />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? "🙈" : "👁️"}</button>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                placeholder="Senha" 
+                className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4 pr-10" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                required 
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
             <button type="submit" disabled={loading} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
               {loading ? 'Entrando...' : 'Entrar'}
@@ -160,7 +177,6 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
           </form>
 
           <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm py-2">Criar nova conta</button>
-          
           <button onClick={onGoogleLogin} className="w-full mt-2 py-2 rounded-xl border border-white/15 text-white">
             Entrar com Google
           </button>
@@ -171,7 +187,7 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
 };
 
 // ============================================
-// TELA DE CADASTRO SIMPLES
+// TELA DE CADASTRO
 // ============================================
 const SignUpScreen = ({ onBack, onSuccess }: any) => {
   const [email, setEmail] = useState('');
@@ -251,7 +267,8 @@ export const MainScreen = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
-        await loadProfile(session.user.id);
+        const { data } = await supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle();
+        setProfile(data);
       }
       setLoading(false);
     };
@@ -261,7 +278,8 @@ export const MainScreen = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        await loadProfile(session.user.id);
+        const { data } = await supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle();
+        setProfile(data);
       } else {
         setUser(null);
         setProfile(null);
@@ -272,13 +290,12 @@ export const MainScreen = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadProfile = async (userId: string) => {
-    const { data } = await supabase.from('usuarios').select('*').eq('id', userId).maybeSingle();
-    setProfile(data);
-  };
-
   const handleLogin = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      // Recarregar para atualizar o estado
+      window.location.reload();
+    }
     return { error };
   };
 
@@ -322,5 +339,11 @@ export const MainScreen = () => {
     return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => setShowSignUp(false)} />;
   }
 
-  return <LoginScreen onLogin={handleLogin} onGoogleLogin={handleGoogleLogin} onSignUp={() => setShowSignUp(true)} />;
+  return (
+    <LoginScreen 
+      onLogin={handleLogin} 
+      onGoogleLogin={handleGoogleLogin} 
+      onSignUp={() => setShowSignUp(true)} 
+    />
+  );
 };
