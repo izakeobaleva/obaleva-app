@@ -7,11 +7,13 @@ export const MainScreen = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Verificar sessão
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
       setLoading(false);
     });
 
+    // Ouvir mudanças
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         setUser(session?.user || null);
@@ -36,6 +38,7 @@ export const MainScreen = () => {
     );
   }
 
+  // Tela principal (quando logado)
   if (user) {
     return (
       <div className="min-h-screen bg-[#0F0B1A] p-4">
@@ -74,6 +77,7 @@ export const MainScreen = () => {
     );
   }
 
+  // Tela de login
   return (
     <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -102,7 +106,7 @@ export const MainScreen = () => {
               const password = (document.getElementById('loginPassword') as HTMLInputElement).value;
               const { error } = await supabase.auth.signInWithPassword({ email, password });
               if (error) {
-                alert('E-mail ou senha inválidos');
+                alert('❌ E-mail ou senha inválidos');
               }
             }}
             className="w-full py-3 bg-[#F4D03F] rounded-xl text-black font-bold"
