@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, Eye, EyeOff, Chrome, Home, Search, User, Menu, LogOut, MapPin } from 'lucide-react';
-import MapComponent from '../components/MapComponent';
+import { Car, Home, Search, User, Menu, LogOut, MapPin, Chrome, Eye, EyeOff } from 'lucide-react';
 
 // ============================================
 // BOTTOM NAVIGATION
@@ -30,25 +29,13 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// TELA PRINCIPAL (HOME) - COM BOTÕES FUNCIONANDO
+// TELA PRINCIPAL (HOME)
 // ============================================
 const HomeScreen = ({ user, onSignOut }: any) => {
   const [destino, setDestino] = useState('');
-  const [mensagem, setMensagem] = useState('');
-
-  const handleConfirmarCorrida = () => {
-    if (!destino.trim()) {
-      setMensagem('❌ Digite um destino primeiro!');
-      setTimeout(() => setMensagem(''), 3000);
-      return;
-    }
-    setMensagem(`✅ Corrida confirmada para: ${destino}`);
-    setTimeout(() => setMensagem(''), 3000);
-  };
 
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
-      {/* Header */}
       <div className="flex justify-between items-center py-3">
         <div className="flex items-center gap-2">
           <Car size={24} className="text-[#F4D03F]" />
@@ -56,46 +43,28 @@ const HomeScreen = ({ user, onSignOut }: any) => {
         </div>
         <button 
           onClick={onSignOut}
-          className="px-4 py-2 rounded-lg bg-red-500/30 border border-red-500 text-red-400 text-sm font-bold hover:bg-red-500/50 transition"
+          className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold"
         >
-          <LogOut size={14} className="inline mr-1" /> SAIR
+          SAIR
         </button>
       </div>
 
-      {/* Mapa */}
-      <div className="h-[220px] rounded-xl overflow-hidden mb-3 shadow-lg">
-        <MapComponent />
+      <div className="h-[220px] rounded-xl bg-[#1A1528] flex items-center justify-center mb-3">
+        <p className="text-white text-center">🗺️ MAPA<br/><span className="text-xs text-gray-400">{user?.email}</span></p>
       </div>
 
-      {/* Campo Para onde vai? */}
-      <div className="bg-gradient-to-br from-[#1A1528] to-[#1A1528]/80 rounded-xl p-4 border border-[#F4D03F]/20">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
-            <MapPin size={16} className="text-[#F4D03F]" />
-          </div>
-          <span className="text-white font-bold text-lg">Para onde você vai agora?</span>
-        </div>
-        
+      <div className="bg-[#1A1528] rounded-xl p-4 border border-[#F4D03F]/20">
+        <h2 className="text-white font-bold text-lg mb-3">Para onde você vai agora?</h2>
         <input
           type="text"
           placeholder="Digite seu destino..."
-          className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white outline-none focus:border-[#F4D03F] transition text-base"
+          className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white outline-none"
           value={destino}
           onChange={(e) => setDestino(e.target.value)}
         />
-        
-        <button 
-          onClick={handleConfirmarCorrida}
-          className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-base hover:scale-[1.02] transition"
-        >
+        <button className="w-full mt-4 py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
           Confirmar corrida
         </button>
-        
-        {mensagem && (
-          <div className="mt-3 p-2 text-center text-sm text-white bg-green-500/30 rounded-lg">
-            {mensagem}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -112,25 +81,18 @@ const ProfileScreen = ({ user, onSignOut }: any) => (
       </div>
       <h2 className="text-white text-xl font-bold">{user?.email?.split('@')[0]}</h2>
       <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <button 
-        onClick={onSignOut}
-        className="mt-6 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold hover:bg-red-500/30 transition"
-      >
-        SAIR DA CONTA
+      <button onClick={onSignOut} className="mt-6 w-full py-3 rounded-xl bg-red-500 text-white font-bold">
+        SAIR
       </button>
     </div>
   </div>
 );
 
-// ============================================
-// TELAS PLACEHOLDER
-// ============================================
 const SearchScreen = () => (
   <div className="max-w-md mx-auto px-4 pb-28 mt-8">
     <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
       <Search size={48} className="text-[#F4D03F] mx-auto mb-4" />
       <h2 className="text-white text-xl font-bold">🔍 Buscar</h2>
-      <p className="text-gray-400 mt-2">Em breve</p>
     </div>
   </div>
 );
@@ -140,28 +102,28 @@ const MenuScreen = () => (
     <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
       <Menu size={48} className="text-[#F4D03F] mx-auto mb-4" />
       <h2 className="text-white text-xl font-bold">☰ Menu</h2>
-      <p className="text-gray-400 mt-2">Em breve</p>
     </div>
   </div>
 );
 
 // ============================================
-// TELA DE CADASTRO (SIMPLIFICADA)
+// TELA DE CADASTRO
 // ============================================
 const SignUpScreen = ({ onBack, onSuccess }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSignUp = async () => {
+    setError('');
     if (!nome || !email || !password) {
-      alert('Preencha todos os campos');
+      setError('Preencha todos os campos');
       return;
     }
     if (password.length < 6) {
-      alert('Senha deve ter no mínimo 6 caracteres');
+      setError('Senha: mínimo 6 caracteres');
       return;
     }
 
@@ -187,7 +149,11 @@ const SignUpScreen = ({ onBack, onSuccess }: any) => {
         onSuccess();
       }
     } catch (error: any) {
-      alert('❌ ' + error.message);
+      if (error.message.includes('already registered')) {
+        setError('Este e-mail já está cadastrado');
+      } else {
+        setError(error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -199,13 +165,11 @@ const SignUpScreen = ({ onBack, onSuccess }: any) => {
         <button onClick={onBack} className="text-[#A0A0B0] mb-4">← Voltar</button>
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
           <h2 className="text-xl font-bold text-white text-center mb-6">Criar Conta</h2>
-          <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
+          {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
+          <input type="text" placeholder="Nome" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
           <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
-          <div className="relative">
-            <input type={showPassword ? "text" : "password"} placeholder="Senha (mínimo 6 caracteres)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4 pr-10" value={password} onChange={e => setPassword(e.target.value)} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
-          </div>
-          <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
+          <input type="password" placeholder="Senha (mínimo 6)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4" value={password} onChange={e => setPassword(e.target.value)} />
+          <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
             {loading ? 'Criando...' : 'Cadastrar'}
           </button>
         </div>
@@ -221,11 +185,15 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
+  const handleLogin = async () => {
+    setError('');
     setLoading(true);
-    await onLogin(email, password);
+    const result = await onLogin(email, password);
+    if (result?.error) {
+      setError('E-mail ou senha inválidos');
+    }
     setLoading(false);
   };
 
@@ -237,12 +205,13 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
             <Car size={40} className="text-[#F4D03F]" />
           </div>
           <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
-          <p className="text-[#A0A0B0] text-sm mt-1">Sua corrida de confiança</p>
         </div>
 
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
+          {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
+          
           <button onClick={onGoogleLogin} className="w-full py-3 rounded-xl border border-[#F4D03F]/30 bg-white/10 text-white flex items-center justify-center gap-2">
-            <Chrome size={20} /> Entrar com Google
+            <Chrome size={20} /> Google
           </button>
 
           <div className="relative my-4">
@@ -251,17 +220,13 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
           </div>
 
           <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
-          
-          <div className="relative">
-            <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4 pr-10" value={password} onChange={e => setPassword(e.target.value)} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
-          </div>
+          <input type="password" placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4" value={password} onChange={e => setPassword(e.target.value)} />
 
-          <button onClick={handleSubmit} disabled={loading} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
+          <button onClick={handleLogin} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
 
-          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm">Não tem conta? Cadastre-se</button>
+          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm">Criar conta</button>
         </div>
       </div>
     </div>
@@ -273,90 +238,65 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
 // ============================================
 export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [showSignUp, setShowSignUp] = useState(false);
 
+  // Verificar sessão
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        setUser(session.user);
-        const { data } = await supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle();
-        setProfile(data);
-      }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
       setLoading(false);
-    };
-    
-    checkUser();
+    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        const { data } = await supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle();
-        setProfile(data);
-      } else {
-        setUser(null);
-        setProfile(null);
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  // LOGIN
   const handleLogin = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-      alert('❌ E-mail ou senha inválidos');
-      return;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      window.location.reload();
     }
-    
-    if (data?.user) {
-      const { data: profileData } = await supabase.from('usuarios').select('*').eq('id', data.user.id).maybeSingle();
-      setProfile(profileData);
-      
-      if (!profileData) {
-        setShowSignUp(true);
-      } else {
-        window.location.reload();
-      }
-    }
+    return { error: !!error };
+  };
+
+  // LOGOUT - VERSÃO SIMPLES E GARANTIDA
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    // Limpar tudo
+    localStorage.clear();
+    sessionStorage.clear();
+    // Recarregar página
+    window.location.href = '/';
   };
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    window.location.reload();
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'google', 
+      options: { redirectTo: window.location.origin } 
+    });
   };
 
   if (loading) {
     return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
   }
 
-  // Usuário logado com perfil → Home
-  if (user && profile) {
+  // Logado
+  if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-        {activeTab === 'home' && <HomeScreen user={user} onSignOut={handleSignOut} />}
-        {activeTab === 'perfil' && <ProfileScreen user={user} onSignOut={handleSignOut} />}
+        {activeTab === 'home' && <HomeScreen user={user} onSignOut={handleLogout} />}
+        {activeTab === 'perfil' && <ProfileScreen user={user} onSignOut={handleLogout} />}
         {activeTab === 'buscar' && <SearchScreen />}
         {activeTab === 'menu' && <MenuScreen />}
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
       </div>
     );
-  }
-
-  // Usuário logado sem perfil → Cadastro
-  if (user && !profile) {
-    return <SignUpScreen onBack={() => supabase.auth.signOut()} onSuccess={() => window.location.reload()} />;
   }
 
   // Não logado
