@@ -39,13 +39,17 @@ function calcularValor(distanciaKm: number): number {
   return parseFloat((taxaBase + (distanciaKm * valorPorKm)).toFixed(2));
 }
 
+// ============================================
+// SOLICITAR CORRIDA (VERSÃO DE TESTE)
+// ============================================
 export async function solicitarCorrida(passageiro_id: string, origem: Location, destino: Location): Promise<Ride | null> {
   try {
     const distanciaKm = calcularDistancia(origem.lat, origem.lng, destino.lat, destino.lng);
     const valorTotal = calcularValor(distanciaKm);
 
-    console.log('📝 Solicitando corrida...', { pass: passageiro_id, origem: origem.address, destino: destino.address });
+    console.log('📝 Solicitando corrida (teste)...', { pass: passageiro_id, origem: origem.address, destino: destino.address });
 
+    // Inserir corrida já com motorista (teste automático)
     const { data, error } = await supabase
       .from('corridas')
       .insert({
@@ -58,18 +62,15 @@ export async function solicitarCorrida(passageiro_id: string, origem: Location, 
         destino_lng: destino.lng,
         distancia_km: distanciaKm,
         valor_total: valorTotal,
-        status: 'buscando_motorista'
+        status: 'motorista_em_rota',  // Já começa com motorista a caminho
+        motorista_id: passageiro_id   // Usa o próprio passageiro como motorista (teste)
       })
       .select()
       .single();
 
     if (error) throw error;
 
-    console.log('✅ Corrida criada:', data.id);
-
-    // Simular busca de motorista
-    simularBuscaMotorista(data.id);
-
+    console.log('✅ Corrida criada (modo teste):', data.id, 'Status:', data.status);
     return data;
   } catch (error) {
     console.error('❌ Erro ao solicitar corrida:', error);
@@ -77,50 +78,9 @@ export async function solicitarCorrida(passageiro_id: string, origem: Location, 
   }
 }
 
-async function simularBuscaMotorista(corridaId: string) {
-  try {
-    console.log('🔍 Buscando motoristas disponíveis...');
-    
-    const { data: motoristas, error } = await supabase
-      .from('motoristas')
-      .select('id, status, online')
-      .eq('status', 'aprovado')
-      .limit(1);
-
-    console.log('📊 Motoristas encontrados:', motoristas);
-
-    if (error) {
-      console.error('❌ Erro ao buscar motoristas:', error);
-      return;
-    }
-
-    if (motoristas && motoristas.length > 0) {
-      console.log('✅ Motorista encontrado! ID:', motoristas[0].id, 'Status:', motoristas[0].status, 'Online:', motoristas[0].online);
-      
-      setTimeout(async () => {
-        const { error: updateError } = await supabase
-          .from('corridas')
-          .update({
-            motorista_id: motoristas[0].id,
-            status: 'motorista_em_rota'
-          })
-          .eq('id', corridaId);
-
-        if (updateError) {
-          console.error('❌ Erro ao associar motorista:', updateError);
-        } else {
-          console.log('✅ Motorista atribuído à corrida!');
-        }
-      }, 3000);
-    } else {
-      console.log('⚠️ Nenhum motorista aprovado disponível.');
-      console.log('💡 Dica: Verifique se existe um motorista com status = "aprovado" na tabela motoristas');
-    }
-  } catch (err) {
-    console.warn('⚠️ Erro ao simular busca de motorista:', err);
-  }
-}
-
+// ============================================
+// CANCELAR CORRIDA
+// ============================================
 export async function cancelarCorrida(corridaId: string): Promise<boolean> {
   try {
     const { error } = await supabase
@@ -137,6 +97,9 @@ export async function cancelarCorrida(corridaId: string): Promise<boolean> {
   }
 }
 
+// ============================================
+// BUSCAR CORRIDA ATIVA
+// ============================================
 export async function buscarCorridaAtiva(passageiroId: string): Promise<Ride | null> {
   try {
     const { data, error } = await supabase
@@ -156,6 +119,9 @@ export async function buscarCorridaAtiva(passageiroId: string): Promise<Ride | n
   }
 }
 
+// ============================================
+// INSCREVER EM ATUALIZAÇÕES DA CORRIDA
+// ============================================
 export function subscribeToRide(corridaId: string, callback: (ride: Ride) => void) {
   console.log('🔔 Inscrevendo para atualizações da corrida:', corridaId);
   
