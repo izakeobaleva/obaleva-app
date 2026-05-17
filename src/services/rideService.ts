@@ -146,7 +146,7 @@ export async function buscarCorridaAtiva(passageiroId: string): Promise<Ride | n
   }
 }
 
-// Atualizar status da corrida (via subscription)
+// Inscrever para atualizações em tempo real da corrida
 export function subscribeToRide(corridaId: string, callback: (ride: Ride) => void) {
   const subscription = supabase
     .channel(`corrida_${corridaId}`)
