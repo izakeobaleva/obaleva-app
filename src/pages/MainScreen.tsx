@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, Home, Search, User, Menu, MapPin, Chrome } from 'lucide-react';
+import { Car, Home, Search, User, Menu, LogOut, MapPin, Chrome, Eye, EyeOff } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
 
 // ============================================
@@ -30,10 +30,21 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// TELA PRINCIPAL
+// TELA PRINCIPAL (HOME)
 // ============================================
-const HomeScreen = ({ user, onLogout }: any) => {
+const HomeScreen = ({ user, onSair }: any) => {
   const [destino, setDestino] = useState('');
+  const [mensagem, setMensagem] = useState('');
+
+  const handleConfirmar = () => {
+    if (!destino.trim()) {
+      setMensagem('❌ Digite um destino');
+      setTimeout(() => setMensagem(''), 2000);
+      return;
+    }
+    setMensagem(`✅ Corrida para: ${destino}`);
+    setTimeout(() => setMensagem(''), 2000);
+  };
 
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
@@ -42,7 +53,10 @@ const HomeScreen = ({ user, onLogout }: any) => {
           <Car size={24} className="text-[#F4D03F]" />
           <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         </div>
-        <button onClick={onLogout} className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold">
+        <button 
+          onClick={onSair}
+          className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition"
+        >
           SAIR
         </button>
       </div>
@@ -62,9 +76,14 @@ const HomeScreen = ({ user, onLogout }: any) => {
           value={destino}
           onChange={(e) => setDestino(e.target.value)}
         />
-        <button className="w-full mt-4 py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
+        <button onClick={handleConfirmar} className="w-full mt-4 py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
           Confirmar corrida
         </button>
+        {mensagem && (
+          <div className="mt-3 p-2 text-center text-sm text-white bg-green-500/30 rounded">
+            {mensagem}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -73,7 +92,7 @@ const HomeScreen = ({ user, onLogout }: any) => {
 // ============================================
 // TELA DE PERFIL
 // ============================================
-const ProfileScreen = ({ user, onLogout }: any) => (
+const ProfileScreen = ({ user, onSair }: any) => (
   <div className="max-w-md mx-auto px-4 pb-28 mt-8">
     <div className="bg-[#1A1528] rounded-2xl p-6 text-center border border-[#F4D03F]/20">
       <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
@@ -81,7 +100,7 @@ const ProfileScreen = ({ user, onLogout }: any) => (
       </div>
       <h2 className="text-white text-xl font-bold">{user?.email?.split('@')[0]}</h2>
       <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <button onClick={onLogout} className="mt-6 w-full py-3 rounded-xl bg-red-500 text-white font-bold">
+      <button onClick={onSair} className="mt-6 w-full py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition">
         SAIR
       </button>
     </div>
@@ -254,11 +273,15 @@ export const MainScreen = () => {
     return { error: !!error };
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  // FUNÇÃO DE SAIR - GARANTIDA
+  const handleSair = () => {
     localStorage.clear();
     sessionStorage.clear();
-    window.location.href = '/';
+    supabase.auth.signOut().then(() => {
+      window.location.href = '/';
+    }).catch(() => {
+      window.location.href = '/';
+    });
   };
 
   const handleGoogleLogin = async () => {
@@ -272,8 +295,8 @@ export const MainScreen = () => {
   if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-        {activeTab === 'home' && <HomeScreen user={user} onLogout={handleLogout} />}
-        {activeTab === 'perfil' && <ProfileScreen user={user} onLogout={handleLogout} />}
+        {activeTab === 'home' && <HomeScreen user={user} onSair={handleSair} />}
+        {activeTab === 'perfil' && <ProfileScreen user={user} onSair={handleSair} />}
         {activeTab === 'buscar' && <SearchScreen />}
         {activeTab === 'menu' && <MenuScreen />}
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
