@@ -150,6 +150,19 @@ const WelcomeWizard: React.FC<WelcomeWizardProps> = ({ user, onComplete }) => {
               </div>
             </button>
 
+            {/* Link para login */}
+            <div className="text-center pt-3">
+              <button
+                onClick={() => {
+                  // Volta para o MainScreen (que vai mostrar a LoginScreen)
+                  window.location.href = '/';
+                }}
+                className="text-[#F4D03F] text-sm hover:underline font-medium"
+              >
+                Já tenho uma conta → Fazer login
+              </button>
+            </div>
+
             {/* Benefícios */}
             <div className="mt-6 pt-4 border-t border-white/10 text-center">
               <p className="text-[#A0A0B0] text-sm mb-4">Vantagens exclusivas ObaLeva</p>
