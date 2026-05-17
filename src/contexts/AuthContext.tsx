@@ -7,6 +7,7 @@ interface AuthContextType {
   profile: any | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   signOut: async () => {},
+  refreshSession: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -24,51 +26,82 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    if (!error && data) {
-      setProfile(data);
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (!error && data) {
+        setProfile(data);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar perfil:', err);
     }
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
+  const refreshSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      setUser(session.user);
+      await fetchProfile(session.user.id);
+    }
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    // Verificar sessão existente ao carregar
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          setUser(session.user);
+          await fetchProfile(session.user.id);
+        }
+      } catch (err) {
+        console.error('Erro ao inicializar auth:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
 
+    initializeAuth();
+
+    // Ouvir mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        setUser(session?.user ?? null);
         if (session?.user) {
+          setUser(session.user);
           await fetchProfile(session.user.id);
         } else {
+          setUser(null);
           setProfile(null);
         }
         setLoading(false);
       }
     );
 
+    // Recuperar última tela do localStorage
+    const lastTab = localStorage.getItem('obaleva_last_tab');
+    if (lastTab) {
+      console.log('Última aba:', lastTab);
+    }
+
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    localStorage.removeItem('obaleva_last_tab');
+  };
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );

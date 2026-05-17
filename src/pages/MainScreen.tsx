@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Search, Menu } from 'lucide-react';
@@ -20,6 +20,19 @@ export const MainScreen = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleRefresh = () => setRefreshKey(prev => prev + 1);
+
+  // Salvar a aba atual no localStorage
+  useEffect(() => {
+    localStorage.setItem('obaleva_last_tab', activeTab);
+  }, [activeTab]);
+
+  // Recuperar a última aba ao iniciar
+  useEffect(() => {
+    const lastTab = localStorage.getItem('obaleva_last_tab');
+    if (lastTab && ['home', 'buscar', 'perfil', 'menu'].includes(lastTab)) {
+      setActiveTab(lastTab);
+    }
+  }, []);
 
   if (loading) return <LoadingScreen />;
 
