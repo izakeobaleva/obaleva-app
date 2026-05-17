@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, Eye, EyeOff, Chrome, Home, Search, User, Menu, LogOut, MapPin, Mail, Lock } from 'lucide-react';
+import { Car, Eye, EyeOff, Chrome, Home, Search, User, Menu, LogOut, MapPin } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
 
 // ============================================
@@ -30,10 +30,21 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// TELA PRINCIPAL (HOME) - PARA QUEM JÁ TEM CADASTRO
+// TELA PRINCIPAL (HOME) - COM BOTÕES FUNCIONANDO
 // ============================================
 const HomeScreen = ({ user, onSignOut }: any) => {
   const [destino, setDestino] = useState('');
+  const [mensagem, setMensagem] = useState('');
+
+  const handleConfirmarCorrida = () => {
+    if (!destino.trim()) {
+      setMensagem('❌ Digite um destino primeiro!');
+      setTimeout(() => setMensagem(''), 3000);
+      return;
+    }
+    setMensagem(`✅ Corrida confirmada para: ${destino}`);
+    setTimeout(() => setMensagem(''), 3000);
+  };
 
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
@@ -43,8 +54,11 @@ const HomeScreen = ({ user, onSignOut }: any) => {
           <Car size={24} className="text-[#F4D03F]" />
           <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         </div>
-        <button onClick={onSignOut} className="px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-500 text-red-400 text-sm">
-          <LogOut size={14} className="inline mr-1" /> Sair
+        <button 
+          onClick={onSignOut}
+          className="px-4 py-2 rounded-lg bg-red-500/30 border border-red-500 text-red-400 text-sm font-bold hover:bg-red-500/50 transition"
+        >
+          <LogOut size={14} className="inline mr-1" /> SAIR
         </button>
       </div>
 
@@ -70,9 +84,18 @@ const HomeScreen = ({ user, onSignOut }: any) => {
           onChange={(e) => setDestino(e.target.value)}
         />
         
-        <button className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-base">
+        <button 
+          onClick={handleConfirmarCorrida}
+          className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-base hover:scale-[1.02] transition"
+        >
           Confirmar corrida
         </button>
+        
+        {mensagem && (
+          <div className="mt-3 p-2 text-center text-sm text-white bg-green-500/30 rounded-lg">
+            {mensagem}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -89,8 +112,11 @@ const ProfileScreen = ({ user, onSignOut }: any) => (
       </div>
       <h2 className="text-white text-xl font-bold">{user?.email?.split('@')[0]}</h2>
       <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <button onClick={onSignOut} className="mt-6 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold">
-        Sair da conta
+      <button 
+        onClick={onSignOut}
+        className="mt-6 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold hover:bg-red-500/30 transition"
+      >
+        SAIR DA CONTA
       </button>
     </div>
   </div>
@@ -120,33 +146,18 @@ const MenuScreen = () => (
 );
 
 // ============================================
-// TELA DE CADASTRO ESTILO 99 (4 ETAPAS)
+// TELA DE CADASTRO (SIMPLIFICADA)
 // ============================================
 const SignUpScreen = ({ onBack, onSuccess }: any) => {
-  const [step, setStep] = useState(1);
-  const [nome, setNome] = useState('');
-  const [sobrenome, setSobrenome] = useState('');
   const [email, setEmail] = useState('');
-  const [confirmarEmail, setConfirmarEmail] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [cpf, setCpf] = useState('');
-  const [dataNascimento, setDataNascimento] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [nome, setNome] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignUp = async () => {
-    if (!nome || !sobrenome || !email || !password || !cpf || !dataNascimento) {
-      alert('Preencha todos os campos obrigatórios');
-      return;
-    }
-    if (email !== confirmarEmail) {
-      alert('E-mails não coincidem');
-      return;
-    }
-    if (password !== confirmarSenha) {
-      alert('Senhas não coincidem');
+    if (!nome || !email || !password) {
+      alert('Preencha todos os campos');
       return;
     }
     if (password.length < 6) {
@@ -156,11 +167,10 @@ const SignUpScreen = ({ onBack, onSuccess }: any) => {
 
     setLoading(true);
     try {
-      const nomeCompleto = `${nome} ${sobrenome}`;
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { nome_completo: nomeCompleto, cpf, data_nascimento: dataNascimento, whatsapp } }
+        options: { data: { nome_completo: nome } }
       });
       
       if (error) throw error;
@@ -168,10 +178,8 @@ const SignUpScreen = ({ onBack, onSuccess }: any) => {
       if (data.user) {
         await supabase.from('usuarios').insert({
           id: data.user.id,
-          nome_completo: nomeCompleto,
-          email,
-          telefone: whatsapp,
-          cpf,
+          nome_completo: nome,
+          email: email,
           tipo: 'passageiro'
         });
         await supabase.from('passageiros').insert({ id: data.user.id });
@@ -185,105 +193,20 @@ const SignUpScreen = ({ onBack, onSuccess }: any) => {
     }
   };
 
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 3) return numbers;
-    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
-    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
-    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
-  };
-
-  const formatWhatsapp = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 2) return `(${numbers}`;
-    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  };
-
-  if (step === 1) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
-          <button onClick={onBack} className="text-[#A0A0B0] mb-4">← Voltar</button>
-          <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
-                <User size={32} className="text-[#F4D03F]" />
-              </div>
-              <h2 className="text-xl font-bold text-white">Qual seu nome?</h2>
-            </div>
-            <input type="text" placeholder="Nome" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
-            <input type="text" placeholder="Sobrenome" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={sobrenome} onChange={e => setSobrenome(e.target.value)} />
-            <button onClick={() => setStep(2)} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">Continuar</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 2) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
-          <button onClick={() => setStep(1)} className="text-[#A0A0B0] mb-4">← Voltar</button>
-          <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
-                <Mail size={32} className="text-[#F4D03F]" />
-              </div>
-              <h2 className="text-xl font-bold text-white">Seu e-mail</h2>
-            </div>
-            <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="email" placeholder="Confirmar e-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={confirmarEmail} onChange={e => setConfirmarEmail(e.target.value)} />
-            <button onClick={() => setStep(3)} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">Continuar</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 3) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
-          <button onClick={() => setStep(2)} className="text-[#A0A0B0] mb-4">← Voltar</button>
-          <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
-                <User size={32} className="text-[#F4D03F]" />
-              </div>
-              <h2 className="text-xl font-bold text-white">Dados pessoais</h2>
-            </div>
-            <input type="text" placeholder="CPF" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={cpf} onChange={e => setCpf(formatCPF(e.target.value))} maxLength={14} />
-            <input type="date" placeholder="Data de nascimento" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} />
-            <input type="tel" placeholder="WhatsApp" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={whatsapp} onChange={e => setWhatsapp(formatWhatsapp(e.target.value))} maxLength={15} />
-            <button onClick={() => setStep(4)} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">Continuar</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <button onClick={() => setStep(3)} className="text-[#A0A0B0] mb-4">← Voltar</button>
+        <button onClick={onBack} className="text-[#A0A0B0] mb-4">← Voltar</button>
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
-              <Lock size={32} className="text-[#F4D03F]" />
-            </div>
-            <h2 className="text-xl font-bold text-white">Crie sua senha</h2>
-            <p className="text-[#A0A0B0] text-sm">Mínimo 6 caracteres</p>
-          </div>
+          <h2 className="text-xl font-bold text-white text-center mb-6">Criar Conta</h2>
+          <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
+          <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
           <div className="relative">
-            <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3 pr-10" value={password} onChange={e => setPassword(e.target.value)} />
+            <input type={showPassword ? "text" : "password"} placeholder="Senha (mínimo 6 caracteres)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4 pr-10" value={password} onChange={e => setPassword(e.target.value)} />
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
           </div>
-          <input type="password" placeholder="Confirmar senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white" value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)} />
-          <button onClick={handleSignUp} disabled={loading} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
-            {loading ? 'Criando...' : 'Finalizar Cadastro'}
+          <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
+            {loading ? 'Criando...' : 'Cadastrar'}
           </button>
         </div>
       </div>
@@ -299,6 +222,12 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    await onLogin(email, password);
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
@@ -328,7 +257,7 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
           </div>
 
-          <button onClick={async () => { setLoading(true); await onLogin(email, password); setLoading(false); }} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
+          <button onClick={handleSubmit} disabled={loading} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold">
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
 
@@ -340,7 +269,7 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
 };
 
 // ============================================
-// MAIN SCREEN - COM REGRA DE REDIRECIONAMENTO
+// MAIN SCREEN
 // ============================================
 export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);
@@ -355,32 +284,20 @@ export const MainScreen = () => {
       
       if (session?.user) {
         setUser(session.user);
-        
-        // VERIFICAR SE O USUÁRIO TEM CADASTRO COMPLETO
-        const { data } = await supabase
-          .from('usuarios')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle();
-        
+        const { data } = await supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle();
         setProfile(data);
       }
-      
       setLoading(false);
     };
     
     checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+      if (session?.user) {
         setUser(session.user);
-        const { data } = await supabase
-          .from('usuarios')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle();
+        const { data } = await supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle();
         setProfile(data);
-      } else if (event === 'SIGNED_OUT') {
+      } else {
         setUser(null);
         setProfile(null);
       }
@@ -398,16 +315,9 @@ export const MainScreen = () => {
     }
     
     if (data?.user) {
-      // Verificar se tem cadastro completo
-      const { data: profileData } = await supabase
-        .from('usuarios')
-        .select('*')
-        .eq('id', data.user.id)
-        .maybeSingle();
-      
+      const { data: profileData } = await supabase.from('usuarios').select('*').eq('id', data.user.id).maybeSingle();
       setProfile(profileData);
       
-      // REGRA: Se não tem cadastro, vai para tela de cadastro
       if (!profileData) {
         setShowSignUp(true);
       } else {
@@ -431,7 +341,7 @@ export const MainScreen = () => {
     return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
   }
 
-  // ✅ REGRA: Se está logado E tem cadastro completo → Tela de corrida (Home)
+  // Usuário logado com perfil → Home
   if (user && profile) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
@@ -444,12 +354,12 @@ export const MainScreen = () => {
     );
   }
 
-  // ✅ REGRA: Se está logado mas NÃO tem cadastro → Tela de cadastro
+  // Usuário logado sem perfil → Cadastro
   if (user && !profile) {
     return <SignUpScreen onBack={() => supabase.auth.signOut()} onSuccess={() => window.location.reload()} />;
   }
 
-  // ✅ REGRA: Não está logado
+  // Não logado
   if (showSignUp) {
     return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => setShowSignUp(false)} />;
   }
