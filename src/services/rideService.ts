@@ -50,11 +50,9 @@ function calcularValor(distanciaKm: number): number {
 // Solicitar nova corrida
 export async function solicitarCorrida(passageiro_id: string, origem: Location, destino: Location): Promise<Ride | null> {
   try {
-    // Calcular distância
     const distanciaKm = calcularDistancia(origem.lat, origem.lng, destino.lat, destino.lng);
     const valorTotal = calcularValor(distanciaKm);
 
-    // Inserir no banco
     const { data, error } = await supabase
       .from('corridas')
       .insert({
@@ -74,8 +72,8 @@ export async function solicitarCorrida(passageiro_id: string, origem: Location, 
 
     if (error) throw error;
 
-    // Simular busca por motorista
-    await simularBuscaMotorista(data.id);
+    // Simular busca de motorista (opcional — não trava se falhar)
+    simularBuscaMotorista(data.id);
 
     return data;
   } catch (error) {
@@ -84,25 +82,32 @@ export async function solicitarCorrida(passageiro_id: string, origem: Location, 
   }
 }
 
-// Simular busca por motorista
+// Simular busca por motorista (tenta encontrar, mas não trava)
 async function simularBuscaMotorista(corridaId: string) {
-  setTimeout(async () => {
+  try {
     const { data: motoristas } = await supabase
       .from('motoristas')
       .select('id')
       .eq('status', 'aprovado')
       .limit(1);
-    
+
     if (motoristas && motoristas.length > 0) {
-      await supabase
-        .from('corridas')
-        .update({
-          motorista_id: motoristas[0].id,
-          status: 'motorista_em_rota'
-        })
-        .eq('id', corridaId);
+      setTimeout(async () => {
+        await supabase
+          .from('corridas')
+          .update({
+            motorista_id: motoristas[0].id,
+            status: 'motorista_em_rota'
+          })
+          .eq('id', corridaId);
+      }, 3000);
+    } else {
+      // Se não tiver motorista, mantém como "buscando_motorista"
+      console.log('⚠️ Nenhum motorista disponível. Corrida aguardando...');
     }
-  }, 3000);
+  } catch (err) {
+    console.warn('⚠️ Erro ao simular busca de motorista:', err);
+  }
 }
 
 // Cancelar corrida
