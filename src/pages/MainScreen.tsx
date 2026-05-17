@@ -5,7 +5,7 @@ import { Car, LogOut, Home, Search, User, Menu, Eye, EyeOff } from 'lucide-react
 // ============================================
 // TELA PRINCIPAL (HOME)
 // ============================================
-const HomeScreen = ({ user, onSignOut }: any) => {
+const HomeScreen = ({ user }: any) => {
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
       {/* Header */}
@@ -15,7 +15,22 @@ const HomeScreen = ({ user, onSignOut }: any) => {
           <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         </div>
         <button 
-          onClick={onSignOut} 
+          onClick={async () => {
+            console.log("🔴 Clicou no botão Sair (Home)");
+            try {
+              const { error } = await supabase.auth.signOut();
+              if (error) {
+                console.error("Erro ao sair:", error);
+                alert("Erro ao sair: " + error.message);
+              } else {
+                console.log("✅ Logout realizado");
+                window.location.href = "/";
+              }
+            } catch (err) {
+              console.error("Erro:", err);
+              window.location.reload();
+            }
+          }} 
           className="px-4 py-2 rounded-lg bg-red-500/30 border border-red-500 text-red-400 text-sm font-bold hover:bg-red-500/50 transition"
         >
           <LogOut size={14} className="inline mr-1" /> SAIR
@@ -54,20 +69,51 @@ const HomeScreen = ({ user, onSignOut }: any) => {
 // ============================================
 // TELA DE PERFIL
 // ============================================
-const ProfileScreen = ({ user, profile, onSignOut }: any) => (
-  <div className="max-w-md mx-auto px-4 pb-28 mt-8">
-    <div className="bg-[#1A1528] rounded-2xl p-6 text-center border border-[#F4D03F]/20">
-      <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
-        <User size={40} className="text-[#F4D03F]" />
-      </div>
-      <h2 className="text-white text-xl font-bold">{profile?.nome_completo || user?.email?.split('@')[0]}</h2>
-      <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <button onClick={onSignOut} className="mt-6 w-full py-3 rounded-xl bg-red-500/30 border border-red-500 text-red-400 font-bold">
-        SAIR DA CONTA
+const ProfileScreen = ({ user, profile }: any) => {
+  // Botão de teste - verificar se clique funciona
+  console.log("📱 ProfileScreen renderizado");
+  
+  return (
+    <div className="max-w-md mx-auto px-4 pb-28 mt-8">
+      {/* Botão de teste temporário */}
+      <button 
+        onClick={() => alert("Botão de teste funcionando!")}
+        className="w-full bg-blue-500 text-white p-3 rounded-xl mb-4 font-bold"
+      >
+        🔵 TESTE - Clique aqui
       </button>
+
+      <div className="bg-[#1A1528] rounded-2xl p-6 text-center border border-[#F4D03F]/20">
+        <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+          <User size={40} className="text-[#F4D03F]" />
+        </div>
+        <h2 className="text-white text-xl font-bold">{profile?.nome_completo || user?.email?.split('@')[0]}</h2>
+        <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
+        <button 
+          onClick={async () => {
+            console.log("🔴 Clicou no botão Sair (Perfil)");
+            try {
+              const { error } = await supabase.auth.signOut();
+              if (error) {
+                console.error("Erro ao sair:", error);
+                alert("❌ Erro ao sair: " + error.message);
+              } else {
+                console.log("✅ Logout realizado com sucesso!");
+                window.location.href = "/";
+              }
+            } catch (err) {
+              console.error("💥 Erro inesperado:", err);
+              window.location.reload();
+            }
+          }} 
+          className="mt-6 w-full py-3 rounded-xl bg-red-500/30 border border-red-500 text-red-400 font-bold hover:bg-red-500/50 transition"
+        >
+          SAIR DA CONTA
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ============================================
 // TELAS PLACEHOLDER
@@ -303,13 +349,6 @@ export const MainScreen = () => {
     await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    window.location.reload();
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
@@ -325,8 +364,8 @@ export const MainScreen = () => {
   if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-        {activeTab === 'home' && <HomeScreen user={user} onSignOut={handleSignOut} />}
-        {activeTab === 'perfil' && <ProfileScreen user={user} profile={profile} onSignOut={handleSignOut} />}
+        {activeTab === 'home' && <HomeScreen user={user} />}
+        {activeTab === 'perfil' && <ProfileScreen user={user} profile={profile} />}
         {activeTab === 'buscar' && <SearchScreen />}
         {activeTab === 'menu' && <MenuScreen />}
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
