@@ -24,6 +24,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastActivity, setLastActivity] = useState(Date.now());
+  const INACTIVITY_LIMIT = 7 * 24 * 60 * 60 * 1000; // 7 dias
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -50,7 +52,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Verificar sessão existente ao carregar
+    // Atualizar timestamp da última atividade
+    const updateActivity = () => setLastActivity(Date.now());
+    
+    window.addEventListener('click', updateActivity);
+    window.addEventListener('keydown', updateActivity);
+    window.addEventListener('mousemove', updateActivity);
+    
+    // Verificar inatividade a cada minuto
+    const interval = setInterval(() => {
+      if (user && (Date.now() - lastActivity) > INACTIVITY_LIMIT) {
+        signOut();
+      }
+    }, 60000);
+    
+    return () => {
+      window.removeEventListener('click', updateActivity);
+      window.removeEventListener('keydown', updateActivity);
+      window.removeEventListener('mousemove', updateActivity);
+      clearInterval(interval);
+    };
+  }, [user, lastActivity]);
+
+  useEffect(() => {
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -68,7 +92,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    // Ouvir mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session?.user) {
@@ -81,12 +104,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
       }
     );
-
-    // Recuperar última tela do localStorage
-    const lastTab = localStorage.getItem('obaleva_last_tab');
-    if (lastTab) {
-      console.log('Última aba:', lastTab);
-    }
 
     return () => {
       subscription.unsubscribe();

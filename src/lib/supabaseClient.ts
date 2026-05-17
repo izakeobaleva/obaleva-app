@@ -13,26 +13,27 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storage: localStorage,
-    storageKey: 'obaleva_auth_token',
+    storageKey: 'obaleva_auth',
   }
 });
 
-// Função para verificar e restaurar sessão
 export const checkAndRestoreSession = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session) {
-    // Tentar restaurar do localStorage
-    const storedSession = localStorage.getItem('obaleva_auth_token');
-    if (storedSession) {
-      try {
-        const { data } = await supabase.auth.setSession(JSON.parse(storedSession));
-        return data.session;
-      } catch (err) {
-        console.error('Erro ao restaurar sessão:', err);
+  const storedSession = localStorage.getItem('obaleva_auth');
+  if (storedSession) {
+    try {
+      const parsed = JSON.parse(storedSession);
+      if (parsed?.access_token) {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: parsed.access_token,
+          refresh_token: parsed.refresh_token,
+        });
+        if (!error && data.session) return data.session;
       }
+    } catch (err) {
+      console.error('Erro ao restaurar sessão:', err);
     }
   }
   
+  const { data: { session } } = await supabase.auth.getSession();
   return session;
 };
