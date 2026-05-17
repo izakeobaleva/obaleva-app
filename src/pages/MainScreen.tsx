@@ -33,6 +33,17 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 // ============================================
 const HomeScreen = ({ user, onSignOut }: any) => {
   const [destino, setDestino] = useState('');
+  const [mensagem, setMensagem] = useState('');
+
+  const handleConfirmar = () => {
+    if (!destino.trim()) {
+      setMensagem('❌ Digite um destino');
+      setTimeout(() => setMensagem(''), 2000);
+      return;
+    }
+    setMensagem(`✅ Corrida para: ${destino}`);
+    setTimeout(() => setMensagem(''), 2000);
+  };
 
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
@@ -41,16 +52,17 @@ const HomeScreen = ({ user, onSignOut }: any) => {
           <Car size={24} className="text-[#F4D03F]" />
           <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         </div>
-        <button 
-          onClick={onSignOut}
-          className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold"
-        >
+        <button onClick={onSignOut} className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold">
           SAIR
         </button>
       </div>
 
-      <div className="h-[220px] rounded-xl bg-[#1A1528] flex items-center justify-center mb-3">
-        <p className="text-white text-center">🗺️ MAPA<br/><span className="text-xs text-gray-400">{user?.email}</span></p>
+      <div className="h-[220px] rounded-xl bg-[#1A1528] flex items-center justify-center mb-3 border border-[#F4D03F]/20">
+        <div className="text-center">
+          <MapPin size={32} className="text-[#F4D03F] mx-auto mb-2" />
+          <p className="text-white text-sm">🗺️ Mapa</p>
+          <p className="text-[#A0A0B0] text-xs mt-1">{user?.email}</p>
+        </div>
       </div>
 
       <div className="bg-[#1A1528] rounded-xl p-4 border border-[#F4D03F]/20">
@@ -62,9 +74,14 @@ const HomeScreen = ({ user, onSignOut }: any) => {
           value={destino}
           onChange={(e) => setDestino(e.target.value)}
         />
-        <button className="w-full mt-4 py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
+        <button onClick={handleConfirmar} className="w-full mt-4 py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
           Confirmar corrida
         </button>
+        {mensagem && (
+          <div className="mt-3 p-2 text-center text-sm text-white bg-green-500/30 rounded">
+            {mensagem}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -93,6 +110,7 @@ const SearchScreen = () => (
     <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
       <Search size={48} className="text-[#F4D03F] mx-auto mb-4" />
       <h2 className="text-white text-xl font-bold">🔍 Buscar</h2>
+      <p className="text-gray-400 mt-2">Em breve</p>
     </div>
   </div>
 );
@@ -102,6 +120,7 @@ const MenuScreen = () => (
     <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20">
       <Menu size={48} className="text-[#F4D03F] mx-auto mb-4" />
       <h2 className="text-white text-xl font-bold">☰ Menu</h2>
+      <p className="text-gray-400 mt-2">Em breve</p>
     </div>
   </div>
 );
@@ -166,7 +185,7 @@ const SignUpScreen = ({ onBack, onSuccess }: any) => {
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
           <h2 className="text-xl font-bold text-white text-center mb-6">Criar Conta</h2>
           {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
-          <input type="text" placeholder="Nome" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
+          <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
           <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
           <input type="password" placeholder="Senha (mínimo 6)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4" value={password} onChange={e => setPassword(e.target.value)} />
           <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
@@ -205,13 +224,14 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
             <Car size={40} className="text-[#F4D03F]" />
           </div>
           <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
+          <p className="text-[#A0A0B0] text-sm mt-1">Sua corrida de confiança</p>
         </div>
 
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
           {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
           
           <button onClick={onGoogleLogin} className="w-full py-3 rounded-xl border border-[#F4D03F]/30 bg-white/10 text-white flex items-center justify-center gap-2">
-            <Chrome size={20} /> Google
+            <Chrome size={20} /> Entrar com Google
           </button>
 
           <div className="relative my-4">
@@ -226,7 +246,7 @@ const LoginScreen = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
 
-          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm">Criar conta</button>
+          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm">Criar nova conta</button>
         </div>
       </div>
     </div>
@@ -242,13 +262,17 @@ export const MainScreen = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [showSignUp, setShowSignUp] = useState(false);
 
-  // Verificar sessão
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Verificar sessão ao carregar
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
       setLoading(false);
-    });
+    };
+    
+    checkSession();
 
+    // Ouvir mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
@@ -256,22 +280,27 @@ export const MainScreen = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // LOGIN
+  // Função de login
   const handleLogin = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (!error) {
+      // Recarregar após login bem sucedido
       window.location.reload();
     }
     return { error: !!error };
   };
 
-  // LOGOUT - VERSÃO SIMPLES E GARANTIDA
+  // Função de logout - GARANTIDA
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.log(e);
+    }
     // Limpar tudo
     localStorage.clear();
     sessionStorage.clear();
-    // Recarregar página
+    // Forçar recarga
     window.location.href = '/';
   };
 
@@ -283,10 +312,14 @@ export const MainScreen = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
+    return (
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
+      </div>
+    );
   }
 
-  // Logado
+  // Usuário logado
   if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
@@ -299,10 +332,11 @@ export const MainScreen = () => {
     );
   }
 
-  // Não logado
+  // Tela de cadastro
   if (showSignUp) {
     return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => setShowSignUp(false)} />;
   }
 
+  // Tela de login
   return <LoginScreen onLogin={handleLogin} onGoogleLogin={handleGoogleLogin} onSignUp={() => setShowSignUp(true)} />;
 };
