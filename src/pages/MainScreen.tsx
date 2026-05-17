@@ -42,7 +42,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 // ============================================
 // TELA DE LOGIN
 // ============================================
-const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading, onSignUpClick, onBack }: any) => {
+const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading, onSignUpClick }: any) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -108,16 +108,7 @@ const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, l
 };
 
 // ============================================
-// TELA DE CADASTRO (SignUpScreen)
-// ============================================
-const SignUpScreen = ({ onBack, onSuccess }: any) => {
-  return (
-    <OnboardingWizard onComplete={onSuccess} />
-  );
-};
-
-// ============================================
-// TELA PRINCIPAL (HOME) - TELA DE SOLICITAR CORRIDA
+// TELA PRINCIPAL (HOME)
 // ============================================
 const HomeScreen = ({ user, onSignOut }: any) => {
   const [pickupAddress, setPickupAddress] = useState('');
@@ -179,7 +170,6 @@ const HomeScreen = ({ user, onSignOut }: any) => {
 
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
-      {/* Header */}
       <div className="flex justify-between items-center py-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
@@ -192,7 +182,6 @@ const HomeScreen = ({ user, onSignOut }: any) => {
         </button>
       </div>
 
-      {/* MAPA */}
       <div className="relative h-[220px] rounded-xl overflow-hidden mb-3">
         <MapComponent
           pickupLocation={pickupLocation}
@@ -211,7 +200,6 @@ const HomeScreen = ({ user, onSignOut }: any) => {
         </div>
       </div>
 
-      {/* CAMPOS ORIGEM E DESTINO */}
       <div className="bg-gradient-to-br from-[#1A1528] to-[#1A1528]/80 rounded-xl p-3 border border-[#F4D03F]/15">
         <div className="bg-white/10 rounded-lg mb-2">
           <div className="flex items-center gap-2 p-3">
@@ -222,45 +210,24 @@ const HomeScreen = ({ user, onSignOut }: any) => {
         <div className="bg-white/10 rounded-lg">
           <div className="flex items-center gap-2 p-3">
             <div className="w-2 h-2 rounded-full bg-red-500" />
-            <input 
-              type="text" 
-              placeholder="Para onde você vai?"
-              className="flex-1 bg-transparent text-white outline-none text-base font-medium"
-              value={dropoffAddress} 
-              onChange={e => setDropoffAddress(e.target.value)} 
-              autoFocus
-            />
+            <input type="text" placeholder="Para onde você vai?" className="flex-1 bg-transparent text-white outline-none text-base font-medium" value={dropoffAddress} onChange={e => setDropoffAddress(e.target.value)} autoFocus />
           </div>
         </div>
       </div>
 
-      {/* BOTÃO SOLICITAR CORRIDA */}
-      <button 
-        onClick={handleRequestRide} 
-        disabled={solicitando || !pickupLocation || !dropoffLocation} 
-        className="w-full py-3 mt-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold transition-all hover:scale-[1.02] disabled:opacity-50"
-      >
+      <button onClick={handleRequestRide} disabled={solicitando || !pickupLocation || !dropoffLocation} className="w-full py-3 mt-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold transition-all hover:scale-[1.02] disabled:opacity-50">
         {solicitando ? (
           <div className="flex items-center justify-center gap-2">
-            <div className="w-5 h-5 border-2 border-[#1A1528] border-t-transparent rounded-full animate-spin" />
-            Buscando motorista...
+            <div className="w-5 h-5 border-2 border-[#1A1528] border-t-transparent rounded-full animate-spin" /> Buscando motorista...
           </div>
         ) : (
           '🚗 SOLICITAR CORRIDA'
         )}
       </button>
 
-      {/* BANNER ROTATIVO */}
       <RotatingBanner />
 
-      {/* MODAL DE ACOMPANHAMENTO */}
-      {showRideModal && activeRide && (
-        <RideStatusModal 
-          ride={activeRide} 
-          onClose={() => setShowRideModal(false)} 
-          onCancel={handleCancelRide} 
-        />
-      )}
+      {showRideModal && activeRide && <RideStatusModal ride={activeRide} onClose={() => setShowRideModal(false)} onCancel={handleCancelRide} />}
     </div>
   );
 };
@@ -310,16 +277,22 @@ const MenuScreen = () => (
 );
 
 // ============================================
-// MAIN SCREEN - VERSÃO CORRIGIDA
+// MAIN SCREEN - VERSÃO COM DEPURAÇÃO
 // ============================================
 export const MainScreen = () => {
   const { user, profile, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
   const [showSignUp, setShowSignUp] = useState(false);
-  const [showWizard, setShowWizard] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+
+  // Logs de depuração
+  console.log('\n========== 🖥️ MAINSCREEN ==========');
+  console.log('👤 user:', user?.email || 'null');
+  console.log('📋 profile:', profile?.nome_completo || 'null');
+  console.log('⏳ loading:', loading);
+  console.log('=====================================\n');
 
   const handleSignOut = async () => {
     try {
@@ -342,8 +315,9 @@ export const MainScreen = () => {
     );
   }
 
-  // ✅ USUÁRIO LOGADO E COM PERFIL COMPLETO → VAI DIRETO PARA HOME (TELA DE SOLICITAR CORRIDA)
+  // ✅ USUÁRIO LOGADO E COM PERFIL COMPLETO → VAI DIRETO PARA HOME
   if (user && profile) {
+    console.log('✅ USUÁRIO COM PERFIL → Indo para HomeScreen');
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
         {activeTab === 'home' && <HomeScreen user={user} onSignOut={handleSignOut} />}
@@ -355,16 +329,41 @@ export const MainScreen = () => {
     );
   }
 
-  // ✅ USUÁRIO LOGADO MAS SEM PERFIL COMPLETO → MOSTRA WIZARD DE CADASTRO
+  // ✅ USUÁRIO LOGADO MAS SEM PERFIL → MOSTRA WIZARD
   if (user && !profile) {
+    console.log('📝 USUÁRIO SEM PERFIL → Indo para OnboardingWizard');
     return <OnboardingWizard onComplete={() => window.location.reload()} />;
   }
 
-  // ✅ USUÁRIO NÃO LOGADO → MOSTRA TELA DE LOGIN
-  if (!user && showSignUp) {
-    return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => setShowSignUp(false)} />;
+  // ✅ USUÁRIO NÃO LOGADO → MOSTRA LOGIN
+  if (showSignUp) {
+    console.log('🔐 MOSTRANDO SIGNUP');
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4">
+              <Car size={40} className="text-[#F4D03F]" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Criar Conta</h2>
+            <p className="text-[#A0A0B0] text-sm mt-1">Cadastre-se para começar</p>
+          </div>
+
+          <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10">
+            <div className="space-y-3">
+              <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" />
+              <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" />
+              <input type="password" placeholder="Senha (mínimo 6 caracteres)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" />
+              <button className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1A1528] font-bold transition-all hover:shadow-lg">Criar conta</button>
+              <div className="text-center"><button onClick={() => setShowSignUp(false)} className="text-gray-400 text-sm hover:text-[#F4D03F] transition font-medium">← Já tenho conta</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
+  console.log('🔐 MOSTRANDO LOGIN');
   return (
     <LoginScreen 
       onSignUpClick={() => setShowSignUp(true)} 
