@@ -1,5 +1,6 @@
 import React from 'react';
 import { Car, LogOut } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 import MapComponent from './MapComponent';
 import RotatingBanner from './RotatingBanner';
 import RideStatusModal from './RideStatusModal';
@@ -42,6 +43,11 @@ export const HomeContent: React.FC<HomeContentProps> = ({
   onCloseRideModal,
   onCancelRide,
 }) => {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
       {/* Header */}
@@ -50,11 +56,14 @@ export const HomeContent: React.FC<HomeContentProps> = ({
           <Car size={24} className="text-[#F4D03F]" />
           <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         </div>
-        <button 
-          onClick={onSignOut} 
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-500 text-red-400 text-sm hover:bg-red-500/30 transition"
+        
+        {/* Botão Sair - VERMELHO E VISÍVEL */}
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 border border-red-500 text-red-400 hover:bg-red-500/30 transition-all duration-200"
         >
-          <LogOut size={14} /> Sair
+          <LogOut size={16} />
+          <span className="text-sm font-medium">Sair</span>
         </button>
       </div>
 

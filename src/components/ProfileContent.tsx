@@ -1,5 +1,6 @@
 import React from 'react';
 import { User, LogOut } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 interface ProfileContentProps {
   user: any;
@@ -8,6 +9,11 @@ interface ProfileContentProps {
 }
 
 export const ProfileContent: React.FC<ProfileContentProps> = ({ user, profile, onSignOut }) => {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+
   return (
     <div className="max-w-md mx-auto px-4 pb-28">
       <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10 mt-4 text-center">
@@ -29,8 +35,10 @@ export const ProfileContent: React.FC<ProfileContentProps> = ({ user, profile, o
           <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10 transition flex items-center justify-center gap-2">
             ⭐ Avaliações
           </button>
+          
+          {/* Botão Sair - VERMELHO E VISÍVEL */}
           <button 
-            onClick={onSignOut} 
+            onClick={handleSignOut}
             className="w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold hover:bg-red-500/30 transition flex items-center justify-center gap-2"
           >
             <LogOut size={16} /> Sair da conta
