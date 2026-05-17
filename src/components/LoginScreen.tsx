@@ -16,7 +16,7 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin, loginEmail, setLoginE
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] via-[#120E1F] to-[#1A1528] flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] via-[#120E1F] to-[#1A1528] flex items-center justify-center pb-32">
       <div className="max-w-md w-full mx-4">
         
         {/* Logo */}
