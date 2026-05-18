@@ -1,102 +1,63 @@
-import React, { useState } from 'react';
-import { Car, Shield, Star, Zap, Chrome, Eye, EyeOff } from 'lucide-react';
-
-interface LoginScreenProps {
-  onGoogleLogin: () => void;
-  onEmailLogin: (e: React.FormEvent) => Promise<void>;
-  loginEmail: string;
-  setLoginEmail: (value: string) => void;
-  loginPassword: string;
-  setLoginPassword: (value: string) => void;
-  loginLoading: boolean;
-  onSignUpClick: () => void;
-}
-
-export const LoginScreen: React.FC<LoginScreenProps> = ({
-  onGoogleLogin,
-  onEmailLogin,
-  loginEmail,
-  setLoginEmail,
-  loginPassword,
-  setLoginPassword,
-  loginLoading,
-  onSignUpClick,
-}) => {
+// ============================================
+// TELA DE LOGIN COM BOTÃO CRIAR CONTA
+// ============================================
+const LoginScreen = ({ onGoogleLogin, onEmailLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, loginLoading, onSignUp }: any) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4 border border-[#F4D03F]/30">
-            <Car size={40} className="text-[#F4D03F]" />
-          </div>
-          <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
-          <p className="text-gray-400 mt-1">Sua corrida de confiança</p>
+    <div className="bg-[#1A1528] rounded-2xl p-5 border border-[#F4D03F]/20">
+      <div className="text-center mb-5">
+        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
+          <Car className="text-[#F4D03F] w-8 h-8" />
+        </div>
+        <h2 className="text-lg font-bold text-white">Bem-vindo</h2>
+        <p className="text-[#A0A0B0] text-xs">Entre para solicitar corridas</p>
+      </div>
+      
+      <div className="space-y-3">
+        <button onClick={onGoogleLogin} className="w-full py-2.5 rounded-xl border border-[#F4D03F]/30 bg-white/5 text-white flex items-center justify-center gap-2 text-sm">
+          <svg className="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/>
+            <path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/>
+            <path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/>
+            <path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/>
+          </svg>
+          Entrar com Google
+        </button>
+        
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
+          <div className="relative flex justify-center text-xs"><span className="bg-[#1A1528] px-2 text-[#A0A0B0]">ou</span></div>
         </div>
 
-        <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10">
-          <h2 className="text-xl font-bold text-white text-center mb-6">Bem-vindo de volta!</h2>
+        <form onSubmit={onEmailLogin} className="space-y-2">
+          <div className="bg-white/5 rounded-xl border border-white/10">
+            <div className="flex items-center gap-2 px-3 py-2">
+              <span>📧</span>
+              <input type="email" placeholder="E-mail" className="flex-1 bg-transparent text-white outline-none text-sm" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
+            </div>
+          </div>
           
-          <div className="space-y-4">
-            <button 
-              onClick={onGoogleLogin} 
-              className="w-full py-3 rounded-xl border border-white/20 bg-white/5 text-white flex items-center justify-center gap-2 hover:bg-white/10 transition"
-            >
-              <Chrome size={20} /> Entrar com Google
-            </button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-              <div className="relative flex justify-center"><span className="bg-[#1A1528] px-3 text-xs text-gray-400">ou</span></div>
-            </div>
-
-            <form onSubmit={onEmailLogin} className="space-y-3">
-              <input 
-                type="email" 
-                placeholder="E-mail" 
-                className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition" 
-                value={loginEmail} 
-                onChange={e => setLoginEmail(e.target.value)} 
-                required 
-              />
-              
-              <div className="relative">
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="Senha" 
-                  className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder:text-gray-500 focus:border-[#F4D03F] outline-none transition pr-12" 
-                  value={loginPassword} 
-                  onChange={e => setLoginPassword(e.target.value)} 
-                  required 
-                />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400 hover:text-white transition">
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={loginLoading} 
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1A1528] font-bold transition-all hover:shadow-lg disabled:opacity-50"
-              >
-                {loginLoading ? 'Entrando...' : 'Entrar'}
-              </button>
-            </form>
-
-            <div className="text-center pt-2">
-              <button onClick={onSignUpClick} className="text-[#F4D03F] text-sm hover:underline font-medium">
-                Criar nova conta
-              </button>
-            </div>
-
-            <div className="flex justify-center gap-4 pt-4 border-t border-white/10">
-              <div className="flex items-center gap-1"><Shield size={12} className="text-[#F4D03F]" /><span className="text-[10px] text-gray-400">Seguro</span></div>
-              <div className="flex items-center gap-1"><Star size={12} className="text-[#F4D03F]" /><span className="text-[10px] text-gray-400">Qualidade</span></div>
-              <div className="flex items-center gap-1"><Zap size={12} className="text-[#F4D03F]" /><span className="text-[10px] text-gray-400">Rapidez</span></div>
+          <div className="bg-white/5 rounded-xl border border-white/10">
+            <div className="flex items-center gap-2 px-3 py-2">
+              <span>🔒</span>
+              <input type={showPassword ? "text" : "password"} placeholder="Senha" className="flex-1 bg-transparent text-white outline-none text-sm" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0]">{showPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button>
             </div>
           </div>
-        </div>
+          
+          <button type="submit" disabled={loginLoading} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-[#1A1528] font-bold text-sm">
+            {loginLoading ? 'Entrando...' : 'Entrar'}
+          </button>
+        </form>
+
+        {/* BOTÃO CRIAR CONTA - ADICIONADO AQUI */}
+        <button 
+          onClick={onSignUp}
+          className="w-full mt-2 py-2.5 rounded-xl border-2 border-[#F4D03F] text-[#F4D03F] font-bold text-sm hover:bg-[#F4D03F]/10 transition"
+        >
+          ✨ Criar nova conta
+        </button>
       </div>
     </div>
   );
