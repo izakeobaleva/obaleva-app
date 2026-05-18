@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
 import DriverRegistration from '../components/DriverRegistration';
+import OnboardingFlow from '../components/OnboardingFlow';
 
 // ============================================
 // BOTTOM NAVIGATION
@@ -296,8 +297,17 @@ export const MainScreen = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [showSignUp, setShowSignUp] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
   useEffect(() => {
+    // Verificar onboarding
+    const completed = localStorage.getItem('obaleva_onboarding') === 'true';
+    setOnboardingCompleted(completed);
+    if (!completed) {
+      setShowOnboarding(true);
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => { setUser(session?.user || null); setLoading(false); });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setUser(session?.user || null); });
     return () => subscription.unsubscribe();
@@ -312,6 +322,20 @@ export const MainScreen = () => {
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
   };
+
+  // Se não completou onboarding, mostrar o fluxo de boas-vindas
+  if (showOnboarding && !onboardingCompleted) {
+    return (
+      <OnboardingFlow 
+        onComplete={(phone) => {
+          console.log('📞 Telefone registrado:', phone);
+          setShowOnboarding(false);
+          setOnboardingCompleted(true);
+        }}
+        onGoogleLogin={handleGoogleLogin}
+      />
+    );
+  }
 
   if (loading) { return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>; }
 
