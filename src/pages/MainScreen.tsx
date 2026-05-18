@@ -40,7 +40,6 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 // FUNÇÃO DE LOGOUT GLOBAL
 // ============================================
 const fazerLogout = async () => {
-  console.log("🔴 Fazendo logout...");
   await supabase.auth.signOut();
   localStorage.clear();
   sessionStorage.clear();
@@ -299,17 +298,26 @@ export const MainScreen = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   useEffect(() => {
-    // Verificar onboarding
-    const completed = localStorage.getItem('obaleva_onboarding') === 'true';
-    setOnboardingCompleted(completed);
-    if (!completed) {
-      setShowOnboarding(true);
-    }
+    const checkStatus = async () => {
+      const completed = localStorage.getItem('obaleva_onboarding') === 'true';
+      setOnboardingCompleted(completed);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      
+      setCheckingOnboarding(false);
+      setLoading(false);
+    };
+    
+    checkStatus();
 
-    supabase.auth.getSession().then(({ data: { session } }) => { setUser(session?.user || null); setLoading(false); });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setUser(session?.user || null); });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -323,18 +331,12 @@ export const MainScreen = () => {
     await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
   };
 
-  // Se não completou onboarding, mostrar o fluxo de boas-vindas
-  if (showOnboarding && !onboardingCompleted) {
-    return (
-      <OnboardingFlow 
-        onComplete={(phone) => {
-          console.log('📞 Telefone registrado:', phone);
-          setShowOnboarding(false);
-          setOnboardingCompleted(true);
-        }}
-        onGoogleLogin={handleGoogleLogin}
-      />
-    );
+  // Se não completou onboarding E não está logado, mostrar onboarding
+  if (!checkingOnboarding && !onboardingCompleted && !user) {
+    return <OnboardingFlow onComplete={() => {
+      setOnboardingCompleted(true);
+      window.location.reload();
+    }} />;
   }
 
   if (loading) { return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>; }
