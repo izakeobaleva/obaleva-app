@@ -7,6 +7,7 @@ import {
   ArrowLeft, LogOut, Star
 } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
+import DriverRegistration from '../components/DriverRegistration';
 
 // ============================================
 // BOTTOM NAVIGATION
@@ -54,7 +55,6 @@ const HomeScreen = ({ user }: any) => {
 
   return (
     <div className="max-w-md mx-auto px-4 pb-24">
-      {/* Header */}
       <div className="flex justify-between items-center py-3">
         <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         <div className="flex items-center gap-4">
@@ -63,13 +63,9 @@ const HomeScreen = ({ user }: any) => {
           <button onClick={fazerLogout} className="text-red-400 text-xs">Sair</button>
         </div>
       </div>
-
-      {/* Mapa */}
       <div className="h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg">
         <MapComponent />
       </div>
-
-      {/* Campo de endereço */}
       <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3">
         <div className="flex items-center gap-3 pb-2 border-b border-white/10">
           <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -86,8 +82,6 @@ const HomeScreen = ({ user }: any) => {
           />
         </div>
       </div>
-
-      {/* Banner promoção */}
       <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#8B5CF6]/20 rounded-xl p-3 mb-3 flex justify-between items-center">
         <div>
           <div className="flex items-center gap-1"><span className="text-2xl">🍔</span><span className="text-white font-bold text-sm">Almoço com até 50% OFF</span></div>
@@ -95,8 +89,6 @@ const HomeScreen = ({ user }: any) => {
         </div>
         <ChevronRight size={20} className="text-[#F4D03F]" />
       </div>
-
-      {/* Lojas recomendadas */}
       <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/15 mb-3">
         <div className="flex justify-between items-center mb-2">
           <span className="text-white font-bold text-sm">🏪 Lojas recomendadas na região</span>
@@ -108,8 +100,6 @@ const HomeScreen = ({ user }: any) => {
           <div className="flex items-center gap-2"><div className="flex items-center gap-1"><Star size={14} className="text-[#F4D03F] fill-[#F4D03F]" /><span className="text-white text-sm font-bold">3</span></div><span className="text-[#A0A0B0] text-xs">Itens</span></div>
         </div>
       </div>
-
-      {/* Categorias */}
       <div className="flex justify-around py-2 bg-[#1A1528]/50 rounded-xl">
         <div className="text-center"><div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center mx-auto mb-1"><span className="text-lg">📍</span></div><span className="text-[10px] text-[#A0A0B0]">Poi*</span><span className="text-[8px] text-[#A0A0B0] block">10-25</span></div>
         <div className="text-center"><div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center mx-auto mb-1"><span className="text-lg">🍔</span></div><span className="text-[10px] text-[#A0A0B0]">Food</span></div>
@@ -121,23 +111,10 @@ const HomeScreen = ({ user }: any) => {
 };
 
 // ============================================
-// TELA DE PERFIL COMPLETA (CLUBE)
+// TELA DE PERFIL COMPLETA (COM DRIVER REGISTRATION)
 // ============================================
 const ProfileScreen = ({ user }: any) => {
-  const [showMotoristaForm, setShowMotoristaForm] = useState(false);
-  const [placa, setPlaca] = useState('');
-  const [modelo, setModelo] = useState('');
-
-  const handleSejaMotorista = async () => {
-    if (!placa || !modelo) {
-      alert('Preencha a placa e o modelo do veículo');
-      return;
-    }
-    await supabase.from('usuarios').update({ tipo: 'motorista' }).eq('id', user.id);
-    await supabase.from('motoristas').insert({ id: user.id, status: 'pendente', dados_veiculo: { placa, modelo } });
-    alert('Solicitação enviada! Aguarde aprovação.');
-    setShowMotoristaForm(false);
-  };
+  const [showDriverForm, setShowDriverForm] = useState(false);
 
   return (
     <div className="max-w-md mx-auto px-4 pb-24">
@@ -180,19 +157,21 @@ const ProfileScreen = ({ user }: any) => {
         <div className="p-3 border-b border-white/10"><span className="text-white font-bold text-sm">🌟 OUTROS RECURSOS</span></div>
         <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-3"><Users size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Convide Amigos</span></div><ChevronRight size={16} className="text-[#A0A0B0]" /></button>
         <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-3"><Users size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Convide Motoristas</span></div><ChevronRight size={16} className="text-[#A0A0B0]" /></button>
-        <button onClick={() => setShowMotoristaForm(true)} className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition"><div className="flex items-center gap-3"><Truck size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Seja Motorista</span></div><ChevronRight size={16} className="text-[#A0A0B0]" /></button>
+        <button onClick={() => setShowDriverForm(true)} className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition">
+          <div className="flex items-center gap-3"><Truck size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Seja Motorista</span></div>
+          <ChevronRight size={16} className="text-[#A0A0B0]" />
+        </button>
       </div>
 
-      {showMotoristaForm && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1A1528] rounded-2xl p-6 max-w-md w-full border border-[#F4D03F]/20">
-            <h3 className="text-white text-xl font-bold mb-4">Seja Motorista</h3>
-            <input type="text" placeholder="Placa do veículo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={placa} onChange={e => setPlaca(e.target.value)} />
-            <input type="text" placeholder="Modelo do veículo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4" value={modelo} onChange={e => setModelo(e.target.value)} />
-            <button onClick={handleSejaMotorista} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold mb-2">Enviar solicitação</button>
-            <button onClick={() => setShowMotoristaForm(false)} className="w-full py-2 rounded-xl text-gray-400">Cancelar</button>
-          </div>
-        </div>
+      {showDriverForm && (
+        <DriverRegistration 
+          user={user} 
+          onClose={() => setShowDriverForm(false)} 
+          onSuccess={() => {
+            setShowDriverForm(false);
+            alert('Solicitação enviada! Aguarde aprovação.');
+          }} 
+        />
       )}
 
       <button onClick={fazerLogout} className="w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold mt-2">SAIR DA CONTA</button>
