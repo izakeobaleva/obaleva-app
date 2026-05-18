@@ -1,23 +1,29 @@
-import MapComponent from './MapComponent';
-import { Car } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
 
-export function MapSection() {
-  return (
-    <div className="relative h-[180px] rounded-xl overflow-hidden shadow-md mb-2">
-      <MapComponent />
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="bg-black/50 backdrop-blur-md rounded-xl px-3 py-1 border border-[#F4D03F]/40">
-          <div className="flex items-center gap-1.5">
-            <div className="w-6 h-6 rounded-full bg-[#F4D03F]/20 flex items-center justify-center">
-              <Car className="text-[#F4D03F] w-3.5 h-3.5" />
-            </div>
-            <div>
-              <h1 className="text-sm font-bold bg-gradient-to-r from-white to-[#F4D03F] bg-clip-text text-transparent">OBALEVA</h1>
-              <p className="text-[#F4D03F] text-[7px] text-center">MOBILIDADE PREMIUM</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+const MapComponent: React.FC = () => {
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey || !mapRef.current) return;
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+    script.async = true;
+    script.onload = () => {
+      if (window.google && mapRef.current) {
+        new window.google.maps.Map(mapRef.current, {
+          center: { lat: -23.5505, lng: -46.6333 },
+          zoom: 14,
+          disableDefaultUI: true,
+          zoomControl: true,
+        });
+      }
+    };
+    document.head.appendChild(script);
+  }, []);
+
+  return <div ref={mapRef} className="w-full h-full rounded-xl" />;
+};
+
+export default MapComponent;
