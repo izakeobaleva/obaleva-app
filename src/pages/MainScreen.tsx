@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, Chrome, Eye, EyeOff, Home, Search, ClipboardList, User, Bell, MapPin, ChevronRight, Star, Phone, Lock } from 'lucide-react';
+import { Car, Eye, EyeOff, Home, Search, ClipboardList, User, Bell, MapPin, ChevronRight } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
 
 // ============================================
@@ -30,11 +30,11 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// TELA PRINCIPAL (MAPA)
+// TELA PRINCIPAL (MAPA + ONDE VOCÊ ESTÁ + BOTTOM NAV)
 // ============================================
-const HomeScreen = ({ user }: any) => {
+const HomeScreen = ({ user, onLogout }: any) => {
   const [destino, setDestino] = useState('');
-  const [origem, setOrigem] = useState(localStorage.getItem('user_address') || 'Buscando endereço...');
+  const [origem, setOrigem] = useState(localStorage.getItem('user_address') || 'Rua Santo Antônio, 1095 - Centro, São Paulo - SP');
   const [modoEdicao, setModoEdicao] = useState(false);
   const [enderecoEditado, setEnderecoEditado] = useState(origem);
 
@@ -53,7 +53,7 @@ const HomeScreen = ({ user }: any) => {
         <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         <div className="flex items-center gap-3">
           <button className="text-[#A0A0B0] text-xs">Mudar passageiro</button>
-          <button className="text-red-400 text-xs">Sair</button>
+          {onLogout && <button onClick={onLogout} className="text-red-400 text-xs">Sair</button>}
         </div>
       </div>
 
@@ -65,7 +65,7 @@ const HomeScreen = ({ user }: any) => {
         </button>
       </div>
 
-      {/* Campo ONDE VOCÊ ESTÁ? com endereço automático */}
+      {/* Campo ONDE VOCÊ ESTÁ? */}
       <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-2">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
@@ -96,7 +96,13 @@ const HomeScreen = ({ user }: any) => {
           <div className="w-2 h-2 rounded-full bg-red-500" />
           <span className="text-white text-xs font-bold">PARA ONDE VOCÊ VAI?</span>
         </div>
-        <input type="text" placeholder="Digite o endereço ou cidade..." className="w-full bg-white/10 text-white p-2 rounded-lg outline-none" value={destino} onChange={(e) => setDestino(e.target.value)} />
+        <input
+          type="text"
+          placeholder="Digite o endereço ou cidade..."
+          className="w-full bg-white/10 text-white p-2 rounded-lg outline-none"
+          value={destino}
+          onChange={(e) => setDestino(e.target.value)}
+        />
       </div>
 
       {/* Botão CHAMAR OBALEVALe */}
@@ -114,7 +120,7 @@ const HomeScreen = ({ user }: any) => {
 };
 
 // ============================================
-// TELA DE PERFIL
+// TELA DE PERFIL (APARECE QUANDO LOGADO)
 // ============================================
 const ProfileScreen = ({ user, onLogout }: any) => (
   <div className="max-w-md mx-auto px-4 pb-28 mt-8">
@@ -131,10 +137,10 @@ const SearchScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><d
 const ActivityScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><ClipboardList size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">📋 Atividade</h2><p className="text-gray-400 mt-2">Histórico de corridas</p></div></div>);
 
 // ============================================
-// MODAL DE LOCALIZAÇÃO
+// MODAL DE LOCALIZAÇÃO (SOBREPOSTO)
 // ============================================
-const LocationModal = ({ onAllow, onDeny, onClose }: any) => (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center">
+const LocationModal = ({ onAllow, onDeny }: any) => (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
       <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
       <div className="px-6 pb-8">
@@ -142,9 +148,9 @@ const LocationModal = ({ onAllow, onDeny, onClose }: any) => (
         <h2 className="text-white text-xl font-bold text-center mb-2">Permitir acesso à localização?</h2>
         <p className="text-[#A0A0B0] text-sm text-center mb-6">Para assegurar que o aplicativo possa enviar corridas e planejar rotas.</p>
         <div className="space-y-3">
-          <button onClick={() => { onAllow('exact'); onClose(); }} className="w-full py-4 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left flex justify-between items-center"><div className="flex flex-col"><span className="text-base">📍 Permitir (Exata)</span><span className="text-xs text-black/70 font-normal">DURANTE O USO DO APP</span></div></button>
-          <button onClick={() => { onAllow('approximate'); onClose(); }} className="w-full py-4 px-4 rounded-xl border border-white/20 text-white font-bold text-left"><div className="flex flex-col"><span className="text-base">📍 Permitir (Aproximada)</span><span className="text-xs text-[#A0A0B0] font-normal">APENAS ESTA VEZ</span></div></button>
-          <button onClick={() => { onDeny(); onClose(); }} className="w-full py-4 px-4 rounded-xl text-[#A0A0B0] text-left">NÃO PERMITIR</button>
+          <button onClick={() => { onAllow('exact'); }} className="w-full py-4 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left"><div className="flex flex-col"><span className="text-base">📍 Permitir (Exata)</span><span className="text-xs text-black/70 font-normal">DURANTE O USO DO APP</span></div></button>
+          <button onClick={() => { onAllow('approximate'); }} className="w-full py-4 px-4 rounded-xl border border-white/20 text-white font-bold text-left"><div className="flex flex-col"><span className="text-base">📍 Permitir (Aproximada)</span><span className="text-xs text-[#A0A0B0] font-normal">APENAS ESTA VEZ</span></div></button>
+          <button onClick={onDeny} className="w-full py-4 px-4 rounded-xl text-[#A0A0B0] text-left">NÃO PERMITIR</button>
         </div>
       </div>
     </div>
@@ -152,10 +158,10 @@ const LocationModal = ({ onAllow, onDeny, onClose }: any) => (
 );
 
 // ============================================
-// MODAL DE NOTIFICAÇÕES
+// MODAL DE NOTIFICAÇÕES (SOBREPOSTO)
 // ============================================
-const NotificationModal = ({ onAllow, onDeny, onClose }: any) => (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center">
+const NotificationModal = ({ onAllow, onDeny }: any) => (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
       <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
       <div className="px-6 pb-8">
@@ -169,8 +175,8 @@ const NotificationModal = ({ onAllow, onDeny, onClose }: any) => (
           <p className="text-white text-sm">• 💰 "Promoções e descontos"</p>
         </div>
         <div className="space-y-3">
-          <button onClick={() => { onAllow(); onClose(); }} className="w-full py-4 rounded-xl bg-[#F4D03F] text-black font-bold">PERMITIR</button>
-          <button onClick={() => { onDeny(); onClose(); }} className="w-full py-4 rounded-xl border border-white/20 text-white font-bold">NÃO PERMITIR</button>
+          <button onClick={onAllow} className="w-full py-4 rounded-xl bg-[#F4D03F] text-black font-bold">PERMITIR</button>
+          <button onClick={onDeny} className="w-full py-4 rounded-xl border border-white/20 text-white font-bold">NÃO PERMITIR</button>
         </div>
       </div>
     </div>
@@ -178,9 +184,9 @@ const NotificationModal = ({ onAllow, onDeny, onClose }: any) => (
 );
 
 // ============================================
-// MODAL DE CRIAÇÃO DE CONTA
+// MODAL DE CRIAÇÃO DE CONTA (SOBREPOSTO)
 // ============================================
-const SignUpModal = ({ onClose, onSuccess }: any) => {
+const SignUpModal = ({ onSuccess }: any) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -224,14 +230,14 @@ const SignUpModal = ({ onClose, onSuccess }: any) => {
   const handleGoogleLogin = async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
       <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[85vh] overflow-y-auto">
         <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
         <div className="px-6 pb-8">
           <div className="text-center mb-4"><div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3"><Car size={32} className="text-[#F4D03F]" /></div><h2 className="text-white text-xl font-bold">Criar sua conta</h2><p className="text-[#A0A0B0] text-sm">Comece a usar o ObaLeva</p></div>
           {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
           <div className="space-y-3">
-            <button onClick={handleGoogleLogin} className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center gap-3 hover:bg-white/20 transition"><svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/><path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/></svg><span>Entrar com Google</span></button>
+            <button onClick={handleGoogleLogin} className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center gap-3"><svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/><path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/></svg><span>Entrar com Google</span></button>
             <div className="relative my-3"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-3 text-xs text-gray-400">ou</span></div></div>
             <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center px-3 py-3"><span className="text-white font-bold mr-2">+55</span><input type="tel" placeholder="(11) 99999-9999" className="flex-1 bg-transparent text-white outline-none" value={phoneNumber} onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))} maxLength={15} /></div></div>
             <div className="relative"><input type={showPassword ? "text" : "password"} placeholder="Senha *" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white pr-10" value={password} onChange={(e) => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
@@ -252,7 +258,6 @@ export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
-  const [step, setStep] = useState(1);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
@@ -286,7 +291,6 @@ export const MainScreen = () => {
 
   const handleLocationAllow = (type: string) => {
     localStorage.setItem('location_permission_asked', 'true');
-    localStorage.setItem('location_permission_type', type);
     if (navigator.geolocation) navigator.geolocation.getCurrentPosition(() => {}, () => {});
     setShowLocationModal(false);
     setShowNotificationModal(true);
@@ -316,26 +320,22 @@ export const MainScreen = () => {
 
   if (loading) return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
 
-  // Usuário logado → mostra app completo
-  if (user) {
-    return (
+  // TELA PRINCIPAL SEMPRE VISÍVEL + MODAIS SOBREPOSTOS
+  return (
+    <>
+      {/* TELA PRINCIPAL - SEMPRE VISÍVEL E FUNCIONAL */}
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-        {activeTab === 'home' && <HomeScreen user={user} />}
-        {activeTab === 'perfil' && <ProfileScreen user={user} onLogout={() => supabase.auth.signOut().then(() => window.location.reload())} />}
+        {activeTab === 'home' && <HomeScreen user={user} onLogout={user ? () => supabase.auth.signOut().then(() => window.location.reload()) : undefined} />}
+        {activeTab === 'perfil' && user && <ProfileScreen user={user} onLogout={() => supabase.auth.signOut().then(() => window.location.reload())} />}
         {activeTab === 'buscar' && <SearchScreen />}
         {activeTab === 'atividade' && <ActivityScreen />}
         <BottomNav active={activeTab} onNavigate={setActiveTab} />
       </div>
-    );
-  }
 
-  // Primeira vez: mapa + modals sobrepostos
-  return (
-    <>
-      <HomeScreen user={null} />
-      {showLocationModal && <LocationModal onAllow={handleLocationAllow} onDeny={handleLocationDeny} onClose={() => {}} />}
-      {showNotificationModal && <NotificationModal onAllow={handleNotificationAllow} onDeny={handleNotificationDeny} onClose={() => {}} />}
-      {showSignUpModal && <SignUpModal onClose={() => setShowSignUpModal(false)} onSuccess={handleSignUpSuccess} />}
+      {/* MODAIS SOBREPOSTOS (APENAS NA PRIMEIRA VEZ) */}
+      {showLocationModal && <LocationModal onAllow={handleLocationAllow} onDeny={handleLocationDeny} />}
+      {showNotificationModal && <NotificationModal onAllow={handleNotificationAllow} onDeny={handleNotificationDeny} />}
+      {showSignUpModal && <SignUpModal onSuccess={handleSignUpSuccess} />}
     </>
   );
 };
