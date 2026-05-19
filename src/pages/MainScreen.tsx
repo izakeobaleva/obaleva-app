@@ -7,7 +7,6 @@ import {
   ArrowLeft, LogOut, Star, MapPin
 } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
-import DriverRegistration from '../components/DriverRegistration';
 import OnboardingFlow from '../components/OnboardingFlow';
 
 // ============================================
@@ -37,7 +36,7 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// FUNÇÃO DE LOGOUT GLOBAL
+// FUNÇÃO DE LOGOUT
 // ============================================
 const fazerLogout = async () => {
   await supabase.auth.signOut();
@@ -47,110 +46,133 @@ const fazerLogout = async () => {
 };
 
 // ============================================
-// TELA PRINCIPAL (HOME) - ESTILO 99 COM AUTOCOMPLETE
+// TELA PRINCIPAL COM MAPA, ENDEREÇO, DESTINO E BOTÃO CHAMAR
 // ============================================
 const HomeScreenFunc = ({ user }: any) => {
-  const [origem, setOrigem] = useState('');
+  const [origem, setOrigem] = useState('Buscando endereço...');
   const [destino, setDestino] = useState('');
-  const origemInputRef = useRef<HTMLInputElement>(null);
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [enderecoEditado, setEnderecoEditado] = useState('');
   const destinoInputRef = useRef<HTMLInputElement>(null);
 
-  // Inicializar autocomplete do Google Maps com loop de espera
+  // Ouvir evento de endereço vindo do MapComponent
+  useEffect(() => {
+    const handler = (e: any) => {
+      const endereco = e.detail?.endereco;
+      if (endereco) {
+        setOrigem(endereco);
+        setEnderecoEditado(endereco);
+      }
+    };
+    window.addEventListener('enderecoAtualizado', handler);
+    return () => window.removeEventListener('enderecoAtualizado', handler);
+  }, []);
+
+  // Autocomplete para destino
   useEffect(() => {
     const checkGoogleMaps = setInterval(() => {
-      if (window.google && window.google.maps && window.google.maps.places) {
+      if (window.google && window.google.maps && window.google.maps.places && destinoInputRef.current) {
         clearInterval(checkGoogleMaps);
-        console.log('✅ Google Maps Places carregado!');
-
-        // Autocomplete para origem
-        if (origemInputRef.current) {
-          const origemAuto = new window.google.maps.places.Autocomplete(origemInputRef.current, {
-            fields: ['formatted_address', 'geometry', 'name'],
-          });
-          origemAuto.addListener('place_changed', () => {
-            const place = origemAuto.getPlace();
-            if (place.geometry) {
-              setOrigem(place.formatted_address || place.name);
-            }
-          });
-        }
-
-        // Autocomplete para destino
-        if (destinoInputRef.current) {
-          const destinoAuto = new window.google.maps.places.Autocomplete(destinoInputRef.current, {
-            fields: ['formatted_address', 'geometry', 'name'],
-          });
-          destinoAuto.addListener('place_changed', () => {
-            const place = destinoAuto.getPlace();
-            if (place.geometry) {
-              setDestino(place.formatted_address || place.name);
-            }
-          });
-        }
+        const destinoAuto = new window.google.maps.places.Autocomplete(destinoInputRef.current, {
+          fields: ['formatted_address', 'geometry', 'name'],
+        });
+        destinoAuto.addListener('place_changed', () => {
+          const place = destinoAuto.getPlace();
+          if (place.geometry) {
+            setDestino(place.formatted_address || place.name || '');
+          }
+        });
       }
-    }, 500); // Verificar a cada 500ms
-
+    }, 500);
     return () => clearInterval(checkGoogleMaps);
   }, []);
 
-  const handleChamarObaLeva = () => {
+  const handleChamarObaLeva = async () => {
     if (!destino) {
-      alert('Digite um destino primeiro!');
+      alert('Digite um destino!');
       return;
     }
-    alert(`🚗 Corrida solicitada de: ${origem || 'Sua localização'}\nPara: ${destino}`);
+    alert(`🚗 Corrida solicitada!\n\n📍 Origem: ${origem}\n📍 Destino: ${destino}`);
   };
 
   return (
     <div className="max-w-md mx-auto px-4 pb-24">
       {/* Header */}
       <div className="flex justify-between items-center py-3">
-        <h1 className="text-xl font-bold text-white">OBALEVA</h1>
-        <div className="flex items-center gap-3">
-          <button className="text-[#A0A0B0] text-xs">Mudar passageiro</button>
-          <button onClick={fazerLogout} className="text-red-400 text-xs">Sair</button>
+        <div className="flex items-center gap-2">
+          <Car size={24} className="text-[#F4D03F]" />
+          <h1 className="text-xl font-bold text-white">OBALEVA</h1>
         </div>
+        <button onClick={fazerLogout} className="text-red-400 text-xs hover:underline">Sair</button>
       </div>
 
-      {/* Mapa */}
+      {/* Mapa com gotinha azul e círculo pulsante */}
       <div className="relative h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg">
         <MapComponent />
-        <button className="absolute bottom-3 right-3 bg-[#1A1528] rounded-full p-2 shadow-lg border border-[#F4D03F]/30">
+        <div className="absolute bottom-3 right-3 bg-[#1A1528] rounded-full p-2 shadow-lg border border-[#F4D03F]/30">
           <MapPin size={20} className="text-[#F4D03F]" />
-        </button>
-      </div>
-
-      {/* Campo de ORIGEM com autocomplete */}
-      <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-2">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-          <input
-            ref={origemInputRef}
-            type="text"
-            placeholder="Onde você está?"
-            className="flex-1 bg-transparent text-white text-sm outline-none placeholder-[#A0A0B0]"
-            defaultValue={origem}
-            onChange={(e) => setOrigem(e.target.value)}
-          />
         </div>
       </div>
 
-      {/* Campo de DESTINO com autocomplete */}
+      {/* ONDE VOCÊ ESTÁ? - Endereço automático com botão Editar/Confirmar */}
       <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-2">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-          <input
-            ref={destinoInputRef}
-            type="text"
-            placeholder="Para onde você vai?"
-            className="flex-1 bg-transparent text-white text-sm outline-none placeholder-[#A0A0B0]"
-            value={destino}
-            onChange={(e) => setDestino(e.target.value)}
-          />
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="text-white text-xs font-bold">ONDE VOCÊ ESTÁ?</span>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setModoEdicao(!modoEdicao)}
+              className="text-[#F4D03F] text-xs hover:underline"
+            >
+              {modoEdicao ? 'Cancelar' : '✏️ Editar'}
+            </button>
+            {modoEdicao && (
+              <button 
+                onClick={() => {
+                  setOrigem(enderecoEditado);
+                  setModoEdicao(false);
+                }}
+                className="text-green-400 text-xs hover:underline"
+              >
+                ✅ Confirmar
+              </button>
+            )}
+          </div>
         </div>
+        
+        {modoEdicao ? (
+          <input
+            type="text"
+            className="w-full bg-white/10 text-white p-2 rounded-lg outline-none"
+            value={enderecoEditado}
+            onChange={(e) => setEnderecoEditado(e.target.value)}
+          />
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-white text-sm flex-1">{origem}</span>
+          </div>
+        )}
       </div>
 
-      {/* BOTÃO CHAMAR OBALEVALe - LOGO ABAIXO DO CAMPO */}
+      {/* PARA ONDE VAI? - Campo com autocomplete */}
+      <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-2">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-2 h-2 rounded-full bg-red-500" />
+          <span className="text-white text-xs font-bold">PARA ONDE VAI?</span>
+        </div>
+        <input
+          ref={destinoInputRef}
+          type="text"
+          placeholder="Digite seu destino..."
+          className="w-full bg-transparent text-white text-sm outline-none placeholder-[#A0A0B0]"
+          value={destino}
+          onChange={(e) => setDestino(e.target.value)}
+        />
+      </div>
+
+      {/* BOTÃO CHAMAR OBALEVALe */}
       <button
         onClick={handleChamarObaLeva}
         className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-base flex items-center justify-center gap-2 mb-3"
@@ -169,30 +191,25 @@ const HomeScreenFunc = ({ user }: any) => {
         </div>
         <ChevronRight size={20} className="text-[#F4D03F]" />
       </div>
-
-      {/* Lojas recomendadas */}
-      <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/15">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-white font-bold text-sm">🏪 Lojas recomendadas na região</span>
-          <span className="text-[#F4D03F] text-xs">Mais ›</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            <Star size={14} className="text-[#F4D03F] fill-[#F4D03F]" />
-            <span className="text-white text-sm font-bold">4.6</span>
-          </div>
-          <span className="text-[#A0A0B0] text-xs">Itens com até 95% ...</span>
-        </div>
-      </div>
     </div>
   );
 };
 
 // ============================================
-// TELA DE PERFIL COMPLETA (COM DRIVER REGISTRATION)
+// TELA DE PERFIL
 // ============================================
 const ProfileScreenFunc = ({ user }: any) => {
-  const [showDriverForm, setShowDriverForm] = useState(false);
+  const menuItems = [
+    { icon: ClipboardList, label: "Solicitações", color: "#F4D03F" },
+    { icon: MessageCircle, label: "Mensagens", color: "#F4D03F" },
+    { icon: CreditCard, label: "99Pay", color: "#F4D03F" },
+    { icon: Tag, label: "Descontos", color: "#F4D03F" },
+    { icon: DollarSign, label: "Pagamento", color: "#F4D03F" },
+    { icon: Settings, label: "Configurações", color: "#F4D03F" },
+    { icon: HelpCircle, label: "Ajuda", color: "#F4D03F" },
+    { icon: Shield, label: "Segurança", color: "#F4D03F" },
+    { icon: Camera, label: "Escanear", color: "#F4D03F" },
+  ];
 
   return (
     <div className="max-w-md mx-auto px-4 pb-24">
@@ -213,17 +230,7 @@ const ProfileScreenFunc = ({ user }: any) => {
       </div>
 
       <div className="bg-[#1A1528] rounded-xl border border-[#F4D03F]/15 overflow-hidden mb-4">
-        {[
-          { icon: ClipboardList, label: "Solicitações", color: "#F4D03F" },
-          { icon: MessageCircle, label: "Mensagens", color: "#F4D03F" },
-          { icon: CreditCard, label: "99Pay", color: "#F4D03F" },
-          { icon: Tag, label: "Descontos", color: "#F4D03F" },
-          { icon: DollarSign, label: "Pagamento", color: "#F4D03F" },
-          { icon: Settings, label: "Configurações", color: "#F4D03F" },
-          { icon: HelpCircle, label: "Ajuda", color: "#F4D03F" },
-          { icon: Shield, label: "Segurança", color: "#F4D03F" },
-          { icon: Camera, label: "Escanear", color: "#F4D03F" },
-        ].map((item, index) => (
+        {menuItems.map((item, index) => (
           <button key={index} className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10 last:border-0">
             <div className="flex items-center gap-3"><item.icon size={18} style={{ color: item.color }} /><span className="text-white text-sm">{item.label}</span></div>
             <ChevronRight size={16} className="text-[#A0A0B0]" />
@@ -234,25 +241,10 @@ const ProfileScreenFunc = ({ user }: any) => {
       <div className="bg-[#1A1528] rounded-xl border border-[#F4D03F]/15 overflow-hidden mb-4">
         <div className="p-3 border-b border-white/10"><span className="text-white font-bold text-sm">🌟 OUTROS RECURSOS</span></div>
         <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-3"><Users size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Convide Amigos</span></div><ChevronRight size={16} className="text-[#A0A0B0]" /></button>
-        <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-3"><Users size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Convide Motoristas</span></div><ChevronRight size={16} className="text-[#A0A0B0]" /></button>
-        <button onClick={() => setShowDriverForm(true)} className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition">
-          <div className="flex items-center gap-3"><Truck size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Seja Motorista</span></div>
-          <ChevronRight size={16} className="text-[#A0A0B0]" />
-        </button>
+        <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition"><div className="flex items-center gap-3"><Truck size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Seja Motorista</span></div><ChevronRight size={16} className="text-[#A0A0B0]" /></button>
       </div>
 
-      {showDriverForm && (
-        <DriverRegistration 
-          user={user} 
-          onClose={() => setShowDriverForm(false)} 
-          onSuccess={() => {
-            setShowDriverForm(false);
-            alert('Solicitação enviada! Aguarde aprovação.');
-          }} 
-        />
-      )}
-
-      <button onClick={fazerLogout} className="w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold mt-2">SAIR DA CONTA</button>
+      <button onClick={fazerLogout} className="w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold">SAIR DA CONTA</button>
     </div>
   );
 };
@@ -301,16 +293,16 @@ const LoginScreenFunc = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
         </div>
 
         <div className="bg-[#1A1528] rounded-2xl p-6">
-          {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
-          <button onClick={onGoogleLogin} className="w-full py-3 rounded-xl border border-white/20 text-white flex items-center justify-center gap-2"><Chrome size={20} /> Entrar com Google</button>
-          <div className="relative my-4"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-3 text-xs text-gray-400">ou</span></div></div>
+          {error && <div className="mb-3 text-center text-sm text-red-400 bg-red-500/10 rounded p-2">{error}</div>}
+          <button onClick={onGoogleLogin} className="w-full py-3 rounded-xl border border-white/20 text-white flex items-center justify-center gap-2 mb-4"><Chrome size={20} /> Entrar com Google</button>
+          <div className="relative mb-4"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-3 text-xs text-gray-400">ou</span></div></div>
           <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
-          <div className="relative">
-            <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4 pr-10" value={password} onChange={e => setPassword(e.target.value)} />
+          <div className="relative mb-4">
+            <input type={showPassword ? "text" : "password"} placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white pr-10" value={password} onChange={e => setPassword(e.target.value)} />
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
           </div>
           <button onClick={async () => { setError(''); setLoading(true); const result = await onLogin(email, password); if (result?.error) setError('E-mail ou senha inválidos'); setLoading(false); }} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">{loading ? 'Entrando...' : 'Entrar'}</button>
-          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm">Criar conta</button>
+          <button onClick={onSignUp} className="w-full mt-3 text-[#F4D03F] text-sm font-medium">Criar conta</button>
         </div>
       </div>
     </div>
@@ -318,7 +310,7 @@ const LoginScreenFunc = ({ onLogin, onGoogleLogin, onSignUp }: any) => {
 };
 
 // ============================================
-// TELA DE CADASTRO COM BOTÃO VOLTAR
+// TELA DE CADASTRO
 // ============================================
 const SignUpScreenFunc = ({ onBack, onSuccess }: any) => {
   const [email, setEmail] = useState('');
@@ -337,7 +329,7 @@ const SignUpScreenFunc = ({ onBack, onSuccess }: any) => {
       const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { nome_completo: nome } } });
       if (error) throw error;
       if (data.user) {
-        await supabase.from('usuarios').insert({ id: data.user.id, nome_completo: nome, email: email, tipo: 'passageiro' });
+        await supabase.from('usuarios').insert({ id: data.user.id, nome_completo: nome, email, tipo: 'passageiro' });
         await supabase.from('passageiros').insert({ id: data.user.id });
         alert('✅ Conta criada! Faça login.');
         onSuccess();
@@ -352,11 +344,11 @@ const SignUpScreenFunc = ({ onBack, onSuccess }: any) => {
         <button onClick={onBack} className="flex items-center gap-1 text-[#A0A0B0] mb-4 hover:text-[#F4D03F] transition"><ArrowLeft size={18} /> Voltar</button>
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
           <h2 className="text-xl font-bold text-white text-center mb-6">Criar Conta</h2>
-          {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
+          {error && <div className="mb-3 text-center text-sm text-red-400 bg-red-500/10 rounded p-2">{error}</div>}
           <input type="text" placeholder="Nome completo" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={nome} onChange={e => setNome(e.target.value)} />
           <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-3" value={email} onChange={e => setEmail(e.target.value)} />
-          <div className="relative">
-            <input type={showPassword ? "text" : "password"} placeholder="Senha (mínimo 6)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white mb-4 pr-10" value={password} onChange={e => setPassword(e.target.value)} />
+          <div className="relative mb-4">
+            <input type={showPassword ? "text" : "password"} placeholder="Senha (mínimo 6)" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white pr-10" value={password} onChange={e => setPassword(e.target.value)} />
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
           </div>
           <button onClick={handleSignUp} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">{loading ? 'Criando...' : 'Cadastrar'}</button>
@@ -367,7 +359,7 @@ const SignUpScreenFunc = ({ onBack, onSuccess }: any) => {
 };
 
 // ============================================
-// MAIN SCREEN PRINCIPAL - EXPORTADA CORRETAMENTE
+// MAIN SCREEN PRINCIPAL
 // ============================================
 const MainScreen = () => {
   const [user, setUser] = useState<any>(null);

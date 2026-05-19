@@ -4,20 +4,43 @@ const MapComponent: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const markerRef = useRef<any>(null);
+  const pulseCircleRef = useRef<any>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  // Buscar endereço a partir das coordenadas (geocodificação reversa)
+  const buscarEnderecoPorCoordenadas = async (lat: number, lng: number) => {
+    try {
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const endereco = results[0].formatted_address;
+          // Disparar evento customizado para o HomeScreen ouvir
+          window.dispatchEvent(new CustomEvent('enderecoAtualizado', { detail: { endereco } }));
+        }
+      });
+    } catch (err) {
+      console.error('Erro ao buscar endereço:', err);
+    }
+  };
 
   // Obter localização do usuário
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const pos = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          });
+          };
+          setUserLocation(pos);
+          if (window.google && window.google.maps) {
+            buscarEnderecoPorCoordenadas(pos.lat, pos.lng);
+          }
         },
-        () => setUserLocation({ lat: -23.5505, lng: -46.6333 })
+        () => {
+          const defaultPos = { lat: -23.5505, lng: -46.6333 };
+          setUserLocation(defaultPos);
+        }
       );
     } else {
       setUserLocation({ lat: -23.5505, lng: -46.6333 });
@@ -39,7 +62,7 @@ const MapComponent: React.FC = () => {
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // Criar mapa e marcador animado com pulso
+  // Criar mapa e marcador
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation) return;
 
@@ -50,78 +73,59 @@ const MapComponent: React.FC = () => {
       zoomControl: true,
     });
 
-    // Criar marcador personalizado (círculo animado)
-    const marker = new window.google.maps.Marker({
+    // MARCADOR GOTINHA PADRÃO DO GOOGLE MAPS
+    new window.google.maps.Marker({
       position: userLocation,
       map: map,
       title: 'Sua localização',
       icon: {
-        path: window.google.maps.SymbolPath.CIRCLE,
-        scale: 12,
-        fillColor: '#F4D03F',
-        fillOpacity: 1,
-        strokeColor: '#1A1528',
-        strokeWeight: 2,
+        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        scaledSize: new window.google.maps.Size(32, 32),
       },
       animation: window.google.maps.Animation.DROP,
     });
-    markerRef.current = marker;
 
-    // Animação de pulso (círculo que expande e contrai como batimento cardíaco)
-    let pulseSize = 12;
+    // CÍRCULO PULSANTE (ONDA SONORA) - expande e contrai como coração
+    let pulseSize = 30;
     let growing = true;
-    const pulseInterval = setInterval(() => {
-      if (!markerRef.current) return;
-      
-      if (growing) {
-        pulseSize += 0.8;
-        if (pulseSize >= 22) growing = false;
-      } else {
-        pulseSize -= 0.8;
-        if (pulseSize <= 12) growing = true;
-      }
-      
-      markerRef.current.setIcon({
-        path: window.google.maps.SymbolPath.CIRCLE,
-        scale: pulseSize,
-        fillColor: '#F4D03F',
-        fillOpacity: 0.9,
-        strokeColor: '#F4D03F',
-        strokeWeight: 3,
-        strokeOpacity: 0.7,
-      });
-    }, 60);
-
-    // Círculo de precisão (sombra/área) com animação
-    const precisionCircle = new window.google.maps.Circle({
+    
+    const circle = new window.google.maps.Circle({
       map: map,
       center: userLocation,
-      radius: 80,
+      radius: pulseSize,
       fillColor: '#F4D03F',
-      fillOpacity: 0.08,
+      fillOpacity: 0.2,
       strokeColor: '#F4D03F',
-      strokeOpacity: 0.3,
-      strokeWeight: 1,
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
     });
 
-    // Animação do círculo de precisão (pulsa também)
-    let circleRadius = 80;
-    let circleGrowing = true;
-    const circleInterval = setInterval(() => {
-      if (circleGrowing) {
-        circleRadius += 2;
-        if (circleRadius >= 120) circleGrowing = false;
+    // Animação de pulso
+    const pulseInterval = setInterval(() => {
+      if (growing) {
+        pulseSize += 3;
+        if (pulseSize >= 60) growing = false;
       } else {
-        circleRadius -= 2;
-        if (circleRadius <= 80) circleGrowing = true;
+        pulseSize -= 3;
+        if (pulseSize <= 30) growing = true;
       }
-      precisionCircle.setRadius(circleRadius);
-    }, 100);
+      circle.setRadius(pulseSize);
+      circle.setOptions({
+        fillOpacity: 0.3 - (pulseSize / 200),
+        strokeOpacity: 0.9 - (pulseSize / 100),
+      });
+    }, 80);
 
-    return () => {
-      clearInterval(pulseInterval);
-      clearInterval(circleInterval);
-    };
+    pulseCircleRef.current = circle;
+
+    return () => clearInterval(pulseInterval);
+  }, [mapsLoaded, userLocation]);
+
+  // Buscar endereço quando o mapa carregar
+  useEffect(() => {
+    if (mapsLoaded && userLocation) {
+      buscarEnderecoPorCoordenadas(userLocation.lat, userLocation.lng);
+    }
   }, [mapsLoaded, userLocation]);
 
   if (!apiKey) {
