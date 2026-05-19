@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { 
   Car, Chrome, Eye, EyeOff, Home, Search, ClipboardList, User, 
@@ -63,9 +63,12 @@ const HomeScreen = ({ user }: any) => {
           <button onClick={fazerLogout} className="text-red-400 text-xs">Sair</button>
         </div>
       </div>
-      <div className="h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg">
+      
+      {/* MAPA */}
+      <div className="h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg border border-white/10">
         <MapComponent />
       </div>
+      
       <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3">
         <div className="flex items-center gap-3 pb-2 border-b border-white/10">
           <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -306,7 +309,13 @@ export const MainScreen = () => {
       setOnboardingCompleted(completed);
       
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
+      if (session?.user) {
+        setUser(session.user);
+        localStorage.setItem('obaleva_onboarding', 'true');
+        setOnboardingCompleted(true);
+      } else if (!completed) {
+        setShowOnboarding(true);
+      }
       
       setCheckingOnboarding(false);
       setLoading(false);
@@ -331,16 +340,44 @@ export const MainScreen = () => {
     await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
   };
 
-  // Se não completou onboarding E não está logado, mostrar onboarding
-  if (!checkingOnboarding && !onboardingCompleted && !user) {
-    return <OnboardingFlow onComplete={() => {
-      setOnboardingCompleted(true);
-      window.location.reload();
-    }} />;
+  if (loading || checkingOnboarding) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4 animate-pulse">
+            <Car size={32} className="text-[#F4D03F]" />
+          </div>
+          <div className="w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-[#A0A0B0] text-sm mt-3">Carregando...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (loading) { return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>; }
+  // Se NÃO completou onboarding E NÃO está logado: mostrar onboarding sobreposto + tela de login
+  if (!onboardingCompleted && !user) {
+    return (
+      <>
+        {/* Tela de login por baixo */}
+        <LoginScreen 
+          onLogin={handleLogin} 
+          onGoogleLogin={handleGoogleLogin} 
+          onSignUp={() => setShowSignUp(true)} 
+        />
+        {/* Onboarding sobreposto */}
+        <OnboardingFlow 
+          isVisible={showOnboarding} 
+          onComplete={() => {
+            setShowOnboarding(false);
+            setOnboardingCompleted(true);
+            window.location.reload();
+          }} 
+        />
+      </>
+    );
+  }
 
+  // Se está logado
   if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
@@ -353,7 +390,11 @@ export const MainScreen = () => {
     );
   }
 
-  if (showSignUp) { return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => { setShowSignUp(false); window.location.reload(); }} />; }
+  // Tela de cadastro
+  if (showSignUp) {
+    return <SignUpScreen onBack={() => setShowSignUp(false)} onSuccess={() => { setShowSignUp(false); window.location.reload(); }} />;
+  }
 
+  // Tela de login padrão
   return <LoginScreen onLogin={handleLogin} onGoogleLogin={handleGoogleLogin} onSignUp={() => setShowSignUp(true)} />;
 };
