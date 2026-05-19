@@ -140,47 +140,56 @@ const ProfileScreen = ({ user, onLogout }: any) => (
 const SearchScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><Search size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">🔍 Buscar</h2></div></div>);
 const ActivityScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><ClipboardList size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">📋 Atividade</h2><p className="text-gray-400 mt-2">Histórico de corridas</p></div></div>);
 
+// ============================================
+// MODAL DE LOCALIZAÇÃO (ALTURA REDUZIDA - max-h-[320px])
+// ============================================
 const LocationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
-    <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+    <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[320px]">
       <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-      <div className="px-6 pb-8">
-        <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4"><MapPin size={32} className="text-[#F4D03F]" /></div>
-        <h2 className="text-white text-xl font-bold text-center mb-2">Permitir acesso à localização?</h2>
-        <p className="text-[#A0A0B0] text-sm text-center mb-6">Para assegurar que o aplicativo possa enviar corridas e planejar rotas.</p>
-        <div className="space-y-3">
-          <button onClick={() => { onAllow('exact'); }} className="w-full py-4 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left"><div className="flex flex-col"><span className="text-base">📍 Permitir (Exata)</span><span className="text-xs text-black/70 font-normal">DURANTE O USO DO APP</span></div></button>
-          <button onClick={() => { onAllow('approximate'); }} className="w-full py-4 px-4 rounded-xl border border-white/20 text-white font-bold text-left"><div className="flex flex-col"><span className="text-base">📍 Permitir (Aproximada)</span><span className="text-xs text-[#A0A0B0] font-normal">APENAS ESTA VEZ</span></div></button>
-          <button onClick={onDeny} className="w-full py-4 px-4 rounded-xl text-[#A0A0B0] text-left">NÃO PERMITIR</button>
+      <div className="px-6 pb-6">
+        <div className="w-14 h-14 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3"><MapPin size={28} className="text-[#F4D03F]" /></div>
+        <h2 className="text-white text-lg font-bold text-center mb-1">Permitir acesso à localização?</h2>
+        <p className="text-[#A0A0B0] text-xs text-center mb-4">Para assegurar que o aplicativo possa enviar corridas e planejar rotas.</p>
+        <div className="space-y-2">
+          <button onClick={() => { onAllow('exact'); }} className="w-full py-3 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left"><div className="flex flex-col"><span className="text-sm">📍 Permitir (Exata)</span><span className="text-[10px] text-black/70 font-normal">DURANTE O USO DO APP</span></div></button>
+          <button onClick={() => { onAllow('approximate'); }} className="w-full py-3 px-4 rounded-xl border border-white/20 text-white font-bold text-left"><div className="flex flex-col"><span className="text-sm">📍 Permitir (Aproximada)</span><span className="text-[10px] text-[#A0A0B0] font-normal">APENAS ESTA VEZ</span></div></button>
+          <button onClick={onDeny} className="w-full py-3 px-4 rounded-xl text-[#A0A0B0] text-left text-sm">NÃO PERMITIR</button>
         </div>
       </div>
     </div>
   </div>
 );
 
+// ============================================
+// MODAL DE NOTIFICAÇÕES (ALTURA REDUZIDA - max-h-[380px])
+// ============================================
 const NotificationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
-    <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+    <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[380px]">
       <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-      <div className="px-6 pb-8">
-        <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4"><Bell size={32} className="text-[#F4D03F]" /></div>
-        <h2 className="text-white text-xl font-bold text-center mb-2">Permitir notificações?</h2>
-        <p className="text-[#A0A0B0] text-sm text-center mb-4">Para receber alertas importantes como:</p>
-        <div className="bg-white/5 rounded-xl p-3 mb-6 space-y-2">
-          <p className="text-white text-sm">• 🚗 "Motorista a caminho"</p>
-          <p className="text-white text-sm">• 📍 "Estou chegando!"</p>
-          <p className="text-white text-sm">• ✅ "Corrida confirmada"</p>
-          <p className="text-white text-sm">• 💰 "Promoções e descontos"</p>
+      <div className="px-6 pb-6">
+        <div className="w-14 h-14 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3"><Bell size={28} className="text-[#F4D03F]" /></div>
+        <h2 className="text-white text-lg font-bold text-center mb-1">Permitir notificações?</h2>
+        <p className="text-[#A0A0B0] text-xs text-center mb-3">Para receber alertas importantes como:</p>
+        <div className="bg-white/5 rounded-xl p-2 mb-4 space-y-1">
+          <p className="text-white text-xs">• 🚗 "Motorista a caminho"</p>
+          <p className="text-white text-xs">• 📍 "Estou chegando!"</p>
+          <p className="text-white text-xs">• ✅ "Corrida confirmada"</p>
+          <p className="text-white text-xs">• 💰 "Promoções e descontos"</p>
         </div>
-        <div className="space-y-3">
-          <button onClick={onAllow} className="w-full py-4 rounded-xl bg-[#F4D03F] text-black font-bold">PERMITIR</button>
-          <button onClick={onDeny} className="w-full py-4 rounded-xl border border-white/20 text-white font-bold">NÃO PERMITIR</button>
+        <div className="space-y-2">
+          <button onClick={onAllow} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">PERMITIR</button>
+          <button onClick={onDeny} className="w-full py-3 rounded-xl border border-white/20 text-white font-bold">NÃO PERMITIR</button>
         </div>
       </div>
     </div>
   </div>
 );
 
+// ============================================
+// MODAL DE CRIAÇÃO DE CONTA (ALTURA REDUZIDA - max-h-[500px])
+// ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -226,19 +235,23 @@ const SignUpModal = ({ onSuccess }: any) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
-      <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[85vh] overflow-y-auto">
+      <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[500px] overflow-y-auto">
         <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-        <div className="px-6 pb-8">
-          <div className="text-center mb-4"><div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3"><Car size={32} className="text-[#F4D03F]" /></div><h2 className="text-white text-xl font-bold">Criar sua conta</h2><p className="text-[#A0A0B0] text-sm">Comece a usar o ObaLeva</p></div>
-          {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
-          <div className="space-y-3">
-            <button onClick={handleGoogleLogin} className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center gap-3"><svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/><path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/></svg><span>Entrar com Google</span></button>
-            <div className="relative my-3"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-3 text-xs text-gray-400">ou</span></div></div>
-            <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center px-3 py-3"><span className="text-white font-bold mr-2">+55</span><input type="tel" placeholder="(11) 99999-9999" className="flex-1 bg-transparent text-white outline-none" value={phoneNumber} onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))} maxLength={15} /></div></div>
-            <div className="relative"><input type={showPassword ? "text" : "password"} placeholder="Senha *" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white pr-10" value={password} onChange={(e) => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
-            <div className="relative"><input type={showPassword ? "text" : "password"} placeholder="Confirmar senha *" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white pr-10" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
-            <label className="flex items-center gap-2 py-2"><input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="w-4 h-4" /><span className="text-[#A0A0B0] text-xs">Li e aceito os <span className="text-[#F4D03F]">Termos de Uso</span> e a <span className="text-[#F4D03F]">Política de Privacidade</span></span></label>
-            <button onClick={handleCreateAccount} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">{loading ? 'Criando conta...' : '✅ CRIAR CONTA'}</button>
+        <div className="px-6 pb-6">
+          <div className="text-center mb-3">
+            <div className="w-14 h-14 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-2"><Car size={28} className="text-[#F4D03F]" /></div>
+            <h2 className="text-white text-lg font-bold">Criar sua conta</h2>
+            <p className="text-[#A0A0B0] text-xs">Comece a usar o ObaLeva</p>
+          </div>
+          {error && <div className="mb-2 p-1 text-center text-xs text-red-400 bg-red-500/10 rounded">{error}</div>}
+          <div className="space-y-2">
+            <button onClick={handleGoogleLogin} className="w-full py-2 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center gap-2 text-sm"><svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/><path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/></svg><span>Entrar com Google</span></button>
+            <div className="relative my-2"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-2 text-[10px] text-gray-400">ou</span></div></div>
+            <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center px-3 py-2"><span className="text-white font-bold mr-2 text-sm">+55</span><input type="tel" placeholder="(11) 99999-9999" className="flex-1 bg-transparent text-white outline-none text-sm" value={phoneNumber} onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))} maxLength={15} /></div></div>
+            <div className="relative"><input type={showPassword ? "text" : "password"} placeholder="Senha *" className="w-full p-2 rounded-xl bg-white/10 border border-white/15 text-white pr-8 text-sm" value={password} onChange={(e) => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2 text-gray-400">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
+            <div className="relative"><input type={showPassword ? "text" : "password"} placeholder="Confirmar senha *" className="w-full p-2 rounded-xl bg-white/10 border border-white/15 text-white pr-8 text-sm" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2 text-gray-400">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
+            <label className="flex items-center gap-2 py-1"><input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="w-3 h-3" /><span className="text-[#A0A0B0] text-[10px]">Li e aceito os <span className="text-[#F4D03F]">Termos de Uso</span></span></label>
+            <button onClick={handleCreateAccount} disabled={loading} className="w-full py-2 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">{loading ? 'Criando conta...' : '✅ CRIAR CONTA'}</button>
           </div>
         </div>
       </div>
