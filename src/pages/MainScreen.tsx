@@ -79,11 +79,6 @@ export const MainScreen = () => {
     window.location.reload();
   };
 
-  const handleLoginClick = () => {
-    setShowSignUpModal(false);
-    setOnboardingCompleted(true);
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
@@ -128,7 +123,7 @@ export const MainScreen = () => {
         <NotificationModal onAllow={handleNotificationAllow} onDeny={handleNotificationDeny} />
       )}
       {!showFullUI && showSignUpModal && (
-        <SignUpModal onSuccess={handleSignUpSuccess} onLoginClick={handleLoginClick} />
+        <SignUpModal onSuccess={handleSignUpSuccess} />
       )}
     </>
   );
