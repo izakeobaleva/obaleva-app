@@ -4,8 +4,6 @@ const MapComponent: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const pulseCircleRef = useRef<any>(null);
-  const rippleCircleRef = useRef<any>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   // Obter localização do usuário
@@ -42,19 +40,22 @@ const MapComponent: React.FC = () => {
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // Criar mapa e marcador com ondas mais visíveis
+  // Criar mapa e marcador
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation) return;
 
     const map = new window.google.maps.Map(mapRef.current, {
       center: userLocation,
       zoom: 16,
-      disableDefaultUI: true,
-      zoomControl: true,
+      disableDefaultUI: true,    // Desabilita TODOS os controles padrão
+      zoomControl: false,        // Remove botões + e -
+      mapTypeControl: false,     // Remove botão de mapa/satélite
+      streetViewControl: false,  // Remove boneco do street view
+      fullscreenControl: false,  // Remove botão de tela cheia
     });
 
-    // MARCADOR GOTINHA AZUL
-    const marker = new window.google.maps.Marker({
+    // Marcador gotinha azul
+    new window.google.maps.Marker({
       position: userLocation,
       map: map,
       title: 'Sua localização',
@@ -65,12 +66,9 @@ const MapComponent: React.FC = () => {
       animation: window.google.maps.Animation.DROP,
     });
 
-    // ============================================
-    // ONDA 1: CÍRCULO PULSANTE (bate como coração)
-    // ============================================
+    // Círculo pulsante
     let pulseSize = 35;
     let growing = true;
-    
     const pulseCircle = new window.google.maps.Circle({
       map: map,
       center: userLocation,
@@ -79,29 +77,9 @@ const MapComponent: React.FC = () => {
       fillOpacity: 0.35,
       strokeColor: '#F4D03F',
       strokeOpacity: 0.9,
-      strokeWeight: 3,
-    });
-    pulseCircleRef.current = pulseCircle;
-
-    // ============================================
-    // ONDA 2: CÍRCULO DE ONDA EXPANSIVA (maior)
-    // ============================================
-    let rippleSize = 50;
-    let rippleGrowing = true;
-    
-    const rippleCircle = new window.google.maps.Circle({
-      map: map,
-      center: userLocation,
-      radius: rippleSize,
-      fillColor: '#F4D03F',
-      fillOpacity: 0.15,
-      strokeColor: '#FFD966',
-      strokeOpacity: 0.8,
       strokeWeight: 2,
     });
-    rippleCircleRef.current = rippleCircle;
 
-    // ANIMAÇÃO DO PULSO
     const pulseInterval = setInterval(() => {
       if (growing) {
         pulseSize += 2;
@@ -111,38 +89,9 @@ const MapComponent: React.FC = () => {
         if (pulseSize <= 35) growing = true;
       }
       pulseCircle.setRadius(pulseSize);
-      const opacity = 0.35 - (pulseSize / 200);
-      pulseCircle.setOptions({
-        fillOpacity: Math.max(0.15, opacity),
-        strokeOpacity: 0.7 + (pulseSize / 100),
-      });
     }, 60);
 
-    // ANIMAÇÃO DA ONDA EXPANSIVA
-    const rippleInterval = setInterval(() => {
-      if (rippleGrowing) {
-        rippleSize += 4;
-        if (rippleSize >= 100) {
-          rippleGrowing = false;
-        }
-      } else {
-        rippleSize -= 4;
-        if (rippleSize <= 50) {
-          rippleGrowing = true;
-        }
-      }
-      rippleCircle.setRadius(rippleSize);
-      const opacity = 0.2 - (rippleSize / 200);
-      rippleCircle.setOptions({
-        fillOpacity: Math.max(0.05, opacity),
-        strokeOpacity: 0.6 - (rippleSize / 200),
-      });
-    }, 80);
-
-    return () => {
-      clearInterval(pulseInterval);
-      clearInterval(rippleInterval);
-    };
+    return () => clearInterval(pulseInterval);
   }, [mapsLoaded, userLocation]);
 
   if (!apiKey) {
