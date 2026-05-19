@@ -5,41 +5,21 @@ const MapComponent: React.FC = () => {
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const pulseCircleRef = useRef<any>(null);
+  const rippleCircleRef = useRef<any>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
-  // Buscar endereço a partir das coordenadas
-  const buscarEnderecoPorCoordenadas = async (lat: number, lng: number): Promise<string> => {
-    return new Promise((resolve) => {
-      if (!window.google) {
-        resolve('Carregando mapa...');
-        return;
-      }
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-        if (status === 'OK' && results && results[0]) {
-          resolve(results[0].formatted_address);
-        } else {
-          resolve('Endereço não encontrado');
-        }
-      });
-    });
-  };
 
   // Obter localização do usuário
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
-          setUserLocation(pos);
-          // Salvar no localStorage para uso no HomeScreen
-          const endereco = await buscarEnderecoPorCoordenadas(pos.lat, pos.lng);
-          localStorage.setItem('user_address', endereco);
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
         },
         () => {
-          const defaultPos = { lat: -23.5505, lng: -46.6333 };
-          setUserLocation(defaultPos);
-          localStorage.setItem('user_address', 'São Paulo, SP');
+          setUserLocation({ lat: -23.5505, lng: -46.6333 });
         }
       );
     } else {
@@ -62,60 +42,107 @@ const MapComponent: React.FC = () => {
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // Criar mapa com marcador e círculo pulsante
+  // Criar mapa e marcador com ondas mais visíveis
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation) return;
 
     const map = new window.google.maps.Map(mapRef.current, {
       center: userLocation,
-      zoom: 15,
+      zoom: 16,
       disableDefaultUI: true,
       zoomControl: true,
     });
 
-    // Marcador gotinha padrão
-    new window.google.maps.Marker({
+    // MARCADOR GOTINHA AZUL
+    const marker = new window.google.maps.Marker({
       position: userLocation,
       map: map,
       title: 'Sua localização',
       icon: {
         url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-        scaledSize: new window.google.maps.Size(32, 32),
+        scaledSize: new window.google.maps.Size(40, 40),
       },
       animation: window.google.maps.Animation.DROP,
     });
 
-    // Círculo pulsante (onda sonora)
-    let pulseSize = 30;
+    // ============================================
+    // ONDA 1: CÍRCULO PULSANTE (bate como coração)
+    // ============================================
+    let pulseSize = 35;
     let growing = true;
-    const circle = new window.google.maps.Circle({
+    
+    const pulseCircle = new window.google.maps.Circle({
       map: map,
       center: userLocation,
       radius: pulseSize,
       fillColor: '#F4D03F',
-      fillOpacity: 0.2,
+      fillOpacity: 0.35,
       strokeColor: '#F4D03F',
+      strokeOpacity: 0.9,
+      strokeWeight: 3,
+    });
+    pulseCircleRef.current = pulseCircle;
+
+    // ============================================
+    // ONDA 2: CÍRCULO DE ONDA EXPANSIVA (maior)
+    // ============================================
+    let rippleSize = 50;
+    let rippleGrowing = true;
+    
+    const rippleCircle = new window.google.maps.Circle({
+      map: map,
+      center: userLocation,
+      radius: rippleSize,
+      fillColor: '#F4D03F',
+      fillOpacity: 0.15,
+      strokeColor: '#FFD966',
       strokeOpacity: 0.8,
       strokeWeight: 2,
     });
+    rippleCircleRef.current = rippleCircle;
 
+    // ANIMAÇÃO DO PULSO
     const pulseInterval = setInterval(() => {
       if (growing) {
-        pulseSize += 3;
-        if (pulseSize >= 60) growing = false;
+        pulseSize += 2;
+        if (pulseSize >= 55) growing = false;
       } else {
-        pulseSize -= 3;
-        if (pulseSize <= 30) growing = true;
+        pulseSize -= 2;
+        if (pulseSize <= 35) growing = true;
       }
-      circle.setRadius(pulseSize);
-      circle.setOptions({
-        fillOpacity: 0.3 - (pulseSize / 200),
-        strokeOpacity: 0.9 - (pulseSize / 100),
+      pulseCircle.setRadius(pulseSize);
+      const opacity = 0.35 - (pulseSize / 200);
+      pulseCircle.setOptions({
+        fillOpacity: Math.max(0.15, opacity),
+        strokeOpacity: 0.7 + (pulseSize / 100),
+      });
+    }, 60);
+
+    // ANIMAÇÃO DA ONDA EXPANSIVA
+    const rippleInterval = setInterval(() => {
+      if (rippleGrowing) {
+        rippleSize += 4;
+        if (rippleSize >= 100) {
+          rippleGrowing = false;
+        }
+      } else {
+        rippleSize -= 4;
+        if (rippleSize <= 50) {
+          rippleGrowing = true;
+        }
+      }
+      rippleCircle.setRadius(rippleSize);
+      const opacity = 0.2 - (rippleSize / 200);
+      rippleCircle.setOptions({
+        fillOpacity: Math.max(0.05, opacity),
+        strokeOpacity: 0.6 - (rippleSize / 200),
       });
     }, 80);
 
-    pulseCircleRef.current = circle;
-    return () => clearInterval(pulseInterval);
+    return () => {
+      clearInterval(pulseInterval);
+      clearInterval(rippleInterval);
+    };
   }, [mapsLoaded, userLocation]);
 
   if (!apiKey) {
