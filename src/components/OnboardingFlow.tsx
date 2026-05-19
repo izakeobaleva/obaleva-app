@@ -1,37 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Bell, FileText, Chrome, Car, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { MapPin, Bell, Chrome, Car, Eye, EyeOff, CheckCircle } from 'lucide-react';
 
 interface OnboardingFlowProps {
   onComplete: () => void;
+  isVisible: boolean;
 }
 
-const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
+const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, isVisible }) => {
   const [step, setStep] = useState(1);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
   const [locationPermission, setLocationPermission] = useState<'exact' | 'approximate' | 'denied' | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<boolean | null>(null);
-  const [loginLoading, setLoginLoading] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        localStorage.setItem('obaleva_onboarding', 'true');
-        onComplete();
-      }
-    };
-    checkAuth();
-  }, []);
+  if (!isVisible) return null;
 
   const requestLocationPermission = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        () => setLocationPermission('exact'),
-        () => setLocationPermission('denied')
+        () => {
+          setLocationPermission('exact');
+          setTimeout(() => setStep(2), 300);
+        },
+        () => {
+          setLocationPermission('denied');
+          setTimeout(() => setStep(2), 300);
+        }
       );
     }
+  };
+
+  const requestApproximateLocation = () => {
+    setLocationPermission('approximate');
+    setTimeout(() => setStep(2), 300);
+  };
+
+  const denyLocation = () => {
+    setLocationPermission('denied');
+    setTimeout(() => setStep(2), 300);
   };
 
   const requestNotificationPermission = async () => {
@@ -41,41 +55,91 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     } else {
       setNotificationPermission(false);
     }
+    setTimeout(() => setStep(3), 300);
   };
 
-  const handleNext = () => {
-    if (step === 1 && locationPermission) setStep(2);
-    else if (step === 2 && notificationPermission !== null) setStep(3);
-    else if (step === 3 && agreeTerms) setStep(4);
+  const denyNotification = () => {
+    setNotificationPermission(false);
+    setTimeout(() => setStep(3), 300);
+  };
+
+  const handleCreateAccount = async () => {
+    setError('');
+    
+    if (!phoneNumber || !password || !confirmPassword) {
+      setError('Preencha todos os campos');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem');
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError('A senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+    
+    if (!agreeTerms) {
+      setError('Você precisa aceitar os termos de uso');
+      return;
+    }
+    
+    const phoneDigits = phoneNumber.replace(/\D/g, '');
+    if (phoneDigits.length < 10) {
+      setError('Digite um número de telefone válido');
+      return;
+    }
+    
+    setLoading(true);
+    
+    const tempEmail = `user_${phoneDigits}@obaleva.com`;
+    
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: tempEmail,
+        password: password,
+        options: {
+          data: {
+            telefone: phoneNumber,
+            nome_completo: 'Usuário ObaLeva'
+          }
+        }
+      });
+      
+      if (signUpError && !signUpError.message.includes('already registered')) {
+        throw signUpError;
+      }
+      
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: tempEmail,
+        password: password
+      });
+      
+      if (signInError) throw signInError;
+      
+      localStorage.setItem('obaleva_phone', phoneNumber);
+      localStorage.setItem('obaleva_onboarding', 'true');
+      localStorage.setItem('location_permission_asked', 'true');
+      
+      setTimeout(() => {
+        onComplete();
+      }, 500);
+      
+    } catch (err: any) {
+      setError(err.message || 'Erro ao criar conta');
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
-    setLoginLoading(true);
+    setLoading(true);
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin }
     });
-    setLoginLoading(false);
-  };
-
-  const handlePhoneLogin = async () => {
-    if (!agreeTerms) { alert('Aceite os termos para continuar'); return; }
-    if (phoneNumber.replace(/\D/g, '').length < 10) { alert('Digite um número de telefone válido'); return; }
-
-    setLoginLoading(true);
-    const tempEmail = `user_${phoneNumber.replace(/\D/g, '')}@obaleva.com`;
-    const tempPassword = phoneNumber.replace(/\D/g, '') + '@ObaLeva';
-    
-    try {
-      const { error } = await supabase.auth.signUp({ email: tempEmail, password: tempPassword, options: { data: { telefone: phoneNumber, nome_completo: 'Usuário ObaLeva' } } });
-      if (error && !error.message.includes('already registered')) throw error;
-      
-      await supabase.auth.signInWithPassword({ email: tempEmail, password: tempPassword });
-      localStorage.setItem('obaleva_phone', phoneNumber);
-      localStorage.setItem('obaleva_onboarding', 'true');
-      setTimeout(() => window.location.reload(), 1000);
-    } catch (err) { alert('Erro ao processar login'); }
-    finally { setLoginLoading(false); }
+    setLoading(false);
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -86,89 +150,106 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
 
+  // PASSO 1: PERMISSÃO DE LOCALIZAÇÃO
   if (step === 1) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20 text-center">
-          <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4 animate-pulse">
-            <MapPin size={40} className="text-[#F4D03F]" />
-          </div>
-          <h2 className="text-white text-2xl font-bold mb-2">Permitir acesso à localização?</h2>
-          <p className="text-[#A0A0B0] text-sm mb-6">Para assegurar que o aplicativo possa enviar corridas e planejar rotas.</p>
-          <div className="space-y-3">
-            <button onClick={() => { requestLocationPermission(); setLocationPermission('exact'); setTimeout(handleNext, 500); }} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">Permitir (Exata)</button>
-            <button onClick={() => { requestLocationPermission(); setLocationPermission('approximate'); setTimeout(handleNext, 500); }} className="w-full py-3 rounded-xl border border-white/20 text-white font-bold">Permitir (Aproximada)</button>
-            <button onClick={() => { setLocationPermission('denied'); handleNext(); }} className="w-full py-3 rounded-xl text-[#A0A0B0]">Não permitir</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 2) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20 text-center">
-          <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4">
-            <Bell size={40} className="text-[#F4D03F]" />
-          </div>
-          <h2 className="text-white text-2xl font-bold mb-6">Permitir notificações?</h2>
-          <div className="space-y-3">
-            <button onClick={() => { requestNotificationPermission(); setTimeout(handleNext, 500); }} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">PERMITIR</button>
-            <button onClick={() => { setNotificationPermission(false); handleNext(); }} className="w-full py-3 rounded-xl border border-white/20 text-white font-bold">NÃO PERMITIR</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 3) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-          <div className="text-center mb-4">
-            <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4"><FileText size={40} className="text-[#F4D03F]" /></div>
-            <h2 className="text-white text-xl font-bold">Política de privacidade</h2>
-          </div>
-          <p className="text-[#A0A0B0] text-sm mb-4">Ao usar o ObaLeva, você concorda com nossos Termos de Uso e Política de Privacidade.</p>
-          <button className="text-[#F4D03F] text-sm mb-6 flex items-center gap-1">Ler mais <ArrowRight size={14} /></button>
-          <div className="space-y-3">
-            <button onClick={() => { setAgreeTerms(true); handleNext(); }} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">Concordo</button>
-            <button className="w-full py-3 rounded-xl border border-white/20 text-white font-bold">Sair</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-6">
-          <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4"><Car size={40} className="text-[#F4D03F]" /></div>
-          <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
-          <p className="text-gray-400 text-sm">Sua corrida de confiança</p>
-        </div>
-
-        <div className="bg-[#1A1528] rounded-2xl p-6 border border-[#F4D03F]/20">
-          <h2 className="text-white text-lg font-bold mb-4">Insira o número de telefone</h2>
-          <div className="bg-white/5 rounded-xl border border-white/15 mb-4">
-            <div className="flex items-center px-3 py-3">
-              <span className="text-white font-bold mr-2">+55</span>
-              <input type="tel" placeholder="123 4567 8901" className="flex-1 bg-transparent text-white outline-none" value={phoneNumber} onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))} maxLength={15} />
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center">
+        <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 animate-slide-up">
+          <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+          <div className="px-6 pb-8">
+            <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4">
+              <MapPin size={32} className="text-[#F4D03F]" />
+            </div>
+            <h2 className="text-white text-xl font-bold text-center mb-2">Permitir acesso à localização?</h2>
+            <p className="text-[#A0A0B0] text-sm text-center mb-6">Para assegurar que o aplicativo possa enviar corridas e planejar rotas.</p>
+            <div className="space-y-3">
+              <button onClick={requestLocationPermission} className="w-full py-4 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left flex justify-between items-center">
+                <div className="flex flex-col"><span className="text-base">📍 Permitir (Exata)</span><span className="text-xs text-black/70 font-normal">DURANTE O USO DO APP</span></div>
+              </button>
+              <button onClick={requestApproximateLocation} className="w-full py-4 px-4 rounded-xl border border-white/20 text-white font-bold text-left flex justify-between items-center hover:bg-white/5 transition">
+                <div className="flex flex-col"><span className="text-base">📍 Permitir (Aproximada)</span><span className="text-xs text-[#A0A0B0] font-normal">APENAS ESTA VEZ</span></div>
+              </button>
+              <button onClick={denyLocation} className="w-full py-4 px-4 rounded-xl text-[#A0A0B0] text-left hover:bg-white/5 transition">NÃO PERMITIR</button>
             </div>
           </div>
-          <label className="flex items-center gap-2 mb-6">
-            <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="w-4 h-4" />
-            <span className="text-[#A0A0B0] text-xs">Li e aceito os <span className="text-[#F4D03F]">Termos de Uso</span></span>
-          </label>
-          <button onClick={handlePhoneLogin} disabled={!agreeTerms || phoneNumber.replace(/\D/g, '').length < 10 || loginLoading} className={`w-full py-3 rounded-xl font-bold mb-4 ${agreeTerms && phoneNumber.replace(/\D/g, '').length >= 10 ? 'bg-[#F4D03F] text-black' : 'bg-white/10 text-[#A0A0B0]'}`}>
-            {loginLoading ? 'Entrando...' : 'Próximo'}
-          </button>
-          <div className="relative my-4"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-3 text-xs text-gray-400">ou</span></div></div>
-          <button onClick={handleGoogleLogin} disabled={loginLoading} className="w-full py-3 rounded-xl border border-white/20 text-white flex items-center justify-center gap-2">
-            <Chrome size={20} /> {loginLoading ? 'Aguarde...' : 'Entrar com Google'}
-          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // PASSO 2: PERMISSÃO DE NOTIFICAÇÕES
+  if (step === 2) {
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center">
+        <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+          <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+          <div className="px-6 pb-8">
+            <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4">
+              <Bell size={32} className="text-[#F4D03F]" />
+            </div>
+            <h2 className="text-white text-xl font-bold text-center mb-6">Permitir notificações?</h2>
+            <div className="space-y-3">
+              <button onClick={requestNotificationPermission} className="w-full py-4 rounded-xl bg-[#F4D03F] text-black font-bold">PERMITIR</button>
+              <button onClick={denyNotification} className="w-full py-4 rounded-xl border border-white/20 text-white font-bold">NÃO PERMITIR</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // PASSO 3: CRIAR CONTA
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center">
+      <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[85vh] overflow-y-auto">
+        <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+        <div className="px-6 pb-8">
+          <div className="text-center mb-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+              <Car size={32} className="text-[#F4D03F]" />
+            </div>
+            <h2 className="text-white text-xl font-bold">Criar sua conta</h2>
+            <p className="text-[#A0A0B0] text-sm">Comece a usar o ObaLeva</p>
+          </div>
+
+          {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
+
+          <div className="space-y-3">
+            <div className="bg-white/5 rounded-xl border border-white/15">
+              <div className="flex items-center px-3 py-3">
+                <span className="text-white font-bold mr-2">+55</span>
+                <input type="tel" placeholder="(11) 99999-9999" className="flex-1 bg-transparent text-white outline-none" value={phoneNumber} onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))} maxLength={15} />
+              </div>
+            </div>
+
+            <div className="relative">
+              <input type={showPassword ? "text" : "password"} placeholder="Senha *" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white pr-10" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+            </div>
+
+            <div className="relative">
+              <input type={showConfirmPassword ? "text" : "password"} placeholder="Confirmar senha *" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white pr-10" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-3 text-gray-400">{showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+            </div>
+
+            <label className="flex items-center gap-2 py-2">
+              <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="w-4 h-4" />
+              <span className="text-[#A0A0B0] text-xs">Li e aceito os <span className="text-[#F4D03F]">Termos de Uso</span> e a <span className="text-[#F4D03F]">Política de Privacidade</span></span>
+            </label>
+
+            <button onClick={handleCreateAccount} disabled={loading} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">
+              {loading ? 'Criando conta...' : '✅ CRIAR CONTA'}
+            </button>
+
+            <div className="relative my-3">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div>
+              <div className="relative flex justify-center"><span className="bg-[#1A1528] px-3 text-xs text-gray-400">ou</span></div>
+            </div>
+
+            <button onClick={handleGoogleLogin} disabled={loading} className="w-full py-3 rounded-xl border border-white/20 text-white flex items-center justify-center gap-2">
+              <Chrome size={20} /> Entrar com Google
+            </button>
+          </div>
         </div>
       </div>
     </div>
