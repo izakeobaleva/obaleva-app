@@ -4,6 +4,7 @@ const MapComponent: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const mapInstanceRef = useRef<any>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   // Obter localização do usuário
@@ -11,10 +12,14 @@ const MapComponent: React.FC = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const pos = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          });
+          };
+          setUserLocation(pos);
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.setCenter(pos);
+          }
         },
         () => {
           setUserLocation({ lat: -23.5505, lng: -46.6333 });
@@ -40,19 +45,24 @@ const MapComponent: React.FC = () => {
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // Criar mapa e marcador
+  // Criar mapa
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation) return;
 
     const map = new window.google.maps.Map(mapRef.current, {
       center: userLocation,
       zoom: 16,
-      disableDefaultUI: true,    // Desabilita TODOS os controles padrão
-      zoomControl: false,        // Remove botões + e -
-      mapTypeControl: false,     // Remove botão de mapa/satélite
-      streetViewControl: false,  // Remove boneco do street view
-      fullscreenControl: false,  // Remove botão de tela cheia
+      disableDefaultUI: true,
+      zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
+      streetViewControl: false,
+      mapTypeControl: false,
+      fullscreenControl: false,
     });
+
+    mapInstanceRef.current = map;
 
     // Marcador gotinha azul
     new window.google.maps.Marker({
@@ -90,6 +100,70 @@ const MapComponent: React.FC = () => {
       }
       pulseCircle.setRadius(pulseSize);
     }, 60);
+
+    // BOTÃO DE LOCALIZAÇÃO PERSONALIZADO (ALVO)
+    const locationButton = document.createElement('button');
+    locationButton.innerHTML = '📍';
+    locationButton.title = 'Centralizar na minha localização';
+    locationButton.style.cssText = `
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+    locationButton.onmouseenter = () => {
+      locationButton.style.background = 'rgba(0,0,0,0.8)';
+      locationButton.style.transform = 'scale(1.05)';
+    };
+    locationButton.onmouseleave = () => {
+      locationButton.style.background = 'rgba(0,0,0,0.6)';
+      locationButton.style.transform = 'scale(1)';
+    };
+    locationButton.onclick = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            map.setCenter(pos);
+            map.setZoom(16);
+          },
+          () => {
+            alert('Não foi possível obter sua localização.');
+          }
+        );
+      } else {
+        alert('Seu navegador não suporta geolocalização.');
+      }
+    };
+
+    // Adicionar botão de localização acima do zoom
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
+
+    // Estilizar controle de zoom (fundo transparente com blur)
+    setTimeout(() => {
+      const zoomControls = mapRef.current?.querySelectorAll('.gm-control-active, .gm-bundled-control, .gmnoprint');
+      if (zoomControls) {
+        zoomControls.forEach((el: any) => {
+          if (el.style) {
+            el.style.background = 'rgba(0,0,0,0.35) !important';
+            el.style.backdropFilter = 'blur(4px)';
+            el.style.borderRadius = '8px';
+          }
+        });
+      }
+    }, 100);
 
     return () => clearInterval(pulseInterval);
   }, [mapsLoaded, userLocation]);
