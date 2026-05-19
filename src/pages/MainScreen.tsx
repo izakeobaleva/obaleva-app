@@ -30,9 +30,9 @@ const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: s
 };
 
 // ============================================
-// TELA PRINCIPAL (MAPA + ONDE VOCÊ ESTÁ + BOTTOM NAV)
+// TELA PRINCIPAL (MAPA + ONDE VOCÊ ESTÁ)
 // ============================================
-const HomeScreen = ({ user, onLogout }: any) => {
+const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
   const [destino, setDestino] = useState('');
   const [origem, setOrigem] = useState(localStorage.getItem('user_address') || 'Rua Santo Antônio, 1095 - Centro, São Paulo - SP');
   const [modoEdicao, setModoEdicao] = useState(false);
@@ -46,18 +46,25 @@ const HomeScreen = ({ user, onLogout }: any) => {
     alert(`🚗 Corrida solicitada de: ${origem}\nPara: ${destino}`);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.reload();
+  };
+
   return (
     <div className="max-w-md mx-auto px-4 pb-24">
-      {/* Header */}
       <div className="flex justify-between items-center py-3">
         <h1 className="text-xl font-bold text-white">OBALEVA</h1>
-        <div className="flex items-center gap-3">
-          <button className="text-[#A0A0B0] text-xs">Mudar passageiro</button>
-          {onLogout && <button onClick={onLogout} className="text-red-400 text-xs">Sair</button>}
-        </div>
+        {showFullUI && (
+          <div className="flex items-center gap-3">
+            <button className="text-[#A0A0B0] text-xs">Mudar passageiro</button>
+            <button onClick={onLogout || handleLogout} className="text-red-400 text-xs font-bold">SAIR</button>
+          </div>
+        )}
       </div>
 
-      {/* Mapa */}
       <div className="relative h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg">
         <MapComponent />
         <button className="absolute bottom-3 right-3 bg-[#1A1528] rounded-full p-2 shadow-lg border border-[#F4D03F]/30">
@@ -65,7 +72,6 @@ const HomeScreen = ({ user, onLogout }: any) => {
         </button>
       </div>
 
-      {/* Campo ONDE VOCÊ ESTÁ? */}
       <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-2">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
@@ -90,45 +96,43 @@ const HomeScreen = ({ user, onLogout }: any) => {
         )}
       </div>
 
-      {/* Campo PARA ONDE VOCÊ VAI? */}
-      <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-2 h-2 rounded-full bg-red-500" />
-          <span className="text-white text-xs font-bold">PARA ONDE VOCÊ VAI?</span>
-        </div>
-        <input
-          type="text"
-          placeholder="Digite o endereço ou cidade..."
-          className="w-full bg-white/10 text-white p-2 rounded-lg outline-none"
-          value={destino}
-          onChange={(e) => setDestino(e.target.value)}
-        />
-      </div>
+      {showFullUI && (
+        <>
+          <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2 h-2 rounded-full bg-red-500" />
+              <span className="text-white text-xs font-bold">PARA ONDE VOCÊ VAI?</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Digite o endereço ou cidade..."
+              className="w-full bg-white/10 text-white p-2 rounded-lg outline-none"
+              value={destino}
+              onChange={(e) => setDestino(e.target.value)}
+            />
+          </div>
 
-      {/* Botão CHAMAR OBALEVALe */}
-      <button onClick={handleChamarObaLeva} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-base flex items-center justify-center gap-2 mb-3">
-        <Car size={18} /> CHAMAR OBALEVALe
-      </button>
+          <button onClick={handleChamarObaLeva} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-base flex items-center justify-center gap-2 mb-3">
+            <Car size={18} /> CHAMAR OBALEVALe
+          </button>
 
-      {/* Banner promoção */}
-      <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#8B5CF6]/20 rounded-xl p-3 flex justify-between items-center">
-        <div><div className="flex items-center gap-1"><span className="text-2xl">🍔</span><span className="text-white font-bold text-sm">Almoço com até 50% OFF</span></div><p className="text-[#A0A0B0] text-xs mt-1">Peça agora</p></div>
-        <ChevronRight size={20} className="text-[#F4D03F]" />
-      </div>
+          <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#8B5CF6]/20 rounded-xl p-3 flex justify-between items-center">
+            <div><div className="flex items-center gap-1"><span className="text-2xl">🍔</span><span className="text-white font-bold text-sm">Almoço com até 50% OFF</span></div><p className="text-[#A0A0B0] text-xs mt-1">Peça agora</p></div>
+            <ChevronRight size={20} className="text-[#F4D03F]" />
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
-// ============================================
-// TELA DE PERFIL (APARECE QUANDO LOGADO)
-// ============================================
 const ProfileScreen = ({ user, onLogout }: any) => (
   <div className="max-w-md mx-auto px-4 pb-28 mt-8">
     <div className="bg-[#1A1528] rounded-2xl p-6 text-center border border-[#F4D03F]/20">
       <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3"><User size={40} className="text-[#F4D03F]" /></div>
       <h2 className="text-white text-xl font-bold">{user?.email?.split('@')[0]}</h2>
       <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <button onClick={onLogout} className="mt-6 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold">SAIR DA CONTA</button>
+      <button onClick={onLogout} className="mt-6 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold">SAIR</button>
     </div>
   </div>
 );
@@ -136,9 +140,6 @@ const ProfileScreen = ({ user, onLogout }: any) => (
 const SearchScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><Search size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">🔍 Buscar</h2></div></div>);
 const ActivityScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><ClipboardList size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">📋 Atividade</h2><p className="text-gray-400 mt-2">Histórico de corridas</p></div></div>);
 
-// ============================================
-// MODAL DE LOCALIZAÇÃO (SOBREPOSTO)
-// ============================================
 const LocationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
@@ -157,9 +158,6 @@ const LocationModal = ({ onAllow, onDeny }: any) => (
   </div>
 );
 
-// ============================================
-// MODAL DE NOTIFICAÇÕES (SOBREPOSTO)
-// ============================================
 const NotificationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
@@ -183,9 +181,6 @@ const NotificationModal = ({ onAllow, onDeny }: any) => (
   </div>
 );
 
-// ============================================
-// MODAL DE CRIAÇÃO DE CONTA (SOBREPOSTO)
-// ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -261,15 +256,19 @@ export const MainScreen = () => {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
   useEffect(() => {
     const checkStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
-      const onboardingCompleted = localStorage.getItem('obaleva_onboarding') === 'true';
+      
+      const completed = localStorage.getItem('obaleva_onboarding') === 'true';
       const locationAsked = localStorage.getItem('location_permission_asked') === 'true';
       
-      if (!onboardingCompleted && !session?.user) {
+      setOnboardingCompleted(completed || !!session?.user);
+      
+      if (!completed && !session?.user) {
         if (!locationAsked) setShowLocationModal(true);
         else setShowNotificationModal(true);
       }
@@ -280,6 +279,7 @@ export const MainScreen = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
       if (session?.user) {
+        setOnboardingCompleted(true);
         localStorage.setItem('obaleva_onboarding', 'true');
         setShowLocationModal(false);
         setShowNotificationModal(false);
@@ -318,24 +318,30 @@ export const MainScreen = () => {
     window.location.reload();
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.reload();
+  };
+
   if (loading) return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
 
-  // TELA PRINCIPAL SEMPRE VISÍVEL + MODAIS SOBREPOSTOS
+  const showFullUI = onboardingCompleted || !!user;
+
   return (
     <>
-      {/* TELA PRINCIPAL - SEMPRE VISÍVEL E FUNCIONAL */}
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-        {activeTab === 'home' && <HomeScreen user={user} onLogout={user ? () => supabase.auth.signOut().then(() => window.location.reload()) : undefined} />}
-        {activeTab === 'perfil' && user && <ProfileScreen user={user} onLogout={() => supabase.auth.signOut().then(() => window.location.reload())} />}
-        {activeTab === 'buscar' && <SearchScreen />}
-        {activeTab === 'atividade' && <ActivityScreen />}
-        <BottomNav active={activeTab} onNavigate={setActiveTab} />
+        {activeTab === 'home' && <HomeScreen user={user} onLogout={user ? handleLogout : undefined} showFullUI={showFullUI} />}
+        {activeTab === 'perfil' && user && <ProfileScreen user={user} onLogout={handleLogout} />}
+        {activeTab === 'buscar' && showFullUI && <SearchScreen />}
+        {activeTab === 'atividade' && showFullUI && <ActivityScreen />}
+        {showFullUI && <BottomNav active={activeTab} onNavigate={setActiveTab} />}
       </div>
 
-      {/* MODAIS SOBREPOSTOS (APENAS NA PRIMEIRA VEZ) */}
-      {showLocationModal && <LocationModal onAllow={handleLocationAllow} onDeny={handleLocationDeny} />}
-      {showNotificationModal && <NotificationModal onAllow={handleNotificationAllow} onDeny={handleNotificationDeny} />}
-      {showSignUpModal && <SignUpModal onSuccess={handleSignUpSuccess} />}
+      {!showFullUI && showLocationModal && <LocationModal onAllow={handleLocationAllow} onDeny={handleLocationDeny} />}
+      {!showFullUI && showNotificationModal && <NotificationModal onAllow={handleNotificationAllow} onDeny={handleNotificationDeny} />}
+      {!showFullUI && showSignUpModal && <SignUpModal onSuccess={handleSignUpSuccess} />}
     </>
   );
 };
