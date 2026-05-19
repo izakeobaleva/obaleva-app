@@ -177,7 +177,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, isVisible }
     );
   }
 
-  // PASSO 2: PERMISSÃO DE NOTIFICAÇÕES
+  // PASSO 2: PERMISSÃO DE NOTIFICAÇÕES (COM JUSTIFICATIVA)
   if (step === 2) {
     return (
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center">
@@ -187,7 +187,17 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, isVisible }
             <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4">
               <Bell size={32} className="text-[#F4D03F]" />
             </div>
-            <h2 className="text-white text-xl font-bold text-center mb-6">Permitir notificações?</h2>
+            <h2 className="text-white text-xl font-bold text-center mb-2">Permitir notificações?</h2>
+            <p className="text-[#A0A0B0] text-sm text-center mb-4">
+              Para receber alertas importantes como:
+            </p>
+            <div className="bg-white/5 rounded-xl p-3 mb-6 space-y-2">
+              <p className="text-white text-sm">• 🚗 "Motorista a caminho"</p>
+              <p className="text-white text-sm">• 📍 "Estou chegando!"</p>
+              <p className="text-white text-sm">• ✅ "Corrida confirmada"</p>
+              <p className="text-white text-sm">• 💰 "Promoções e descontos"</p>
+              <p className="text-white text-sm">• ⭐ "Avalie sua corrida"</p>
+            </div>
             <div className="space-y-3">
               <button onClick={requestNotificationPermission} className="w-full py-4 rounded-xl bg-[#F4D03F] text-black font-bold">PERMITIR</button>
               <button onClick={denyNotification} className="w-full py-4 rounded-xl border border-white/20 text-white font-bold">NÃO PERMITIR</button>
