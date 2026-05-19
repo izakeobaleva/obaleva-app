@@ -4,6 +4,7 @@ const MapComponent: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const mapInstanceRef = useRef<any>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   // Obter localização do usuário
@@ -11,10 +12,14 @@ const MapComponent: React.FC = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const pos = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          });
+          };
+          setUserLocation(pos);
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.setCenter(pos);
+          }
         },
         () => {
           setUserLocation({ lat: -23.5505, lng: -46.6333 });
@@ -44,7 +49,6 @@ const MapComponent: React.FC = () => {
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation) return;
 
-    // Criar mapa com zoom transparente e sem botões extras
     const map = new window.google.maps.Map(mapRef.current, {
       center: userLocation,
       zoom: 16,
@@ -58,7 +62,8 @@ const MapComponent: React.FC = () => {
       fullscreenControl: false,
     });
 
-    // ESTILIZAR O CONTROLE DE ZOOM (fundo transparente)
+    mapInstanceRef.current = map;
+
     setTimeout(() => {
       const zoomControls = document.querySelectorAll('.gm-control-active');
       zoomControls.forEach((control) => {
@@ -69,7 +74,6 @@ const MapComponent: React.FC = () => {
       });
     }, 100);
 
-    // Marcador gotinha azul
     new window.google.maps.Marker({
       position: userLocation,
       map: map,
@@ -81,7 +85,6 @@ const MapComponent: React.FC = () => {
       animation: window.google.maps.Animation.DROP,
     });
 
-    // Círculo pulsante
     let pulseSize = 35;
     let growing = true;
     const pulseCircle = new window.google.maps.Circle({
@@ -105,6 +108,56 @@ const MapComponent: React.FC = () => {
       }
       pulseCircle.setRadius(pulseSize);
     }, 60);
+
+    // Botão de centralização de localização
+    const locationButton = document.createElement('button');
+    locationButton.innerHTML = '📍';
+    locationButton.title = 'Centralizar na minha localização';
+    locationButton.style.cssText = `
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    `;
+    locationButton.onmouseenter = () => {
+      locationButton.style.background = 'rgba(0,0,0,0.7)';
+      locationButton.style.transform = 'scale(1.05)';
+    };
+    locationButton.onmouseleave = () => {
+      locationButton.style.background = 'rgba(0,0,0,0.5)';
+      locationButton.style.transform = 'scale(1)';
+    };
+    locationButton.onclick = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            map.setCenter(pos);
+            map.setZoom(16);
+          },
+          () => {
+            alert('Não foi possível obter sua localização. Verifique as permissões.');
+          }
+        );
+      } else {
+        alert('Seu navegador não suporta geolocalização.');
+      }
+    };
+
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
 
     return () => clearInterval(pulseInterval);
   }, [mapsLoaded, userLocation]);
