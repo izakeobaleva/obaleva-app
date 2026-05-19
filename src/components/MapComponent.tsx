@@ -7,39 +7,39 @@ const MapComponent: React.FC = () => {
   const pulseCircleRef = useRef<any>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  // Buscar endereço a partir das coordenadas (geocodificação reversa)
-  const buscarEnderecoPorCoordenadas = async (lat: number, lng: number) => {
-    try {
+  // Buscar endereço a partir das coordenadas
+  const buscarEnderecoPorCoordenadas = async (lat: number, lng: number): Promise<string> => {
+    return new Promise((resolve) => {
+      if (!window.google) {
+        resolve('Carregando mapa...');
+        return;
+      }
       const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ location: { lat, lng } }, (results, status) => {
         if (status === 'OK' && results && results[0]) {
-          const endereco = results[0].formatted_address;
-          // Disparar evento customizado para o HomeScreen ouvir
-          window.dispatchEvent(new CustomEvent('enderecoAtualizado', { detail: { endereco } }));
+          resolve(results[0].formatted_address);
+        } else {
+          resolve('Endereço não encontrado');
         }
       });
-    } catch (err) {
-      console.error('Erro ao buscar endereço:', err);
-    }
+    });
   };
 
   // Obter localização do usuário
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const pos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
+        async (position) => {
+          const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
           setUserLocation(pos);
-          if (window.google && window.google.maps) {
-            buscarEnderecoPorCoordenadas(pos.lat, pos.lng);
-          }
+          // Salvar no localStorage para uso no HomeScreen
+          const endereco = await buscarEnderecoPorCoordenadas(pos.lat, pos.lng);
+          localStorage.setItem('user_address', endereco);
         },
         () => {
           const defaultPos = { lat: -23.5505, lng: -46.6333 };
           setUserLocation(defaultPos);
+          localStorage.setItem('user_address', 'São Paulo, SP');
         }
       );
     } else {
@@ -62,7 +62,7 @@ const MapComponent: React.FC = () => {
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // Criar mapa e marcador
+  // Criar mapa com marcador e círculo pulsante
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation) return;
 
@@ -73,7 +73,7 @@ const MapComponent: React.FC = () => {
       zoomControl: true,
     });
 
-    // MARCADOR GOTINHA PADRÃO DO GOOGLE MAPS
+    // Marcador gotinha padrão
     new window.google.maps.Marker({
       position: userLocation,
       map: map,
@@ -85,10 +85,9 @@ const MapComponent: React.FC = () => {
       animation: window.google.maps.Animation.DROP,
     });
 
-    // CÍRCULO PULSANTE (ONDA SONORA) - expande e contrai como coração
+    // Círculo pulsante (onda sonora)
     let pulseSize = 30;
     let growing = true;
-    
     const circle = new window.google.maps.Circle({
       map: map,
       center: userLocation,
@@ -100,7 +99,6 @@ const MapComponent: React.FC = () => {
       strokeWeight: 2,
     });
 
-    // Animação de pulso
     const pulseInterval = setInterval(() => {
       if (growing) {
         pulseSize += 3;
@@ -117,27 +115,13 @@ const MapComponent: React.FC = () => {
     }, 80);
 
     pulseCircleRef.current = circle;
-
     return () => clearInterval(pulseInterval);
-  }, [mapsLoaded, userLocation]);
-
-  // Buscar endereço quando o mapa carregar
-  useEffect(() => {
-    if (mapsLoaded && userLocation) {
-      buscarEnderecoPorCoordenadas(userLocation.lat, userLocation.lng);
-    }
   }, [mapsLoaded, userLocation]);
 
   if (!apiKey) {
     return (
-      <div className="w-full h-full bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-xl flex items-center justify-center">
-        <div className="text-center p-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-yellow-900/20 border border-yellow-500/30 flex items-center justify-center mb-3">
-            <span className="text-3xl">🗺️</span>
-          </div>
-          <p className="text-yellow-400 text-sm font-medium">Chave da API não encontrada</p>
-          <p className="text-gray-500 text-xs mt-1">Adicione VITE_GOOGLE_MAPS_API_KEY no .env</p>
-        </div>
+      <div className="w-full h-full bg-[#1A1528] rounded-xl flex items-center justify-center">
+        <div className="text-center"><p className="text-yellow-400">⚠️ Configurar API Key</p></div>
       </div>
     );
   }
