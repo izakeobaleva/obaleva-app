@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Car, Chrome, Eye, EyeOff, Home, Search, ClipboardList, User, Bell, MapPin, ChevronRight } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
+import ProfileScreen from '../components/ProfileScreen';
 
 // ============================================
 // BOTTOM NAVIGATION
@@ -134,24 +135,13 @@ const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
 };
 
 // ============================================
-// TELA DE PERFIL
+// TELAS AUXILIARES
 // ============================================
-const ProfileScreen = ({ user, onLogout }: any) => (
-  <div className="max-w-md mx-auto px-4 pb-28 mt-8">
-    <div className="bg-[#1A1528] rounded-2xl p-6 text-center border border-[#F4D03F]/20">
-      <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3"><User size={40} className="text-[#F4D03F]" /></div>
-      <h2 className="text-white text-xl font-bold">{user?.email?.split('@')[0]}</h2>
-      <p className="text-[#A0A0B0] text-sm mt-1">{user?.email}</p>
-      <button onClick={onLogout} className="mt-6 w-full py-3 rounded-xl bg-red-500/20 border border-red-500 text-red-400 font-bold">SAIR</button>
-    </div>
-  </div>
-);
-
 const SearchScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><Search size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">🔍 Buscar</h2></div></div>);
 const ActivityScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><ClipboardList size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">📋 Atividade</h2><p className="text-gray-400 mt-2">Histórico de corridas</p></div></div>);
 
 // ============================================
-// MODAL DE LOCALIZAÇÃO (ALINHADO COM O MAPA)
+// MODAIS
 // ============================================
 const LocationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center pointer-events-auto">
@@ -174,9 +164,6 @@ const LocationModal = ({ onAllow, onDeny }: any) => (
   </div>
 );
 
-// ============================================
-// MODAL DE NOTIFICAÇÕES (ALINHADO COM O MAPA)
-// ============================================
 const NotificationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center pointer-events-auto">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 mx-4">
@@ -199,9 +186,6 @@ const NotificationModal = ({ onAllow, onDeny }: any) => (
   </div>
 );
 
-// ============================================
-// MODAL DE CRIAÇÃO DE CONTA (ALINHADO COM O MAPA)
-// ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -323,6 +307,7 @@ export const MainScreen = () => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -387,6 +372,10 @@ export const MainScreen = () => {
     window.location.reload();
   };
 
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
   if (loading) return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
 
   const showFullUI = onboardingCompleted || !!user;
@@ -395,7 +384,7 @@ export const MainScreen = () => {
     <>
       <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
         {activeTab === 'home' && <HomeScreen user={user} onLogout={user ? handleLogout : undefined} showFullUI={showFullUI} />}
-        {activeTab === 'perfil' && user && <ProfileScreen user={user} onLogout={handleLogout} />}
+        {activeTab === 'perfil' && user && <ProfileScreen key={refreshKey} user={user} onLogout={handleLogout} onRefresh={handleRefresh} />}
         {activeTab === 'buscar' && showFullUI && <SearchScreen />}
         {activeTab === 'atividade' && showFullUI && <ActivityScreen />}
         {showFullUI && <BottomNav active={activeTab} onNavigate={setActiveTab} />}
