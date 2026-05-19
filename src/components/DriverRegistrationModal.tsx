@@ -162,59 +162,63 @@ const DriverRegistrationModal: React.FC<DriverRegistrationModalProps> = ({ user,
 
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-50 overflow-y-auto">
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-3">
         <div className="max-w-md w-full bg-gradient-to-br from-[#1A1528] to-[#0F0B1A] rounded-2xl border border-[#F4D03F]/20 shadow-2xl overflow-hidden">
           
-          <div className="p-3 border-b border-white/10 flex items-center justify-between">
+          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
             {step > 1 ? (
-              <button onClick={handleBack} className="text-[#A0A0B0] hover:text-white"><ArrowLeft size={22} /></button>
+              <button onClick={handleBack} className="text-[#A0A0B0] hover:text-white p-1"><ArrowLeft size={22} /></button>
             ) : (
-              <button onClick={onClose} className="text-[#A0A0B0] hover:text-white"><X size={22} /></button>
+              <button onClick={onClose} className="text-[#A0A0B0] hover:text-white p-1"><X size={22} /></button>
             )}
             <h2 className="text-white text-base font-bold">Seja Motorista</h2>
-            <div className="w-6" />
+            <div className="w-8" />
           </div>
 
           <div className="px-4 pt-3">
-            <div className="flex justify-between text-[10px] text-[#A0A0B0] mb-1.5">
-              <span className={step >= 1 ? 'text-[#F4D03F] text-xs font-bold' : 'text-[10px]'}>📋 DADOS</span>
-              <span className={step >= 2 ? 'text-[#F4D03F] text-xs font-bold' : 'text-[10px]'}>📄 CNH</span>
-              <span className={step >= 3 ? 'text-[#F4D03F] text-xs font-bold' : 'text-[10px]'}>🚗 VEÍCULO</span>
+            <div className="flex justify-between text-xs text-[#A0A0B0] mb-1.5">
+              <span className={step >= 1 ? 'text-[#F4D03F] text-sm font-bold' : 'text-xs'}>📋 DADOS</span>
+              <span className={step >= 2 ? 'text-[#F4D03F] text-sm font-bold' : 'text-xs'}>📄 CNH</span>
+              <span className={step >= 3 ? 'text-[#F4D03F] text-sm font-bold' : 'text-xs'}>🚗 VEÍCULO</span>
             </div>
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden mb-3">
+            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-3">
               <div className="h-full bg-gradient-to-r from-[#F4D03F] to-[#FFD966] rounded-full transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }} />
             </div>
           </div>
 
-          <div className="px-4 pb-3 max-h-[60vh] overflow-y-auto">
+          <div className="px-4 pb-3 max-h-[58vh] overflow-y-auto">
             
             {step === 1 && (
-              <div className="space-y-2">
-                <div className="bg-[#F4D03F]/10 rounded-lg p-1.5 text-center mb-1">
-                  <p className="text-[#F4D03F] text-sm font-bold">📝 Informações Pessoais</p>
-                  <p className="text-[#A0A0B0] text-[10px]">Complete seus dados para começar</p>
+              <div className="space-y-2.5">
+                <div className="bg-[#F4D03F]/10 rounded-lg p-2 text-center mb-1">
+                  <p className="text-[#F4D03F] text-base font-bold">📝 Informações Pessoais</p>
+                  <p className="text-[#A0A0B0] text-xs">Complete seus dados para começar</p>
                 </div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><User size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Nome completo *" className="flex-1 bg-transparent text-white outline-none text-sm" value={nome} onChange={e => handleFieldChange('nome', e.target.value)} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Mail size={16} className="text-[#F4D03F]" /><input type="email" placeholder="E-mail" className="flex-1 bg-transparent text-white outline-none text-sm" value={email} disabled /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Phone size={16} className="text-[#F4D03F]" /><input type="tel" placeholder="WhatsApp *" className="flex-1 bg-transparent text-white outline-none text-sm" value={telefone} onChange={e => handleFieldChange('telefone', formatPhone(e.target.value))} maxLength={15} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><CreditCard size={16} className="text-[#F4D03F]" /><input type="text" placeholder="CPF *" className="flex-1 bg-transparent text-white outline-none text-sm" value={cpf} onChange={e => handleFieldChange('cpf', formatCPF(e.target.value))} maxLength={14} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Calendar size={16} className="text-[#F4D03F]" /><input type="date" placeholder="Data de nascimento *" className="flex-1 bg-transparent text-white outline-none text-sm" value={dataNascimento} onChange={e => handleFieldChange('dataNascimento', e.target.value)} /></div></div>
-                <div className="bg-[#F4D03F]/10 rounded-lg p-1.5 text-center mt-1"><p className="text-[#F4D03F] text-sm font-bold">🏠 Endereço</p></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><MapPin size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Rua, Avenida *" className="flex-1 bg-transparent text-white outline-none text-sm" value={endereco} onChange={e => handleFieldChange('endereco', e.target.value)} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><MapPin size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Bairro *" className="flex-1 bg-transparent text-white outline-none text-sm" value={bairro} onChange={e => handleFieldChange('bairro', e.target.value)} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><MapPin size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Cidade *" className="flex-1 bg-transparent text-white outline-none text-sm" value={cidade} onChange={e => handleFieldChange('cidade', e.target.value)} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><User size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Nome completo *" className="flex-1 bg-transparent text-white outline-none text-base" value={nome} onChange={e => handleFieldChange('nome', e.target.value)} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Mail size={18} className="text-[#F4D03F] shrink-0" /><input type="email" placeholder="E-mail" className="flex-1 bg-transparent text-white outline-none text-base" value={email} disabled /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Phone size={18} className="text-[#F4D03F] shrink-0" /><input type="tel" placeholder="WhatsApp *" className="flex-1 bg-transparent text-white outline-none text-base" value={telefone} onChange={e => handleFieldChange('telefone', formatPhone(e.target.value))} maxLength={15} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><CreditCard size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="CPF *" className="flex-1 bg-transparent text-white outline-none text-base" value={cpf} onChange={e => handleFieldChange('cpf', formatCPF(e.target.value))} maxLength={14} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Calendar size={18} className="text-[#F4D03F] shrink-0" /><input type="date" placeholder="Data de nascimento *" className="flex-1 bg-transparent text-white outline-none text-base" value={dataNascimento} onChange={e => handleFieldChange('dataNascimento', e.target.value)} /></div></div>
+                <div className="bg-[#F4D03F]/10 rounded-lg p-2 text-center mt-1"><p className="text-[#F4D03F] text-base font-bold">🏠 Endereço</p></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><MapPin size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Rua, Avenida *" className="flex-1 bg-transparent text-white outline-none text-base" value={endereco} onChange={e => handleFieldChange('endereco', e.target.value)} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><MapPin size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Bairro *" className="flex-1 bg-transparent text-white outline-none text-base" value={bairro} onChange={e => handleFieldChange('bairro', e.target.value)} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><MapPin size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Cidade *" className="flex-1 bg-transparent text-white outline-none text-base" value={cidade} onChange={e => handleFieldChange('cidade', e.target.value)} /></div></div>
               </div>
             )}
 
             {step === 2 && (
-              <div className="space-y-2">
-                <div className="bg-[#F4D03F]/10 rounded-lg p-1.5 text-center mb-1"><p className="text-[#F4D03F] text-sm font-bold">📄 Carteira Nacional de Habilitação (CNH)</p><p className="text-[#A0A0B0] text-[10px]">Preencha os dados da sua CNH</p></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Key size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Número do Registro da CNH *" className="flex-1 bg-transparent text-white outline-none text-sm" value={cnhNumero} onChange={e => handleFieldChange('cnhNumero', e.target.value)} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Shield size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Categoria * (A, B, C, D, E)" className="flex-1 bg-transparent text-white outline-none text-sm" value={cnhCategoria} onChange={e => handleFieldChange('cnhCategoria', e.target.value.toUpperCase())} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Calendar size={16} className="text-[#F4D03F]" /><input type="date" placeholder="Data de validade *" className="flex-1 bg-transparent text-white outline-none text-sm" value={cnhValidade} onChange={e => handleFieldChange('cnhValidade', e.target.value)} /></div></div>
-                <div className="mt-2"><label className="text-[#F4D03F] text-xs font-bold mb-0.5 block">Foto da CNH (frente e verso) *</label>
-                  <div className="mt-1 bg-white/5 rounded-lg border border-dashed border-[#F4D03F]/30 p-2 text-center cursor-pointer hover:bg-white/10 transition" onClick={() => cnhRef.current?.click()}>
-                    {cnhPreview ? <img src={cnhPreview} className="w-full h-24 object-cover rounded-lg" /> : <><Upload size={20} className="text-[#F4D03F] mx-auto mb-1" /><p className="text-[#A0A0B0] text-[10px]">Clique para enviar a foto da CNH</p></>}
+              <div className="space-y-2.5">
+                <div className="bg-[#F4D03F]/10 rounded-lg p-2 text-center mb-1">
+                  <p className="text-[#F4D03F] text-base font-bold">📄 Carteira Nacional de Habilitação (CNH)</p>
+                  <p className="text-[#A0A0B0] text-xs">Preencha os dados da sua CNH</p>
+                </div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Key size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Número do Registro da CNH *" className="flex-1 bg-transparent text-white outline-none text-base" value={cnhNumero} onChange={e => handleFieldChange('cnhNumero', e.target.value)} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Shield size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Categoria * (A, B, C, D, E)" className="flex-1 bg-transparent text-white outline-none text-base" value={cnhCategoria} onChange={e => handleFieldChange('cnhCategoria', e.target.value.toUpperCase())} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Calendar size={18} className="text-[#F4D03F] shrink-0" /><input type="date" placeholder="Data de validade *" className="flex-1 bg-transparent text-white outline-none text-base" value={cnhValidade} onChange={e => handleFieldChange('cnhValidade', e.target.value)} /></div></div>
+                <div className="mt-2">
+                  <label className="text-[#F4D03F] text-sm font-bold mb-1 block">Foto da CNH (frente e verso) *</label>
+                  <div className="bg-white/5 rounded-xl border border-dashed border-[#F4D03F]/30 p-3 text-center cursor-pointer hover:bg-white/10 transition" onClick={() => cnhRef.current?.click()}>
+                    {cnhPreview ? <img src={cnhPreview} className="w-full h-28 object-cover rounded-lg" /> : <><Upload size={24} className="text-[#F4D03F] mx-auto mb-1" /><p className="text-[#A0A0B0] text-sm">Clique para enviar a foto da CNH</p><p className="text-[#A0A0B0] text-xs">Envie uma foto nítida (frente e verso)</p></>}
                   </div>
                   <input ref={cnhRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'cnh')} />
                 </div>
@@ -222,15 +226,19 @@ const DriverRegistrationModal: React.FC<DriverRegistrationModalProps> = ({ user,
             )}
 
             {step === 3 && (
-              <div className="space-y-2">
-                <div className="bg-[#F4D03F]/10 rounded-lg p-1.5 text-center mb-1"><p className="text-[#F4D03F] text-sm font-bold">🚗 Dados do Veículo</p><p className="text-[#A0A0B0] text-[10px]">Informe os dados do seu veículo</p></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Car size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Placa * (ABC-1234)" className="flex-1 bg-transparent text-white outline-none text-sm" value={placa} onChange={e => handleFieldChange('placa', e.target.value.toUpperCase())} maxLength={8} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Car size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Modelo *" className="flex-1 bg-transparent text-white outline-none text-sm" value={modelo} onChange={e => handleFieldChange('modelo', e.target.value)} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Calendar size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Ano *" className="flex-1 bg-transparent text-white outline-none text-sm" value={ano} onChange={e => handleFieldChange('ano', e.target.value)} maxLength={4} /></div></div>
-                <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-2"><Car size={16} className="text-[#F4D03F]" /><input type="text" placeholder="Cor *" className="flex-1 bg-transparent text-white outline-none text-sm" value={cor} onChange={e => handleFieldChange('cor', e.target.value)} /></div></div>
-                <div className="mt-2"><label className="text-[#F4D03F] text-xs font-bold mb-0.5 block">Foto do veículo *</label>
-                  <div className="mt-1 bg-white/5 rounded-lg border border-dashed border-[#F4D03F]/30 p-2 text-center cursor-pointer hover:bg-white/10 transition" onClick={() => fotoVeiculoRef.current?.click()}>
-                    {fotoVeiculoPreview ? <img src={fotoVeiculoPreview} className="w-full h-24 object-cover rounded-lg" /> : <><Upload size={20} className="text-[#F4D03F] mx-auto mb-1" /><p className="text-[#A0A0B0] text-[10px]">Adicionar foto do veículo</p></>}
+              <div className="space-y-2.5">
+                <div className="bg-[#F4D03F]/10 rounded-lg p-2 text-center mb-1">
+                  <p className="text-[#F4D03F] text-base font-bold">🚗 Dados do Veículo</p>
+                  <p className="text-[#A0A0B0] text-xs">Informe os dados do seu veículo</p>
+                </div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Car size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Placa * (ABC-1234)" className="flex-1 bg-transparent text-white outline-none text-base" value={placa} onChange={e => handleFieldChange('placa', e.target.value.toUpperCase())} maxLength={8} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Car size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Modelo *" className="flex-1 bg-transparent text-white outline-none text-base" value={modelo} onChange={e => handleFieldChange('modelo', e.target.value)} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Calendar size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Ano *" className="flex-1 bg-transparent text-white outline-none text-base" value={ano} onChange={e => handleFieldChange('ano', e.target.value)} maxLength={4} /></div></div>
+                <div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-3 px-3 py-2.5"><Car size={18} className="text-[#F4D03F] shrink-0" /><input type="text" placeholder="Cor *" className="flex-1 bg-transparent text-white outline-none text-base" value={cor} onChange={e => handleFieldChange('cor', e.target.value)} /></div></div>
+                <div className="mt-2">
+                  <label className="text-[#F4D03F] text-sm font-bold mb-1 block">Foto do veículo *</label>
+                  <div className="bg-white/5 rounded-xl border border-dashed border-[#F4D03F]/30 p-3 text-center cursor-pointer hover:bg-white/10 transition" onClick={() => fotoVeiculoRef.current?.click()}>
+                    {fotoVeiculoPreview ? <img src={fotoVeiculoPreview} className="w-full h-28 object-cover rounded-lg" /> : <><Upload size={24} className="text-[#F4D03F] mx-auto mb-1" /><p className="text-[#A0A0B0] text-sm">Adicionar foto do veículo</p><p className="text-[#A0A0B0] text-xs">Envie uma foto do veículo (dianteira, lateral ou traseira)</p></>}
                   </div>
                   <input ref={fotoVeiculoRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'veiculo')} />
                 </div>
@@ -240,9 +248,9 @@ const DriverRegistrationModal: React.FC<DriverRegistrationModalProps> = ({ user,
 
           <div className="p-4 border-t border-white/10 flex gap-2">
             {step > 1 && (
-              <button onClick={handleBack} className="flex-1 py-2 rounded-xl border border-white/20 text-white font-bold text-sm">Voltar</button>
+              <button onClick={handleBack} className="flex-1 py-2.5 rounded-xl border border-white/20 text-white font-bold text-sm">Voltar</button>
             )}
-            <button onClick={handleNext} disabled={loading} className="flex-1 py-2 rounded-xl font-bold text-sm bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black">
+            <button onClick={handleNext} disabled={loading} className="flex-1 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black">
               {loading ? 'Enviando...' : (step === 3 ? '✅ Enviar solicitação' : 'Continuar →')}
             </button>
           </div>
