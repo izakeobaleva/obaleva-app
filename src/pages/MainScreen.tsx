@@ -4,7 +4,7 @@ import {
   Car, Chrome, Eye, EyeOff, Home, Search, ClipboardList, User, 
   Bell, Settings, Gift, MessageCircle, CreditCard, Tag, DollarSign, 
   HelpCircle, Shield, Camera, Users, Truck, ChevronRight, Key, 
-  ArrowLeft, LogOut, Star
+  ArrowLeft, LogOut, Star, MapPin
 } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
 import DriverRegistration from '../components/DriverRegistration';
@@ -47,68 +47,134 @@ const fazerLogout = async () => {
 };
 
 // ============================================
-// TELA PRINCIPAL (PEDIR CORRIDA)
+// TELA PRINCIPAL (HOME) - ESTILO 99
 // ============================================
 const HomeScreen = ({ user }: any) => {
-  const [origem] = useState('R. Manoel Dutra');
   const [destino, setDestino] = useState('');
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [sugestoes] = useState([
+    { nome: "Casa", endereco: "Rua Santo Antônio, 1095" },
+    { nome: "Trabalho", endereco: "Av. Paulista, 1000" },
+    { nome: "Shopping Metrô Itaquera", endereco: "Avenida José Pinheiro Borges - Itaquera", distancia: "20.4km" },
+    { nome: "Estação de Metrô Capão Redondo", endereco: "Avenida Carlos Caldeira Filho", distancia: "19.4km" },
+    { nome: "Terminal Rodoviário do Tietê", endereco: "Vila Guilherme", distancia: "7.9km" },
+  ]);
+
+  const handleChamarObaLeva = () => {
+    if (!destino) {
+      alert('Digite um destino primeiro!');
+      return;
+    }
+    alert(`🚗 Corrida solicitada para: ${destino}`);
+  };
 
   return (
     <div className="max-w-md mx-auto px-4 pb-24">
+      {/* Header */}
       <div className="flex justify-between items-center py-3">
         <h1 className="text-xl font-bold text-white">OBALEVA</h1>
-        <div className="flex items-center gap-4">
-          <Bell size={20} className="text-[#A0A0B0]" />
-          <MessageCircle size={20} className="text-[#A0A0B0]" />
+        <div className="flex items-center gap-3">
+          <button className="text-[#A0A0B0] text-xs">Mudar passageiro</button>
           <button onClick={fazerLogout} className="text-red-400 text-xs">Sair</button>
         </div>
       </div>
-      
-      {/* MAPA */}
-      <div className="h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg border border-white/10">
+
+      {/* Mapa */}
+      <div className="relative h-[320px] rounded-xl overflow-hidden mb-3 shadow-lg">
         <MapComponent />
+        {/* Botão de localização atual */}
+        <button className="absolute bottom-3 right-3 bg-[#1A1528] rounded-full p-2 shadow-lg border border-[#F4D03F]/30">
+          <MapPin size={20} className="text-[#F4D03F]" />
+        </button>
       </div>
-      
+
+      {/* Campo de endereço - estilo 99 */}
       <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3">
         <div className="flex items-center gap-3 pb-2 border-b border-white/10">
           <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span className="text-white text-sm flex-1">{origem}</span>
+          <span className="text-white text-sm flex-1">Rua Santo Antônio, 1095</span>
         </div>
-        <div className="flex items-center gap-3 pt-2">
+        <button 
+          onClick={() => setShowSearchModal(true)}
+          className="flex items-center gap-3 pt-2 w-full text-left"
+        >
           <div className="w-2 h-2 rounded-full bg-red-500" />
-          <input
-            type="text"
-            placeholder="Para onde vamos?"
-            className="flex-1 bg-transparent text-white outline-none text-sm"
-            value={destino}
-            onChange={(e) => setDestino(e.target.value)}
-          />
-        </div>
+          <span className="text-[#A0A0B0] text-sm flex-1">Para onde vamos?</span>
+        </button>
       </div>
+
+      {/* Modal de busca de destino */}
+      {showSearchModal && (
+        <div className="fixed inset-0 bg-black/95 z-50 flex flex-col">
+          <div className="bg-[#1A1528] p-4 flex items-center gap-3 border-b border-white/10">
+            <button onClick={() => setShowSearchModal(false)} className="text-white text-xl">←</button>
+            <input
+              type="text"
+              placeholder="Para onde você vai?"
+              className="flex-1 bg-transparent text-white outline-none text-lg"
+              autoFocus
+              value={destino}
+              onChange={(e) => setDestino(e.target.value)}
+            />
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="mb-4">
+              <p className="text-[#A0A0B0] text-xs mb-2">SUGESTÕES</p>
+              {sugestoes.map((sug, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setDestino(sug.nome);
+                    setShowSearchModal(false);
+                  }}
+                  className="w-full text-left py-3 border-b border-white/10 last:border-0"
+                >
+                  <p className="text-white font-medium">{sug.nome}</p>
+                  <p className="text-[#A0A0B0] text-xs">{sug.endereco}</p>
+                  {sug.distancia && <p className="text-[#F4D03F] text-xs">{sug.distancia}</p>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Banner de promoção */}
       <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#8B5CF6]/20 rounded-xl p-3 mb-3 flex justify-between items-center">
         <div>
-          <div className="flex items-center gap-1"><span className="text-2xl">🍔</span><span className="text-white font-bold text-sm">Almoço com até 50% OFF</span></div>
+          <div className="flex items-center gap-1">
+            <span className="text-2xl">🍔</span>
+            <span className="text-white font-bold text-sm">Almoço com até 50% OFF</span>
+          </div>
           <p className="text-[#A0A0B0] text-xs mt-1">Peça agora</p>
         </div>
         <ChevronRight size={20} className="text-[#F4D03F]" />
       </div>
+
+      {/* Lojas recomendadas */}
       <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/15 mb-3">
         <div className="flex justify-between items-center mb-2">
           <span className="text-white font-bold text-sm">🏪 Lojas recomendadas na região</span>
           <span className="text-[#F4D03F] text-xs">Mais ›</span>
         </div>
         <div className="space-y-2">
-          <div className="flex items-center gap-2"><div className="flex items-center gap-1"><Star size={14} className="text-[#F4D03F] fill-[#F4D03F]" /><span className="text-white text-sm font-bold">4.6</span></div><span className="text-[#A0A0B0] text-xs">Itens com até 95% ...</span></div>
-          <div className="flex items-center gap-2"><div className="flex items-center gap-1"><Star size={14} className="text-[#F4D03F] fill-[#F4D03F]" /><span className="text-white text-sm font-bold">3.8</span></div><span className="text-[#A0A0B0] text-xs">Itens com até 80% ...</span></div>
-          <div className="flex items-center gap-2"><div className="flex items-center gap-1"><Star size={14} className="text-[#F4D03F] fill-[#F4D03F]" /><span className="text-white text-sm font-bold">3</span></div><span className="text-[#A0A0B0] text-xs">Itens</span></div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <Star size={14} className="text-[#F4D03F] fill-[#F4D03F]" />
+              <span className="text-white text-sm font-bold">4.6</span>
+            </div>
+            <span className="text-[#A0A0B0] text-xs">Itens com até 95% ...</span>
+          </div>
         </div>
       </div>
-      <div className="flex justify-around py-2 bg-[#1A1528]/50 rounded-xl">
-        <div className="text-center"><div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center mx-auto mb-1"><span className="text-lg">📍</span></div><span className="text-[10px] text-[#A0A0B0]">Poi*</span><span className="text-[8px] text-[#A0A0B0] block">10-25</span></div>
-        <div className="text-center"><div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center mx-auto mb-1"><span className="text-lg">🍔</span></div><span className="text-[10px] text-[#A0A0B0]">Food</span></div>
-        <div className="text-center"><div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center mx-auto mb-1"><span className="text-lg">🛵</span></div><span className="text-[10px] text-[#A0A0B0]">Entrega</span></div>
-        <div className="text-center"><div className="w-12 h-12 rounded-full bg-[#F4D03F]/20 flex items-center justify-center mx-auto mb-1"><span className="text-lg">💳</span></div><span className="text-[10px] text-[#A0A0B0]">Pay</span></div>
-      </div>
+
+      {/* BOTÃO CHAMAR OBALEVALe */}
+      <button
+        onClick={handleChamarObaLeva}
+        className="w-full py-4 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-lg flex items-center justify-center gap-2 mt-2"
+      >
+        <Car size={20} /> CHAMAR OBALEVALe
+      </button>
     </div>
   );
 };
