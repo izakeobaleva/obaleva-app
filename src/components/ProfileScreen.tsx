@@ -5,6 +5,7 @@ import {
   LogOut, Edit, CreditCard, History, Bell, Heart, ChevronRight,
   Camera, Save, X, MapPin, Award, Shield, HelpCircle, MessageCircle
 } from 'lucide-react';
+import DriverRegistrationModal from './DriverRegistrationModal';
 
 interface ProfileScreenProps {
   user: any;
@@ -27,6 +28,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, onLogout, onRefresh
     avaliacao_media: 4.8,
     tempo_medio: 0,
   });
+  const [showSejaMotorista, setShowSejaMotorista] = useState(false);
 
   useEffect(() => {
     carregarPerfil();
@@ -265,12 +267,29 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, onLogout, onRefresh
             <div className="flex items-center gap-2"><MessageCircle size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Fale conosco</span></div>
             <ChevronRight size={14} className="text-gray-500" />
           </button>
+          {profile.tipo !== 'motorista' && (
+            <button onClick={() => setShowSejaMotorista(true)} className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
+              <div className="flex items-center gap-2"><Truck size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Seja Motorista</span></div>
+              <ChevronRight size={14} className="text-gray-500" />
+            </button>
+          )}
           <button onClick={onLogout} className="w-full flex items-center justify-between p-3 hover:bg-red-500/10 transition">
             <div className="flex items-center gap-2"><LogOut size={16} className="text-red-400" /><span className="text-red-400 text-sm">Sair da conta</span></div>
             <ChevronRight size={14} className="text-red-400" />
           </button>
         </div>
       </div>
+
+      {showSejaMotorista && (
+        <DriverRegistrationModal
+          user={user}
+          onClose={() => setShowSejaMotorista(false)}
+          onSuccess={() => {
+            setShowSejaMotorista(false);
+            carregarPerfil();
+          }}
+        />
+      )}
     </div>
   );
 };
