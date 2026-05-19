@@ -3,21 +3,42 @@ import React, { useEffect, useRef, useState } from 'react';
 const MapComponent: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
+  // Obter localização do usuário
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('Erro ao obter localização:', error);
+          // Localização padrão (São Paulo)
+          setUserLocation({ lat: -23.5505, lng: -46.6333 });
+        }
+      );
+    } else {
+      setUserLocation({ lat: -23.5505, lng: -46.6333 });
+    }
+  }, []);
+
+  // Carregar Google Maps
   useEffect(() => {
     if (!apiKey) {
       console.error('❌ API Key não encontrada');
       return;
     }
 
-    // Verificar se já está carregado
     if (window.google && window.google.maps) {
       setMapsLoaded(true);
       return;
     }
 
-    // Carregar o script com Places API e callback
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
     script.async = true;
@@ -34,17 +55,43 @@ const MapComponent: React.FC = () => {
     document.head.appendChild(script);
   }, [apiKey]);
 
+  // Criar mapa e adicionar marcador
   useEffect(() => {
-    if (!mapsLoaded || !mapRef.current) return;
+    if (!mapsLoaded || !mapRef.current || !userLocation) return;
 
-    // Criar o mapa
-    new window.google.maps.Map(mapRef.current, {
-      center: { lat: -23.5505, lng: -46.6333 },
-      zoom: 14,
+    // Criar o mapa centralizado na localização do usuário
+    const map = new window.google.maps.Map(mapRef.current, {
+      center: userLocation,
+      zoom: 15,
       disableDefaultUI: true,
       zoomControl: true,
     });
-  }, [mapsLoaded]);
+
+    // Adicionar marcador (pontinho azul) da localização atual
+    new window.google.maps.Marker({
+      position: userLocation,
+      map: map,
+      title: 'Sua localização',
+      icon: {
+        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        scaledSize: new window.google.maps.Size(32, 32),
+      },
+      animation: window.google.maps.Animation.DROP,
+    });
+
+    // Opcional: adicionar círculo de precisão
+    new window.google.maps.Circle({
+      map: map,
+      center: userLocation,
+      radius: 50,
+      fillColor: '#4285F4',
+      fillOpacity: 0.1,
+      strokeColor: '#4285F4',
+      strokeOpacity: 0.5,
+      strokeWeight: 1,
+    });
+
+  }, [mapsLoaded, userLocation]);
 
   if (!apiKey) {
     return (
