@@ -30,18 +30,39 @@ const MapComponent: React.FC = () => {
     }
   }, []);
 
-  // Carregar Google Maps
+  // Carregar Google Maps com a biblioteca PLACES
   useEffect(() => {
     if (!apiKey) return;
-    if (window.google && window.google.maps) {
+    
+    if (window.google && window.google.maps && window.google.maps.places) {
       setMapsLoaded(true);
       return;
     }
+
+    if (document.querySelector('#google-maps-script')) {
+      const checkInterval = setInterval(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+          clearInterval(checkInterval);
+          setMapsLoaded(true);
+        }
+      }, 100);
+      return () => clearInterval(checkInterval);
+    }
+
     const script = document.createElement('script');
+    script.id = 'google-maps-script';
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
     script.async = true;
     script.defer = true;
-    (window as any).initMap = () => setMapsLoaded(true);
+    
+    (window as any).initMap = () => {
+      setMapsLoaded(true);
+    };
+    
+    script.onerror = () => {
+      console.error('Erro ao carregar Google Maps');
+    };
+    
     document.head.appendChild(script);
   }, [apiKey]);
 
@@ -109,7 +130,6 @@ const MapComponent: React.FC = () => {
       pulseCircle.setRadius(pulseSize);
     }, 60);
 
-    // Botão de centralização de localização
     const locationButton = document.createElement('button');
     locationButton.innerHTML = '📍';
     locationButton.title = 'Centralizar na minha localização';
@@ -129,34 +149,19 @@ const MapComponent: React.FC = () => {
       justify-content: center;
       margin-bottom: 8px;
     `;
-    locationButton.onmouseenter = () => {
-      locationButton.style.background = 'rgba(0,0,0,0.7)';
-      locationButton.style.transform = 'scale(1.05)';
-    };
-    locationButton.onmouseleave = () => {
-      locationButton.style.background = 'rgba(0,0,0,0.5)';
-      locationButton.style.transform = 'scale(1)';
-    };
     locationButton.onclick = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            const pos = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            map.setCenter(pos);
+            map.setCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
             map.setZoom(16);
           },
-          () => {
-            alert('Não foi possível obter sua localização. Verifique as permissões.');
-          }
+          () => alert('Não foi possível obter sua localização.')
         );
       } else {
         alert('Seu navegador não suporta geolocalização.');
       }
     };
-
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
 
     return () => clearInterval(pulseInterval);

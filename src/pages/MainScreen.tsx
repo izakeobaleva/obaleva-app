@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Car, Chrome, Eye, EyeOff, Home, Search, ClipboardList, User, Bell, MapPin, ChevronRight } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
@@ -37,6 +37,45 @@ const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
   const [origem, setOrigem] = useState(localStorage.getItem('user_address') || 'Rua Santo Antônio, 1095 - Centro, São Paulo - SP');
   const [modoEdicao, setModoEdicao] = useState(false);
   const [enderecoEditado, setEnderecoEditado] = useState(origem);
+  
+  const origemInputRef = useRef<HTMLInputElement>(null);
+  const destinoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const checkGoogleMaps = setInterval(() => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        clearInterval(checkGoogleMaps);
+        
+        if (origemInputRef.current) {
+          const origemAuto = new window.google.maps.places.Autocomplete(origemInputRef.current, {
+            fields: ['formatted_address', 'geometry', 'name'],
+          });
+          origemAuto.addListener('place_changed', () => {
+            const place = origemAuto.getPlace();
+            if (place.geometry) {
+              setOrigem(place.formatted_address || place.name);
+              setEnderecoEditado(place.formatted_address || place.name);
+              localStorage.setItem('user_address', place.formatted_address || place.name);
+            }
+          });
+        }
+        
+        if (destinoInputRef.current) {
+          const destinoAuto = new window.google.maps.places.Autocomplete(destinoInputRef.current, {
+            fields: ['formatted_address', 'geometry', 'name'],
+          });
+          destinoAuto.addListener('place_changed', () => {
+            const place = destinoAuto.getPlace();
+            if (place.geometry) {
+              setDestino(place.formatted_address || place.name);
+            }
+          });
+        }
+      }
+    }, 100);
+
+    return () => clearInterval(checkGoogleMaps);
+  }, []);
 
   const handleChamarObaLeva = () => {
     if (!destino) {
@@ -70,14 +109,18 @@ const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
             {modoEdicao && <button onClick={() => { setOrigem(enderecoEditado); setModoEdicao(false); }} className="text-green-400 text-xs hover:underline">✅ Confirmar</button>}
           </div>
         </div>
-        {modoEdicao ? <input type="text" className="w-full bg-white/10 text-white p-2 rounded-lg outline-none" value={enderecoEditado} onChange={(e) => setEnderecoEditado(e.target.value)} /> : <div className="flex items-center gap-2"><span className="text-white text-sm flex-1">{origem}</span></div>}
+        {modoEdicao ? (
+          <input type="text" className="w-full bg-white/10 text-white p-2 rounded-lg outline-none" value={enderecoEditado} onChange={(e) => setEnderecoEditado(e.target.value)} />
+        ) : (
+          <input ref={origemInputRef} type="text" className="w-full bg-white/10 text-white p-2 rounded-lg outline-none" value={origem} onChange={(e) => setOrigem(e.target.value)} />
+        )}
       </div>
 
       {showFullUI && (
         <>
           <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3">
             <div className="flex items-center gap-2 mb-1"><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-white text-xs font-bold">PARA ONDE VOCÊ VAI?</span></div>
-            <input type="text" placeholder="Digite o endereço ou cidade..." className="w-full bg-white/10 text-white p-2 rounded-lg outline-none" value={destino} onChange={(e) => setDestino(e.target.value)} />
+            <input ref={destinoInputRef} type="text" placeholder="Digite o endereço ou cidade..." className="w-full bg-white/10 text-white p-2 rounded-lg outline-none" value={destino} onChange={(e) => setDestino(e.target.value)} />
           </div>
           <button onClick={handleChamarObaLeva} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-base flex items-center justify-center gap-2 mb-3"><Car size={18} /> Chamar ObaLeva</button>
           <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#8B5CF6]/20 rounded-xl p-3 flex justify-between items-center">
