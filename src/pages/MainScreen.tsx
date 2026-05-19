@@ -5,84 +5,29 @@ import { HomeScreen } from '../components/screens/HomeScreen';
 import { ProfileScreen } from '../components/screens/ProfileScreen';
 import { SearchScreen } from '../components/screens/SearchScreen';
 import { ActivityScreen } from '../components/screens/ActivityScreen';
-import { LocationModal } from '../components/modals/LocationModal';
-import { NotificationModal } from '../components/modals/NotificationModal';
-import { SignUpModal } from '../components/modals/SignUpModal';
 
 export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
-  const [showLocationModal, setShowLocationModal] = useState(false);
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [showSignUpModal, setShowSignUpModal] = useState(false);
-  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
   useEffect(() => {
-    const checkStatus = async () => {
+    const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
-      
-      const completed = localStorage.getItem('obaleva_onboarding') === 'true';
-      const locationAsked = localStorage.getItem('location_permission_asked') === 'true';
-      
-      setOnboardingCompleted(completed || !!session?.user);
-      
-      if (!completed && !session?.user) {
-        if (!locationAsked) setShowLocationModal(true);
-        else setShowNotificationModal(true);
-      }
       setLoading(false);
     };
-    checkStatus();
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
-      if (session?.user) {
-        setOnboardingCompleted(true);
-        localStorage.setItem('obaleva_onboarding', 'true');
-        setShowLocationModal(false);
-        setShowNotificationModal(false);
-        setShowSignUpModal(false);
-      }
     });
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleLocationAllow = (type: string) => {
-    localStorage.setItem('location_permission_asked', 'true');
-    if (navigator.geolocation) navigator.geolocation.getCurrentPosition(() => {}, () => {});
-    setShowLocationModal(false);
-    setShowNotificationModal(true);
-  };
-
-  const handleLocationDeny = () => {
-    localStorage.setItem('location_permission_asked', 'true');
-    setShowLocationModal(false);
-    setShowNotificationModal(true);
-  };
-
-  const handleNotificationAllow = () => {
-    if ('Notification' in window) Notification.requestPermission();
-    setShowNotificationModal(false);
-    setShowSignUpModal(true);
-  };
-
-  const handleNotificationDeny = () => {
-    setShowNotificationModal(false);
-    setShowSignUpModal(true);
-  };
-
-  const handleSignUpSuccess = () => {
-    setShowSignUpModal(false);
-    window.location.reload();
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.reload();
+    setUser(null);
   };
 
   if (loading) return (
@@ -91,7 +36,7 @@ export const MainScreen = () => {
     </div>
   );
 
-  const showFullUI = onboardingCompleted || !!user;
+  const showFullUI = !!user;
 
   const renderTab = () => {
     switch (activeTab) {
@@ -114,16 +59,6 @@ export const MainScreen = () => {
         {renderTab()}
         {showFullUI && <BottomNav active={activeTab} onNavigate={setActiveTab} />}
       </div>
-
-      {!showFullUI && showLocationModal && (
-        <LocationModal onAllow={handleLocationAllow} onDeny={handleLocationDeny} />
-      )}
-      {!showFullUI && showNotificationModal && (
-        <NotificationModal onAllow={handleNotificationAllow} onDeny={handleNotificationDeny} />
-      )}
-      {!showFullUI && showSignUpModal && (
-        <SignUpModal onSuccess={handleSignUpSuccess} />
-      )}
     </>
   );
 };
