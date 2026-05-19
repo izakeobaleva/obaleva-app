@@ -1,168 +1,33 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 const MapComponent: React.FC = () => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [mapError, setMapError] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  
+  // URL do mapa estático do Google
+  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=-23.5505,-46.6333&zoom=14&size=400x300&key=${apiKey}`;
 
-  useEffect(() => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    
-    console.log('🔍 Verificando API Key:', apiKey ? '✅ Configurada' : '❌ Não encontrada');
-
-    if (!apiKey) {
-      console.error('❌ VITE_GOOGLE_MAPS_API_KEY não está configurada no .env');
-      setMapError(true);
-      setLoading(false);
-      return;
-    }
-
-    if (!mapRef.current) {
-      console.error('❌ Referência do mapa não encontrada');
-      return;
-    }
-
-    async function initMap() {
-      try {
-        if ((window as any).google?.maps) {
-          createMap();
-          return;
-        }
-
-        console.log('📥 Carregando script do Google Maps...');
-        
-        await new Promise<void>((resolve, reject) => {
-          const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-          if (existingScript) {
-            // Script já está carregando, esperar
-            const checkGoogle = setInterval(() => {
-              if ((window as any).google?.maps) {
-                clearInterval(checkGoogle);
-                resolve();
-              }
-            }, 100);
-            return;
-          }
-
-          const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&libraries=places`;
-          script.async = true;
-          script.defer = true;
-          script.onload = () => {
-            console.log('✅ Script Google Maps carregado');
-            resolve();
-          };
-          script.onerror = () => {
-            console.error('❌ Erro ao carregar script do Google Maps');
-            reject(new Error('Falha ao carregar Google Maps'));
-          };
-          document.head.appendChild(script);
-        });
-
-        createMap();
-      } catch (err) {
-        console.error('❌ Erro:', err);
-        setMapError(true);
-        setLoading(false);
-      }
-    }
-
-    function createMap() {
-      if (!mapRef.current || !(window as any).google?.maps) {
-        console.error('❌ Google Maps não disponível');
-        return;
-      }
-
-      try {
-        const map = new (window as any).google.maps.Map(mapRef.current, {
-          center: { lat: -23.5505, lng: -46.6333 },
-          zoom: 14,
-          disableDefaultUI: true,
-          zoomControl: true,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-          styles: [
-            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-            {
-              featureType: "administrative.locality",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#d59563" }],
-            },
-            {
-              featureType: "road",
-              elementType: "geometry",
-              stylers: [{ color: "#38414e" }],
-            },
-            {
-              featureType: "road",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#212a37" }],
-            },
-            {
-              featureType: "road",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#9ca5b3" }],
-            },
-            {
-              featureType: "water",
-              elementType: "geometry",
-              stylers: [{ color: "#17263c" }],
-            },
-            {
-              featureType: "water",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#515c6d" }],
-            },
-          ],
-        });
-        
-        console.log('✅ Mapa criado com sucesso!');
-        setLoading(false);
-      } catch (err) {
-        console.error('❌ Erro ao criar mapa:', err);
-        setMapError(true);
-        setLoading(false);
-      }
-    }
-
-    initMap();
-
-    return () => {
-      // Cleanup - não remover o script porque pode ser usado por outros componentes
-    };
-  }, []);
-
-  if (mapError) {
+  if (!apiKey) {
     return (
       <div className="w-full h-full bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-xl flex items-center justify-center">
         <div className="text-center p-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-3">
-            <span className="text-2xl">🗺️</span>
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+            <span className="text-3xl">🗺️</span>
           </div>
-          <p className="text-red-400 text-sm font-medium">Erro ao carregar o mapa</p>
-          <p className="text-[#A0A0B0] text-xs mt-1">Verifique sua conexão com a internet</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="w-full h-full bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-xl flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-2 border-[#F4D03F] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-white text-sm">Carregando mapa...</p>
+          <p className="text-white text-sm font-medium">Configurar Google Maps</p>
+          <p className="text-[#A0A0B0] text-xs mt-1">Adicione a chave da API no arquivo .env</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '200px' }}>
-      <div ref={mapRef} className="w-full h-full" />
+    <div className="w-full h-full rounded-xl overflow-hidden">
+      <img 
+        src={mapUrl} 
+        alt="Mapa" 
+        className="w-full h-full object-cover"
+        onError={() => console.error('Erro ao carregar mapa estático')}
+      />
     </div>
   );
 };
