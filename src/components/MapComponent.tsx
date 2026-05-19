@@ -8,64 +8,130 @@ const MapComponent: React.FC = () => {
   useEffect(() => {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     
+    console.log('🔍 Verificando API Key:', apiKey ? '✅ Configurada' : '❌ Não encontrada');
+
     if (!apiKey) {
-      console.error('❌ API Key não encontrada');
+      console.error('❌ VITE_GOOGLE_MAPS_API_KEY não está configurada no .env');
       setMapError(true);
       setLoading(false);
       return;
     }
 
-    // Verificar se o mapa já foi carregado
-    if (mapRef.current && (window as any).google) {
+    if (!mapRef.current) {
+      console.error('❌ Referência do mapa não encontrada');
+      return;
+    }
+
+    async function initMap() {
       try {
-        new (window as any).google.maps.Map(mapRef.current, {
+        if ((window as any).google?.maps) {
+          createMap();
+          return;
+        }
+
+        console.log('📥 Carregando script do Google Maps...');
+        
+        await new Promise<void>((resolve, reject) => {
+          const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+          if (existingScript) {
+            // Script já está carregando, esperar
+            const checkGoogle = setInterval(() => {
+              if ((window as any).google?.maps) {
+                clearInterval(checkGoogle);
+                resolve();
+              }
+            }, 100);
+            return;
+          }
+
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&libraries=places`;
+          script.async = true;
+          script.defer = true;
+          script.onload = () => {
+            console.log('✅ Script Google Maps carregado');
+            resolve();
+          };
+          script.onerror = () => {
+            console.error('❌ Erro ao carregar script do Google Maps');
+            reject(new Error('Falha ao carregar Google Maps'));
+          };
+          document.head.appendChild(script);
+        });
+
+        createMap();
+      } catch (err) {
+        console.error('❌ Erro:', err);
+        setMapError(true);
+        setLoading(false);
+      }
+    }
+
+    function createMap() {
+      if (!mapRef.current || !(window as any).google?.maps) {
+        console.error('❌ Google Maps não disponível');
+        return;
+      }
+
+      try {
+        const map = new (window as any).google.maps.Map(mapRef.current, {
           center: { lat: -23.5505, lng: -46.6333 },
           zoom: 14,
           disableDefaultUI: true,
           zoomControl: true,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          styles: [
+            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            {
+              featureType: "administrative.locality",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#d59563" }],
+            },
+            {
+              featureType: "road",
+              elementType: "geometry",
+              stylers: [{ color: "#38414e" }],
+            },
+            {
+              featureType: "road",
+              elementType: "geometry.stroke",
+              stylers: [{ color: "#212a37" }],
+            },
+            {
+              featureType: "road",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#9ca5b3" }],
+            },
+            {
+              featureType: "water",
+              elementType: "geometry",
+              stylers: [{ color: "#17263c" }],
+            },
+            {
+              featureType: "water",
+              elementType: "labels.text.fill",
+              stylers: [{ color: "#515c6d" }],
+            },
+          ],
         });
+        
+        console.log('✅ Mapa criado com sucesso!');
         setLoading(false);
-        return;
       } catch (err) {
-        console.error('Erro ao criar mapa:', err);
+        console.error('❌ Erro ao criar mapa:', err);
+        setMapError(true);
+        setLoading(false);
       }
     }
 
-    // Carregar o script do Google Maps
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
-    script.async = true;
-    script.defer = true;
-    script.onerror = () => {
-      console.error('❌ Erro ao carregar Google Maps');
-      setMapError(true);
-      setLoading(false);
-    };
-
-    script.onload = () => {
-      if (mapRef.current && (window as any).google) {
-        try {
-          new (window as any).google.maps.Map(mapRef.current, {
-            center: { lat: -23.5505, lng: -46.6333 },
-            zoom: 14,
-            disableDefaultUI: true,
-            zoomControl: true,
-          });
-          setLoading(false);
-        } catch (err) {
-          console.error('Erro ao criar mapa:', err);
-          setMapError(true);
-          setLoading(false);
-        }
-      }
-    };
-
-    document.head.appendChild(script);
+    initMap();
 
     return () => {
-      // Limpeza
-      const scriptElement = document.querySelector('script[src*="maps.googleapis.com"]');
-      if (scriptElement) scriptElement.remove();
+      // Cleanup - não remover o script porque pode ser usado por outros componentes
     };
   }, []);
 
@@ -95,7 +161,7 @@ const MapComponent: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-full rounded-xl overflow-hidden">
+    <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '200px' }}>
       <div ref={mapRef} className="w-full h-full" />
     </div>
   );
