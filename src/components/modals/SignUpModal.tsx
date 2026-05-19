@@ -4,9 +4,10 @@ import { supabase } from '../../lib/supabaseClient';
 
 interface SignUpModalProps {
   onSuccess: () => void;
+  onLoginClick?: () => void;
 }
 
-export function SignUpModal({ onSuccess }: SignUpModalProps) {
+export function SignUpModal({ onSuccess, onLoginClick }: SignUpModalProps) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -98,66 +99,76 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center pointer-events-auto">
-      <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[560px] overflow-y-auto">
-        <div className="p-2 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-        <div className="px-5 pb-5">
-          <div className="mb-3">
+      <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[520px] overflow-y-auto">
+        <div className="p-1.5 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+        <div className="px-5 pb-4">
+          <div className="mb-2">
             <div className="flex items-center gap-2">
-              <Car size={22} className="text-[#F4D03F]" />
-              <h2 className="text-white text-base font-bold">Criar sua conta</h2>
+              <Car size={24} className="text-[#F4D03F]" />
+              <h2 className="text-white text-lg font-bold">Criar sua conta</h2>
             </div>
-            <p className="text-[#A0A0B0] text-[10px] ml-7">Preencha seus dados para começar</p>
+            <p className="text-[#A0A0B0] text-sm ml-8">Preencha seus dados para começar</p>
           </div>
 
           {error && (
-            <div className="mb-2 p-1.5 text-center text-xs text-red-400 bg-red-500/10 rounded">{error}</div>
+            <div className="mb-2 p-1.5 text-center text-sm text-red-400 bg-red-500/10 rounded">
+              {error}
+              {error.includes('já cadastrado') && (
+                <button
+                  onClick={() => onLoginClick?.()}
+                  className="ml-2 text-[#F4D03F] underline font-bold"
+                >
+                  Fazer login
+                </button>
+              )}
+            </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="bg-white/5 rounded-xl border border-white/15">
-              <div className="flex items-center px-3 py-2">
-                <span className="text-white mr-2 text-sm">👤</span>
-                <input type="text" placeholder="Nome completo *" className="flex-1 bg-transparent text-white outline-none text-sm" value={nome} onChange={(e) => setNome(e.target.value)} />
+              <div className="flex items-center px-3 py-1.5">
+                <span className="text-white mr-2 text-base">👤</span>
+                <input type="text" placeholder="Nome completo *" className="flex-1 bg-transparent text-white outline-none text-base" value={nome} onChange={(e) => setNome(e.target.value)} />
               </div>
             </div>
 
             <div className="bg-white/5 rounded-xl border border-white/15">
-              <div className="flex items-center px-3 py-2">
-                <span className="text-white mr-2 text-sm">📧</span>
-                <input type="email" placeholder="E-mail *" className="flex-1 bg-transparent text-white outline-none text-sm" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <div className="flex items-center px-3 py-1.5">
+                <span className="text-white mr-2 text-base">📧</span>
+                <input type="email" placeholder="E-mail *" className="flex-1 bg-transparent text-white outline-none text-base" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
             </div>
 
             <div className="bg-white/5 rounded-xl border border-white/15">
-              <div className="flex items-center px-3 py-2">
-                <span className="text-white mr-2 text-sm">📱</span>
-                <input type="tel" placeholder="Telefone (WhatsApp) - opcional" className="flex-1 bg-transparent text-white outline-none text-sm" value={telefone} onChange={(e) => setTelefone(formatPhoneNumber(e.target.value))} maxLength={15} />
+              <div className="flex items-center px-3 py-1.5">
+                <span className="text-white mr-2 text-base">📱</span>
+                <input type="tel" placeholder="Telefone (WhatsApp) - opcional" className="flex-1 bg-transparent text-white outline-none text-base" value={telefone} onChange={(e) => setTelefone(formatPhoneNumber(e.target.value))} maxLength={15} />
               </div>
             </div>
 
             <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} placeholder="Senha * (mínimo 6 caracteres)" className="w-full p-2 rounded-xl bg-white/10 border border-white/15 text-white pr-7 text-sm" value={password} onChange={(e) => setPassword(e.target.value)} />
-              <button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2 text-gray-400">{showPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button>
+              <input type={showPassword ? 'text' : 'password'} placeholder="Senha * (mínimo 6 caracteres)" className="w-full py-1.5 px-3 rounded-xl bg-white/10 border border-white/15 text-white pr-7 text-base" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1.5 text-gray-400">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
             </div>
 
             <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} placeholder="Confirmar senha *" className="w-full p-2 rounded-xl bg-white/10 border border-white/15 text-white pr-7 text-sm" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-              <button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2 text-gray-400">{showPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button>
+              <input type={showPassword ? 'text' : 'password'} placeholder="Confirmar senha *" className="w-full py-1.5 px-3 rounded-xl bg-white/10 border border-white/15 text-white pr-7 text-base" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+              <button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1.5 text-gray-400">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
             </div>
 
             <label className="flex items-center gap-1.5 py-1">
-              <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="w-3 h-3" />
-              <span className="text-[#A0A0B0] text-[9px]">Li e aceito os <span className="text-[#F4D03F]">Termos de Uso</span> e a <span className="text-[#F4D03F]">Política de Privacidade</span></span>
+              <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="w-3.5 h-3.5" />
+              <span className="text-[#A0A0B0] text-sm">Li e aceito os <span className="text-[#F4D03F]">Termos de Uso</span> e a <span className="text-[#F4D03F]">Política de Privacidade</span></span>
             </label>
 
-            <button onClick={handleCreateAccount} disabled={loading} className="w-full py-2 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">{loading ? 'Criando conta...' : '✅ CRIAR CONTA'}</button>
+            <button onClick={handleCreateAccount} disabled={loading} className="w-full py-1.5 rounded-xl bg-[#F4D03F] text-black font-bold text-base">{loading ? 'Criando conta...' : '✅ CRIAR CONTA'}</button>
 
             <div className="relative my-1.5">
               <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div>
-              <div className="relative flex justify-center"><span className="bg-[#1A1528] px-2 text-[10px] text-gray-400">ou</span></div>
+              <div className="relative flex justify-center"><span className="bg-[#1A1528] px-2 text-sm text-gray-400">ou</span></div>
             </div>
 
-            <button onClick={handleGoogleLogin} className="w-full py-2 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center gap-2 text-sm">
+            <button onClick={handleGoogleLogin} className="w-full py-1.5 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center gap-2 text-base">
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/>
                 <path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/>
