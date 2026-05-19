@@ -1,7 +1,50 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const MapComponent: React.FC = () => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  useEffect(() => {
+    if (!apiKey) {
+      console.error('❌ API Key não encontrada');
+      return;
+    }
+
+    // Verificar se já está carregado
+    if (window.google && window.google.maps) {
+      setMapsLoaded(true);
+      return;
+    }
+
+    // Carregar o script com Places API e callback
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+
+    (window as any).initMap = () => {
+      setMapsLoaded(true);
+    };
+
+    script.onerror = () => {
+      console.error('❌ Erro ao carregar Google Maps');
+    };
+
+    document.head.appendChild(script);
+  }, [apiKey]);
+
+  useEffect(() => {
+    if (!mapsLoaded || !mapRef.current) return;
+
+    // Criar o mapa
+    new window.google.maps.Map(mapRef.current, {
+      center: { lat: -23.5505, lng: -46.6333 },
+      zoom: 14,
+      disableDefaultUI: true,
+      zoomControl: true,
+    });
+  }, [mapsLoaded]);
 
   if (!apiKey) {
     return (
@@ -19,16 +62,7 @@ const MapComponent: React.FC = () => {
 
   return (
     <div className="w-full h-full rounded-xl overflow-hidden">
-      <iframe
-        title="Mapa ObaLeva"
-        width="100%"
-        height="100%"
-        frameBorder="0"
-        style={{ border: 0, minHeight: '200px' }}
-        src={`https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=-23.5505,-46.6333&zoom=14`}
-        allowFullScreen
-        referrerPolicy="no-referrer-when-downgrade"
-      />
+      <div ref={mapRef} className="w-full h-full" />
     </div>
   );
 };

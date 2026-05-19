@@ -52,55 +52,45 @@ const fazerLogout = async () => {
 const HomeScreenFunc = ({ user }: any) => {
   const [origem, setOrigem] = useState('');
   const [destino, setDestino] = useState('');
-  const [origemLocation, setOrigemLocation] = useState<any>(null);
-  const [destinoLocation, setDestinoLocation] = useState<any>(null);
   const origemInputRef = useRef<HTMLInputElement>(null);
   const destinoInputRef = useRef<HTMLInputElement>(null);
 
-  // Inicializar autocomplete do Google Maps
+  // Inicializar autocomplete do Google Maps com loop de espera
   useEffect(() => {
-    if (!window.google || !origemInputRef.current || !destinoInputRef.current) {
-      console.log('⏳ Aguardando Google Maps carregar para autocomplete...');
-      return;
-    }
+    const checkGoogleMaps = setInterval(() => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        clearInterval(checkGoogleMaps);
+        console.log('✅ Google Maps Places carregado!');
 
-    try {
-      // Autocomplete para origem
-      const origemAuto = new window.google.maps.places.Autocomplete(origemInputRef.current, {
-        fields: ['formatted_address', 'geometry', 'name'],
-      });
-      origemAuto.addListener('place_changed', () => {
-        const place = origemAuto.getPlace();
-        if (place.geometry) {
-          setOrigem(place.formatted_address || place.name);
-          setOrigemLocation({
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-            address: place.formatted_address
+        // Autocomplete para origem
+        if (origemInputRef.current) {
+          const origemAuto = new window.google.maps.places.Autocomplete(origemInputRef.current, {
+            fields: ['formatted_address', 'geometry', 'name'],
+          });
+          origemAuto.addListener('place_changed', () => {
+            const place = origemAuto.getPlace();
+            if (place.geometry) {
+              setOrigem(place.formatted_address || place.name);
+            }
           });
         }
-      });
 
-      // Autocomplete para destino
-      const destinoAuto = new window.google.maps.places.Autocomplete(destinoInputRef.current, {
-        fields: ['formatted_address', 'geometry', 'name'],
-      });
-      destinoAuto.addListener('place_changed', () => {
-        const place = destinoAuto.getPlace();
-        if (place.geometry) {
-          setDestino(place.formatted_address || place.name);
-          setDestinoLocation({
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-            address: place.formatted_address
+        // Autocomplete para destino
+        if (destinoInputRef.current) {
+          const destinoAuto = new window.google.maps.places.Autocomplete(destinoInputRef.current, {
+            fields: ['formatted_address', 'geometry', 'name'],
+          });
+          destinoAuto.addListener('place_changed', () => {
+            const place = destinoAuto.getPlace();
+            if (place.geometry) {
+              setDestino(place.formatted_address || place.name);
+            }
           });
         }
-      });
+      }
+    }, 500); // Verificar a cada 500ms
 
-      console.log('✅ Autocomplete Google Maps ativado!');
-    } catch (err) {
-      console.error('❌ Erro ao inicializar autocomplete:', err);
-    }
+    return () => clearInterval(checkGoogleMaps);
   }, []);
 
   const handleChamarObaLeva = () => {
@@ -482,6 +472,5 @@ const MainScreen = () => {
   return <LoginScreenFunc onLogin={handleLogin} onGoogleLogin={handleGoogleLogin} onSignUp={() => setShowSignUp(true)} />;
 };
 
-// ✅ CORRIGIDO: Exportação nomeada + padrão
 export { MainScreen };
 export default MainScreen;
