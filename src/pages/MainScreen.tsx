@@ -141,10 +141,10 @@ const SearchScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><d
 const ActivityScreen = () => (<div className="max-w-md mx-auto px-4 pb-28 mt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><ClipboardList size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">📋 Atividade</h2><p className="text-gray-400 mt-2">Histórico de corridas</p></div></div>);
 
 // ============================================
-// MODAL DE LOCALIZAÇÃO (ALTURA REDUZIDA - max-h-[320px])
+// MODAL DE LOCALIZAÇÃO (SEM BLUR - bg-black/70)
 // ============================================
 const LocationModal = ({ onAllow, onDeny }: any) => (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
+  <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center pointer-events-auto">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[320px]">
       <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
       <div className="px-6 pb-6">
@@ -162,10 +162,10 @@ const LocationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// MODAL DE NOTIFICAÇÕES (ALTURA REDUZIDA - max-h-[380px])
+// MODAL DE NOTIFICAÇÕES (SEM BLUR - bg-black/70)
 // ============================================
 const NotificationModal = ({ onAllow, onDeny }: any) => (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
+  <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center pointer-events-auto">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[380px]">
       <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
       <div className="px-6 pb-6">
@@ -188,7 +188,7 @@ const NotificationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// MODAL DE CRIAÇÃO DE CONTA (ALTURA REDUZIDA - max-h-[500px])
+// MODAL DE CRIAÇÃO DE CONTA (SEM BLUR - bg-black/70)
 // ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -234,7 +234,7 @@ const SignUpModal = ({ onSuccess }: any) => {
   const handleGoogleLogin = async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center pointer-events-auto">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center pointer-events-auto">
       <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30 max-h-[500px] overflow-y-auto">
         <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
         <div className="px-6 pb-6">
