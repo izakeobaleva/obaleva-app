@@ -8,7 +8,6 @@ import { ActivityScreen } from '../components/screens/ActivityScreen';
 import { LocationModal } from '../components/modals/LocationModal';
 import { NotificationModal } from '../components/modals/NotificationModal';
 import { SignUpModal } from '../components/modals/SignUpModal';
-import { Car } from 'lucide-react';
 
 export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);

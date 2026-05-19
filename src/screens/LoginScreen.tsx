@@ -28,7 +28,7 @@ export function LoginScreen({ onLogin, onGoogleLogin, onSignUp }: LoginScreenPro
           <div className="w-20 h-20 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-4">
             <Car size={40} className="text-[#F4D03F]" />
           </div>
-          <h1 className="text-3xl font-bold text-white">OBALEVA</h1>
+          <h1 className="text-3xl font-bold text-white">ObaLeva</h1>
           <p className="text-[#A0A0B0] text-sm mt-1">Sua corrida de confiança</p>
         </div>
 

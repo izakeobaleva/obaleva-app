@@ -26,7 +26,7 @@ export function HomeScreen({ user, onSignOut }: HomeScreenProps) {
       <div className="flex justify-between items-center py-3">
         <div className="flex items-center gap-2">
           <Car size={24} className="text-[#F4D03F]" />
-          <h1 className="text-xl font-bold text-white">OBALEVA</h1>
+          <h1 className="text-xl font-bold text-white">ObaLeva</h1>
         </div>
         <button
           onClick={onSignOut}
@@ -55,7 +55,7 @@ export function HomeScreen({ user, onSignOut }: HomeScreenProps) {
           onClick={handleConfirmar}
           className="w-full mt-4 py-3 rounded-xl bg-[#F4D03F] text-black font-bold"
         >
-          Confirmar corrida
+          Chamar ObaLeva
         </button>
         {mensagem && (
           <div className="mt-3 p-2 text-center text-sm text-white bg-green-500/30 rounded">

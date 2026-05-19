@@ -25,7 +25,7 @@ export function HomeScreen({ user, onLogout, showFullUI }: HomeScreenProps) {
   return (
     <div className="max-w-md mx-auto px-4 pb-24">
       <div className="flex justify-between items-center py-3">
-        <h1 className="text-xl font-bold text-white">OBALEVA</h1>
+        <h1 className="text-xl font-bold text-white">ObaLeva</h1>
         {showFullUI && (
           <div className="flex items-center gap-3">
             <button className="text-[#A0A0B0] text-xs">Mudar passageiro</button>
@@ -84,7 +84,7 @@ export function HomeScreen({ user, onLogout, showFullUI }: HomeScreenProps) {
           </div>
 
           <button onClick={handleChamarObaLeva} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-base flex items-center justify-center gap-2 mb-3">
-            <Car size={18} /> CHAMAR OBALEVALe
+            <Car size={18} /> Chamar ObaLeva
           </button>
 
           <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#8B5CF6]/20 rounded-xl p-3 flex justify-between items-center">

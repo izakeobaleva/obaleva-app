@@ -21,7 +21,7 @@ export function DriverDashboard({ user, onSignOut }: DriverDashboardProps) {
       <div className="flex justify-between items-center py-3">
         <div className="flex items-center gap-2">
           <Truck size={24} className="text-[#F4D03F]" />
-          <h1 className="text-xl font-bold text-white">OBALEVA</h1>
+          <h1 className="text-xl font-bold text-white">ObaLeva</h1>
         </div>
         <button
           onClick={onSignOut}
@@ -37,9 +37,7 @@ export function DriverDashboard({ user, onSignOut }: DriverDashboardProps) {
           <div>
             <p className="text-[#A0A0B0] text-sm">Status</p>
             <div className="flex items-center gap-2 mt-1">
-              <span
-                className={`w-3 h-3 rounded-full ${online ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}
-              />
+              <span className={`w-3 h-3 rounded-full ${online ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
               <span className="text-white font-bold">{online ? 'Online' : 'Offline'}</span>
             </div>
           </div>
@@ -92,9 +90,7 @@ export function DriverDashboard({ user, onSignOut }: DriverDashboardProps) {
         </div>
         <div className="flex justify-between items-center py-2">
           <span className="text-[#A0A0B0] text-sm">Média por corrida</span>
-          <span className="text-white font-bold">
-            R$ {(stats.ganhosSemana / stats.corridasSemana).toFixed(2)}
-          </span>
+          <span className="text-white font-bold">R$ {(stats.ganhosSemana / stats.corridasSemana).toFixed(2)}</span>
         </div>
       </div>
 
@@ -118,9 +114,7 @@ export function DriverDashboard({ user, onSignOut }: DriverDashboardProps) {
                   <p className="text-[#A0A0B0] text-xs">📍 Av. Paulista → Shopping</p>
                   <p className="text-[#F4D03F] text-xs font-bold mt-1">R$ 18,50</p>
                 </div>
-                <button className="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
-                  Aceitar
-                </button>
+                <button className="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Aceitar</button>
               </div>
             </div>
             <div className="bg-white/5 rounded-xl p-3 border border-white/10">
@@ -130,9 +124,7 @@ export function DriverDashboard({ user, onSignOut }: DriverDashboardProps) {
                   <p className="text-[#A0A0B0] text-xs">📍 Centro → Aeroporto</p>
                   <p className="text-[#F4D03F] text-xs font-bold mt-1">R$ 35,00</p>
                 </div>
-                <button className="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
-                  Aceitar
-                </button>
+                <button className="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Aceitar</button>
               </div>
             </div>
           </div>
