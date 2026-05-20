@@ -82,40 +82,50 @@ const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
 const ProfileScreen = ({ user, onLogout, onSejaMotorista, onRefresh }: any) => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showTermsAcceptModal, setShowTermsAcceptModal] = useState(false);
+  const [showTermsScreen, setShowTermsScreen] = useState(false);
+  const [showPrivacyScreen, setShowPrivacyScreen] = useState(false);
 
   const carregarPerfil = async () => {
     const { data } = await supabase.from('usuarios').select('*').eq('id', user.id).single();
     setProfile(data);
-    if (data && !data.termos_aceitos) setShowTermsModal(true);
+    if (data && data.termos_aceitos === false) {
+      setShowTermsAcceptModal(true);
+    }
     setLoading(false);
+  };
+
+  const aceitarTermos = async () => {
+    await supabase.from('usuarios').update({ termos_aceitos: true }).eq('id', user.id);
+    localStorage.setItem('terms_accepted', 'true');
+    setShowTermsAcceptModal(false);
+    carregarPerfil();
   };
 
   useEffect(() => { carregarPerfil(); }, [user]);
 
-  const aceitarTermos = async () => {
-    await supabase.from('usuarios').update({ termos_aceitos: true, termos_aceito_em: new Date() }).eq('id', user.id);
-    localStorage.setItem('terms_accepted', 'true');
-    setShowTermsModal(false);
-    carregarPerfil();
-  };
+  if (showTermsScreen) return <TermsScreen onBack={() => setShowTermsScreen(false)} />;
+  if (showPrivacyScreen) return <PrivacyScreen onBack={() => setShowPrivacyScreen(false)} />;
 
   if (loading) return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
 
-  if (showTermsModal) {
+  if (showTermsAcceptModal) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
         <div className="bg-[#1A1528] rounded-2xl max-w-md w-full p-6 border border-[#F4D03F]/20">
           <div className="text-center mb-4">
-            <div className="w-14 h-14 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
-              <Shield size={26} className="text-[#F4D03F]" />
+            <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
+              <Shield size={28} className="text-[#F4D03F]" />
             </div>
             <h2 className="text-white text-xl font-bold">Aceite os Termos</h2>
-            <p className="text-[#A0A0B0] text-sm mt-2">Para continuar usando o ObaLeva, você precisa aceitar nossos Termos de Uso e Política de Privacidade.</p>
+            <p className="text-[#A0A0B0] text-sm mt-2">
+              Para continuar usando o ObaLeva, você precisa aceitar nossos Termos de Uso e Política de Privacidade.
+            </p>
           </div>
           <div className="space-y-3">
-            <button type="button" className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white text-sm flex items-center justify-center gap-2" onClick={() => setShowTermsModal(false)}>📄 Ler Termos</button>
-            <button type="button" onClick={aceitarTermos} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">✅ ACEITAR</button>
+            <button onClick={() => setShowTermsScreen(true)} className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white font-medium">📖 Ler Termos de Uso</button>
+            <button onClick={() => setShowPrivacyScreen(true)} className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white font-medium">🔒 Ler Política de Privacidade</button>
+            <button onClick={aceitarTermos} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">✅ ACEITAR E CONTINUAR</button>
           </div>
         </div>
       </div>
@@ -308,7 +318,7 @@ const SignUpModal = ({ onSuccess }: any) => {
             <Car size={20} className="text-[#F4D03F]" />
             <h2 className="text-white text-base font-bold">Criar sua conta</h2>
           </div>
-          <p className="text-[#A0A0B0] text-[11px] mb-2">Comece a usar o ObaLeva</p>
+          <p className="text-[#A0A0B0] text-[11px] mb-3">Comece a usar o ObaLeva</p>
 
           {error && <div className="mb-2 p-1.5 text-center text-xs text-red-400 bg-red-500/10 rounded">{error}{error.includes('já cadastrado') && <button onClick={() => setIsLoginMode(true)} className="ml-2 text-[#F4D03F] underline">Faça login</button>}</div>}
 
