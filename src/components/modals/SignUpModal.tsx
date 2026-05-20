@@ -12,7 +12,6 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
-  const [dataNascimento, setDataNascimento] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +34,6 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
     const newErrors = { ...errors };
     if (field === 'nome' && !value) newErrors.nome = 'Nome é obrigatório';
     else if (field === 'email' && !value) newErrors.email = 'E-mail é obrigatório';
-    else if (field === 'dataNascimento' && !value) newErrors.dataNascimento = 'Data de nascimento é obrigatória';
     else if (field === 'telefone' && value && value.replace(/\D/g, '').length < 10) newErrors.telefone = 'Telefone inválido';
     else if (field === 'password' && !value) newErrors.password = 'Senha é obrigatória';
     else if (field === 'password' && value.length < 6) newErrors.password = 'Mínimo 6 caracteres';
@@ -49,7 +47,6 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
     const newErrors: Record<string, string> = {};
     if (!nome) newErrors.nome = 'Nome é obrigatório';
     if (!email) newErrors.email = 'E-mail é obrigatório';
-    if (!dataNascimento) newErrors.dataNascimento = 'Data de nascimento é obrigatória';
     if (telefone && telefone.replace(/\D/g, '').length < 10) newErrors.telefone = 'Telefone inválido';
     if (!password) newErrors.password = 'Senha é obrigatória';
     else if (password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
@@ -57,8 +54,6 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-  // ... rest of the functions remain the same
 
   const handleCreateAccount = async () => {
     if (!validateAll()) return;
@@ -70,7 +65,6 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
           data: {
             nome_completo: nome,
             telefone: telefone.replace(/\D/g, ''),
-            data_nascimento: dataNascimento,
             termos_aceitos: false,
           },
         },
@@ -78,10 +72,12 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
       if (signUpError) throw signUpError;
       if (data.user) {
         await supabase.from('usuarios').insert({
-          id: data.user.id, nome_completo: nome, email,
+          id: data.user.id,
+          nome_completo: nome,
+          email,
           telefone: telefone.replace(/\D/g, ''),
-          data_nascimento: dataNascimento,
-          tipo: 'passageiro', termos_aceitos: false,
+          tipo: 'passageiro',
+          termos_aceitos: false,
         });
         await supabase.from('passageiros').insert({ id: data.user.id });
         localStorage.setItem('obaleva_onboarding', 'true');
@@ -90,8 +86,12 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
         setIsLoginMode(true);
       }
     } catch (err: any) {
-      if (err.message.includes('already registered')) { setErrors({ email: 'E-mail já cadastrado' }); setIsLoginMode(true); }
-      else { setErrors({ general: err.message || 'Erro ao criar conta' }); }
+      if (err.message.includes('already registered')) {
+        setErrors({ email: 'E-mail já cadastrado' });
+        setIsLoginMode(true);
+      } else {
+        setErrors({ general: err.message || 'Erro ao criar conta' });
+      }
     } finally { setLoading(false); }
   };
 
@@ -108,8 +108,9 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
       if (signInError) throw signInError;
       localStorage.setItem('obaleva_onboarding', 'true');
       onSuccess();
-    } catch (err: any) { setErrors({ general: err.message || 'Erro ao fazer login' }); }
-    finally { setLoading(false); }
+    } catch (err: any) {
+      setErrors({ general: err.message || 'Erro ao fazer login' });
+    } finally { setLoading(false); }
   };
 
   const handleGoogleLogin = async () => {
@@ -152,7 +153,6 @@ export function SignUpModal({ onSuccess }: SignUpModalProps) {
             <div><div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-2 px-3 py-1.5"><span className="text-white">👤</span><input type="text" placeholder="Nome completo *" className="flex-1 bg-transparent text-white outline-none text-sm" value={nome} onChange={(e) => { setNome(e.target.value); validateField('nome', e.target.value); }} /></div></div>{errors.nome && <p className="text-red-400 text-[10px] px-1">{errors.nome}</p>}</div>
             <div><div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-2 px-3 py-1.5"><span className="text-white">📧</span><input type="email" placeholder="E-mail *" className="flex-1 bg-transparent text-white outline-none text-sm" value={email} onChange={(e) => { setEmail(e.target.value); validateField('email', e.target.value); }} /></div></div>{errors.email && <p className="text-red-400 text-[10px] px-1">{errors.email}</p>}</div>
             <div><div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-2 px-3 py-1.5"><span className="text-white">📱</span><span className="text-green-500 text-[10px] font-bold mr-0.5">WhatsApp</span><span className="text-white text-[10px]">+55</span><input type="tel" placeholder="(11) 99999-9999" className="flex-1 bg-transparent text-white outline-none text-sm" value={telefone} onChange={(e) => { setTelefone(formatPhoneNumber(e.target.value)); validateField('telefone', e.target.value); }} maxLength={15} /></div></div>{errors.telefone && <p className="text-red-400 text-[10px] px-1">{errors.telefone}</p>}</div>
-            <div><div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-2 px-3 py-1.5"><span className="text-white">📅</span><input type="date" placeholder="Data de nascimento *" className="flex-1 bg-transparent text-white outline-none text-sm" value={dataNascimento} onChange={(e) => { setDataNascimento(e.target.value); validateField('dataNascimento', e.target.value); }} /></div></div>{errors.dataNascimento && <p className="text-red-400 text-[10px] px-1">{errors.dataNascimento}</p>}</div>
             <div className="flex gap-1.5">
               <div className="flex-1"><div className="relative"><input type={showPassword ? 'text' : 'password'} placeholder="Senha *" className="w-full py-1.5 px-3 rounded-xl bg-white/10 border border-white/15 text-white pr-7 text-sm" value={password} onChange={(e) => { setPassword(e.target.value); validateField('password', e.target.value); }} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1.5 text-gray-400">{showPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button></div>{errors.password && <p className="text-red-400 text-[10px] px-1">{errors.password}</p>}</div>
               <div className="flex-1"><div className="relative"><input type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirmar *" className="w-full py-1.5 px-3 rounded-xl bg-white/10 border border-white/15 text-white pr-7 text-sm" value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); validateField('confirmPassword', e.target.value); }} /><button onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1.5 text-gray-400">{showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button></div>{errors.confirmPassword && <p className="text-red-400 text-[10px] px-1">{errors.confirmPassword}</p>}</div>
