@@ -15,7 +15,7 @@ const tabs = [
 export function BottomNav({ active, onNavigate }: BottomNavProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-3 z-50">
-      <div className="bg-[#1A1528] border border-[#F4D03F]/20 rounded-2xl max-w-md w-full mx-4">
+      <div className="bg-[#1A1528] border border-[#F4D03F]/20 rounded-2xl max-w-md w-full mx-4 shadow-lg">
         <div className="flex justify-between px-6 py-2">
           {tabs.map((tab) => (
             <button
