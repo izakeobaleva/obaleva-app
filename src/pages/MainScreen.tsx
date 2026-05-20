@@ -4,7 +4,7 @@ import {
   Car, Chrome, Eye, EyeOff, Home, Search, ClipboardList, User, 
   Bell, MapPin, ChevronRight, LogOut, Edit, CreditCard, History, 
   Truck, X, ArrowLeft, Upload, Key, Shield, Calendar, Phone, Mail, 
-  Map, Smartphone
+  Map, Smartphone, Heart, HelpCircle
 } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
 import ProfileScreen from '../components/ProfileScreen';
@@ -61,18 +61,17 @@ const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
       <div className="max-w-md mx-auto px-4 pb-24">
         <div className="flex justify-between items-center py-3">
           <h1 className="text-xl font-bold text-white">ObaLeva</h1>
-          {showFullUI && <div className="flex items-center gap-3"><button className="text-[#A0A0B0] text-xs">Mudar passageiro</button><button onClick={onLogout} className="text-red-400 text-xs font-bold">SAIR</button></div>}
+          {showFullUI && user && <button onClick={onLogout} className="text-red-400 text-xs font-bold hover:text-red-300 transition">SAIR</button>}
         </div>
         <div className="relative h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg"><MapComponent /></div>
         <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-2">
-          <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500" /><span className="text-white text-xs font-bold">ONDE VOCÊ ESTÁ?</span></div><button onClick={() => setModoEdicao(!modoEdicao)} className="text-[#F4D03F] text-xs hover:underline">{modoEdicao ? 'Cancelar' : '✏️ Editar'}</button></div>
-          {modoEdicao ? <input type="text" className="w-full bg-white/10 text-white p-2 rounded-lg outline-none text-base" value={enderecoEditado} onChange={(e) => setEnderecoEditado(e.target.value)} /> : <input ref={origemInputRef} type="text" className="w-full bg-white/10 text-white p-2 rounded-lg outline-none text-base" value={origem} onChange={(e) => setOrigem(e.target.value)} />}
+          <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500" /><span className="text-white text-xs font-bold">ONDE VOCÊ ESTÁ?</span></div></div>
+          <input ref={origemInputRef} type="text" className="w-full bg-white/10 text-white p-2 rounded-lg outline-none text-base" value={origem} onChange={(e) => setOrigem(e.target.value)} />
         </div>
         {showFullUI && (
           <>
             <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3"><div className="flex items-center gap-2 mb-1"><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-white text-xs font-bold">PARA ONDE VOCÊ VAI?</span></div><input ref={destinoInputRef} type="text" placeholder="Digite o endereço ou cidade..." className="w-full bg-white/10 text-white p-2 rounded-lg outline-none text-base" value={destino} onChange={(e) => setDestino(e.target.value)} /></div>
             <button onClick={handleChamarObaLeva} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-base flex items-center justify-center gap-2 mb-3"><Car size={18} /> Chamar ObaLeva</button>
-            <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#8B5CF6]/20 rounded-xl p-3 flex justify-between items-center"><div><div className="flex items-center gap-1"><span className="text-2xl">🍔</span><span className="text-white font-bold text-sm">Almoço com até 50% OFF</span></div><p className="text-[#A0A0B0] text-xs mt-1">Peça agora</p></div><ChevronRight size={20} className="text-[#F4D03F]" /></div>
           </>
         )}
       </div>
@@ -89,7 +88,7 @@ const ActivityScreen = () => (
 );
 
 // ============================================
-// 1. TELA DE LOCALIZAÇÃO (ALINHADA COM O MAPA)
+// 1. TELA DE LOCALIZAÇÃO
 // ============================================
 const LocationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
@@ -117,7 +116,7 @@ const LocationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// 2. TELA DE NOTIFICAÇÕES (ALINHADA COM O MAPA)
+// 2. TELA DE NOTIFICAÇÕES
 // ============================================
 const NotificationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
@@ -145,7 +144,7 @@ const NotificationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// 3. TELA DE CRIAÇÃO DE CONTA (ALINHADA COM O MAPA)
+// 3. TELA DE CRIAÇÃO DE CONTA
 // ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [nome, setNome] = useState('');
@@ -313,25 +312,56 @@ export const MainScreen = () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
       
-      // Carregar perfil do usuário
+      // Carregar perfil do usuário da tabela usuarios
       if (session?.user) {
         const { data: userData } = await supabase
           .from('usuarios')
           .select('*')
           .eq('id', session.user.id)
-          .single();
-        setProfile(userData);
+          .maybeSingle();
+        if (userData) {
+          setProfile(userData);
+        } else {
+          // Se não achou na tabela usuarios, tenta pegar do metadata
+          const metadata = session.user.user_metadata;
+          if (metadata?.tipo) {
+            setProfile({ tipo: metadata.tipo, nome_completo: metadata.nome_completo || session.user.email });
+          }
+        }
       }
       
       const completed = localStorage.getItem('obaleva_onboarding') === 'true';
       const locationAsked = localStorage.getItem('location_permission_asked') === 'true';
       setOnboardingCompleted(completed || !!session?.user);
-      if (!completed && !session?.user) { if (!locationAsked) setShowLocationModal(true); else setShowNotificationModal(true); }
+      if (!completed && !session?.user) { 
+        if (!locationAsked) setShowLocationModal(true); 
+        else setShowNotificationModal(true); 
+      }
       setLoading(false);
     })();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user || null);
-      if (session?.user) { setOnboardingCompleted(true); setShowLocationModal(false); setShowNotificationModal(false); setShowSignUpModal(false); }
+      
+      // Recarregar perfil quando o usuário mudar
+      if (session?.user) {
+        const { data: userData } = await supabase
+          .from('usuarios')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        if (userData) {
+          setProfile(userData);
+        }
+      } else {
+        setProfile(null);
+      }
+      
+      if (session?.user) { 
+        setOnboardingCompleted(true); 
+        setShowLocationModal(false); 
+        setShowNotificationModal(false); 
+        setShowSignUpModal(false); 
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -348,9 +378,10 @@ export const MainScreen = () => {
         .from('usuarios')
         .select('*')
         .eq('id', user.id)
-        .single();
-      setProfile(userData);
+        .maybeSingle();
+      if (userData) setProfile(userData);
     }
+    window.location.reload();
   };
 
   if (loading) return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
@@ -360,7 +391,14 @@ export const MainScreen = () => {
   return (
     <>
       {activeTab === 'home' && <HomeScreen user={user} onLogout={user ? handleLogout : undefined} showFullUI={showFullUI} />}
-      {activeTab === 'perfil' && user && <ProfileScreen user={user} profile={profile} onLogout={handleLogout} onRefresh={handleRefresh} />}
+      {activeTab === 'perfil' && user && (
+        <ProfileScreen 
+          user={user} 
+          profile={profile} 
+          onLogout={handleLogout} 
+          onRefresh={handleRefresh} 
+        />
+      )}
       {activeTab === 'buscar' && showFullUI && <SearchScreen />}
       {activeTab === 'atividade' && showFullUI && <ActivityScreen />}
       {showFullUI && <BottomNav active={activeTab} onNavigate={setActiveTab} />}
