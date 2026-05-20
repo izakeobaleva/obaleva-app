@@ -12,190 +12,6 @@ import DriverRegistrationModal from '../components/DriverRegistrationModal';
 import TermsScreen from './TermsScreen';
 import PrivacyScreen from './PrivacyScreen';
 
-const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
-  const tabs = [
-    { id: 'home', label: 'Início', icon: Home },
-    { id: 'buscar', label: 'Buscar', icon: Search },
-    { id: 'atividade', label: 'Atividade', icon: ClipboardList },
-    { id: 'perfil', label: 'Perfil', icon: User },
-  ];
-  return (
-    <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-3 z-50">
-      <div className="bg-[#1A1528] border border-[#F4D03F]/20 rounded-2xl max-w-md w-full mx-4 shadow-lg">
-        <div className="flex justify-between px-6 py-2">
-          {tabs.map((tab) => (
-            <button key={tab.id} onClick={() => onNavigate(tab.id)} className={`flex flex-col items-center gap-0.5 ${active === tab.id ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'}`}>
-              <tab.icon size={22} strokeWidth={active === tab.id ? 2 : 1.5} />
-              <span className="text-[10px]">{tab.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
-  const [destino, setDestino] = useState('');
-  const [origem, setOrigem] = useState(localStorage.getItem('user_address') || 'Rua Santo Antônio, 1095 - Centro, São Paulo - SP');
-  const [modoEdicaoOrigem, setModoEdicaoOrigem] = useState(false);
-  const [modoEdicaoDestino, setModoEdicaoDestino] = useState(false);
-  const [enderecoEditadoOrigem, setEnderecoEditadoOrigem] = useState(origem);
-  const [enderecoEditadoDestino, setEnderecoEditadoDestino] = useState(destino);
-  
-  const origemInputRef = useRef<HTMLInputElement>(null);
-  const destinoInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const checkGoogleMaps = setInterval(() => {
-      if (window.google && window.google.maps && window.google.maps.places) {
-        clearInterval(checkGoogleMaps);
-        if (origemInputRef.current) {
-          new window.google.maps.places.Autocomplete(origemInputRef.current, { fields: ['formatted_address'] });
-        }
-        if (destinoInputRef.current) {
-          new window.google.maps.places.Autocomplete(destinoInputRef.current, { fields: ['formatted_address'] });
-        }
-      }
-    }, 100);
-    return () => clearInterval(checkGoogleMaps);
-  }, []);
-
-  const handleChamarObaLeva = () => {
-    if (!destino) {
-      alert('Digite um destino primeiro!');
-      return;
-    }
-    alert(`🚗 Corrida solicitada de: ${origem}\nPara: ${destino}`);
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-      <div className="max-w-md mx-auto px-4 pb-24">
-        <div className="flex justify-between items-center py-3">
-          <h1 className="text-xl font-bold text-white">ObaLeva</h1>
-          {showFullUI && (
-            <div className="flex items-center gap-3">
-              <button className="text-[#A0A0B0] text-xs">Mudar passageiro</button>
-              <button onClick={onLogout} className="text-red-400 text-xs font-bold hover:text-red-300 transition">SAIR</button>
-            </div>
-          )}
-        </div>
-
-        <div className="relative h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg">
-          <MapComponent />
-        </div>
-
-        <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-2">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-white text-xs font-bold">ONDE VOCÊ ESTÁ?</span>
-            </div>
-            <button 
-              onClick={() => setModoEdicaoOrigem(!modoEdicaoOrigem)} 
-              className="text-[#F4D03F] text-xs hover:underline flex items-center gap-1"
-            >
-              {modoEdicaoOrigem ? <>❌ Cancelar</> : <>✏️ Editar</>}
-            </button>
-          </div>
-          {modoEdicaoOrigem ? (
-            <div className="flex gap-2">
-              <input ref={origemInputRef} type="text" className="flex-1 bg-white/10 text-white p-2 rounded-lg outline-none text-sm" value={enderecoEditadoOrigem} onChange={(e) => setEnderecoEditadoOrigem(e.target.value)} />
-              <button onClick={() => { setOrigem(enderecoEditadoOrigem); setModoEdicaoOrigem(false); localStorage.setItem('user_address', enderecoEditadoOrigem); }} className="px-3 bg-green-500/20 text-green-400 rounded-lg text-sm font-bold">✅</button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2"><span className="text-white text-sm flex-1">{origem}</span></div>
-          )}
-        </div>
-
-        {showFullUI && (
-          <>
-            <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3">
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <span className="text-white text-xs font-bold">PARA ONDE VOCÊ VAI?</span>
-                </div>
-                <button onClick={() => setModoEdicaoDestino(!modoEdicaoDestino)} className="text-[#F4D03F] text-xs hover:underline flex items-center gap-1">
-                  {modoEdicaoDestino ? <>❌ Cancelar</> : <>✏️ Editar</>}
-                </button>
-              </div>
-              {modoEdicaoDestino ? (
-                <div className="flex gap-2">
-                  <input ref={destinoInputRef} type="text" placeholder="Digite o endereço ou cidade..." className="flex-1 bg-white/10 text-white p-2 rounded-lg outline-none text-sm" value={enderecoEditadoDestino} onChange={(e) => setEnderecoEditadoDestino(e.target.value)} />
-                  <button onClick={() => { setDestino(enderecoEditadoDestino); setModoEdicaoDestino(false); }} className="px-3 bg-green-500/20 text-green-400 rounded-lg text-sm font-bold">✅</button>
-                </div>
-              ) : (
-                <input ref={destinoInputRef} type="text" placeholder="Digite o endereço ou cidade..." className="w-full bg-white/10 text-white p-2 rounded-lg outline-none text-sm" value={destino} onChange={(e) => setDestino(e.target.value)} />
-              )}
-            </div>
-            <button onClick={handleChamarObaLeva} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-base flex items-center justify-center gap-2 mb-3"><Car size={18} /> Chamar ObaLeva</button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const SearchScreen = () => (
-  <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]"><div className="max-w-md mx-auto px-4 pb-24 pt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><Search size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">🔍 Buscar</h2></div></div></div>
-);
-
-const ActivityScreen = () => (
-  <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]"><div className="max-w-md mx-auto px-4 pb-24 pt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><ClipboardList size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">📋 Atividade</h2><p className="text-gray-400 mt-2">Histórico de corridas</p></div></div></div>
-);
-
-const LocationModal = ({ onAllow, onDeny }: any) => (
-  <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
-    <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
-      <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-      <div className="px-4 pb-4">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <MapPin size={20} className="text-[#F4D03F]" />
-          <h2 className="text-white text-base font-bold">Acesso à localização</h2>
-        </div>
-        <p className="text-[#A0A0B0] text-[11px] text-center mb-3">Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.</p>
-        <div className="space-y-1.5">
-          <button onClick={() => { onAllow('exact'); }} className="w-full py-2 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left">
-            <div className="flex justify-between items-center"><span className="text-sm">📍 SEMPRE PERMITIR</span><span className="text-[9px] text-black/70">Recomendado</span></div>
-            <p className="text-[9px] text-black/70">O app pode usar sua localização a qualquer momento</p>
-          </button>
-          <button onClick={() => { onAllow('approximate'); }} className="w-full py-2 px-4 rounded-xl border border-white/20 text-white font-bold text-left">
-            <div><span className="text-sm">📍 SÓ DESTA VEZ</span><p className="text-[9px] text-[#A0A0B0]">O app usa sua localização apenas agora</p></div>
-          </button>
-          <button onClick={onDeny} className="w-full py-2 px-4 rounded-xl text-[#A0A0B0] text-left text-sm">🚫 NÃO PERMITIR</button>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const NotificationModal = ({ onAllow, onDeny }: any) => (
-  <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
-    <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
-      <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-      <div className="px-4 pb-4">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Bell size={20} className="text-[#F4D03F]" />
-          <h2 className="text-white text-base font-bold">Permitir notificações?</h2>
-        </div>
-        <p className="text-[#A0A0B0] text-[11px] text-center mb-2">Para receber alertas importantes como:</p>
-        <div className="bg-white/5 rounded-lg p-1.5 mb-2 space-y-0.5">
-          <p className="text-white text-[10px] text-center">• 🚗 "Motorista a caminho"</p>
-          <p className="text-white text-[10px] text-center">• 📍 "Estou chegando!"</p>
-          <p className="text-white text-[10px] text-center">• ✅ "Corrida confirmada"</p>
-          <p className="text-white text-[10px] text-center">• 💰 "Promoções e descontos"</p>
-        </div>
-        <div className="space-y-1.5">
-          <button onClick={onAllow} className="w-full py-2 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">PERMITIR</button>
-          <button onClick={onDeny} className="w-full py-2 rounded-xl border border-white/20 text-white font-bold text-sm">NÃO PERMITIR</button>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
 const SignUpModal = ({ onSuccess }: any) => {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -261,19 +77,13 @@ const SignUpModal = ({ onSuccess }: any) => {
         setShowTermsAccept(true);
       }
     } catch (err: any) {
-      if (err.message.includes('already registered')) {
-        setErrors({ email: 'E-mail já cadastrado' });
-        setIsLoginMode(true);
-      } else {
-        setErrors({ general: err.message || 'Erro ao criar conta' });
-      }
+      if (err.message.includes('already registered')) { setErrors({ email: 'E-mail já cadastrado' }); setIsLoginMode(true); }
+      else { setErrors({ general: err.message || 'Erro ao criar conta' }); }
     } finally { setLoading(false); }
   };
 
   const handleAcceptTerms = async () => {
-    if (userId) {
-      await supabase.from('usuarios').update({ termos_aceitos: true }).eq('id', userId);
-    }
+    if (userId) { await supabase.from('usuarios').update({ termos_aceitos: true }).eq('id', userId); }
     localStorage.setItem('obaleva_onboarding', 'true');
     localStorage.setItem('location_permission_asked', 'true');
     alert('✅ Conta criada! Faça login.');
@@ -283,11 +93,7 @@ const SignUpModal = ({ onSuccess }: any) => {
 
   const handleLogin = async () => {
     setErrors({});
-    if (!email || !password) {
-      if (!email) setErrors({ email: 'E-mail é obrigatório' });
-      if (!password) setErrors({ password: 'Senha é obrigatória' });
-      return;
-    }
+    if (!email || !password) { if (!email) setErrors({ email: 'E-mail é obrigatório' }); if (!password) setErrors({ password: 'Senha é obrigatória' }); return; }
     setLoading(true);
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
@@ -305,7 +111,6 @@ const SignUpModal = ({ onSuccess }: any) => {
   if (showTermsModal) { return <TermsScreen onBack={() => setShowTermsModal(false)} />; }
   if (showPrivacyModal) { return <PrivacyScreen onBack={() => setShowPrivacyModal(false)} />; }
 
-  // TELA DE ACEITAÇÃO DE TERMOS (aparece após criar conta)
   if (showTermsAccept) {
     return (
       <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
@@ -316,9 +121,7 @@ const SignUpModal = ({ onSuccess }: any) => {
               <Shield size={20} className="text-[#F4D03F]" />
               <h2 className="text-white text-base font-bold">Aceite os Termos</h2>
             </div>
-            <p className="text-[#A0A0B0] text-[11px] text-center mb-2">
-              Para continuar usando o ObaLeva, você precisa aceitar nossos Termos de Uso e Política de Privacidade.
-            </p>
+            <p className="text-[#A0A0B0] text-[11px] text-center mb-2">Para continuar usando o ObaLeva, você precisa aceitar nossos Termos de Uso e Política de Privacidade.</p>
             <div className="space-y-1.5 mt-3">
               <button onClick={() => setShowTermsModal(true)} className="w-full py-2 px-4 rounded-xl bg-white/10 border border-white/20 text-white font-medium text-left text-sm">📖 Ler Termos de Uso</button>
               <button onClick={() => setShowPrivacyModal(true)} className="w-full py-2 px-4 rounded-xl bg-white/10 border border-white/20 text-white font-medium text-left text-sm">🔒 Ler Política de Privacidade</button>
@@ -336,10 +139,7 @@ const SignUpModal = ({ onSuccess }: any) => {
         <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
           <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
           <div className="px-4 pb-4">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Car size={20} className="text-[#F4D03F]" />
-              <h2 className="text-white text-base font-bold">Fazer login</h2>
-            </div>
+            <div className="flex items-center justify-center gap-2 mb-3"><Car size={20} className="text-[#F4D03F]" /><h2 className="text-white text-base font-bold">Fazer login</h2></div>
             {errors.general && <div className="mb-2 p-1.5 text-center text-xs text-red-400 bg-red-500/10 rounded">{errors.general}</div>}
             <div className="space-y-1.5">
               <div><div className="bg-white/5 rounded-xl border border-white/15"><div className="flex items-center gap-2 px-3 py-1.5"><span className="text-white">📧</span><input type="email" placeholder="E-mail *" className="flex-1 bg-transparent text-white outline-none text-sm" value={email} onChange={(e) => setEmail(e.target.value)} /></div></div>{errors.email && <p className="text-red-400 text-[10px] px-1">{errors.email}</p>}</div>
@@ -359,10 +159,7 @@ const SignUpModal = ({ onSuccess }: any) => {
       <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
         <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
         <div className="px-4 pb-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Car size={20} className="text-[#F4D03F]" />
-            <h2 className="text-white text-base font-bold">Criar sua conta</h2>
-          </div>
+          <div className="flex items-center justify-center gap-2 mb-2"><Car size={20} className="text-[#F4D03F]" /><h2 className="text-white text-base font-bold">Criar sua conta</h2></div>
           <p className="text-[#A0A0B0] text-[11px] text-center mb-3">Comece a usar o ObaLeva</p>
           {errors.general && <div className="mb-2 p-1.5 text-center text-xs text-red-400 bg-red-500/10 rounded">{errors.general}</div>}
           <div className="space-y-1.5">
@@ -377,6 +174,135 @@ const SignUpModal = ({ onSuccess }: any) => {
             <div className="relative my-1.5"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-2 text-[9px] text-gray-400">ou</span></div></div>
             <div className="flex gap-1.5"><button onClick={handleGoogleLogin} className="flex-1 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs flex items-center justify-center gap-1"><svg className="w-3.5 h-3.5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/><path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/></svg><span>Google</span></button><button onClick={() => setIsLoginMode(true)} className="flex-1 py-1.5 rounded-xl border border-white/20 text-white text-xs">🔐 Já tenho conta</button></div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LocationModal = ({ onAllow, onDeny }: any) => (
+  <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
+    <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
+      <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+      <div className="px-4 pb-4">
+        <div className="flex items-center justify-center gap-2 mb-2"><MapPin size={20} className="text-[#F4D03F]" /><h2 className="text-white text-base font-bold">Acesso à localização</h2></div>
+        <p className="text-[#A0A0B0] text-[11px] text-center mb-3">Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.</p>
+        <div className="space-y-1.5">
+          <button onClick={() => { onAllow('exact'); }} className="w-full py-2 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left"><div className="flex justify-between items-center"><span className="text-sm">📍 SEMPRE PERMITIR</span><span className="text-[9px] text-black/70">Recomendado</span></div><p className="text-[9px] text-black/70">O app pode usar sua localização a qualquer momento</p></button>
+          <button onClick={() => { onAllow('approximate'); }} className="w-full py-2 px-4 rounded-xl border border-white/20 text-white font-bold text-left"><div><span className="text-sm">📍 SÓ DESTA VEZ</span><p className="text-[9px] text-[#A0A0B0]">O app usa sua localização apenas agora</p></div></button>
+          <button onClick={onDeny} className="w-full py-2 px-4 rounded-xl text-[#A0A0B0] text-left text-sm">🚫 NÃO PERMITIR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const NotificationModal = ({ onAllow, onDeny }: any) => (
+  <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
+    <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
+      <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+      <div className="px-4 pb-4">
+        <div className="flex items-center justify-center gap-2 mb-2"><Bell size={20} className="text-[#F4D03F]" /><h2 className="text-white text-base font-bold">Permitir notificações?</h2></div>
+        <p className="text-[#A0A0B0] text-[11px] text-center mb-2">Para receber alertas importantes como:</p>
+        <div className="bg-white/5 rounded-lg p-1.5 mb-2 space-y-0.5">
+          <p className="text-white text-[10px] text-center">• 🚗 "Motorista a caminho"</p>
+          <p className="text-white text-[10px] text-center">• 📍 "Estou chegando!"</p>
+          <p className="text-white text-[10px] text-center">• ✅ "Corrida confirmada"</p>
+          <p className="text-white text-[10px] text-center">• 💰 "Promoções e descontos"</p>
+        </div>
+        <div className="space-y-1.5">
+          <button onClick={onAllow} className="w-full py-2 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">PERMITIR</button>
+          <button onClick={onDeny} className="w-full py-2 rounded-xl border border-white/20 text-white font-bold text-sm">NÃO PERMITIR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
+  const [destino, setDestino] = useState('');
+  const [origem, setOrigem] = useState(localStorage.getItem('user_address') || 'Rua Santo Antônio, 1095 - Centro, São Paulo - SP');
+  const [modoEdicaoOrigem, setModoEdicaoOrigem] = useState(false);
+  const [modoEdicaoDestino, setModoEdicaoDestino] = useState(false);
+  const [enderecoEditadoOrigem, setEnderecoEditadoOrigem] = useState(origem);
+  const [enderecoEditadoDestino, setEnderecoEditadoDestino] = useState(destino);
+  const origemInputRef = useRef<HTMLInputElement>(null);
+  const destinoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const checkGoogleMaps = setInterval(() => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        clearInterval(checkGoogleMaps);
+        if (origemInputRef.current) { new window.google.maps.places.Autocomplete(origemInputRef.current, { fields: ['formatted_address'] }); }
+        if (destinoInputRef.current) { new window.google.maps.places.Autocomplete(destinoInputRef.current, { fields: ['formatted_address'] }); }
+      }
+    }, 100);
+    return () => clearInterval(checkGoogleMaps);
+  }, []);
+
+  const handleChamarObaLeva = () => { if (!destino) { alert('Digite um destino primeiro!'); return; } alert(`🚗 Corrida solicitada de: ${origem}\nPara: ${destino}`); };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
+      <div className="max-w-md mx-auto px-4 pb-24">
+        <div className="flex justify-between items-center py-3">
+          <h1 className="text-xl font-bold text-white">ObaLeva</h1>
+          {showFullUI && <div className="flex items-center gap-3"><button className="text-[#A0A0B0] text-xs">Mudar passageiro</button><button onClick={onLogout} className="text-red-400 text-xs font-bold hover:text-red-300 transition">SAIR</button></div>}
+        </div>
+        <div className="relative h-[280px] rounded-xl overflow-hidden mb-3 shadow-lg"><MapComponent /></div>
+        <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-2">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500" /><span className="text-white text-xs font-bold">ONDE VOCÊ ESTÁ?</span></div>
+            <button onClick={() => setModoEdicaoOrigem(!modoEdicaoOrigem)} className="text-[#F4D03F] text-xs hover:underline flex items-center gap-1">{modoEdicaoOrigem ? <>❌ Cancelar</> : <>✏️ Editar</>}</button>
+          </div>
+          {modoEdicaoOrigem ? (
+            <div className="flex gap-2"><input ref={origemInputRef} type="text" className="flex-1 bg-white/10 text-white p-2 rounded-lg outline-none text-sm" value={enderecoEditadoOrigem} onChange={(e) => setEnderecoEditadoOrigem(e.target.value)} /><button onClick={() => { setOrigem(enderecoEditadoOrigem); setModoEdicaoOrigem(false); localStorage.setItem('user_address', enderecoEditadoOrigem); }} className="px-3 bg-green-500/20 text-green-400 rounded-lg text-sm font-bold">✅</button></div>
+          ) : (<div className="flex items-center gap-2"><span className="text-white text-sm flex-1">{origem}</span></div>)}
+        </div>
+        {showFullUI && (
+          <>
+            <div className="bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/20 mb-3">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-white text-xs font-bold">PARA ONDE VOCÊ VAI?</span></div>
+                <button onClick={() => setModoEdicaoDestino(!modoEdicaoDestino)} className="text-[#F4D03F] text-xs hover:underline flex items-center gap-1">{modoEdicaoDestino ? <>❌ Cancelar</> : <>✏️ Editar</>}</button>
+              </div>
+              {modoEdicaoDestino ? (
+                <div className="flex gap-2"><input ref={destinoInputRef} type="text" placeholder="Digite o endereço ou cidade..." className="flex-1 bg-white/10 text-white p-2 rounded-lg outline-none text-sm" value={enderecoEditadoDestino} onChange={(e) => setEnderecoEditadoDestino(e.target.value)} /><button onClick={() => { setDestino(enderecoEditadoDestino); setModoEdicaoDestino(false); }} className="px-3 bg-green-500/20 text-green-400 rounded-lg text-sm font-bold">✅</button></div>
+              ) : (<input ref={destinoInputRef} type="text" placeholder="Digite o endereço ou cidade..." className="w-full bg-white/10 text-white p-2 rounded-lg outline-none text-sm" value={destino} onChange={(e) => setDestino(e.target.value)} />)}
+            </div>
+            <button onClick={handleChamarObaLeva} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-base flex items-center justify-center gap-2 mb-3"><Car size={18} /> Chamar ObaLeva</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const SearchScreen = () => (
+  <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]"><div className="max-w-md mx-auto px-4 pb-24 pt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><Search size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">🔍 Buscar</h2></div></div></div>
+);
+
+const ActivityScreen = () => (
+  <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]"><div className="max-w-md mx-auto px-4 pb-24 pt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><ClipboardList size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">📋 Atividade</h2><p className="text-gray-400 mt-2">Histórico de corridas</p></div></div></div>
+);
+
+const BottomNav = ({ active, onNavigate }: { active: string; onNavigate: (tab: string) => void }) => {
+  const tabs = [
+    { id: 'home', label: 'Início', icon: Home },
+    { id: 'buscar', label: 'Buscar', icon: Search },
+    { id: 'atividade', label: 'Atividade', icon: ClipboardList },
+    { id: 'perfil', label: 'Perfil', icon: User },
+  ];
+  return (
+    <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-3 z-50">
+      <div className="bg-[#1A1528] border border-[#F4D03F]/20 rounded-2xl max-w-md w-full mx-4 shadow-lg">
+        <div className="flex justify-between px-6 py-2">
+          {tabs.map((tab) => (
+            <button key={tab.id} onClick={() => onNavigate(tab.id)} className={`flex flex-col items-center gap-0.5 ${active === tab.id ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'}`}>
+              <tab.icon size={22} strokeWidth={active === tab.id ? 2 : 1.5} />
+              <span className="text-[10px]">{tab.label}</span>
+            </button>
+          ))}
         </div>
       </div>
     </div>
@@ -435,7 +361,14 @@ export const MainScreen = () => {
   return (
     <>
       {activeTab === 'home' && <HomeScreen user={user} onLogout={user ? handleLogout : undefined} showFullUI={showFullUI} />}
-      {activeTab === 'perfil' && user && <ProfileScreen user={user} profile={profile} onLogout={handleLogout} onRefresh={handleRefresh} />}
+      {activeTab === 'perfil' && user && (
+        <ProfileScreen 
+          user={user} 
+          profile={profile} 
+          onLogout={handleLogout} 
+          onRefresh={handleRefresh} 
+        />
+      )}
       {activeTab === 'buscar' && showFullUI && <SearchScreen />}
       {activeTab === 'atividade' && showFullUI && <ActivityScreen />}
       {showFullUI && <BottomNav active={activeTab} onNavigate={setActiveTab} />}
