@@ -7,6 +7,7 @@ import {
   Map, Smartphone
 } from 'lucide-react';
 import MapComponent from '../components/MapComponent';
+import ProfileScreen from '../components/ProfileScreen';
 import DriverRegistrationModal from '../components/DriverRegistrationModal';
 import TermsScreen from './TermsScreen';
 import PrivacyScreen from './PrivacyScreen';
@@ -74,78 +75,6 @@ const HomeScreen = ({ user, onLogout, showFullUI }: any) => {
             <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#8B5CF6]/20 rounded-xl p-3 flex justify-between items-center"><div><div className="flex items-center gap-1"><span className="text-2xl">🍔</span><span className="text-white font-bold text-sm">Almoço com até 50% OFF</span></div><p className="text-[#A0A0B0] text-xs mt-1">Peça agora</p></div><ChevronRight size={20} className="text-[#F4D03F]" /></div>
           </>
         )}
-      </div>
-    </div>
-  );
-};
-
-const ProfileScreen = ({ user, onLogout, onSejaMotorista, onRefresh }: any) => {
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [showTermsAcceptModal, setShowTermsAcceptModal] = useState(false);
-  const [showTermsScreen, setShowTermsScreen] = useState(false);
-  const [showPrivacyScreen, setShowPrivacyScreen] = useState(false);
-
-  const carregarPerfil = async () => {
-    const { data } = await supabase.from('usuarios').select('*').eq('id', user.id).single();
-    setProfile(data);
-    if (data && data.termos_aceitos === false) {
-      setShowTermsAcceptModal(true);
-    }
-    setLoading(false);
-  };
-
-  const aceitarTermos = async () => {
-    await supabase.from('usuarios').update({ termos_aceitos: true }).eq('id', user.id);
-    localStorage.setItem('terms_accepted', 'true');
-    setShowTermsAcceptModal(false);
-    carregarPerfil();
-  };
-
-  useEffect(() => { carregarPerfil(); }, [user]);
-
-  if (showTermsScreen) return <TermsScreen onBack={() => setShowTermsScreen(false)} />;
-  if (showPrivacyScreen) return <PrivacyScreen onBack={() => setShowPrivacyScreen(false)} />;
-
-  if (loading) return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
-
-  if (showTermsAcceptModal) {
-    return (
-      <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-        <div className="bg-[#1A1528] rounded-2xl max-w-md w-full p-6 border border-[#F4D03F]/20">
-          <div className="text-center mb-4">
-            <div className="w-16 h-16 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-3">
-              <Shield size={28} className="text-[#F4D03F]" />
-            </div>
-            <h2 className="text-white text-xl font-bold">Aceite os Termos</h2>
-            <p className="text-[#A0A0B0] text-sm mt-2">
-              Para continuar usando o ObaLeva, você precisa aceitar nossos Termos de Uso e Política de Privacidade.
-            </p>
-          </div>
-          <div className="space-y-3">
-            <button onClick={() => setShowTermsScreen(true)} className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white font-medium">📖 Ler Termos de Uso</button>
-            <button onClick={() => setShowPrivacyScreen(true)} className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white font-medium">🔒 Ler Política de Privacidade</button>
-            <button onClick={aceitarTermos} className="w-full py-3 rounded-xl bg-[#F4D03F] text-black font-bold">✅ ACEITAR E CONTINUAR</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-      <div className="max-w-md mx-auto px-4 pb-24 pt-4">
-        <div className="bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-2xl p-5 border-2 border-[#F4D03F]/30 shadow-xl">
-          <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#F4D03F]/30 to-[#8B5CF6]/20 flex items-center justify-center border-2 border-[#F4D03F]/50"><User size={40} className="text-[#F4D03F]" /></div>
-          <div className="text-center mt-3"><h2 className="text-white text-lg font-bold">{profile?.nome_completo || user.email}</h2><p className="text-[#A0A0B0] text-xs mt-1">{user.email}</p><div className="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-[#F4D03F]/20"><span className="text-[#F4D03F] text-xs font-bold">{profile?.tipo === 'motorista' ? 'MOTORISTA' : 'PASSAGEIRO'}</span></div></div>
-        </div>
-        <div className="mt-4 bg-[#1A1528] rounded-xl border border-[#F4D03F]/15 overflow-hidden">
-          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-2"><Edit size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Editar perfil</span></div><ChevronRight size={14} className="text-gray-500" /></button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-2"><CreditCard size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Formas de pagamento</span></div><ChevronRight size={14} className="text-gray-500" /></button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-2"><History size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Histórico de corridas</span></div><ChevronRight size={14} className="text-gray-500" /></button>
-          {profile?.tipo !== 'motorista' && <button onClick={onSejaMotorista} className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-2"><Truck size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Seja Motorista</span></div><ChevronRight size={14} className="text-gray-500" /></button>}
-          <button onClick={onLogout} className="w-full flex items-center justify-between p-3 hover:bg-red-500/10 transition"><div className="flex items-center gap-2"><LogOut size={16} className="text-red-400" /><span className="text-red-400 text-sm">Sair da conta</span></div><ChevronRight size={14} className="text-red-400" /></button>
-        </div>
       </div>
     </div>
   );
@@ -370,6 +299,7 @@ const SignUpModal = ({ onSuccess }: any) => {
 
 export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -382,6 +312,17 @@ export const MainScreen = () => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
+      
+      // Carregar perfil do usuário
+      if (session?.user) {
+        const { data: userData } = await supabase
+          .from('usuarios')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        setProfile(userData);
+      }
+      
       const completed = localStorage.getItem('obaleva_onboarding') === 'true';
       const locationAsked = localStorage.getItem('location_permission_asked') === 'true';
       setOnboardingCompleted(completed || !!session?.user);
@@ -401,6 +342,16 @@ export const MainScreen = () => {
   const handleNotificationDeny = () => { setShowNotificationModal(false); setShowSignUpModal(true); };
   const handleSignUpSuccess = () => { setShowSignUpModal(false); window.location.reload(); };
   const handleLogout = async () => { await supabase.auth.signOut(); localStorage.clear(); sessionStorage.clear(); window.location.reload(); };
+  const handleRefresh = async () => {
+    if (user) {
+      const { data: userData } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      setProfile(userData);
+    }
+  };
 
   if (loading) return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
 
@@ -409,7 +360,7 @@ export const MainScreen = () => {
   return (
     <>
       {activeTab === 'home' && <HomeScreen user={user} onLogout={user ? handleLogout : undefined} showFullUI={showFullUI} />}
-      {activeTab === 'perfil' && user && <ProfileScreen user={user} onLogout={handleLogout} onSejaMotorista={() => setShowDriverModal(true)} />}
+      {activeTab === 'perfil' && user && <ProfileScreen user={user} profile={profile} onLogout={handleLogout} onRefresh={handleRefresh} />}
       {activeTab === 'buscar' && showFullUI && <SearchScreen />}
       {activeTab === 'atividade' && showFullUI && <ActivityScreen />}
       {showFullUI && <BottomNav active={activeTab} onNavigate={setActiveTab} />}

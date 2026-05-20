@@ -21,41 +21,19 @@ const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ onBack }) => {
             <Shield size={20} className="text-[#F4D03F]" />
             <h2 className="text-white font-bold text-base">1. Informações Coletadas</h2>
           </div>
-          <p className="text-[#A0A0B0] text-sm">
-            Coletamos informações como: nome, e-mail, telefone, CPF, localização, dados de corrida e informações de pagamento.
-          </p>
+          <p className="text-[#A0A0B0] text-sm">Coletamos informações como: nome, e-mail, telefone, CPF, localização, dados de corrida e informações de pagamento.</p>
 
           <div className="flex items-center gap-2 pb-2 border-b border-white/10 pt-2">
             <Lock size={20} className="text-[#F4D03F]" />
             <h2 className="text-white font-bold text-base">2. Uso das Informações</h2>
           </div>
-          <p className="text-[#A0A0B0] text-sm">
-            Utilizamos seus dados para: processar corridas, calcular valores, melhorar o serviço, enviar notificações e cumprir obrigações legais.
-          </p>
+          <p className="text-[#A0A0B0] text-sm">Utilizamos seus dados para: processar corridas, calcular valores, melhorar o serviço, enviar notificações e cumprir obrigações legais.</p>
 
           <div className="flex items-center gap-2 pb-2 border-b border-white/10 pt-2">
             <Eye size={20} className="text-[#F4D03F]" />
             <h2 className="text-white font-bold text-base">3. Compartilhamento de Dados</h2>
           </div>
-          <p className="text-[#A0A0B0] text-sm">
-            Compartilhamos seus dados com motoristas para execução da corrida, parceiros de pagamento e quando exigido por lei.
-          </p>
-
-          <div className="flex items-center gap-2 pb-2 border-b border-white/10 pt-2">
-            <Database size={20} className="text-[#F4D03F]" />
-            <h2 className="text-white font-bold text-base">4. Armazenamento e Segurança</h2>
-          </div>
-          <p className="text-[#A0A0B0] text-sm">
-            Seus dados são armazenados com segurança em servidores criptografados. Implementamos medidas para proteger suas informações.
-          </p>
-
-          <div className="flex items-center gap-2 pb-2 border-b border-white/10 pt-2">
-            <Share2 size={20} className="text-[#F4D03F]" />
-            <h2 className="text-white font-bold text-base">5. Seus Direitos</h2>
-          </div>
-          <p className="text-[#A0A0B0] text-sm">
-            Você pode solicitar acesso, correção ou exclusão de seus dados a qualquer momento através do aplicativo ou pelo e-mail suporte@obaleva.com.br.
-          </p>
+          <p className="text-[#A0A0B0] text-sm">Compartilhamos seus dados com motoristas para execução da corrida, parceiros de pagamento e quando exigido por lei.</p>
 
           <div className="text-center pt-3 border-t border-white/10">
             <p className="text-[#A0A0B0] text-xs">Última atualização: Maio de 2026</p>
