@@ -157,9 +157,6 @@ const NotificationModal = ({ onAllow, onDeny }: any) => (
   </div>
 );
 
-// ============================================
-// MODAL DE CRIAÇÃO DE CONTA (AJUSTADO)
-// ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -169,8 +166,8 @@ const SignUpModal = ({ onSuccess }: any) => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showTermsScreen, setShowTermsScreen] = useState(false);
-  const [showPrivacyScreen, setShowPrivacyScreen] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isLoginMode, setIsLoginMode] = useState(false);
@@ -246,8 +243,8 @@ const SignUpModal = ({ onSuccess }: any) => {
     await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
   };
 
-  if (showTermsScreen) return <TermsScreen onBack={() => setShowTermsScreen(false)} />;
-  if (showPrivacyScreen) return <PrivacyScreen onBack={() => setShowPrivacyScreen(false)} />;
+  if (showTermsModal) return <TermsScreen onBack={() => setShowTermsModal(false)} />;
+  if (showPrivacyModal) return <PrivacyScreen onBack={() => setShowPrivacyModal(false)} />;
 
   if (isLoginMode) {
     return (
@@ -289,7 +286,16 @@ const SignUpModal = ({ onSuccess }: any) => {
           <div className="space-y-1.5">
             <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-1.5"><span className="text-white">👤</span><input type="text" placeholder="Nome completo *" className="flex-1 bg-transparent text-white outline-none text-sm" value={nome} onChange={(e) => setNome(e.target.value)} /></div></div>
             <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-1.5"><span className="text-white">📧</span><input type="email" placeholder="E-mail *" className="flex-1 bg-transparent text-white outline-none text-sm" value={email} onChange={(e) => setEmail(e.target.value)} /></div></div>
-            <div className="bg-white/5 rounded-lg border border-white/15"><div className="flex items-center gap-2 px-3 py-1.5"><span className="text-white">📱</span><span className="text-white text-xs font-bold mr-0.5">+55</span><input type="tel" placeholder="(11) 99999-9999" className="flex-1 bg-transparent text-white outline-none text-sm" value={telefone} onChange={(e) => setTelefone(formatPhoneNumber(e.target.value))} maxLength={15} /></div></div>
+            <div className="bg-white/5 rounded-lg border border-white/15">
+              <div className="flex items-center gap-2 px-3 py-1.5">
+                <div className="flex items-center gap-0.5">
+                  <span className="text-white">📱</span>
+                  <span className="text-green-400 text-sm">💚</span>
+                </div>
+                <span className="text-white text-xs font-bold mr-0.5">+55</span>
+                <input type="tel" placeholder="(11) 99999-9999" className="flex-1 bg-transparent text-white outline-none text-sm" value={telefone} onChange={(e) => setTelefone(formatPhoneNumber(e.target.value))} maxLength={15} />
+              </div>
+            </div>
             <div className="flex gap-2">
               <div className="flex-1 relative"><input type={showPassword ? 'text' : 'password'} placeholder="Senha *" className="w-full py-1.5 px-3 rounded-lg bg-white/10 border border-white/15 text-white pr-7 text-sm" value={password} onChange={(e) => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1.5 text-gray-400">{showPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button></div>
               <div className="flex-1 relative"><input type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirmar *" className="w-full py-1.5 px-3 rounded-lg bg-white/10 border border-white/15 text-white pr-7 text-sm" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /><button onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1.5 text-gray-400">{showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button></div>
@@ -298,9 +304,9 @@ const SignUpModal = ({ onSuccess }: any) => {
               <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="w-3 h-3" />
               <span className="text-[#A0A0B0] text-[9px]">
                 Li e aceito os{' '}
-                <button onClick={() => setShowTermsScreen(true)} className="text-[#F4D03F] underline">Termos de Uso</button>{' '}
+                <button type="button" onClick={() => setShowTermsModal(true)} className="text-[#F4D03F] underline">Termos de Uso</button>{' '}
                 e a{' '}
-                <button onClick={() => setShowPrivacyScreen(true)} className="text-[#F4D03F] underline">Política de Privacidade</button>
+                <button type="button" onClick={() => setShowPrivacyModal(true)} className="text-[#F4D03F] underline">Política de Privacidade</button>
               </span>
             </label>
             <button onClick={handleCreateAccount} disabled={loading} className="w-full py-1.5 rounded-lg bg-[#F4D03F] text-black font-bold text-sm">{loading ? 'Criando conta...' : '✅ CRIAR CONTA'}</button>
