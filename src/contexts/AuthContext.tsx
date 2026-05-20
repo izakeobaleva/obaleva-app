@@ -33,30 +33,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .maybeSingle();
       
-      if (error) return null;
+      if (error) {
+        console.error('Erro ao buscar perfil:', error);
+        return null;
+      }
       return data;
     } catch (err) {
+      console.error('Erro:', err);
       return null;
     }
   };
 
   const signOut = async () => {
+    console.log("🔴 Executando logout...");
     try {
       await supabase.auth.signOut();
-    } catch (err) {}
+    } catch (err) {
+      console.log("Erro no signOut do Supabase:", err);
+    }
+    
     localStorage.clear();
     sessionStorage.clear();
+    
+    document.cookie.split(";").forEach(function(c) {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    
     setUser(null);
     setProfile(null);
+    
     window.location.href = '/';
   };
 
   const refreshSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      setUser(session.user);
-      const profileData = await fetchProfile(session.user.id);
-      setProfile(profileData);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        const profileData = await fetchProfile(session.user.id);
+        setProfile(profileData);
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
+    } catch (err) {
+      console.error('Erro ao atualizar sessão:', err);
     }
   };
 
@@ -64,29 +85,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        
         if (session?.user) {
           setUser(session.user);
           const profileData = await fetchProfile(session.user.id);
           setProfile(profileData);
         }
-      } catch (err) {} finally {
+      } catch (err) {
+        console.error('Erro:', err);
+      } finally {
         setLoading(false);
       }
     };
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user);
-        const profileData = await fetchProfile(session.user.id);
-        setProfile(profileData);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setProfile(null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth event:', event);
+        if (event === 'SIGNED_IN' && session?.user) {
+          setUser(session.user);
+          const profileData = await fetchProfile(session.user.id);
+          setProfile(profileData);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setProfile(null);
+        }
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    );
 
     return () => subscription.unsubscribe();
   }, []);
