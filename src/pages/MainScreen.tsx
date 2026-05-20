@@ -160,20 +160,18 @@ const ActivityScreen = () => (
 );
 
 // ============================================
-// TELA DE LOCALIZAÇÃO (TÍTULO CENTRALIZADO)
+// 1. TELA DE LOCALIZAÇÃO (ÍCONE À ESQUERDA DO TÍTULO)
 // ============================================
 const LocationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
       <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
       <div className="px-5 pb-4">
-        <div className="text-center mb-3">
-          <div className="w-12 h-12 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-2">
-            <MapPin size={22} className="text-[#F4D03F]" />
-          </div>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <MapPin size={20} className="text-[#F4D03F]" />
           <h2 className="text-white text-base font-bold">Acesso à localização</h2>
-          <p className="text-[#A0A0B0] text-[11px] mt-1">Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.</p>
         </div>
+        <p className="text-[#A0A0B0] text-[11px] text-center mb-3">Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.</p>
         <div className="space-y-1.5">
           <button onClick={() => { onAllow('exact'); }} className="w-full py-2 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left">
             <div className="flex justify-between items-center"><span className="text-sm">📍 SEMPRE PERMITIR</span><span className="text-[9px] text-black/70">Recomendado</span></div>
@@ -190,25 +188,23 @@ const LocationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// TELA DE NOTIFICAÇÕES (TÍTULO CENTRALIZADO)
+// 2. TELA DE NOTIFICAÇÕES (ÍCONE À ESQUERDA DO TÍTULO)
 // ============================================
 const NotificationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
     <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
       <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
       <div className="px-5 pb-4">
-        <div className="text-center mb-3">
-          <div className="w-12 h-12 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-2">
-            <Bell size={22} className="text-[#F4D03F]" />
-          </div>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Bell size={20} className="text-[#F4D03F]" />
           <h2 className="text-white text-base font-bold">Permitir notificações?</h2>
-          <p className="text-[#A0A0B0] text-[11px] mt-1">Para receber alertas importantes como:</p>
         </div>
+        <p className="text-[#A0A0B0] text-[11px] text-center mb-2">Para receber alertas importantes como:</p>
         <div className="bg-white/5 rounded-lg p-1.5 mb-2 space-y-0.5">
-          <p className="text-white text-[10px]">• 🚗 "Motorista a caminho"</p>
-          <p className="text-white text-[10px]">• 📍 "Estou chegando!"</p>
-          <p className="text-white text-[10px]">• ✅ "Corrida confirmada"</p>
-          <p className="text-white text-[10px]">• 💰 "Promoções e descontos"</p>
+          <p className="text-white text-[10px] text-center">• 🚗 "Motorista a caminho"</p>
+          <p className="text-white text-[10px] text-center">• 📍 "Estou chegando!"</p>
+          <p className="text-white text-[10px] text-center">• ✅ "Corrida confirmada"</p>
+          <p className="text-white text-[10px] text-center">• 💰 "Promoções e descontos"</p>
         </div>
         <div className="space-y-1.5">
           <button onClick={onAllow} className="w-full py-2 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">PERMITIR</button>
@@ -220,7 +216,7 @@ const NotificationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// MODAL DE CRIAÇÃO DE CONTA (TÍTULO CENTRALIZADO, VALIDAÇÃO POR CAMPO)
+// 3. TELA DE CRIAÇÃO DE CONTA (ÍCONE À ESQUERDA DO TÍTULO, COM VALIDAÇÃO)
 // ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [nome, setNome] = useState('');
@@ -269,7 +265,6 @@ const SignUpModal = ({ onSuccess }: any) => {
 
   const handleCreateAccount = async () => {
     if (!validateAll()) return;
-
     setLoading(true);
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -279,8 +274,7 @@ const SignUpModal = ({ onSuccess }: any) => {
       if (signUpError) throw signUpError;
       if (data.user) {
         await supabase.from('usuarios').insert({
-          id: data.user.id, nome_completo: nome, email,
-          telefone: telefone.replace(/\D/g, ''), tipo: 'passageiro', termos_aceitos: false,
+          id: data.user.id, nome_completo: nome, email, telefone: telefone.replace(/\D/g, ''), tipo: 'passageiro', termos_aceitos: false,
         });
         await supabase.from('passageiros').insert({ id: data.user.id });
         localStorage.setItem('obaleva_onboarding', 'true');
@@ -325,8 +319,8 @@ const SignUpModal = ({ onSuccess }: any) => {
         <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
           <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
           <div className="px-5 pb-4">
-            <div className="text-center mb-3">
-              <div className="w-12 h-12 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-2"><Car size={22} className="text-[#F4D03F]" /></div>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <Car size={20} className="text-[#F4D03F]" />
               <h2 className="text-white text-base font-bold">Fazer login</h2>
             </div>
             {errors.general && <div className="mb-2 p-1.5 text-center text-xs text-red-400 bg-red-500/10 rounded">{errors.general}</div>}
@@ -348,11 +342,11 @@ const SignUpModal = ({ onSuccess }: any) => {
       <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
         <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
         <div className="px-5 pb-4">
-          <div className="text-center mb-3">
-            <div className="w-12 h-12 mx-auto rounded-full bg-[#F4D03F]/20 flex items-center justify-center mb-2"><Car size={22} className="text-[#F4D03F]" /></div>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Car size={20} className="text-[#F4D03F]" />
             <h2 className="text-white text-base font-bold">Criar sua conta</h2>
-            <p className="text-[#A0A0B0] text-[11px] mt-1">Comece a usar o ObaLeva</p>
           </div>
+          <p className="text-[#A0A0B0] text-[11px] text-center mb-3">Comece a usar o ObaLeva</p>
 
           {errors.general && <div className="mb-2 p-1.5 text-center text-xs text-red-400 bg-red-500/10 rounded">{errors.general}</div>}
 
