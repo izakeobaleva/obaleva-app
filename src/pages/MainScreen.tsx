@@ -214,7 +214,7 @@ const NotificationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// MODAL DE CRIAÇÃO DE CONTA
+// MODAL DE CRIAÇÃO DE CONTA (SEM CHECKBOX DE TERMOS)
 // ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [nome, setNome] = useState('');
@@ -349,10 +349,6 @@ const SignUpModal = ({ onSuccess }: any) => {
               <div className="flex-1"><div className="relative"><input type={showPassword ? 'text' : 'password'} placeholder="Senha *" className="w-full py-1.5 px-3 rounded-xl bg-white/10 border border-white/15 text-white pr-7 text-sm" value={password} onChange={(e) => { setPassword(e.target.value); validateField('password', e.target.value); }} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1.5 text-gray-400">{showPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button></div>{errors.password && <p className="text-red-400 text-[10px] px-1">{errors.password}</p>}</div>
               <div className="flex-1"><div className="relative"><input type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirmar *" className="w-full py-1.5 px-3 rounded-xl bg-white/10 border border-white/15 text-white pr-7 text-sm" value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); validateField('confirmPassword', e.target.value); }} /><button onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1.5 text-gray-400">{showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}</button></div>{errors.confirmPassword && <p className="text-red-400 text-[10px] px-1">{errors.confirmPassword}</p>}</div>
             </div>
-            <label className="flex items-start gap-2 py-1">
-              <input type="checkbox" className="w-3.5 h-3.5 mt-0.5" />
-              <span className="text-[#A0A0B0] text-[9px] leading-tight">Li e aceito os <button onClick={() => setShowTermsModal(true)} className="text-[#F4D03F] underline">Termos de Uso</button> e a <button onClick={() => setShowPrivacyModal(true)} className="text-[#F4D03F] underline">Política de Privacidade</button></span>
-            </label>
             <button onClick={handleCreateAccount} disabled={loading} className="w-full py-1.5 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">{loading ? 'Criando conta...' : '✅ CRIAR CONTA'}</button>
             <div className="relative my-1.5"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-2 text-[9px] text-gray-400">ou</span></div></div>
             <div className="flex gap-1.5"><button onClick={handleGoogleLogin} className="flex-1 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs flex items-center justify-center gap-1"><svg className="w-3.5 h-3.5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/><path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/></svg><span>Google</span></button><button onClick={() => setIsLoginMode(true)} className="flex-1 py-1.5 rounded-xl border border-white/20 text-white text-xs">🔐 Já tenho conta</button></div>
@@ -364,7 +360,7 @@ const SignUpModal = ({ onSuccess }: any) => {
 };
 
 // ============================================
-// MAIN SCREEN PRINCIPAL (EXPORTADA CORRETAMENTE)
+// MAIN SCREEN PRINCIPAL
 // ============================================
 export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);
@@ -445,7 +441,6 @@ export const MainScreen = () => {
     window.location.reload();
   };
 
-  // FUNÇÃO DE LOGOUT GARANTIDA
   const handleLogout = async () => {
     console.log("🔴 Logout");
     await supabase.auth.signOut();
