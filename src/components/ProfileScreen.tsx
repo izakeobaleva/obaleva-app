@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PassengerProfile from './PassengerProfile';
 import DriverProfile from './DriverProfile';
 import DriverRegistrationModal from './DriverRegistrationModal';
