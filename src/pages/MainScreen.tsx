@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Car, Chrome, Eye, EyeOff, Home, Search, ClipboardList, User, Bell, MapPin, ChevronRight, Edit, CreditCard, History, Truck, LogOut } from 'lucide-react';
+import { 
+  Car, Chrome, Eye, EyeOff, Home, Search, ClipboardList, User, 
+  Bell, MapPin, ChevronRight, LogOut, Edit, CreditCard, History, 
+  Truck, X, ArrowLeft, Upload, Key, Shield, Calendar, Phone, Mail, 
+  Map, Smartphone
+} from 'lucide-react';
 import MapComponent from '../components/MapComponent';
 import DriverRegistrationModal from '../components/DriverRegistrationModal';
 
@@ -76,7 +81,7 @@ const ProfileScreen = ({ user, onLogout, onSejaMotorista }: any) => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { (async () => { const { data } = await supabase.from('usuarios').select('*').eq('id', user.id).single(); setProfile(data); setLoading(false); })(); }, [user]);
+  useEffect(() => { supabase.from('usuarios').select('*').eq('id', user.id).single().then(({ data }) => { setProfile(data); setLoading(false); }); }, [user]);
 
   if (loading) return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
 
@@ -107,14 +112,58 @@ const ActivityScreen = () => (
   <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]"><div className="max-w-md mx-auto px-4 pb-24 pt-8"><div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[#F4D03F]/20"><ClipboardList size={48} className="text-[#F4D03F] mx-auto mb-4" /><h2 className="text-white text-xl font-bold">📋 Atividade</h2><p className="text-gray-400 mt-2">Histórico de corridas</p></div></div></div>
 );
 
+// ============================================
+// MODAL INFERIOR DE LOCALIZAÇÃO (RESTAURADO)
+// ============================================
 const LocationModal = ({ onAllow, onDeny }: any) => (
-  <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center"><div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-2xl border border-[#F4D03F]/30"><div className="p-4"><div className="flex items-center gap-2 mb-3"><MapPin size={28} className="text-[#F4D03F]" /><h2 className="text-white text-lg font-bold">Acesso à localização</h2></div><p className="text-[#A0A0B0] text-sm mb-4">Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.</p><div className="space-y-2"><button onClick={() => { onAllow('exact'); }} className="w-full py-2.5 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left"><div><span className="text-base">📍 SEMPRE PERMITIR</span><p className="text-xs text-black/70">O app pode usar sua localização a qualquer momento</p></div></button><button onClick={() => { onAllow('approximate'); }} className="w-full py-2.5 px-4 rounded-xl border border-white/20 text-white font-bold text-left"><div><span className="text-base">📍 SÓ DESTA VEZ</span><p className="text-xs text-[#A0A0B0]">O app usa sua localização apenas agora</p></div></button><button onClick={onDeny} className="w-full py-2.5 px-4 rounded-xl text-[#A0A0B0] text-left text-base">🚫 NÃO PERMITIR</button></div></div></div></div>
+  <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
+    <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+      <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+      <div className="px-5 pb-5">
+        <div className="flex items-center gap-2 mb-2"><MapPin size={24} className="text-[#F4D03F]" /><h2 className="text-white text-base font-bold">Acesso à localização</h2></div>
+        <p className="text-[#A0A0B0] text-xs mb-3">Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.</p>
+        <div className="space-y-2">
+          <button onClick={() => { onAllow('exact'); }} className="w-full py-2 px-4 rounded-xl bg-[#F4D03F] text-black font-bold text-left flex justify-between items-center">
+            <div className="flex flex-col"><span className="text-sm">📍 SEMPRE PERMITIR</span><span className="text-[10px] text-black/70 font-normal">O app pode usar sua localização a qualquer momento</span></div>
+          </button>
+          <button onClick={() => { onAllow('approximate'); }} className="w-full py-2 px-4 rounded-xl border border-white/20 text-white font-bold text-left flex justify-between items-center">
+            <div className="flex flex-col"><span className="text-sm">📍 SÓ DESTA VEZ</span><span className="text-[10px] text-[#A0A0B0] font-normal">O app usa sua localização apenas agora</span></div>
+          </button>
+          <button onClick={onDeny} className="w-full py-2 px-4 rounded-xl text-[#A0A0B0] text-left text-sm">🚫 NÃO PERMITIR</button>
+        </div>
+      </div>
+    </div>
+  </div>
 );
 
+// ============================================
+// MODAL INFERIOR DE NOTIFICAÇÕES (RESTAURADO)
+// ============================================
 const NotificationModal = ({ onAllow, onDeny }: any) => (
-  <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center"><div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-2xl border border-[#F4D03F]/30"><div className="p-4"><div className="flex items-center gap-2 mb-3"><Bell size={28} className="text-[#F4D03F]" /><h2 className="text-white text-lg font-bold">Permitir notificações?</h2></div><p className="text-[#A0A0B0] text-sm mb-2">Para receber alertas importantes como:</p><div className="bg-white/5 rounded-lg p-2 mb-3 space-y-1"><p className="text-white text-sm">• 🚗 "Motorista a caminho"</p><p className="text-white text-sm">• 📍 "Estou chegando!"</p><p className="text-white text-sm">• ✅ "Corrida confirmada"</p><p className="text-white text-sm">• 💰 "Promoções e descontos"</p></div><div className="space-y-2"><button onClick={onAllow} className="w-full py-2.5 rounded-xl bg-[#F4D03F] text-black font-bold text-base">PERMITIR</button><button onClick={onDeny} className="w-full py-2.5 rounded-xl border border-white/20 text-white font-bold text-base">NÃO PERMITIR</button></div></div></div></div>
+  <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
+    <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+      <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+      <div className="px-5 pb-5">
+        <div className="flex items-center gap-2 mb-2"><Bell size={24} className="text-[#F4D03F]" /><h2 className="text-white text-base font-bold">Permitir notificações?</h2></div>
+        <p className="text-[#A0A0B0] text-xs mb-2">Para receber alertas importantes como:</p>
+        <div className="bg-white/5 rounded-lg p-2 mb-3 space-y-1">
+          <p className="text-white text-xs">• 🚗 "Motorista a caminho"</p>
+          <p className="text-white text-xs">• 📍 "Estou chegando!"</p>
+          <p className="text-white text-xs">• ✅ "Corrida confirmada"</p>
+          <p className="text-white text-xs">• 💰 "Promoções e descontos"</p>
+        </div>
+        <div className="space-y-2">
+          <button onClick={onAllow} className="w-full py-2 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">PERMITIR</button>
+          <button onClick={onDeny} className="w-full py-2 rounded-xl border border-white/20 text-white font-bold text-sm">NÃO PERMITIR</button>
+        </div>
+      </div>
+    </div>
+  </div>
 );
 
+// ============================================
+// MODAL INFERIOR DE CRIAÇÃO DE CONTA (RESTAURADO)
+// ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -132,23 +181,32 @@ const SignUpModal = ({ onSuccess }: any) => {
   const handleGoogleLogin = async () => { await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); };
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
-      <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-2xl border border-[#F4D03F]/30"><div className="p-4">
-        <div className="flex items-center gap-2 mb-3"><Car size={28} className="text-[#F4D03F]" /><h2 className="text-white text-lg font-bold">Criar sua conta</h2></div>
-        {error && <div className="mb-3 p-2 text-center text-sm text-red-400 bg-red-500/10 rounded">{error}</div>}
-        <div className="space-y-3">
-          <button onClick={handleGoogleLogin} className="w-full py-2.5 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center gap-2 text-base"><svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/><path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/></svg><span>Entrar com Google</span></button>
-          <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-2 text-xs text-gray-400">ou</span></div></div>
-          <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white text-base" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <div className="relative"><input type={showPassword ? 'text' : 'password'} placeholder="Senha" className="w-full p-3 rounded-xl bg-white/10 border border-white/15 text-white pr-10 text-base" value={password} onChange={(e) => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-400">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
-          <button onClick={handleLogin} disabled={loading} className="w-full py-2.5 rounded-xl bg-[#F4D03F] text-black font-bold text-base">{loading ? 'Entrando...' : 'ENTRAR'}</button>
-          <button className="w-full text-[#F4D03F] text-sm text-center">Criar nova conta</button>
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
+      <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+        <div className="p-3 flex justify-center"><div className="w-12 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
+        <div className="px-5 pb-5">
+          <div className="flex items-center gap-2 mb-2"><Car size={24} className="text-[#F4D03F]" /><h2 className="text-white text-base font-bold">Criar sua conta</h2></div>
+          {error && <div className="mb-2 p-2 text-center text-xs text-red-400 bg-red-500/10 rounded">{error}</div>}
+          <div className="space-y-2">
+            <button onClick={handleGoogleLogin} className="w-full py-2 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0181818,0 12,0 C7.27090909,0 3.19745455,2.69832759 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#34A853" d="M5.26620003,9.76452941 C4.45454545,10.7909091 4,12 4,13.1818182 C4,14.3636364 4.45454545,15.5727273 5.26620003,16.5990909 L1.23990909,19.713292 C0.439909091,18.0145909 0,16.0909091 0,13.1818182 C0,10.2727273 0.439909091,8.34904545 1.23990909,6.65032759 L5.26620003,9.76452941 Z"/><path fill="#FBBC05" d="M12,22.3636364 C15.0181818,22.3636364 17.7818182,21.2181818 19.9090909,19.3636364 L16.4181818,15.8727273 C15.2181818,16.8545455 13.6909091,17.4545455 12,17.4545455 C8.85444915,17.4545455 6.19878754,15.425004 5.26620003,12.5981066 L1.23990909,15.7123077 C3.19745455,19.6634077 7.27090909,22.3636364 12,22.3636364 Z"/><path fill="#4285F4" d="M19.9090909,19.3636364 L16.4181818,15.8727273 C17.7818182,14.8909091 19.0909091,13.3636364 19.0909091,11.5454545 L12,11.5454545 L12,14.7272727 L18.1818182,14.7272727 C18.1818182,15.3636364 17.7818182,16.0909091 17.0909091,16.7272727 L19.9090909,19.3636364 Z"/></svg>
+              <span>Entrar com Google</span>
+            </button>
+            <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div><div className="relative flex justify-center"><span className="bg-[#1A1528] px-2 text-[10px] text-gray-400">ou</span></div></div>
+            <input type="email" placeholder="E-mail" className="w-full p-2 rounded-xl bg-white/10 border border-white/15 text-white text-sm" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <div className="relative"><input type={showPassword ? 'text' : 'password'} placeholder="Senha" className="w-full p-2 rounded-xl bg-white/10 border border-white/15 text-white pr-8 text-sm" value={password} onChange={(e) => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2 text-gray-400">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
+            <button onClick={handleLogin} disabled={loading} className="w-full py-2 rounded-xl bg-[#F4D03F] text-black font-bold text-sm">{loading ? 'Entrando...' : 'ENTRAR'}</button>
+            <button className="w-full text-[#F4D03F] text-xs text-center">Criar nova conta</button>
+          </div>
         </div>
-      </div></div>
+      </div>
     </div>
   );
 };
 
+// ============================================
+// MAIN SCREEN PRINCIPAL
+// ============================================
 export const MainScreen = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
