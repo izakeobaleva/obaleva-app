@@ -160,13 +160,13 @@ const ActivityScreen = () => (
 );
 
 // ============================================
-// 1. TELA DE LOCALIZAÇÃO (ÍCONE À ESQUERDA DO TÍTULO)
+// 1. TELA DE LOCALIZAÇÃO (ALINHADA COM O MAPA)
 // ============================================
 const LocationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
-    <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+    <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
       <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-      <div className="px-5 pb-4">
+      <div className="px-4 pb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
           <MapPin size={20} className="text-[#F4D03F]" />
           <h2 className="text-white text-base font-bold">Acesso à localização</h2>
@@ -188,13 +188,13 @@ const LocationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// 2. TELA DE NOTIFICAÇÕES (ÍCONE À ESQUERDA DO TÍTULO)
+// 2. TELA DE NOTIFICAÇÕES (ALINHADA COM O MAPA)
 // ============================================
 const NotificationModal = ({ onAllow, onDeny }: any) => (
   <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
-    <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+    <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
       <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-      <div className="px-5 pb-4">
+      <div className="px-4 pb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Bell size={20} className="text-[#F4D03F]" />
           <h2 className="text-white text-base font-bold">Permitir notificações?</h2>
@@ -216,7 +216,7 @@ const NotificationModal = ({ onAllow, onDeny }: any) => (
 );
 
 // ============================================
-// 3. TELA DE CRIAÇÃO DE CONTA (ÍCONE À ESQUERDA DO TÍTULO, COM VALIDAÇÃO)
+// 3. TELA DE CRIAÇÃO DE CONTA (ALINHADA COM O MAPA)
 // ============================================
 const SignUpModal = ({ onSuccess }: any) => {
   const [nome, setNome] = useState('');
@@ -316,9 +316,9 @@ const SignUpModal = ({ onSuccess }: any) => {
   if (isLoginMode) {
     return (
       <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
-        <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+        <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
           <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-          <div className="px-5 pb-4">
+          <div className="px-4 pb-4">
             <div className="flex items-center justify-center gap-2 mb-3">
               <Car size={20} className="text-[#F4D03F]" />
               <h2 className="text-white text-base font-bold">Fazer login</h2>
@@ -339,9 +339,9 @@ const SignUpModal = ({ onSuccess }: any) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
-      <div className="bg-[#1A1528] w-full max-w-md rounded-t-2xl border-t border-[#F4D03F]/30">
+      <div className="bg-[#1A1528] w-full max-w-md mx-4 rounded-t-2xl border-t border-[#F4D03F]/30">
         <div className="p-2 flex justify-center"><div className="w-10 h-1 bg-[#F4D03F]/50 rounded-full" /></div>
-        <div className="px-5 pb-4">
+        <div className="px-4 pb-4">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Car size={20} className="text-[#F4D03F]" />
             <h2 className="text-white text-base font-bold">Criar sua conta</h2>
