@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 
 const Perfil = () => {
-  const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState('carregando...');
   const [userName, setUserName] = useState('Usuário');
   const [isMotorista, setIsMotorista] = useState(false);
+  const [showBotao, setShowBotao] = useState(true);
 
   useEffect(() => {
     carregarDados();
@@ -26,6 +25,7 @@ const Perfil = () => {
       
       if (data?.tipo === 'motorista') {
         setIsMotorista(true);
+        setShowBotao(false);
       }
     }
   }
@@ -34,7 +34,7 @@ const Perfil = () => {
     await supabase.auth.signOut();
     localStorage.clear();
     sessionStorage.clear();
-    navigate('/');
+    window.location.href = '/';
   };
 
   return (
@@ -42,49 +42,27 @@ const Perfil = () => {
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #0F0B1A, #1A1528)',
       padding: '16px',
-      paddingBottom: '100px',
       fontFamily: 'system-ui, sans-serif'
     }}>
       <div style={{ maxWidth: '500px', margin: '0 auto' }}>
-        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 0', marginBottom: '20px' }}>
-          <button 
-            onClick={() => navigate('/')}
-            style={{ background: 'none', border: 'none', color: '#A0A0B0', fontSize: '20px', cursor: 'pointer' }}
-          >
-            ←
-          </button>
+          <button onClick={() => window.location.href = '/'} style={{ background: 'none', border: 'none', color: '#A0A0B0', fontSize: '20px', cursor: 'pointer' }}>←</button>
           <h1 style={{ color: 'white', fontSize: '20px', margin: 0, fontWeight: 'bold' }}>Meu Perfil</h1>
         </div>
 
-        {/* Card do usuário */}
         <div style={{
-          background: '#1A1528',
-          borderRadius: '16px',
-          padding: '24px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          textAlign: 'center',
-          marginBottom: '16px'
+          background: '#1A1528', borderRadius: '16px', padding: '24px', border: '1px solid rgba(255,255,255,0.1)',
+          textAlign: 'center', marginBottom: '16px'
         }}>
           <div style={{
-            width: '80px',
-            height: '80px',
-            background: 'linear-gradient(135deg, #F4D03F, #F59E0B)',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 16px'
+            width: '80px', height: '80px', background: 'linear-gradient(135deg, #F4D03F, #F59E0B)',
+            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px'
           }}>
             <span style={{ fontSize: '36px' }}>👤</span>
           </div>
           <h2 style={{ color: 'white', fontSize: '20px', margin: '0 0 8px' }}>{userName}</h2>
           <span style={{
-            display: 'inline-block',
-            padding: '6px 16px',
-            borderRadius: '9999px',
-            fontSize: '12px',
-            fontWeight: '600',
+            display: 'inline-block', padding: '6px 16px', borderRadius: '9999px', fontSize: '12px', fontWeight: '600',
             background: isMotorista ? 'rgba(34,197,94,0.3)' : 'rgba(59,130,246,0.3)',
             color: isMotorista ? '#22C55E' : '#3B82F6'
           }}>
@@ -92,13 +70,8 @@ const Perfil = () => {
           </span>
         </div>
 
-        {/* Informações */}
         <div style={{
-          background: '#1A1528',
-          borderRadius: '16px',
-          padding: '20px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          marginBottom: '16px'
+          background: '#1A1528', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '16px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
             <span style={{ fontSize: '18px' }}>📧</span>
@@ -116,51 +89,28 @@ const Perfil = () => {
           </div>
         </div>
 
-        {/* Botão Tornar-se Parceiro */}
-        {!isMotorista && (
+        {showBotao && (
           <button
-            onClick={() => navigate('/tornar-parceiro')}
+            onClick={() => window.location.href = '/novo-parceiro'}
             style={{
-              width: '100%',
-              background: '#1A1528',
-              borderRadius: '16px',
-              padding: '16px',
-              border: '1px solid rgba(244,208,63,0.3)',
-              color: '#F4D03F',
-              fontSize: '16px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              marginBottom: '16px',
-              transition: 'all 0.2s'
+              width: '100%', background: '#1A1528', borderRadius: '16px', padding: '16px',
+              border: '1px solid rgba(244,208,63,0.3)', color: '#F4D03F', fontSize: '16px',
+              fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', gap: '8px', marginBottom: '16px'
             }}
           >
             <span style={{ fontSize: '18px' }}>🚛</span>
-            Tornar-se Parceiro
+            Quero ser Parceiro
           </button>
         )}
 
-        {/* Botão Sair */}
         <button
           onClick={handleSignOut}
           style={{
-            width: '100%',
-            background: '#1A1528',
-            borderRadius: '16px',
-            padding: '16px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#EF4444',
-            fontSize: '16px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s'
+            width: '100%', background: '#1A1528', borderRadius: '16px', padding: '16px',
+            border: '1px solid rgba(255,255,255,0.1)', color: '#EF4444', fontSize: '16px',
+            fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: '8px'
           }}
         >
           <span style={{ fontSize: '18px' }}>🚪</span>
