@@ -1,5 +1,4 @@
 import { useAuth } from '../contexts/AuthContext';
-import { BottomNav } from '../components/BottomNav';
 import { User, Mail, Shield, LogOut, ArrowLeft, Truck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -77,7 +76,23 @@ export default function Perfil() {
         </button>
       </main>
 
-      <BottomNav role={userType as 'passageiro' | 'motorista'} />
+      {userType && <BottomNav role={userType as 'passageiro' | 'motorista'} />}
+    </div>
+  );
+}
+
+function BottomNav({ role }: { role: 'passageiro' | 'motorista' }) {
+  return (
+    <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-3 z-50">
+      <div className="bg-[#1A1528] border border-[#F4D03F]/30 rounded-2xl max-w-md w-full mx-4">
+        <div className="flex justify-between px-5 py-3">
+          {[{ id: 'home', label: 'Início' }, { id: 'perfil', label: 'Perfil' }].map(tab => (
+            <div key={tab.id} className={`flex flex-col items-center gap-1 ${tab.id === 'perfil' ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'}`}>
+              <span className="text-[10px]">{tab.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
