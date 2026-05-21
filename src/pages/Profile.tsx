@@ -1,45 +1,44 @@
-import { useAuth } from '../contexts/AuthContext'
-import { BottomNav } from '../components/BottomNav'
-import { User, Mail, Shield, LogOut, ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext';
+import { BottomNav } from '../components/BottomNav';
+import { User, Mail, Shield, LogOut, ArrowLeft, Truck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Perfil() {
-  const { user, signOut } = useAuth()
-  const navigate = useNavigate()
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
-  }
+    await signOut();
+    navigate('/');
+  };
 
-  const userType = user?.user_metadata?.tipo || 'passageiro'
+  const userType = user?.user_metadata?.tipo || 'passageiro';
+  const isMotorista = profile?.tipo === 'motorista';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
       <header className="glass-header sticky top-0 z-20 px-6 py-4 flex items-center gap-3">
-        <button
-          onClick={() => navigate('/')}
-          className="btn-outline-dark p-2"
-          aria-label="Voltar"
-        >
+        <button onClick={() => navigate('/')} className="btn-outline-dark p-2" aria-label="Voltar">
           <ArrowLeft size={20} />
         </button>
-        <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Meu Perfil</h1>
+        <h1 className="text-xl font-bold text-white">Meu Perfil</h1>
       </header>
       
       <main className="p-4 max-w-lg mx-auto space-y-4 mt-4">
+        {/* Card do usuário */}
         <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10 text-center">
           <div className="w-20 h-20 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <User size={36} className="text-[#1E1E2F]" />
           </div>
           <h2 className="text-xl font-bold text-white">{user?.email?.split('@')[0] || 'Usuário'}</h2>
           <span className={`inline-block mt-2 px-4 py-1.5 rounded-full text-xs font-semibold ${
-            userType === 'motorista' ? 'bg-green-900/40 text-green-400' : 'bg-blue-900/40 text-blue-400'
+            isMotorista ? 'bg-green-900/40 text-green-400' : 'bg-blue-900/40 text-blue-400'
           }`}>
-            {userType === 'motorista' ? '🚗 Motorista' : '🚶 Passageiro'}
+            {isMotorista ? '🚗 Motorista' : '🚶 Passageiro'}
           </span>
         </div>
 
+        {/* Informações da conta */}
         <div className="bg-[#1A1528] rounded-2xl p-5 border border-white/10 space-y-4">
           <div className="flex items-center gap-3">
             <Mail size={18} className="text-[#F4D03F]" />
@@ -57,6 +56,18 @@ export default function Perfil() {
           </div>
         </div>
 
+        {/* Botão Seja Motorista - aparece apenas se NÃO for motorista */}
+        {!isMotorista && (
+          <button
+            onClick={() => navigate('/seja-motorista')}
+            className="w-full bg-[#1A1528] rounded-2xl p-4 border border-[#F4D03F]/30 flex items-center justify-center gap-2 text-[#F4D03F] hover:bg-[#F4D03F]/10 transition-all font-medium"
+          >
+            <Truck size={18} />
+            Quero ser Motorista
+          </button>
+        )}
+
+        {/* Botão Sair */}
         <button
           onClick={handleSignOut}
           className="w-full bg-[#1A1528] rounded-2xl p-4 border border-white/10 flex items-center justify-center gap-2 text-red-400 hover:bg-red-500/10 transition-all font-medium"
@@ -68,5 +79,5 @@ export default function Perfil() {
 
       <BottomNav role={userType as 'passageiro' | 'motorista'} />
     </div>
-  )
+  );
 }
