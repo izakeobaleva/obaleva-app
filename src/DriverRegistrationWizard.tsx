@@ -32,13 +32,10 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
   const totalEtapas = 4;
 
   const handleLogout = async () => {
-    if (onLogout) {
-      onLogout();
-    } else {
-      await supabase.auth.signOut();
-      localStorage.clear();
-      window.location.href = '/';
-    }
+    if (onLogout) { onLogout(); return; }
+    await supabase.auth.signOut();
+    localStorage.clear();
+    window.location.href = '/';
   };
 
   const formatCPF = (value: string) => {
@@ -54,13 +51,8 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
     return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
 
-  const handleAvancar = () => {
-    if (etapa < totalEtapas) setEtapa(etapa + 1);
-  };
-
-  const handleVoltar = () => {
-    if (etapa > 1) setEtapa(etapa - 1);
-  };
+  const handleAvancar = () => { if (etapa < totalEtapas) setEtapa(etapa + 1); };
+  const handleVoltar = () => { if (etapa > 1) setEtapa(etapa - 1); };
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -88,20 +80,11 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
     <div className="bg-[#1A1528] rounded-xl border border-white/15">
       <div className="flex items-center gap-3 px-3 py-2">
         <Icon size={15} className="text-[#F4D03F] shrink-0" />
-        <input
-          type={type}
-          placeholder={placeholder}
-          value={value}
+        <input type={type} placeholder={placeholder} value={value}
           onChange={(e) => onChange(e.target.value)}
           className="flex-1 bg-transparent text-white outline-none text-sm placeholder:text-[#A0A0B0]"
-          maxLength={maxLength}
-          required
-        />
-        {value && (
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        )}
+          maxLength={maxLength} required />
+        {value && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>}
       </div>
     </div>
   );
@@ -110,21 +93,11 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
     <div className="bg-[#1A1528] rounded-xl border border-white/15">
       <div className="flex items-center gap-3 px-3 py-2">
         <Icon size={15} className="text-[#F4D03F] shrink-0" />
-        <div className="flex-1 relative">
-          <input
-            type="date"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-transparent text-white outline-none text-sm"
-            style={{ colorScheme: 'dark' }}
-            required
-          />
-        </div>
-        {value && (
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        )}
+        <input type="date" value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 bg-transparent text-white outline-none text-sm"
+          style={{ colorScheme: 'dark' }} required />
+        {value && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>}
       </div>
     </div>
   );
@@ -132,10 +105,12 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
   const UploadField = ({ label, file, onChange, accept = "image/*" }: any) => (
     <div>
       <label className="text-[#A0A0B0] text-xs mb-1 block">{label}</label>
-      <div className="bg-[#1A1528] rounded-xl border border-dashed border-[#F4D03F]/30 p-3 text-center cursor-pointer hover:bg-white/5 transition" onClick={() => document.getElementById(label)?.click()}>
+      <div className="bg-[#1A1528] rounded-xl border border-dashed border-[#F4D03F]/30 p-3 text-center cursor-pointer hover:bg-white/5 transition"
+        onClick={() => document.getElementById(label)?.click()}>
         <Upload size={20} className="text-[#F4D03F] mx-auto mb-1" />
         <p className="text-[#A0A0B0] text-xs">{file ? file.name : 'Toque para enviar'}</p>
-        <input id={label} type="file" accept={accept} className="hidden" onChange={(e) => onChange(e.target.files?.[0] || null)} />
+        <input id={label} type="file" accept={accept} className="hidden"
+          onChange={(e) => onChange(e.target.files?.[0] || null)} />
       </div>
     </div>
   );
@@ -145,8 +120,7 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
       {/* Header fixo */}
       <div className="flex-shrink-0 px-4 py-2.5 border-b border-white/10 bg-[#1A1528] flex items-center justify-between">
         <button onClick={handleLogout} className="flex items-center gap-1 text-red-400 hover:text-red-300 text-sm font-medium">
-          <LogOut size={16} />
-          Sair
+          <LogOut size={16} /> Sair
         </button>
         <h2 className="text-white font-bold text-sm">Cadastro Motorista</h2>
         <span className="text-[#A0A0B0] text-xs">{etapa}/{totalEtapas}</span>
@@ -155,16 +129,13 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
       {/* Barra de progresso */}
       <div className="flex-shrink-0 px-4 py-2 bg-[#1A1528]">
         <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-[#F4D03F] to-[#FFD966] rounded-full transition-all duration-300"
-            style={{ width: `${(etapa / totalEtapas) * 100}%` }}
-          />
+          <div className="h-full bg-gradient-to-r from-[#F4D03F] to-[#FFD966] rounded-full transition-all duration-300"
+            style={{ width: `${(etapa / totalEtapas) * 100}%` }} />
         </div>
       </div>
 
-      {/* Conteúdo rolável - APENAS OS CAMPOS, sem botão */}
+      {/* Conteúdo rolável - APENAS OS CAMPOS */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 pb-0">
-        {/* ETAPA 1 - DADOS PESSOAIS */}
         {etapa === 1 && (
           <>
             <div className="bg-[#F4D03F]/10 rounded-xl p-1.5 text-center">
@@ -177,27 +148,22 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
           </>
         )}
 
-        {/* ETAPA 2 - ENDEREÇO */}
         {etapa === 2 && (
           <>
             <div className="bg-[#F4D03F]/10 rounded-xl p-1.5 text-center">
-              <p className="text-[#F4D03F] text-xs font-bold">🏠 Endereço</p>
+              <p className="text-[#F4D03F] text-xs font-bold">🏠 Endereço & Documentos</p>
             </div>
             <InputField icon={MapPin} placeholder="Endereço completo *" value={endereco} onChange={setEndereco} />
-            <div className="bg-[#F4D03F]/10 rounded-xl p-1.5 text-center mt-3">
-              <p className="text-[#F4D03F] text-xs font-bold">📷 Documentos</p>
-            </div>
             <UploadField label="CNH - Frente" file={cnhFrente} onChange={setCnhFrente} />
             <UploadField label="CNH - Verso" file={cnhVerso} onChange={setCnhVerso} />
             <UploadField label="Foto de Perfil" file={fotoPerfil} onChange={setFotoPerfil} />
           </>
         )}
 
-        {/* ETAPA 3 - CNH */}
         {etapa === 3 && (
           <>
             <div className="bg-[#F4D03F]/10 rounded-xl p-1.5 text-center">
-              <p className="text-[#F4D03F] text-xs font-bold">📄 Carteira de Habilitação</p>
+              <p className="text-[#F4D03F] text-xs font-bold">📄 CNH</p>
             </div>
             <InputField icon={Key} placeholder="Número da CNH *" value={cnhNumero} onChange={setCnhNumero} />
             <InputField icon={Shield} placeholder="Categoria * (A, B, C, D, E)" value={cnhCategoria} onChange={(v) => setCnhCategoria(v.toUpperCase())} />
@@ -205,7 +171,6 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
           </>
         )}
 
-        {/* ETAPA 4 - VEÍCULO */}
         {etapa === 4 && (
           <>
             <div className="bg-[#F4D03F]/10 rounded-xl p-1.5 text-center">
@@ -219,32 +184,23 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
         )}
       </div>
 
-      {/* Botão fixo ACIMA da faixa inferior - fora do scroll */}
+      {/* Botão fixo ACIMA da faixa inferior */}
       <div className="flex-shrink-0 px-4 py-2.5 border-t border-white/10 bg-[#1A1528]">
         <div className="flex gap-2">
           {etapa > 1 && (
-            <button
-              onClick={handleVoltar}
-              className="px-3 py-2.5 rounded-xl border border-white/20 text-white font-bold text-xs flex items-center gap-1 hover:bg-white/5 transition"
-            >
-              <ChevronLeft size={14} />
-              Voltar
+            <button onClick={handleVoltar}
+              className="px-3 py-2.5 rounded-xl border border-white/20 text-white font-bold text-xs flex items-center gap-1 hover:bg-white/5 transition">
+              <ChevronLeft size={14} /> Voltar
             </button>
           )}
-          
           {etapa < totalEtapas ? (
-            <button
-              onClick={handleAvancar}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-xs hover:opacity-90 transition active:scale-[0.98]"
-            >
+            <button onClick={handleAvancar}
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-xs hover:opacity-90 transition active:scale-[0.98]">
               Continuar
             </button>
           ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-bold text-xs hover:opacity-90 transition active:scale-[0.98] disabled:opacity-50"
-            >
+            <button onClick={handleSubmit} disabled={loading}
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-bold text-xs hover:opacity-90 transition active:scale-[0.98] disabled:opacity-50">
               {loading ? 'Cadastrando...' : '✅ Confirmar Cadastro'}
             </button>
           )}
