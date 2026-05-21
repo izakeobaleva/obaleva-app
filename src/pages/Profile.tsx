@@ -5,7 +5,6 @@ const Perfil = () => {
   const [userEmail, setUserEmail] = useState('carregando...');
   const [userName, setUserName] = useState('Usuário');
   const [isMotorista, setIsMotorista] = useState(false);
-  const [showBotao, setShowBotao] = useState(true);
 
   useEffect(() => {
     carregarDados();
@@ -25,7 +24,6 @@ const Perfil = () => {
       
       if (data?.tipo === 'motorista') {
         setIsMotorista(true);
-        setShowBotao(false);
       }
     }
   }
@@ -89,25 +87,6 @@ const Perfil = () => {
           </div>
         </div>
 
-        {/* 🚫 BOTÃO "QUERO SER PARCEIRO" COMENTADO TEMPORARIAMENTE PARA TESTE */}
-        {/*
-        {showBotao && (
-          <button
-            onClick={() => window.location.href = '/parceiro'}
-            style={{
-              width: '100%', background: '#1A1528', borderRadius: '16px', padding: '16px',
-              border: '1px solid rgba(244,208,63,0.3)', color: '#F4D03F', fontSize: '16px',
-              fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', gap: '8px', marginBottom: '16px'
-            }}
-          >
-            <span style={{ fontSize: '18px' }}>🚛</span>
-            Quero ser Parceiro
-          </button>
-        )}
-        */}
-
-        {/* Apenas o sair */}
         <button
           onClick={handleSignOut}
           style={{
