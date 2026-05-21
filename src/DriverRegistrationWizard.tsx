@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
-import { LogOut, User, Phone, CreditCard, Calendar, MapPin, Car, Key, Shield, Upload, ChevronLeft, CheckCircle } from 'lucide-react';
+import { LogOut, User, Phone, CreditCard, Calendar, MapPin, Car, Key, Shield, Upload, ChevronLeft, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface DriverRegistrationWizardProps {
   user: any;
@@ -31,6 +31,8 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
   const [cnhFrente, setCnhFrente] = useState<File | null>(null);
   const [cnhVerso, setCnhVerso] = useState<File | null>(null);
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
+  const [bottomBarHeight, setBottomBarHeight] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const [nome, setNome] = useState(user?.user_metadata?.nome_completo || '');
   const [telefone, setTelefone] = useState('');
@@ -46,6 +48,23 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
   const [cor, setCor] = useState('');
 
   const totalEtapas = 4;
+
+  // Detectar altura da barra inferior
+  useEffect(() => {
+    const checkBottomNav = () => {
+      const bottomNav = document.querySelector('.bottom-nav');
+      if (bottomNav) {
+        setBottomBarHeight(bottomNav.getBoundingClientRect().height);
+      } else {
+        // Fallback: 60px (altura comum da barra inferior)
+        setBottomBarHeight(60);
+      }
+    };
+    
+    checkBottomNav();
+    window.addEventListener('resize', checkBottomNav);
+    return () => window.removeEventListener('resize', checkBottomNav);
+  }, []);
 
   const handleLogout = async () => {
     if (onLogout) { onLogout(); return; }
@@ -131,12 +150,20 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
     if (validarEtapa()) {
       setErros({});
       if (etapa < totalEtapas) setEtapa(etapa + 1);
+      // Scroll to top quando mudar de etapa
+      if (contentRef.current) {
+        contentRef.current.scrollTop = 0;
+      }
     }
   };
 
   const handleVoltar = () => {
     setErros({});
     if (etapa > 1) setEtapa(etapa - 1);
+    // Scroll to top quando mudar de etapa
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
   };
 
   const handleSubmit = async () => {
@@ -170,7 +197,7 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
 
   const InputField = ({ icon: Icon, placeholder, value, onChange, type = 'text', maxLength, erro, campo }: any) => (
     <div className="mb-[6px]">
-      <div className={`flex items-center gap-2 px-3 py-[6px] rounded-xl border ${erro ? 'border-red-500/50' : 'border-white/15'} bg-[#1A1528] focus-within:ring-1 focus-within:ring-[#F4D03F]`}>
+      <div className={`flex items-center gap-2 px-3 py-[6px] rounded-xl border ${erro ? 'border-red-500/50 bg-red-500/5' : 'border-white/15'} bg-[#1A1528] focus-within:ring-1 focus-within:ring-[#F4D03F] transition-all`}>
         <Icon size={13} className="text-[#F4D03F] shrink-0" />
         <input 
           type={type} placeholder={placeholder} value={value}
@@ -179,14 +206,15 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
           maxLength={maxLength} required
         />
         {value && !erro && <CheckCircle size={12} className="text-green-400 shrink-0" />}
+        {value && erro && <AlertCircle size={12} className="text-red-400 shrink-0" />}
       </div>
-      {erro && <p className="text-red-400 text-[9px] mt-[2px] ml-1">{erro}</p>}
+      {erro && <p className="text-red-400 text-[9px] mt-[2px] ml-1 flex items-center gap-1"><span>⚠</span> {erro}</p>}
     </div>
   );
 
   const DateField = ({ icon: Icon, value, onChange, erro, campo }: any) => (
     <div className="mb-[6px]">
-      <div className={`flex items-center gap-2 px-3 py-[6px] rounded-xl border ${erro ? 'border-red-500/50' : 'border-white/15'} bg-[#1A1528] focus-within:ring-1 focus-within:ring-[#F4D03F]`}>
+      <div className={`flex items-center gap-2 px-3 py-[6px] rounded-xl border ${erro ? 'border-red-500/50 bg-red-500/5' : 'border-white/15'} bg-[#1A1528] focus-within:ring-1 focus-within:ring-[#F4D03F] transition-all`}>
         <Icon size={13} className="text-[#F4D03F] shrink-0" />
         <input 
           type="date" value={value}
@@ -195,16 +223,17 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
           style={{ colorScheme: 'dark' }} required
         />
         {value && !erro && <CheckCircle size={12} className="text-green-400 shrink-0" />}
+        {value && erro && <AlertCircle size={12} className="text-red-400 shrink-0" />}
       </div>
-      {erro && <p className="text-red-400 text-[9px] mt-[2px] ml-1">{erro}</p>}
+      {erro && <p className="text-red-400 text-[9px] mt-[2px] ml-1 flex items-center gap-1"><span>⚠</span> {erro}</p>}
     </div>
   );
 
   const UploadField = ({ label, file, onChange }: any) => (
     <div className="mb-[4px]">
-      <label className="text-[#A0A0B0] text-[10px] block">{label}</label>
+      <label className="text-[#A0A0B0] text-[10px] block mb-[2px]">{label}</label>
       <div 
-        className="bg-[#1A1528] rounded-xl border border-dashed border-[#F4D03F]/30 p-2 text-center cursor-pointer hover:bg-white/5 transition"
+        className="bg-[#1A1528] rounded-xl border border-dashed border-[#F4D03F]/30 p-2 text-center cursor-pointer hover:bg-white/5 transition active:scale-[0.98]"
         onClick={() => document.getElementById(label.replace(/\s/g, ''))?.click()}
       >
         <Upload size={14} className="text-[#F4D03F] mx-auto mb-[2px]" />
@@ -220,7 +249,7 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
   return (
     <div className="fixed inset-0 bg-[#0F0B1A] z-50 flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
       {/* Header fixo */}
-      <div className="flex-shrink-0 px-4 py-[6px] border-b border-white/10 bg-[#1A1528] flex items-center justify-between">
+      <div className="flex-shrink-0 px-4 py-[6px] border-b border-white/10 bg-[#1A1528] flex items-center justify-between" style={{ minHeight: '36px' }}>
         <button onClick={handleLogout} className="flex items-center gap-1 text-red-400 hover:text-red-300 text-xs font-medium">
           <LogOut size={14} /> Sair
         </button>
@@ -247,8 +276,15 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
         </div>
       </div>
 
-      {/* CONTEÚDO SEM SCROLL - tudo cabe na tela */}
-      <div className="flex-1 px-4 py-1 overflow-hidden">
+      {/* CONTEÚDO COM SCROLL APENAS SE NECESSÁRIO - mas com padding-bottom para o botão fixo */}
+      <div 
+        ref={contentRef}
+        className="flex-1 overflow-y-auto"
+        style={{ 
+          padding: '4px 16px',
+          paddingBottom: `${bottomBarHeight + 60}px`, // Espaço para o botão + barra inferior
+        }}
+      >
         {etapa === 1 && (
           <>
             <InputField icon={User} placeholder="Nome completo *" value={nome} onChange={handleChange(setNome, 'nome')} erro={erros.nome} campo="nome" />
@@ -284,31 +320,51 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
           </>
         )}
 
-        {/* Mensagem de propriedade - ocupa espaço restante */}
-        <div className="flex items-center justify-center h-full min-h-[20px]">
-          <p className="text-[#A0A0B0] text-[9px] text-center opacity-60">
-            💡 Complete seu cadastro e comece a ganhar como motorista parceiro!
+        {/* Mensagem de dica */}
+        <div className="mt-2 p-2 bg-[#1A1528]/50 rounded-xl border border-dashed border-[#F4D03F]/20">
+          <p className="text-[#A0A0B0] text-[9px] text-center">
+            💡 Motoristas parceiros ganham em média <strong className="text-[#F4D03F]">R$ 45/hora</strong>
           </p>
         </div>
+
+        {/* Espaço extra para garantir que o último campo não fique atrás do botão */}
+        <div style={{ height: '20px' }} />
       </div>
 
-      {/* BOTÃO FIXO ACIMA DA BARRA INFERIOR - SEMPRE VISÍVEL */}
-      <div className="flex-shrink-0 px-4 py-2 border-t border-white/10 bg-[#1A1528]">
-        <div className="flex gap-2">
+      {/* BOTÃO FIXO COM POSITION FIXED - calculado para ficar acima da barra inferior */}
+      <div 
+        style={{
+          position: 'fixed',
+          bottom: `${bottomBarHeight + 4}px`, // 4px de espaçamento acima da barra inferior
+          left: 0,
+          right: 0,
+          padding: '8px 16px',
+          background: 'linear-gradient(to top, #0F0B1A 80%, transparent)',
+          zIndex: 60,
+        }}
+      >
+        <div className="flex gap-2 max-w-md mx-auto">
           {etapa > 1 && (
-            <button onClick={handleVoltar}
-              className="px-3 py-[7px] rounded-xl border border-white/20 text-white font-bold text-[10px] flex items-center gap-1 hover:bg-white/5 transition">
-              <ChevronLeft size={12} /> Voltar
+            <button 
+              onClick={handleVoltar}
+              className="px-3 py-[8px] rounded-xl border border-white/20 text-white font-bold text-[11px] flex items-center gap-1 hover:bg-white/5 transition active:scale-[0.97]"
+            >
+              <ChevronLeft size={14} /> Voltar
             </button>
           )}
           {etapa < totalEtapas ? (
-            <button onClick={handleAvancar}
-              className="flex-1 py-[7px] rounded-xl bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] font-bold text-[10px] hover:opacity-90 transition active:scale-[0.98]">
+            <button 
+              onClick={handleAvancar}
+              className="flex-1 py-[8px] rounded-xl bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] font-bold text-[11px] hover:opacity-90 transition active:scale-[0.97] shadow-lg shadow-[#F4D03F]/20"
+            >
               Continuar
             </button>
           ) : (
-            <button onClick={handleSubmit} disabled={loading}
-              className="flex-1 py-[7px] rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-bold text-[10px] hover:opacity-90 transition active:scale-[0.98] disabled:opacity-50">
+            <button 
+              onClick={handleSubmit} 
+              disabled={loading}
+              className="flex-1 py-[8px] rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-bold text-[11px] hover:opacity-90 transition active:scale-[0.97] disabled:opacity-50 shadow-lg shadow-green-500/20"
+            >
               {loading ? 'Cadastrando...' : '✅ Confirmar'}
             </button>
           )}
