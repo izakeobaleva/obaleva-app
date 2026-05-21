@@ -1,214 +1,318 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { User, Edit, CreditCard, History, Star, Bell, Shield, HelpCircle, LogOut, ChevronRight, Award, Truck, Car, DollarSign, Phone, Mail, Camera, Save, X } from 'lucide-react';
+import { 
+  User, Truck, LogOut, Users, Navigation, DollarSign,  
+  MapPin, Star, Clock, TrendingUp, Car
+} from 'lucide-react';
+import { 
+  buscarSolicitacoesPendentes, subscribeToNewRides, aceitarCorrida, 
+  atualizarLocalizacaoMotorista, iniciarCorrida, finalizarCorrida, Ride,
+  subscribeToRide, cancelarCorrida
+} from '../services/rideService';
 
 interface DriverProfileProps {
   user: any;
   onLogout: () => void;
 }
 
-const DriverProfile: React.FC<DriverProfileProps> = ({ user, onLogout }) => {
+export default function DriverProfile({ user, onLogout }: DriverProfileProps) {
   const [profile, setProfile] = useState<any>(null);
-  const [veiculo, setVeiculo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [online, setOnline] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({ nome_completo: '', telefone: '' });
-  const [estatisticas, setEstatisticas] = useState({
-    total_corridas: 0,
-    distancia_total: 0,
-    faturamento_total: 0,
-    avaliacao_media: 4.9,
-    corridas_hoje: 0,
-    faturamento_hoje: 0,
-  });
+  const [online, setOnline] = useState(false);
+  const [solicitacoes, setSolicitacoes] = useState<Ride[]>([]);
+  const [activeRide, setActiveRide] = useState<Ride | null>(null);
+  const [ganhosHoje, setGanhosHoje] = useState(0);
+  const [corridasHoje, setCorridasHoje] = useState(0);
+  const [locationInterval, setLocationInterval] = useState<any>(null);
 
   useEffect(() => {
-    carregarPerfil();
-    carregarEstatisticas();
-  }, [user]);
+    carregarTudo();
+    const sub = subscribeToNewRides((novaRide) => {
+      setSolicitacoes(prev => [novaRide, ...prev]);
+    });
+    return () => {
+      sub.unsubscribe();
+      if (locationInterval) clearInterval(locationInterval);
+    };
+  }, []);
 
-  const carregarPerfil = async () => {
+  async function carregarTudo() {
     const { data: userData } = await supabase.from('usuarios').select('*').eq('id', user.id).single();
     const { data: motoristaData } = await supabase.from('motoristas').select('*').eq('id', user.id).single();
-    setProfile(userData);
-    setEditData({ nome_completo: userData?.nome_completo || '', telefone: userData?.telefone || '' });
-    setVeiculo(motoristaData?.dados_veiculo);
-    setLoading(false);
-  };
+    setProfile({ ...userData, ...motoristaData });
+    setOnline(motoristaData?.online || false);
 
-  const carregarEstatisticas = async () => {
-    const { data: corridas } = await supabase
+    const pendentes = await buscarSolicitacoesPendentes();
+    setSolicitacoes(pendentes);
+
+    // Buscar corrida ativa
+    const { data: corridaAtiva } = await supabase
       .from('corridas')
-      .select('valor_total, distancia_km')
+      .select('*')
       .eq('motorista_id', user.id)
-      .eq('status', 'finalizada');
-    
-    if (corridas && corridas.length > 0) {
-      const total = corridas.reduce((acc, c) => acc + (c.valor_total || 0), 0);
-      const distancia = corridas.reduce((acc, c) => acc + (c.distancia_km || 0), 0);
-      setEstatisticas({
-        total_corridas: corridas.length,
-        distancia_total: distancia,
-        faturamento_total: total,
-        avaliacao_media: 4.9,
-        corridas_hoje: 3,
-        faturamento_hoje: 45,
-      });
-    }
-  };
+      .in('status', ['motorista_em_rota', 'em_andamento'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  const handleUpdateProfile = async () => {
-    setLoading(true);
-    const { error } = await supabase
-      .from('usuarios')
-      .update({ nome_completo: editData.nome_completo, telefone: editData.telefone })
-      .eq('id', user.id);
-    
-    if (error) {
-      alert('Erro ao atualizar: ' + error.message);
-    } else {
-      alert('✅ Perfil atualizado!');
-      setIsEditing(false);
-      carregarPerfil();
+    if (corridaAtiva) {
+      setActiveRide(corridaAtiva);
+      startLocationTracking();
     }
+
+    // Estatísticas do dia
+    const hoje = new Date().toISOString().split('T')[0];
+    const { data: corridasHojeData } = await supabase
+      .from('corridas')
+      .select('valor_total')
+      .eq('motorista_id', user.id)
+      .eq('status', 'finalizada')
+      .gte('created_at', hoje);
+
+    if (corridasHojeData) {
+      setGanhosHoje(corridasHojeData.reduce((acc, c) => acc + (c.valor_total || 0), 0));
+      setCorridasHoje(corridasHojeData.length);
+    }
+
     setLoading(false);
-  };
-
-  if (loading) {
-    return <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" /></div>;
   }
 
+  function startLocationTracking() {
+    if (!navigator.geolocation || locationInterval) return;
+    const interval = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => atualizarLocalizacaoMotorista(user.id, pos.coords.latitude, pos.coords.longitude),
+        () => {},
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }, 5000);
+    setLocationInterval(interval);
+  }
+
+  async function toggleOnline() {
+    const novo = !online;
+    const { error } = await supabase.from('motoristas').update({ online: novo }).eq('id', user.id);
+    if (!error) setOnline(novo);
+  }
+
+  async function handleAccept(ride: Ride) {
+    const ok = await aceitarCorrida(ride.id, user.id);
+    if (ok) {
+      setSolicitacoes(prev => prev.filter(r => r.id !== ride.id));
+      setActiveRide({ ...ride, motorista_id: user.id, status: 'motorista_em_rota' });
+      startLocationTracking();
+    }
+  }
+
+  async function handleIniciar() {
+    if (activeRide) {
+      await iniciarCorrida(activeRide.id);
+      setActiveRide({ ...activeRide, status: 'em_andamento' });
+    }
+  }
+
+  async function handleFinalizar() {
+    if (activeRide) {
+      await finalizarCorrida(activeRide.id);
+      setActiveRide(null);
+      if (locationInterval) clearInterval(locationInterval);
+      setLocationInterval(null);
+      carregarTudo();
+    }
+  }
+
+  async function handleCancelar() {
+    if (activeRide) {
+      await cancelarCorrida(activeRide.id);
+      setActiveRide(null);
+      if (locationInterval) clearInterval(locationInterval);
+      setLocationInterval(null);
+    }
+  }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528]">
-      <div className="max-w-md mx-auto px-4 pb-24 pt-4">
-        <div className="bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-2xl p-5 border-2 border-[#F4D03F]/30 shadow-xl">
-          <div className="relative">
-            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#F4D03F]/30 to-[#8B5CF6]/20 flex items-center justify-center border-2 border-[#F4D03F]/50">
-              <User size={40} className="text-[#F4D03F]" />
+    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528] pb-32">
+      <div className="max-w-md mx-auto px-4 pt-4">
+        {/* Card de perfil */}
+        <div className="bg-gradient-to-br from-[#1A1528] to-[#2D2342] rounded-2xl p-5 border-2 border-[#F4D03F]/30 mb-4">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-[#F4D03F]/20 flex items-center justify-center border-2 border-[#F4D03F]/50">
+              <User size={32} className="text-[#F4D03F]" />
             </div>
-            <button className="absolute bottom-0 right-1/3 bg-[#F4D03F] rounded-full p-1.5 shadow-lg">
-              <Camera size={12} className="text-black" />
+            <div className="flex-1">
+              <h2 className="text-white font-bold">{profile?.nome_completo || user.email}</h2>
+              <p className="text-[#A0A0B0] text-xs flex items-center gap-1"><Truck size={12} /> Motorista</p>
+              <div className="flex items-center gap-1 mt-1">
+                <Star size={12} className="text-[#F4D03F] fill-[#F4D03F]" />
+                <span className="text-white text-xs font-bold">4.8</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`text-lg font-bold ${online ? 'text-green-400' : 'text-red-400'}`}>
+                {online ? 'Online' : 'Offline'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Status e botão online */}
+        <div className="bg-[#1A1528] rounded-xl p-4 border border-[#F4D03F]/15 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${online ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className="text-white font-bold">{online ? 'Recebendo solicitações' : 'Não está recebendo solicitações'}</span>
+            </div>
+            <button
+              onClick={toggleOnline}
+              className={`px-5 py-2 rounded-xl font-bold text-sm transition ${
+                online ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'
+              }`}
+            >
+              {online ? 'Ficar Offline' : 'Ficar Online'}
             </button>
           </div>
+        </div>
 
-          <div className="text-center mt-3">
-            {isEditing ? (
-              <div className="space-y-2">
-                <input type="text" value={editData.nome_completo} onChange={(e) => setEditData({ ...editData, nome_completo: e.target.value })} className="w-full p-2 rounded-lg bg-white/10 border border-white/15 text-white text-center text-base" placeholder="Nome completo" />
-                <input type="tel" value={editData.telefone} onChange={(e) => setEditData({ ...editData, telefone: e.target.value })} className="w-full p-2 rounded-lg bg-white/10 border border-white/15 text-white text-center text-base" placeholder="Telefone" />
-                <div className="flex gap-2 mt-2">
-                  <button onClick={handleUpdateProfile} className="flex-1 py-2 rounded-lg bg-green-500 text-white text-sm font-bold flex items-center justify-center gap-1"><Save size={14} /> Salvar</button>
-                  <button onClick={() => setIsEditing(false)} className="flex-1 py-2 rounded-lg bg-red-500/20 text-red-400 text-sm font-bold flex items-center justify-center gap-1"><X size={14} /> Cancelar</button>
+        {/* Corrida ativa */}
+        {activeRide && (
+          <div className="bg-gradient-to-r from-[#F4D03F]/20 to-[#22C55E]/20 rounded-xl p-4 border border-[#F4D03F]/30 mb-4">
+            <h3 className="text-white font-bold text-lg mb-2 flex items-center gap-2">
+              <Navigation size={20} className="text-[#F4D03F]" />
+              Corrida em andamento
+            </h3>
+            <div className="space-y-2 bg-[#0F0B1A]/50 rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-green-400" />
+                <span className="text-white text-sm">{activeRide.origem}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Navigation size={14} className="text-red-400" />
+                <span className="text-white text-sm">{activeRide.destino}</span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                <div className="flex items-center gap-1">
+                  <DollarSign size={16} className="text-[#F4D03F]" />
+                  <span className="text-white font-bold text-lg">R$ {activeRide.valor_total.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock size={14} className="text-[#A0A0B0]" />
+                  <span className="text-[#A0A0B0] text-sm">{activeRide.distancia_km.toFixed(1)} km</span>
                 </div>
               </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              {activeRide.status === 'motorista_em_rota' && (
+                <button onClick={handleIniciar} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-sm">
+                  🚗 INICIAR CORRIDA
+                </button>
+              )}
+              {activeRide.status === 'em_andamento' && (
+                <button onClick={handleFinalizar} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-bold text-sm">
+                  ✅ FINALIZAR CORRIDA
+                </button>
+              )}
+              {(activeRide.status === 'motorista_em_rota') && (
+                <button onClick={handleCancelar} className="py-3 px-4 rounded-xl border border-red-500/30 text-red-400 text-sm">
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Solicitações pendentes */}
+        {online && !activeRide && (
+          <div className="mb-4">
+            <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+              <Users size={18} className="text-[#F4D03F]" />
+              Solicitações Pendentes ({solicitacoes.length})
+            </h3>
+            {solicitacoes.length === 0 ? (
+              <div className="bg-[#1A1528] rounded-xl p-6 text-center border border-[#F4D03F]/15">
+                <Navigation size={32} className="mx-auto mb-2 text-gray-600" />
+                <p className="text-white font-medium">Aguardando solicitações...</p>
+                <p className="text-[#A0A0B0] text-xs mt-1">As corridas aparecerão aqui</p>
+              </div>
             ) : (
-              <>
-                <h2 className="text-white text-lg font-bold">{profile?.nome_completo || user.email}</h2>
-                <p className="text-[#A0A0B0] text-xs mt-1 flex items-center justify-center gap-1"><Mail size={12} /> {user.email}</p>
-                {profile?.telefone && <p className="text-[#A0A0B0] text-xs flex items-center justify-center gap-1"><Phone size={12} /> {profile.telefone}</p>}
-                <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-[#F4D03F]/20">
-                  <Truck size={14} className="text-[#F4D03F]" />
-                  <span className="text-[#F4D03F] text-xs font-bold">MOTORISTA</span>
-                </div>
-                <button onClick={() => setIsEditing(true)} className="mt-2 text-[#F4D03F] text-xs flex items-center justify-center gap-1 w-full"><Edit size={12} /> Editar perfil</button>
-              </>
+              <div className="space-y-2">
+                {solicitacoes.map(ride => (
+                  <div key={ride.id} className="bg-[#1A1528] rounded-xl p-4 border border-[#F4D03F]/20 hover:border-[#F4D03F]/40 transition">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-1">
+                        <MapPin size={14} className="text-green-500" />
+                        <span className="text-white text-sm font-medium truncate max-w-[200px]">{ride.origem}</span>
+                      </div>
+                      <span className="text-[#F4D03F] font-bold">R$ {ride.valor_total.toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center gap-1 mb-3">
+                      <Navigation size={14} className="text-red-400" />
+                      <span className="text-[#A0A0B0] text-sm truncate max-w-[250px]">{ride.destino}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-[#A0A0B0] mb-3">
+                      <span>🕐 {new Date(ride.created_at).toLocaleTimeString('pt-BR')}</span>
+                      <span>📏 {ride.distancia_km.toFixed(1)} km</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleAccept(ride)}
+                        className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-bold text-sm"
+                      >
+                        ✅ ACEITAR
+                      </button>
+                      <button 
+                        onClick={() => setSolicitacoes(prev => prev.filter(r => r.id !== ride.id))}
+                        className="flex-1 py-2.5 rounded-xl border border-red-500/30 text-red-400 font-bold text-sm"
+                      >
+                        ❌ RECUSAR
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-        </div>
+        )}
 
-        <div className="mt-4 bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/15 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full animate-pulse ${online ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className={`text-sm font-bold ${online ? 'text-green-400' : 'text-red-400'}`}>{online ? 'ONLINE' : 'OFFLINE'}</span>
-          </div>
-          <button onClick={() => setOnline(!online)} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${online ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
-            {online ? '🔴 Ficar Offline' : '🟢 Ficar Online'}
-          </button>
-        </div>
-
-        <div className="mt-4">
-          <h3 className="text-white font-bold text-sm mb-2 flex items-center gap-2"><Award size={16} className="text-[#F4D03F]" /> Meus Ganhos</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-[#1A1528] rounded-xl p-2 text-center border border-[#F4D03F]/15">
-              <div className="text-lg font-bold text-white">{estatisticas.corridas_hoje}</div>
-              <p className="text-[#A0A0B0] text-[10px]">Corridas hoje</p>
+        {/* Estatísticas do dia */}
+        <div className="bg-[#1A1528] rounded-xl p-4 border border-[#F4D03F]/15 mb-4">
+          <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+            <TrendingUp size={16} className="text-[#F4D03F]" />
+            Resumo de Hoje
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-[#0F0B1A] rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-white">{corridasHoje}</p>
+              <p className="text-[#A0A0B0] text-xs">Corridas</p>
             </div>
-            <div className="bg-[#1A1528] rounded-xl p-2 text-center border border-[#F4D03F]/15">
-              <div className="text-lg font-bold text-white">R$ {estatisticas.faturamento_hoje.toFixed(2)}</div>
-              <p className="text-[#A0A0B0] text-[10px]">Faturamento hoje</p>
+            <div className="bg-[#0F0B1A] rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-[#F4D03F]">R$ {ganhosHoje.toFixed(2)}</p>
+              <p className="text-[#A0A0B0] text-xs">Ganhos</p>
             </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 mt-2">
-            <div className="bg-[#1A1528] rounded-xl p-2 text-center border border-[#F4D03F]/15">
-              <div className="text-md font-bold text-white">{estatisticas.total_corridas}</div>
-              <p className="text-[#A0A0B0] text-[9px]">Total corridas</p>
-            </div>
-            <div className="bg-[#1A1528] rounded-xl p-2 text-center border border-[#F4D03F]/15">
-              <div className="text-md font-bold text-white">{estatisticas.distancia_total.toFixed(0)}km</div>
-              <p className="text-[#A0A0B0] text-[9px]">Distância</p>
-            </div>
-            <div className="bg-[#1A1528] rounded-xl p-2 text-center border border-[#F4D03F]/15">
-              <div className="text-md font-bold text-white">R$ {estatisticas.faturamento_total.toFixed(2)}</div>
-              <p className="text-[#A0A0B0] text-[9px]">Total</p>
-            </div>
-          </div>
-          <div className="mt-2 bg-[#1A1528] rounded-xl p-2 text-center border border-[#F4D03F]/15">
-            <div className="flex items-center justify-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={14} className={i < Math.floor(estatisticas.avaliacao_media) ? 'text-[#F4D03F] fill-[#F4D03F]' : 'text-gray-500'} />
-              ))}
-              <span className="text-white text-sm font-bold ml-1">{estatisticas.avaliacao_media}</span>
-            </div>
-            <p className="text-[#A0A0B0] text-[10px]">Média de avaliações</p>
           </div>
         </div>
 
-        <div className="mt-4 bg-[#1A1528] rounded-xl p-3 border border-[#F4D03F]/15">
-          <div className="flex items-center gap-2 mb-2"><Car size={16} className="text-[#F4D03F]" /><h3 className="text-white font-bold text-sm">Meu Veículo</h3></div>
-          <p className="text-white text-sm">🚗 {veiculo?.modelo || 'Não informado'}</p>
-          <p className="text-[#A0A0B0] text-xs">Placa: {veiculo?.placa || 'Não informada'}</p>
-          <p className="text-[#A0A0B0] text-xs">Cor: {veiculo?.cor || 'Não informada'}</p>
-          <button className="mt-2 text-[#F4D03F] text-xs flex items-center gap-1"><Edit size={12} /> Editar veículo</button>
-        </div>
-
-        <div className="mt-4 bg-[#1A1528] rounded-xl border border-[#F4D03F]/15 overflow-hidden">
-          <button onClick={() => setIsEditing(true)} className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
-            <div className="flex items-center gap-2"><Edit size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Editar perfil</span></div>
-            <ChevronRight size={14} className="text-gray-500" />
+        {/* Menu do perfil */}
+        <div className="bg-[#1A1528] rounded-xl border border-[#F4D03F]/15 overflow-hidden mb-4">
+          <div className="p-3 border-b border-white/10 bg-[#F4D03F]/5">
+            <p className="text-[#F4D03F] text-xs font-bold">⚙️ CONFIGURAÇÕES</p>
+          </div>
+          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
+            <div className="flex items-center gap-2"><Car size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Meu Veículo ({profile?.dados_veiculo?.modelo || 'Não informado'})</span></div>
           </button>
           <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
-            <div className="flex items-center gap-2"><CreditCard size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Formas de pagamento</span></div>
-            <ChevronRight size={14} className="text-gray-500" />
-          </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
-            <div className="flex items-center gap-2"><History size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Histórico de corridas</span></div>
-            <ChevronRight size={14} className="text-gray-500" />
-          </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
-            <div className="flex items-center gap-2"><DollarSign size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Meus ganhos</span></div>
-            <ChevronRight size={14} className="text-gray-500" />
-          </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
-            <div className="flex items-center gap-2"><Bell size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Notificações</span></div>
-            <ChevronRight size={14} className="text-gray-500" />
-          </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
-            <div className="flex items-center gap-2"><Shield size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Segurança</span></div>
-            <ChevronRight size={14} className="text-gray-500" />
-          </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition border-b border-white/10">
-            <div className="flex items-center gap-2"><HelpCircle size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Ajuda</span></div>
-            <ChevronRight size={14} className="text-gray-500" />
+            <div className="flex items-center gap-2"><DollarSign size={16} className="text-[#F4D03F]" /><span className="text-white text-sm">Meus Ganhos</span></div>
           </button>
           <button onClick={onLogout} className="w-full flex items-center justify-between p-3 hover:bg-red-500/10 transition">
-            <div className="flex items-center gap-2"><LogOut size={16} className="text-red-400" /><span className="text-red-400 text-sm">Sair da conta</span></div>
-            <ChevronRight size={14} className="text-red-400" />
+            <div className="flex items-center gap-2"><LogOut size={16} className="text-red-400" /><span className="text-red-400 text-sm font-medium">Sair da conta</span></div>
           </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default DriverProfile;
+}
