@@ -30,7 +30,7 @@ const SejaMotorista: React.FC<SejaMotoristaProps> = ({ user, onClose, onSuccess,
   const [erros, setErros] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  // Máscara para data (DD/MM/AAAA)
+  // MÁSCARA PARA DATA (SEM CALENDAR)
   const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 8) value = value.slice(0, 8);
@@ -248,6 +248,7 @@ const SejaMotorista: React.FC<SejaMotoristaProps> = ({ user, onClose, onSuccess,
           {erros.cpf && <ErroMsg msg={erros.cpf} />}
         </CardCampo>
 
+        {/* CAMPO DATA DIGITÁVEL - SEM CALENDAR */}
         <CardCampo label="📅 Data de nascimento * (digite DD/MM/AAAA)">
           <input
             type="text"
@@ -324,11 +325,6 @@ const inputStyle: React.CSSProperties = {
   fontFamily: 'inherit',
   outline: 'none',
   boxSizing: 'border-box',
-  ':focus': {
-    borderColor: '#667eea',
-    background: 'white',
-    boxShadow: '0 0 0 3px rgba(102,126,234,0.1)',
-  }
 };
 
 function InputText({ value, onChange, placeholder, inputMode }: any) {
@@ -339,10 +335,7 @@ function InputText({ value, onChange, placeholder, inputMode }: any) {
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       inputMode={inputMode || 'text'}
-      style={{
-        ...inputStyle,
-        '&:focus': { borderColor: '#667eea', background: 'white', boxShadow: '0 0 0 3px rgba(102,126,234,0.1)' }
-      } as any}
+      style={inputStyle}
       onFocus={(e) => { e.target.style.borderColor = '#667eea'; e.target.style.background = 'white'; e.target.style.boxShadow = '0 0 0 3px rgba(102,126,234,0.1)'; }}
       onBlur={(e) => { e.target.style.borderColor = '#e0e0e0'; e.target.style.background = '#fafafa'; e.target.style.boxShadow = 'none'; }}
     />
