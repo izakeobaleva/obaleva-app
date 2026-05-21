@@ -17,22 +17,24 @@ import SejaMotorista from './pages/SejaMotorista';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<MainScreen />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<RegisterPassenger />} />
-      <Route path="/register-driver" element={<RegisterDriver />} />
-      <Route path="/passenger" element={<PassengerDashboard />} />
-      <Route path="/driver" element={<DriverDashboard />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/trips" element={<Trips />} />
-      <Route path="/trips/:id" element={<TripDetails />} />
-      <Route path="/earnings" element={<Earnings />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/update-password" element={<UpdatePassword />} />
-      <Route path="/seja-motorista" element={<SejaMotorista />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainScreen />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<RegisterPassenger />} />
+        <Route path="/register-driver" element={<RegisterDriver />} />
+        <Route path="/passenger" element={<PassengerDashboard />} />
+        <Route path="/driver" element={<DriverDashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/trips" element={<Trips />} />
+        <Route path="/trips/:id" element={<TripDetails />} />
+        <Route path="/earnings" element={<Earnings />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/seja-motorista" element={<SejaMotorista />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
