@@ -61,7 +61,13 @@ const DriverRegistrationModal: React.FC<DriverRegistrationModalProps> = ({ user,
 
   const handleFieldChange = (field: string, value: any) => {
     saveToLocalStorage({ [field]: value });
-    const setters: any = { nome: setNome, telefone: setTelefone, cpf: setCpf, dataNascimento: setDataNascimento, endereco: setEndereco, cidade: setCidade, bairro: setBairro, cnhNumero: setCnhNumero, cnhCategoria: setCnhCategoria, cnhValidade: setCnhValidade, placa: setPlaca, modelo: setModelo, ano: setAno, cor: setCor };
+    const setters: any = { 
+      nome: setNome, telefone: setTelefone, cpf: setCpf, 
+      dataNascimento: setDataNascimento, endereco: setEndereco, 
+      cidade: setCidade, bairro: setBairro, cnhNumero: setCnhNumero, 
+      cnhCategoria: setCnhCategoria, cnhValidade: setCnhValidade, 
+      placa: setPlaca, modelo: setModelo, ano: setAno, cor: setCor 
+    };
     if (setters[field]) setters[field](value);
   };
 
@@ -108,100 +114,182 @@ const DriverRegistrationModal: React.FC<DriverRegistrationModalProps> = ({ user,
   };
 
   return (
-    <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-50 overflow-y-auto">
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ paddingBottom: '80px' }}>
-        <div className="max-w-sm w-full bg-gradient-to-br from-[#1A1528] to-[#0F0B1A] rounded-2xl border border-[#F4D03F]/20 shadow-2xl overflow-hidden">
-          
-          {/* Header compacto */}
-          <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
-            <button onClick={step > 1 ? handleBack : onClose} className="text-[#A0A0A0] hover:text-white">
-              {step > 1 ? <ArrowLeft size={18} /> : <X size={18} />}
-            </button>
-            <h2 className="text-white text-sm font-bold">Seja Motorista</h2>
-            <div className="w-5" />
-          </div>
+    <div className="fixed inset-0 bg-[#0F0B1A] z-50 flex flex-col h-full h-[100dvh]">
+      {/* Header fixo no topo */}
+      <div className="flex-shrink-0 px-4 py-3 border-b border-white/10 bg-[#1A1528] flex items-center justify-between">
+        <button onClick={step > 1 ? handleBack : onClose} className="text-[#A0A0A0] hover:text-white p-2 -ml-2">
+          {step > 1 ? <ArrowLeft size={22} /> : <X size={22} />}
+        </button>
+        <h2 className="text-white text-base font-bold">Cadastro de Motorista</h2>
+        <div className="w-8" />
+      </div>
 
-          {/* Progresso minimalista */}
-          <div className="px-3 pt-2 pb-1">
-            <div className="flex justify-between text-[9px] text-[#A0A0B0] mb-1">
-              {['📋 DADOS', '📄 CNH', '🚗 VEÍCULO'].map((label, i) => (
-                <span key={i} className={step >= i + 1 ? 'text-[#F4D03F] text-[10px] font-bold' : ''}>{label}</span>
-              ))}
+      {/* Progresso */}
+      <div className="flex-shrink-0 px-4 pt-3 pb-2 bg-[#1A1528]">
+        <div className="flex justify-between text-[10px] text-[#A0A0B0] mb-1">
+          {['📋 DADOS', '📄 CNH', '🚗 VEÍCULO'].map((label, i) => (
+            <span key={i} className={step >= i + 1 ? 'text-[#F4D03F] text-xs font-bold' : ''}>{label}</span>
+          ))}
+        </div>
+        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-[#F4D03F] to-[#FFD966] rounded-full transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }} />
+        </div>
+      </div>
+
+      {/* Conteúdo rolável - ocupa o espaço restante */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+        
+        {/* Etapa 1 - Dados Pessoais */}
+        {step === 1 && (
+          <>
+            <div className="bg-[#F4D03F]/10 rounded-xl p-3 text-center">
+              <p className="text-[#F4D03F] text-sm font-bold">📝 Dados Pessoais</p>
             </div>
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-[#F4D03F] to-[#FFD966] rounded-full transition-all" style={{ width: `${(step / 3) * 100}%` }} />
+            
+            <Campo icon={<User size={18} />} placeholder="Nome completo *" value={nome} onChange={v => handleFieldChange('nome', v)} />
+            <Campo icon={<Mail size={18} />} placeholder="E-mail" value={email} disabled />
+            <Campo icon={<Phone size={18} />} placeholder="WhatsApp *" value={telefone} onChange={v => handleFieldChange('telefone', formatPhone(v))} maxLength={15} />
+            <Campo icon={<CreditCard size={18} />} placeholder="CPF *" value={cpf} onChange={v => handleFieldChange('cpf', formatCPF(v))} maxLength={14} />
+            
+            {/* Campo de data - digitável e com calendário */}
+            <div className="bg-[#1A1528] rounded-xl border border-white/15 overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <Calendar size={18} className="text-[#F4D03F] shrink-0" />
+                <input 
+                  type="date" 
+                  value={dataNascimento}
+                  onChange={e => handleFieldChange('dataNascimento', e.target.value)}
+                  className="flex-1 bg-transparent text-white outline-none text-base"
+                  style={{ colorScheme: 'dark' }}
+                  required
+                />
+                {dataNascimento && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Conteúdo compacto */}
-          <div className="px-3 pb-1 max-h-[50vh] overflow-y-auto space-y-1.5">
-            {/* Etapa 1 */}
-            {step === 1 && <>
-              <div className="bg-[#F4D03F]/10 rounded-lg py-1 text-center"><span className="text-[#F4D03F] text-[10px] font-bold">📝 Dados Pessoais</span></div>
-              <Campo icon={<User size={12} />} placeholder="Nome completo *" value={nome} onChange={v => handleFieldChange('nome', v)} />
-              <Campo icon={<Mail size={12} />} placeholder="E-mail" value={email} disabled />
-              <Campo icon={<Phone size={12} />} placeholder="WhatsApp *" value={telefone} onChange={v => handleFieldChange('telefone', formatPhone(v))} maxLength={15} />
-              <Campo icon={<CreditCard size={12} />} placeholder="CPF *" value={cpf} onChange={v => handleFieldChange('cpf', formatCPF(v))} maxLength={14} />
-              <Campo type="date" icon={<Calendar size={12} />} placeholder="Data de nascimento *" value={dataNascimento} onChange={v => handleFieldChange('dataNascimento', v)} />
-              <div className="bg-[#F4D03F]/10 rounded-lg py-1 text-center"><span className="text-[#F4D03F] text-[10px] font-bold">🏠 Endereço</span></div>
-              <Campo icon={<MapPin size={12} />} placeholder="Rua, Avenida *" value={endereco} onChange={v => handleFieldChange('endereco', v)} />
-              <Campo icon={<MapPin size={12} />} placeholder="Bairro *" value={bairro} onChange={v => handleFieldChange('bairro', v)} />
-              <Campo icon={<MapPin size={12} />} placeholder="Cidade *" value={cidade} onChange={v => handleFieldChange('cidade', v)} />
-            </>}
+            <div className="bg-[#F4D03F]/10 rounded-xl p-3 text-center">
+              <p className="text-[#F4D03F] text-sm font-bold">🏠 Endereço</p>
+            </div>
+            
+            <Campo icon={<MapPin size={18} />} placeholder="Rua, Avenida *" value={endereco} onChange={v => handleFieldChange('endereco', v)} />
+            <Campo icon={<MapPin size={18} />} placeholder="Bairro *" value={bairro} onChange={v => handleFieldChange('bairro', v)} />
+            <Campo icon={<MapPin size={18} />} placeholder="Cidade *" value={cidade} onChange={v => handleFieldChange('cidade', v)} />
+          </>
+        )}
 
-            {/* Etapa 2 */}
-            {step === 2 && <>
-              <div className="bg-[#F4D03F]/10 rounded-lg py-1 text-center"><span className="text-[#F4D03F] text-[10px] font-bold">📄 CNH</span></div>
-              <Campo icon={<Key size={12} />} placeholder="Número da CNH *" value={cnhNumero} onChange={v => handleFieldChange('cnhNumero', v)} />
-              <Campo icon={<Shield size={12} />} placeholder="Categoria *" value={cnhCategoria} onChange={v => handleFieldChange('cnhCategoria', v.toUpperCase())} />
-              <Campo type="date" icon={<Calendar size={12} />} placeholder="Validade *" value={cnhValidade} onChange={v => handleFieldChange('cnhValidade', v)} />
-              <UploadField label="Foto da CNH *" preview={cnhPreview} onClick={() => cnhRef.current?.click()} />
-              <input ref={cnhRef} type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'cnh')} />
-            </>}
+        {/* Etapa 2 - CNH */}
+        {step === 2 && (
+          <>
+            <div className="bg-[#F4D03F]/10 rounded-xl p-3 text-center">
+              <p className="text-[#F4D03F] text-sm font-bold">📄 Carteira de Habilitação</p>
+            </div>
+            
+            <Campo icon={<Key size={18} />} placeholder="Número da CNH *" value={cnhNumero} onChange={v => handleFieldChange('cnhNumero', v)} />
+            <Campo icon={<Shield size={18} />} placeholder="Categoria * (A, B, C, D, E)" value={cnhCategoria} onChange={v => handleFieldChange('cnhCategoria', v.toUpperCase())} />
+            
+            {/* Campo de data - válidade da CNH */}
+            <div className="bg-[#1A1528] rounded-xl border border-white/15 overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <Calendar size={18} className="text-[#F4D03F] shrink-0" />
+                <input 
+                  type="date" 
+                  value={cnhValidade}
+                  onChange={e => handleFieldChange('cnhValidade', e.target.value)}
+                  className="flex-1 bg-transparent text-white outline-none text-base"
+                  style={{ colorScheme: 'dark' }}
+                  required
+                />
+                {cnhValidade && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                )}
+              </div>
+            </div>
 
-            {/* Etapa 3 */}
-            {step === 3 && <>
-              <div className="bg-[#F4D03F]/10 rounded-lg py-1 text-center"><span className="text-[#F4D03F] text-[10px] font-bold">🚗 Veículo</span></div>
-              <Campo icon={<Car size={12} />} placeholder="Placa *" value={placa} onChange={v => handleFieldChange('placa', v.toUpperCase())} maxLength={8} />
-              <Campo icon={<Car size={12} />} placeholder="Modelo *" value={modelo} onChange={v => handleFieldChange('modelo', v)} />
-              <Campo icon={<Calendar size={12} />} placeholder="Ano *" value={ano} onChange={v => handleFieldChange('ano', v)} maxLength={4} />
-              <Campo icon={<Car size={12} />} placeholder="Cor *" value={cor} onChange={v => handleFieldChange('cor', v)} />
-              <UploadField label="Foto do veículo *" preview={fotoVeiculoPreview} onClick={() => fotoVeiculoRef.current?.click()} />
-              <input ref={fotoVeiculoRef} type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'veiculo')} />
-            </>}
-          </div>
+            <UploadField label="Foto da CNH (frente e verso) *" preview={cnhPreview} onClick={() => cnhRef.current?.click()} />
+            <input ref={cnhRef} type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'cnh')} />
+          </>
+        )}
 
-          {/* Botões fixos - SEMPRE VISÍVEIS */}
-          <div className="p-3 border-t border-white/10 flex gap-2 bg-gradient-to-b from-transparent to-[#0F0B1A]">
-            {step > 1 && (
-              <button onClick={handleBack} className="flex-1 py-2 rounded-lg border border-white/20 text-white font-bold text-xs hover:bg-white/5">
-                Voltar
-              </button>
-            )}
-            <button onClick={handleNext} disabled={loading} className="flex-1 py-2 rounded-lg bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-xs disabled:opacity-50">
-              {loading ? 'Enviando...' : (step === 3 ? '✅ Enviar' : 'Continuar')}
+        {/* Etapa 3 - Veículo */}
+        {step === 3 && (
+          <>
+            <div className="bg-[#F4D03F]/10 rounded-xl p-3 text-center">
+              <p className="text-[#F4D03F] text-sm font-bold">🚗 Dados do Veículo</p>
+            </div>
+            
+            <Campo icon={<Car size={18} />} placeholder="Placa *" value={placa} onChange={v => handleFieldChange('placa', v.toUpperCase())} maxLength={8} />
+            <Campo icon={<Car size={18} />} placeholder="Modelo *" value={modelo} onChange={v => handleFieldChange('modelo', v)} />
+            <Campo icon={<Calendar size={18} />} placeholder="Ano *" value={ano} onChange={v => handleFieldChange('ano', v)} maxLength={4} />
+            <Campo icon={<Car size={18} />} placeholder="Cor *" value={cor} onChange={v => handleFieldChange('cor', v)} />
+            
+            <UploadField label="Foto do veículo *" preview={fotoVeiculoPreview} onClick={() => fotoVeiculoRef.current?.click()} />
+            <input ref={fotoVeiculoRef} type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, 'veiculo')} />
+          </>
+        )}
+
+        {/* Espaço extra no final para não esconder atrás dos botões */}
+        <div className="h-6" />
+      </div>
+
+      {/* Botões fixos no final */}
+      <div className="flex-shrink-0 p-4 border-t border-white/10 bg-[#1A1528]">
+        <div className="flex gap-3">
+          {step > 1 && (
+            <button onClick={handleBack} className="flex-1 py-3 rounded-xl border border-white/20 text-white font-bold text-sm hover:bg-white/5 transition active:scale-[0.98]">
+              Voltar
             </button>
-          </div>
+          )}
+          <button 
+            onClick={handleNext} 
+            disabled={loading} 
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-sm hover:opacity-90 transition active:scale-[0.98] disabled:opacity-50"
+          >
+            {loading ? 'Enviando...' : (step === 3 ? '✅ Enviar' : 'Continuar')}
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-// Componente de campo compacto
+// Componente de campo - otimizado para celular
 const Campo = ({ icon, placeholder, type = 'text', value, onChange, maxLength, disabled }: any) => (
-  <div className="bg-white/5 rounded-lg border border-white/15 flex items-center gap-2 px-2.5 py-1.5">
-    <span className="text-[#F4D03F] shrink-0">{icon}</span>
-    <input type={type} placeholder={placeholder} className="flex-1 bg-transparent text-white outline-none text-xs placeholder:text-[#A0A0B0]" value={value} onChange={e => onChange(e.target.value)} maxLength={maxLength} disabled={disabled} />
-    {value && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>}
+  <div className="bg-[#1A1528] rounded-xl border border-white/15 overflow-hidden">
+    <div className="flex items-center gap-3 px-4 py-3.5">
+      <span className="text-[#F4D03F] shrink-0">{icon}</span>
+      <input 
+        type={type} 
+        placeholder={placeholder} 
+        className="flex-1 bg-transparent text-white outline-none text-base placeholder:text-[#A0A0B0]" 
+        value={value} 
+        onChange={e => onChange(e.target.value)} 
+        maxLength={maxLength} 
+        disabled={disabled} 
+        style={{ minHeight: '24px' }}
+      />
+      {value && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>}
+    </div>
   </div>
 );
 
 const UploadField = ({ label, preview, onClick }: any) => (
   <div>
-    <label className="text-[#F4D03F] text-[10px] font-bold">{label}</label>
-    <div className="mt-0.5 bg-white/5 rounded-lg border border-dashed border-[#F4D03F]/30 p-2 text-center cursor-pointer hover:bg-white/10" onClick={onClick}>
-      {preview ? <img src={preview} className="w-full h-20 object-cover rounded-lg" /> : <><Upload size={16} className="text-[#F4D03F] mx-auto" /><p className="text-[#A0A0B0] text-[9px]">Clique para enviar</p></>}
+    <label className="text-[#F4D03F] text-sm font-bold mb-2 block">{label}</label>
+    <div 
+      className="bg-[#1A1528] rounded-xl border border-dashed border-[#F4D03F]/30 p-6 text-center cursor-pointer hover:bg-white/5 transition active:scale-[0.98]" 
+      onClick={onClick}
+    >
+      {preview ? (
+        <img src={preview} className="w-full h-32 object-cover rounded-xl" />
+      ) : (
+        <>
+          <Upload size={28} className="text-[#F4D03F] mx-auto mb-2" />
+          <p className="text-[#A0A0B0] text-sm">Toque para enviar foto</p>
+          <p className="text-[#A0A0B0] text-xs mt-1">PNG ou JPG • Máx 5MB</p>
+        </>
+      )}
     </div>
   </div>
 );
