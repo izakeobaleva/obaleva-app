@@ -1,67 +1,144 @@
-import { useAuth } from '../contexts/AuthContext';
-import { User, Mail, Shield, LogOut, ArrowLeft, Truck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 
-export default function Perfil() {
-  const { user, profile, signOut } = useAuth();
+const Perfil = () => {
   const navigate = useNavigate();
+  const [userEmail, setUserEmail] = useState('carregando...');
+  const [userName, setUserName] = useState('Usuário');
+  const [isMotorista, setIsMotorista] = useState(false);
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  async function carregarDados() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      setUserEmail(session.user.email || 'sem email');
+      setUserName(session.user.email?.split('@')[0] || 'Usuário');
+      
+      const { data } = await supabase
+        .from('usuarios')
+        .select('tipo')
+        .eq('id', session.user.id)
+        .maybeSingle();
+      
+      if (data?.tipo === 'motorista') {
+        setIsMotorista(true);
+      }
+    }
+  }
 
   const handleSignOut = async () => {
-    await signOut();
+    await supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
     navigate('/');
   };
 
-  const userType = user?.user_metadata?.tipo || 'passageiro';
-  const isMotorista = profile?.tipo === 'motorista';
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
-      <header className="glass-header sticky top-0 z-20 px-6 py-4 flex items-center gap-3">
-        <button onClick={() => navigate('/')} className="btn-outline-dark p-2" aria-label="Voltar">
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="text-xl font-bold text-white">Meu Perfil</h1>
-      </header>
-      
-      <main className="p-4 max-w-lg mx-auto space-y-4 mt-4">
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0F0B1A, #1A1528)',
+      padding: '16px',
+      paddingBottom: '100px',
+      fontFamily: 'system-ui, sans-serif'
+    }}>
+      <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 0', marginBottom: '20px' }}>
+          <button 
+            onClick={() => navigate('/')}
+            style={{ background: 'none', border: 'none', color: '#A0A0B0', fontSize: '20px', cursor: 'pointer' }}
+          >
+            ←
+          </button>
+          <h1 style={{ color: 'white', fontSize: '20px', margin: 0, fontWeight: 'bold' }}>Meu Perfil</h1>
+        </div>
+
         {/* Card do usuário */}
-        <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10 text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <User size={36} className="text-[#1E1E2F]" />
+        <div style={{
+          background: '#1A1528',
+          borderRadius: '16px',
+          padding: '24px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          textAlign: 'center',
+          marginBottom: '16px'
+        }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            background: 'linear-gradient(135deg, #F4D03F, #F59E0B)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 16px'
+          }}>
+            <span style={{ fontSize: '36px' }}>👤</span>
           </div>
-          <h2 className="text-xl font-bold text-white">{user?.email?.split('@')[0] || 'Usuário'}</h2>
-          <span className={`inline-block mt-2 px-4 py-1.5 rounded-full text-xs font-semibold ${
-            isMotorista ? 'bg-green-900/40 text-green-400' : 'bg-blue-900/40 text-blue-400'
-          }`}>
+          <h2 style={{ color: 'white', fontSize: '20px', margin: '0 0 8px' }}>{userName}</h2>
+          <span style={{
+            display: 'inline-block',
+            padding: '6px 16px',
+            borderRadius: '9999px',
+            fontSize: '12px',
+            fontWeight: '600',
+            background: isMotorista ? 'rgba(34,197,94,0.3)' : 'rgba(59,130,246,0.3)',
+            color: isMotorista ? '#22C55E' : '#3B82F6'
+          }}>
             {isMotorista ? '🚗 Motorista' : '🚶 Passageiro'}
           </span>
         </div>
 
-        {/* Informações da conta */}
-        <div className="bg-[#1A1528] rounded-2xl p-5 border border-white/10 space-y-4">
-          <div className="flex items-center gap-3">
-            <Mail size={18} className="text-[#F4D03F]" />
+        {/* Informações */}
+        <div style={{
+          background: '#1A1528',
+          borderRadius: '16px',
+          padding: '20px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          marginBottom: '16px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+            <span style={{ fontSize: '18px' }}>📧</span>
             <div>
-              <p className="text-xs text-[#A0A0B0]">E-mail</p>
-              <p className="text-sm font-medium text-white">{user?.email}</p>
+              <p style={{ color: '#A0A0B0', fontSize: '12px', margin: '0 0 2px' }}>E-mail</p>
+              <p style={{ color: 'white', fontSize: '14px', margin: 0 }}>{userEmail}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 pt-3 border-t border-white/10">
-            <Shield size={18} className="text-[#F4D03F]" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+            <span style={{ fontSize: '18px' }}>🛡️</span>
             <div>
-              <p className="text-xs text-[#A0A0B0]">Conta</p>
-              <p className="text-sm font-medium text-white">Verificada</p>
+              <p style={{ color: '#A0A0B0', fontSize: '12px', margin: '0 0 2px' }}>Conta</p>
+              <p style={{ color: 'white', fontSize: '14px', margin: 0 }}>Verificada</p>
             </div>
           </div>
         </div>
 
-        {/* Botão Tornar-se Parceiro - aparece apenas se NÃO for motorista */}
+        {/* Botão Tornar-se Parceiro */}
         {!isMotorista && (
           <button
             onClick={() => navigate('/tornar-parceiro')}
-            className="w-full bg-[#1A1528] rounded-2xl p-4 border border-[#F4D03F]/30 flex items-center justify-center gap-2 text-[#F4D03F] hover:bg-[#F4D03F]/10 transition-all font-medium"
+            style={{
+              width: '100%',
+              background: '#1A1528',
+              borderRadius: '16px',
+              padding: '16px',
+              border: '1px solid rgba(244,208,63,0.3)',
+              color: '#F4D03F',
+              fontSize: '16px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              marginBottom: '16px',
+              transition: 'all 0.2s'
+            }}
           >
-            <Truck size={18} />
+            <span style={{ fontSize: '18px' }}>🚛</span>
             Tornar-se Parceiro
           </button>
         )}
@@ -69,30 +146,29 @@ export default function Perfil() {
         {/* Botão Sair */}
         <button
           onClick={handleSignOut}
-          className="w-full bg-[#1A1528] rounded-2xl p-4 border border-white/10 flex items-center justify-center gap-2 text-red-400 hover:bg-red-500/10 transition-all font-medium"
+          style={{
+            width: '100%',
+            background: '#1A1528',
+            borderRadius: '16px',
+            padding: '16px',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#EF4444',
+            fontSize: '16px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s'
+          }}
         >
-          <LogOut size={18} />
+          <span style={{ fontSize: '18px' }}>🚪</span>
           Sair da conta
         </button>
-      </main>
-
-      {userType && <BottomNav role={userType as 'passageiro' | 'motorista'} />}
-    </div>
-  );
-}
-
-function BottomNav({ role }: { role: 'passageiro' | 'motorista' }) {
-  return (
-    <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-3 z-50">
-      <div className="bg-[#1A1528] border border-[#F4D03F]/30 rounded-2xl max-w-md w-full mx-4">
-        <div className="flex justify-between px-5 py-3">
-          {[{ id: 'home', label: 'Início' }, { id: 'perfil', label: 'Perfil' }].map(tab => (
-            <div key={tab.id} className={`flex flex-col items-center gap-1 ${tab.id === 'perfil' ? 'text-[#F4D03F]' : 'text-[#A0A0B0]'}`}>
-              <span className="text-[10px]">{tab.label}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Perfil;
