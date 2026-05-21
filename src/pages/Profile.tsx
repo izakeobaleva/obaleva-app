@@ -56,14 +56,14 @@ export default function Perfil() {
           </div>
         </div>
 
-        {/* Botão Seja Motorista - aparece apenas se NÃO for motorista */}
+        {/* Botão Tornar-se Parceiro - aparece apenas se NÃO for motorista */}
         {!isMotorista && (
           <button
-            onClick={() => navigate('/seja-motorista')}
+            onClick={() => navigate('/tornar-parceiro')}
             className="w-full bg-[#1A1528] rounded-2xl p-4 border border-[#F4D03F]/30 flex items-center justify-center gap-2 text-[#F4D03F] hover:bg-[#F4D03F]/10 transition-all font-medium"
           >
             <Truck size={18} />
-            Quero ser Motorista
+            Tornar-se Parceiro
           </button>
         )}
 
