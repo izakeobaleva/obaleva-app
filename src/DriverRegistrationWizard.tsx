@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from "./lib/supabaseClient";
-import { LogOut, User, Phone, CreditCard, Calendar, MapPin, Car, Key, Shield, ChevronLeft } from 'lucide-react';
+import { LogOut, User, Phone, CreditCard, Calendar, MapPin, Car, Key, Shield, Upload, ChevronLeft } from 'lucide-react';
 
 interface DriverRegistrationWizardProps {
   user: any;
@@ -12,8 +12,10 @@ interface DriverRegistrationWizardProps {
 const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ user, onClose, onSuccess, onLogout }) => {
   const [etapa, setEtapa] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [cnhFrente, setCnhFrente] = useState<File | null>(null);
+  const [cnhVerso, setCnhVerso] = useState<File | null>(null);
+  const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
 
-  // Dados do formulário
   const [nome, setNome] = useState(user?.user_metadata?.nome_completo || '');
   const [telefone, setTelefone] = useState('');
   const [cpf, setCpf] = useState('');
@@ -69,7 +71,12 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
         telefone: telefone.replace(/\D/g, ''), cpf: cpf.replace(/\D/g, ''),
         data_nascimento: dataNascimento, endereco: endereco,
         dados_veiculo: { placa: placa.toUpperCase(), modelo, ano, cor },
-        documentos: { cnh_numero: cnhNumero, cnh_categoria: cnhCategoria, cnh_validade: cnhValidade }
+        documentos: { 
+          cnh_numero: cnhNumero, cnh_categoria: cnhCategoria, 
+          cnh_validade: cnhValidade,
+          cnh_frente: cnhFrente?.name || null,
+          cnh_verso: cnhVerso?.name || null
+        }
       });
       alert('✅ Cadastro enviado!');
       onSuccess();
@@ -99,23 +106,36 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
     </div>
   );
 
-  const DateField = ({ icon: Icon, value, onChange, placeholder }: any) => (
+  const DateField = ({ icon: Icon, value, onChange }: any) => (
     <div className="bg-[#1A1528] rounded-xl border border-white/15">
       <div className="flex items-center gap-3 px-3 py-2">
         <Icon size={15} className="text-[#F4D03F] shrink-0" />
-        <input
-          type="date"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="flex-1 bg-transparent text-white outline-none text-sm"
-          style={{ colorScheme: 'dark' }}
-          required
-        />
+        <div className="flex-1 relative">
+          <input
+            type="date"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full bg-transparent text-white outline-none text-sm"
+            style={{ colorScheme: 'dark' }}
+            required
+          />
+        </div>
         {value && (
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
+      </div>
+    </div>
+  );
+
+  const UploadField = ({ label, file, onChange, accept = "image/*" }: any) => (
+    <div>
+      <label className="text-[#A0A0B0] text-xs mb-1 block">{label}</label>
+      <div className="bg-[#1A1528] rounded-xl border border-dashed border-[#F4D03F]/30 p-3 text-center cursor-pointer hover:bg-white/5 transition" onClick={() => document.getElementById(label)?.click()}>
+        <Upload size={20} className="text-[#F4D03F] mx-auto mb-1" />
+        <p className="text-[#A0A0B0] text-xs">{file ? file.name : 'Toque para enviar'}</p>
+        <input id={label} type="file" accept={accept} className="hidden" onChange={(e) => onChange(e.target.files?.[0] || null)} />
       </div>
     </div>
   );
@@ -142,8 +162,8 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
         </div>
       </div>
 
-      {/* Conteúdo rolável - APENAS OS CAMPOS */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5">
+      {/* Conteúdo rolável - APENAS OS CAMPOS, sem botão */}
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 pb-0">
         {/* ETAPA 1 - DADOS PESSOAIS */}
         {etapa === 1 && (
           <>
@@ -153,7 +173,7 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
             <InputField icon={User} placeholder="Nome completo *" value={nome} onChange={setNome} />
             <InputField icon={Phone} placeholder="WhatsApp *" value={telefone} onChange={(v) => setTelefone(formatPhone(v))} maxLength={15} />
             <InputField icon={CreditCard} placeholder="CPF *" value={cpf} onChange={(v) => setCpf(formatCPF(v))} maxLength={14} />
-            <DateField icon={Calendar} value={dataNascimento} onChange={setDataNascimento} placeholder="Data de nascimento" />
+            <DateField icon={Calendar} value={dataNascimento} onChange={setDataNascimento} />
           </>
         )}
 
@@ -164,6 +184,12 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
               <p className="text-[#F4D03F] text-xs font-bold">🏠 Endereço</p>
             </div>
             <InputField icon={MapPin} placeholder="Endereço completo *" value={endereco} onChange={setEndereco} />
+            <div className="bg-[#F4D03F]/10 rounded-xl p-1.5 text-center mt-3">
+              <p className="text-[#F4D03F] text-xs font-bold">📷 Documentos</p>
+            </div>
+            <UploadField label="CNH - Frente" file={cnhFrente} onChange={setCnhFrente} />
+            <UploadField label="CNH - Verso" file={cnhVerso} onChange={setCnhVerso} />
+            <UploadField label="Foto de Perfil" file={fotoPerfil} onChange={setFotoPerfil} />
           </>
         )}
 
@@ -171,11 +197,11 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
         {etapa === 3 && (
           <>
             <div className="bg-[#F4D03F]/10 rounded-xl p-1.5 text-center">
-              <p className="text-[#F4D03F] text-xs font-bold">📄 CNH</p>
+              <p className="text-[#F4D03F] text-xs font-bold">📄 Carteira de Habilitação</p>
             </div>
             <InputField icon={Key} placeholder="Número da CNH *" value={cnhNumero} onChange={setCnhNumero} />
             <InputField icon={Shield} placeholder="Categoria * (A, B, C, D, E)" value={cnhCategoria} onChange={(v) => setCnhCategoria(v.toUpperCase())} />
-            <DateField icon={Calendar} value={cnhValidade} onChange={setCnhValidade} placeholder="Validade da CNH" />
+            <DateField icon={Calendar} value={cnhValidade} onChange={setCnhValidade} />
           </>
         )}
 
@@ -194,14 +220,14 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
       </div>
 
       {/* Botão fixo ACIMA da faixa inferior - fora do scroll */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-white/10 bg-[#1A1528]">
-        <div className="flex gap-3">
+      <div className="flex-shrink-0 px-4 py-2.5 border-t border-white/10 bg-[#1A1528]">
+        <div className="flex gap-2">
           {etapa > 1 && (
             <button
               onClick={handleVoltar}
-              className="px-4 py-3 rounded-xl border border-white/20 text-white font-bold text-sm flex items-center gap-1 hover:bg-white/5 transition"
+              className="px-3 py-2.5 rounded-xl border border-white/20 text-white font-bold text-xs flex items-center gap-1 hover:bg-white/5 transition"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={14} />
               Voltar
             </button>
           )}
@@ -209,7 +235,7 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
           {etapa < totalEtapas ? (
             <button
               onClick={handleAvancar}
-              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-sm hover:opacity-90 transition active:scale-[0.98]"
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#F4D03F] to-[#FFD966] text-black font-bold text-xs hover:opacity-90 transition active:scale-[0.98]"
             >
               Continuar
             </button>
@@ -217,7 +243,7 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-bold text-sm hover:opacity-90 transition active:scale-[0.98] disabled:opacity-50"
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white font-bold text-xs hover:opacity-90 transition active:scale-[0.98] disabled:opacity-50"
             >
               {loading ? 'Cadastrando...' : '✅ Confirmar Cadastro'}
             </button>
