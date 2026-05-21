@@ -10,7 +10,7 @@ const SejaMotorista = () => {
   const [cnh, setCnh] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  // Máscara para data (DD/MM/AAAA) - SEM Calendar
+  // Máscara para data (DD/MM/AAAA)
   const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let valor = e.target.value.replace(/\D/g, '');
     if (valor.length > 8) valor = valor.slice(0, 8);
@@ -21,7 +21,7 @@ const SejaMotorista = () => {
 
   const handleSubmit = async () => {
     if (!nome || !whatsapp || !cpf || dataNasc.length !== 10 || !cnh) {
-      alert('⚠️ Por favor, preencha todos os campos');
+      alert('⚠️ Preencha todos os campos');
       return;
     }
     
@@ -104,6 +104,7 @@ const SejaMotorista = () => {
               style={{ width: '100%', padding: '12px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '10px', boxSizing: 'border-box' }}
               value={nome}
               onChange={(e) => setNome(e.target.value)}
+              placeholder="Digite seu nome completo"
             />
           </div>
 
@@ -115,6 +116,7 @@ const SejaMotorista = () => {
               style={{ width: '100%', padding: '12px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '10px', boxSizing: 'border-box' }}
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
+              placeholder="11999999999"
             />
           </div>
 
@@ -126,6 +128,7 @@ const SejaMotorista = () => {
               style={{ width: '100%', padding: '12px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '10px', boxSizing: 'border-box' }}
               value={cpf}
               onChange={(e) => setCpf(e.target.value)}
+              placeholder="00000000000"
             />
           </div>
 
@@ -152,6 +155,7 @@ const SejaMotorista = () => {
               style={{ width: '100%', padding: '12px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '10px', boxSizing: 'border-box' }}
               value={cnh}
               onChange={(e) => setCnh(e.target.value)}
+              placeholder="Digite o número da CNH"
             />
           </div>
         </div>
