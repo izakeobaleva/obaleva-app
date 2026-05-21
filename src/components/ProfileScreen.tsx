@@ -33,6 +33,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, profile, onLogout, 
             setShowDriverModal(false);
             onRefresh();
           }}
+          onLogout={onLogout}
         />
       )}
     </>
