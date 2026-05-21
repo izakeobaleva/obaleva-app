@@ -91,7 +91,7 @@ const Perfil = () => {
 
         {showBotao && (
           <button
-            onClick={() => window.location.href = '/novo-parceiro'}
+            onClick={() => window.location.href = '/parceiro'}
             style={{
               width: '100%', background: '#1A1528', borderRadius: '16px', padding: '16px',
               border: '1px solid rgba(244,208,63,0.3)', color: '#F4D03F', fontSize: '16px',
