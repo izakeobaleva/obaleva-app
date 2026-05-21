@@ -13,7 +13,7 @@ import Earnings from './pages/Earnings';
 import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
 import NotFound from './pages/NotFound';
-import SejaMotorista from './pages/SejaMotorista';
+import CadastroMotorista from './pages/CadastroMotorista';
 
 function App() {
   return (
@@ -31,7 +31,7 @@ function App() {
         <Route path="/earnings" element={<Earnings />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/update-password" element={<UpdatePassword />} />
-        <Route path="/seja-motorista" element={<SejaMotorista />} />
+        <Route path="/seja-motorista" element={<CadastroMotorista />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
