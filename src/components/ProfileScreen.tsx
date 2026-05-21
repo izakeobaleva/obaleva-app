@@ -1,7 +1,7 @@
 import React from 'react';
 import PassengerProfile from './PassengerProfile';
 import DriverProfile from './DriverProfile';
-import DriverRegistrationModal from './DriverRegistrationModal';
+import DriverRegistrationModal from '../DriverRegistrationModal';
 
 interface ProfileScreenProps {
   user: any;
