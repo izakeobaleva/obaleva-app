@@ -89,6 +89,8 @@ const Perfil = () => {
           </div>
         </div>
 
+        {/* 🚫 BOTÃO "QUERO SER PARCEIRO" COMENTADO TEMPORARIAMENTE PARA TESTE */}
+        {/*
         {showBotao && (
           <button
             onClick={() => window.location.href = '/parceiro'}
@@ -103,14 +105,16 @@ const Perfil = () => {
             Quero ser Parceiro
           </button>
         )}
+        */}
 
+        {/* Apenas o sair */}
         <button
           onClick={handleSignOut}
           style={{
             width: '100%', background: '#1A1528', borderRadius: '16px', padding: '16px',
             border: '1px solid rgba(255,255,255,0.1)', color: '#EF4444', fontSize: '16px',
             fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', gap: '8px'
+            justifyContent: 'center', gap: '8px', marginTop: '32px'
           }}
         >
           <span style={{ fontSize: '18px' }}>🚪</span>
