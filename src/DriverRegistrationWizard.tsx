@@ -46,7 +46,6 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
   const [cor, setCor] = useState('');
 
   const totalEtapas = 4;
-  const camposVisiveis = etapa === 1 ? 4 : etapa === 2 ? 4 : etapa === 3 ? 3 : 4;
 
   const handleLogout = async () => {
     if (onLogout) { onLogout(); return; }
@@ -293,7 +292,7 @@ const DriverRegistrationWizard: React.FC<DriverRegistrationWizardProps> = ({ use
         </div>
       </div>
 
-      {/* BOTÃO FIXO ACIMA DA BARRA INFERIOR */}
+      {/* BOTÃO FIXO ACIMA DA BARRA INFERIOR - SEMPRE VISÍVEL */}
       <div className="flex-shrink-0 px-4 py-2 border-t border-white/10 bg-[#1A1528]">
         <div className="flex gap-2">
           {etapa > 1 && (
