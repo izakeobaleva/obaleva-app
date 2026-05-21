@@ -1,7 +1,7 @@
 import React from 'react';
 import PassengerProfile from './PassengerProfile';
 import DriverProfile from './DriverProfile';
-import DriverRegistrationFixed from '../DriverRegistrationFixed';
+import DriverRegistrationWizard from '../DriverRegistrationWizard';
 
 interface ProfileScreenProps {
   user: any;
@@ -26,7 +26,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, profile, onLogout, 
         onRefresh={onRefresh}
       />
       {showDriverModal && (
-        <DriverRegistrationFixed
+        <DriverRegistrationWizard
           user={user}
           onClose={() => setShowDriverModal(false)}
           onSuccess={() => {
