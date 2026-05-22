@@ -6,7 +6,8 @@ import { OnboardingFlow } from './screens/OnboardingFlow';
 import { HomeScreen } from './components/screens/HomeScreen';
 import { SearchScreen } from './components/screens/SearchScreen';
 import { ActivityScreen } from './components/screens/ActivityScreen';
-import { ProfileScreen } from './components/ProfileScreen';
+// ⚠️ IMPORTANTE: Import sem chaves porque ProfileScreen usa export default
+import ProfileScreen from './components/ProfileScreen';
 import { BottomNav } from './components/navigation/BottomNav';
 
 function AppContent() {
@@ -15,7 +16,6 @@ function AppContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // Verificar se já completou o onboarding
     const onboardingComplete = localStorage.getItem('obaleva_onboarding_complete') === 'true';
     const termsAccepted = localStorage.getItem('obaleva_terms_accepted') === 'true';
     
@@ -34,7 +34,6 @@ function AppContent() {
     );
   }
 
-  // Fluxo de onboarding (para novos usuários não logados)
   if (showOnboarding && !user) {
     return (
       <>
