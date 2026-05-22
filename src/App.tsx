@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
-import Perfil from './pages/Perfil';
 import Home from './pages/Home';
+import Perfil from './pages/Perfil';
 import MotoristaCadastro from './pages/MotoristaCadastro';
 
 function App() {
