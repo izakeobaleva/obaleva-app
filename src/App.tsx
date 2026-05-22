@@ -1,28 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { OnboardingFlow } from './screens/OnboardingFlow';
+import { AccessScreen } from './screens/AccessScreen';
 import { HomeScreen } from './components/screens/HomeScreen';
 import { SearchScreen } from './components/screens/SearchScreen';
 import { ActivityScreen } from './components/screens/ActivityScreen';
-// ⚠️ IMPORTANTE: Import sem chaves porque ProfileScreen usa export default
 import ProfileScreen from './components/ProfileScreen';
 import { BottomNav } from './components/navigation/BottomNav';
 
 function AppContent() {
   const { user, profile, loading, signOut, refreshSession } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAccess, setShowAccess] = useState(false);
 
   useEffect(() => {
-    const onboardingComplete = localStorage.getItem('obaleva_onboarding_complete') === 'true';
-    const termsAccepted = localStorage.getItem('obaleva_terms_accepted') === 'true';
-    
-    if (!user && !onboardingComplete) {
-      setShowOnboarding(true);
+    if (!user) {
+      setShowAccess(true);
     } else {
-      setShowOnboarding(false);
+      setShowAccess(false);
     }
   }, [user]);
 
@@ -34,10 +30,11 @@ function AppContent() {
     );
   }
 
-  if (showOnboarding && !user) {
+  // Tela de acesso com mapa + carrossel (para não logados)
+  if (showAccess && !user) {
     return (
       <>
-        <OnboardingFlow onComplete={() => setShowOnboarding(false)} />
+        <AccessScreen onAccessSuccess={() => setShowAccess(false)} />
         <Toaster position="top-center" richColors />
       </>
     );
@@ -45,35 +42,20 @@ function AppContent() {
 
   const handleLogout = async () => {
     await signOut();
-    localStorage.removeItem('obaleva_onboarding_complete');
-    setShowOnboarding(true);
+    setShowAccess(true);
   };
 
   return (
     <>
       {activeTab === 'home' && (
-        <HomeScreen 
-          user={user} 
-          onLogout={user ? handleLogout : undefined} 
-          showFullUI={!!user} 
-        />
+        <HomeScreen user={user} onLogout={handleLogout} showFullUI={!!user} />
       )}
       {activeTab === 'perfil' && user && (
-        <ProfileScreen 
-          user={user} 
-          profile={profile} 
-          onLogout={handleLogout} 
-          onRefresh={refreshSession} 
-        />
+        <ProfileScreen user={user} profile={profile} onLogout={handleLogout} onRefresh={refreshSession} />
       )}
       {activeTab === 'buscar' && !!user && <SearchScreen />}
       {activeTab === 'atividade' && !!user && <ActivityScreen />}
       {!!user && <BottomNav active={activeTab} onNavigate={setActiveTab} />}
-
-      {!user && !showOnboarding && (
-        <OnboardingFlow onComplete={() => setShowOnboarding(false)} />
-      )}
-
       <Toaster position="top-center" richColors />
     </>
   );
@@ -85,8 +67,6 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/*" element={<AppContent />} />
-          <Route path="/login" element={<AppContent />} />
-          <Route path="/register" element={<AppContent />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
