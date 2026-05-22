@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MainScreen } from './pages/MainScreen';
 import Login from './pages/Login';
 import { RegisterPassenger } from './pages/RegisterPassenger';
-import RegisterDriver from './pages/RegisterDriver';
+import { RegisterDriver } from './pages/RegisterDriver';
 import { PassengerDashboard } from './pages/PassengerDashboard';
 import { DriverDashboard } from './pages/DriverDashboard';
 import Profile from './pages/Profile';
@@ -30,7 +30,6 @@ function App() {
         <Route path="/earnings" element={<Earnings />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/update-password" element={<UpdatePassword />} />
-        <Route path="/become-driver" element={<RegisterDriver />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
