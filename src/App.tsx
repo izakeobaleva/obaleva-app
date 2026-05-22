@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { AccessScreen } from './screens/AccessScreen';
+import { OnboardingOverlayFlow } from './screens/OnboardingOverlayFlow';
 import { HomeScreen } from './components/screens/HomeScreen';
 import { SearchScreen } from './components/screens/SearchScreen';
 import { ActivityScreen } from './components/screens/ActivityScreen';
@@ -12,13 +12,14 @@ import { BottomNav } from './components/navigation/BottomNav';
 function AppContent() {
   const { user, profile, loading, signOut, refreshSession } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
-  const [showAccess, setShowAccess] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      setShowAccess(true);
+    const onboardingProgress = localStorage.getItem('obaleva_onboarding_progress');
+    if (!user && onboardingProgress !== 'complete') {
+      setShowOnboarding(true);
     } else {
-      setShowAccess(false);
+      setShowOnboarding(false);
     }
   }, [user]);
 
@@ -30,11 +31,11 @@ function AppContent() {
     );
   }
 
-  // Tela de acesso com mapa + carrossel (para não logados)
-  if (showAccess && !user) {
+  // Fluxo de onboarding com mapas de fundo
+  if (showOnboarding && !user) {
     return (
       <>
-        <AccessScreen onAccessSuccess={() => setShowAccess(false)} />
+        <OnboardingOverlayFlow onComplete={() => setShowOnboarding(false)} />
         <Toaster position="top-center" richColors />
       </>
     );
@@ -42,7 +43,8 @@ function AppContent() {
 
   const handleLogout = async () => {
     await signOut();
-    setShowAccess(true);
+    localStorage.removeItem('obaleva_onboarding_progress');
+    setShowOnboarding(true);
   };
 
   return (
