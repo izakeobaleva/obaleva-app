@@ -26,7 +26,7 @@ const Perfil = () => {
       padding: '16px',
       fontFamily: 'system-ui, sans-serif'
     }}>
-      <div style={{ maxWidth: '500px', margin: '0 auto', textAlign: 'center', paddingTop: '40px' }}>
+      <div style={{ maxWidth: '500px', margin: '0 auto', textAlign: 'center', paddingTop: '80px' }}>
         <div style={{
           width: '80px', height: '80px', background: 'linear-gradient(135deg, #F4D03F, #F59E0B)',
           borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px'
