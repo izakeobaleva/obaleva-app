@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MainScreen } from './pages/MainScreen';
 import Login from './pages/Login';
 import { RegisterPassenger } from './pages/RegisterPassenger';
-import { RegisterDriver } from './pages/RegisterDriver';
+import RegisterDriver from './pages/RegisterDriver';
 import { PassengerDashboard } from './pages/PassengerDashboard';
 import { DriverDashboard } from './pages/DriverDashboard';
 import Profile from './pages/Profile';
@@ -24,7 +24,7 @@ function App() {
         <Route path="/register-driver" element={<RegisterDriver />} />
         <Route path="/passenger" element={<PassengerDashboard />} />
         <Route path="/driver" element={<DriverDashboard />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/perfil" element={<Profile />} />
         <Route path="/trips" element={<Trips />} />
         <Route path="/trips/:id" element={<TripDetails />} />
         <Route path="/earnings" element={<Earnings />} />
