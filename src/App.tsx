@@ -1,19 +1,95 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import Perfil from './pages/Perfil';
-import MotoristaCadastro from './pages/MotoristaCadastro';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { OnboardingFlow } from './screens/OnboardingFlow';
+import { HomeScreen } from './components/screens/HomeScreen';
+import { SearchScreen } from './components/screens/SearchScreen';
+import { ActivityScreen } from './components/screens/ActivityScreen';
+import { ProfileScreen } from './components/ProfileScreen';
+import { BottomNav } from './components/navigation/BottomNav';
+
+function AppContent() {
+  const { user, profile, loading, signOut, refreshSession } = useAuth();
+  const [activeTab, setActiveTab] = useState('home');
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    // Verificar se já completou o onboarding
+    const onboardingComplete = localStorage.getItem('obaleva_onboarding_complete') === 'true';
+    const termsAccepted = localStorage.getItem('obaleva_terms_accepted') === 'true';
+    
+    if (!user && !onboardingComplete) {
+      setShowOnboarding(true);
+    } else {
+      setShowOnboarding(false);
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+        <div className="animate-spin h-10 w-10 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Fluxo de onboarding (para novos usuários não logados)
+  if (showOnboarding && !user) {
+    return (
+      <>
+        <OnboardingFlow onComplete={() => setShowOnboarding(false)} />
+        <Toaster position="top-center" richColors />
+      </>
+    );
+  }
+
+  const handleLogout = async () => {
+    await signOut();
+    localStorage.removeItem('obaleva_onboarding_complete');
+    setShowOnboarding(true);
+  };
+
+  return (
+    <>
+      {activeTab === 'home' && (
+        <HomeScreen 
+          user={user} 
+          onLogout={user ? handleLogout : undefined} 
+          showFullUI={!!user} 
+        />
+      )}
+      {activeTab === 'perfil' && user && (
+        <ProfileScreen 
+          user={user} 
+          profile={profile} 
+          onLogout={handleLogout} 
+          onRefresh={refreshSession} 
+        />
+      )}
+      {activeTab === 'buscar' && !!user && <SearchScreen />}
+      {activeTab === 'atividade' && !!user && <ActivityScreen />}
+      {!!user && <BottomNav active={activeTab} onNavigate={setActiveTab} />}
+
+      {!user && !showOnboarding && (
+        <OnboardingFlow onComplete={() => setShowOnboarding(false)} />
+      )}
+
+      <Toaster position="top-center" richColors />
+    </>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/perfil" element={<Perfil />} />
-        <Route path="/motorista-cadastro" element={<MotoristaCadastro />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/*" element={<AppContent />} />
+          <Route path="/login" element={<AppContent />} />
+          <Route path="/register" element={<AppContent />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
