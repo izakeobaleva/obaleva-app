@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 
 const Perfil = () => {
-  const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState('carregando...');
 
   useEffect(() => {
@@ -37,28 +35,10 @@ const Perfil = () => {
         </div>
         <h2 style={{ color: 'white', fontSize: '20px', margin: '0 0 8px' }}>{userEmail}</h2>
 
-        <button
-          onClick={() => navigate('/register-driver')}
-          style={{
-            width: '100%',
-            background: '#1A1528',
-            borderRadius: '16px',
-            padding: '16px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#4CAF50',
-            fontSize: '16px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            marginTop: '32px'
-          }}
-        >
-          🚀 Seja Motorista Parceiro
-        </button>
-
         <button onClick={handleSignOut} style={{
           width: '100%', background: '#1A1528', borderRadius: '16px', padding: '16px',
           border: '1px solid rgba(255,255,255,0.1)', color: '#EF4444', fontSize: '16px',
-          fontWeight: '500', cursor: 'pointer', marginTop: '16px'
+          fontWeight: '500', cursor: 'pointer', marginTop: '32px'
         }}>
           🚪 Sair da conta
         </button>
