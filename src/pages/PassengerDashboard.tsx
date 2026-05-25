@@ -10,15 +10,6 @@ import { LocationAutocomplete } from '../components/LocationAutocomplete';
 import { MapPin, Navigation, DollarSign, History, LogOut, Car, Crosshair, X } from 'lucide-react';
 import { toast } from 'sonner';
 
-const requestCache = new Map<string, any>();
-async function fetchWithCache(key: string, fetcher: () => Promise<any>, ttl = 30000) {
-  const cached = requestCache.get(key);
-  if (cached && Date.now() - cached.timestamp < ttl) return cached.data;
-  const data = await fetcher();
-  requestCache.set(key, { data, timestamp: Date.now() });
-  return data;
-}
-
 export function PassengerDashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -29,18 +20,11 @@ export function PassengerDashboard() {
   const [recentTrips, setRecentTrips] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [mapsTimeout, setMapsTimeout] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const geocoderRef = useRef<any>(null);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
-  // Inicializa Geocoder quando Maps carregar
-  useEffect(() => {
-    if (mapsLoaded && window.google && window.google.maps) {
-      geocoderRef.current = new window.google.maps.Geocoder();
-    }
-  }, [mapsLoaded]);
 
   // Pega localização do usuário
   useEffect(() => {
@@ -60,58 +44,71 @@ export function PassengerDashboard() {
     }
   }, []);
 
-  // Carrega Google Maps
+  // Carrega Google Maps com timeout
   useEffect(() => {
-    if (!apiKey) { setMapsLoaded(true); return; }
-    if (window.google && window.google.maps && window.google.maps.places) { setMapsLoaded(true); return; }
+    if (!apiKey) { 
+      setMapsLoaded(true); 
+      setMapsTimeout(true);
+      return; 
+    }
+    if (window.google && window.google.maps && window.google.maps.places) { 
+      setMapsLoaded(true); 
+      return; 
+    }
 
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initMap`;
     script.async = true; script.defer = true;
+    
     (window as any).initMap = () => setMapsLoaded(true);
-    script.onerror = () => setMapsLoaded(true);
+    script.onerror = () => {
+      setMapsLoaded(true);
+      setMapsTimeout(true);
+    };
     document.head.appendChild(script);
+
+    // Timeout de 10 segundos
+    const timeout = setTimeout(() => {
+      if (!mapsLoaded) {
+        setMapsLoaded(true);
+        setMapsTimeout(true);
+      }
+    }, 10000);
+
+    return () => clearTimeout(timeout);
   }, [apiKey]);
 
-  // Reverse geocode após mapa carregar
+  // Tenta criar o mapa quando o Google Maps carregar
   useEffect(() => {
-    if (mapsLoaded && geocoderRef.current && userLocation && !origem) {
-      geocoderRef.current.geocode(
-        { location: userLocation },
-        (results: any, status: string) => {
-          if (status === 'OK' && results?.[0]) setOrigem(results[0].formatted_address);
-          else setOrigem('Sua Localização Atual');
-        }
-      );
+    if (!mapsLoaded || !mapRef.current || !userLocation || !window.google || !window.google.maps) return;
+
+    try {
+      const map = new window.google.maps.Map(mapRef.current, {
+        center: userLocation, zoom: 16,
+        disableDefaultUI: true, zoomControl: true, streetViewControl: false,
+        mapTypeControl: false, fullscreenControl: false,
+      });
+      mapInstanceRef.current = map;
+
+      const pulseCircle = new window.google.maps.Circle({
+        map, center: userLocation, radius: 30,
+        fillColor: '#F4D03F', fillOpacity: 0.35,
+        strokeColor: '#F4D03F', strokeOpacity: 0.9, strokeWeight: 2,
+      });
+
+      let size = 30, growing = true;
+      const interval = setInterval(() => {
+        size += growing ? 2 : -2;
+        if (size >= 50) growing = false;
+        if (size <= 30) growing = true;
+        pulseCircle.setRadius(size);
+      }, 60);
+
+      return () => clearInterval(interval);
+    } catch (err) {
+      console.error('Erro ao criar mapa:', err);
+      setMapsTimeout(true);
     }
-  }, [mapsLoaded, userLocation]);
-
-  // Inicializa mapa
-  useEffect(() => {
-    if (!mapsLoaded || !mapRef.current || !userLocation || !window.google) return;
-
-    const map = new window.google.maps.Map(mapRef.current, {
-      center: userLocation, zoom: 16,
-      disableDefaultUI: true, zoomControl: true, streetViewControl: false,
-      mapTypeControl: false, fullscreenControl: false,
-    });
-    mapInstanceRef.current = map;
-
-    const pulseCircle = new window.google.maps.Circle({
-      map, center: userLocation, radius: 30,
-      fillColor: '#F4D03F', fillOpacity: 0.35,
-      strokeColor: '#F4D03F', strokeOpacity: 0.9, strokeWeight: 2,
-    });
-
-    let size = 30, growing = true;
-    const interval = setInterval(() => {
-      size += growing ? 2 : -2;
-      if (size >= 50) growing = false;
-      if (size <= 30) growing = true;
-      pulseCircle.setRadius(size);
-    }, 60);
-
-    return () => clearInterval(interval);
   }, [mapsLoaded, userLocation]);
 
   useEffect(() => {
@@ -132,7 +129,7 @@ export function PassengerDashboard() {
   }
 
   const precoEstimado = useMemo(
-    () => origem || destino ? calcularPrecoCorrida({ distanciaKm: 5.2, tempoMin: 15 }) : null,
+    () => (origem || destino) ? calcularPrecoCorrida({ distanciaKm: 5.2, tempoMin: 15 }) : null,
     [origem, destino]
   );
 
@@ -159,7 +156,7 @@ export function PassengerDashboard() {
 
   const handleOriginSelect = (lat: number, lng: number, address: string) => {
     setOrigem(address);
-    if (mapInstanceRef.current) {
+    if (mapInstanceRef.current && window.google) {
       mapInstanceRef.current.setCenter({ lat, lng });
       mapInstanceRef.current.setZoom(16);
     }
@@ -167,7 +164,7 @@ export function PassengerDashboard() {
 
   const handleDestinoSelect = (lat: number, lng: number, address: string) => {
     setDestino(address);
-    if (mapInstanceRef.current) {
+    if (mapInstanceRef.current && window.google) {
       mapInstanceRef.current.setCenter({ lat, lng });
       mapInstanceRef.current.setZoom(14);
     }
@@ -179,15 +176,14 @@ export function PassengerDashboard() {
       (position) => {
         const { latitude: lat, longitude: lng } = position.coords;
         setUserLocation({ lat, lng });
-        if (geocoderRef.current) {
-          geocoderRef.current.geocode(
-            { location: { lat, lng } },
-            (results: any, status: string) => {
-              if (status === 'OK' && results?.[0]) setOrigem(results[0].formatted_address);
-            }
-          );
-        }
-        if (mapInstanceRef.current) {
+        // Buscar endereço via Nominatim (OpenStreetMap)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt`)
+          .then(res => res.json())
+          .then(data => {
+            if (data?.display_name) setOrigem(data.display_name);
+          })
+          .catch(() => setOrigem(`📍 ${lat.toFixed(4)}, ${lng.toFixed(4)}`));
+        if (mapInstanceRef.current && window.google) {
           mapInstanceRef.current.setCenter({ lat, lng });
           mapInstanceRef.current.setZoom(16);
         }
@@ -208,7 +204,7 @@ export function PassengerDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0F0B1A] pb-24">
-      {/* HEADER LIMPO - apenas logo + botão sair */}
+      {/* HEADER LIMPO */}
       <header className="sticky top-0 z-20 bg-[#1A1528]/80 backdrop-blur-lg border-b border-white/10 flex justify-between items-center px-4 py-3">
         <motion.h1 
           initial={{ opacity: 0, x: -20 }} 
@@ -217,7 +213,6 @@ export function PassengerDashboard() {
         >
           ObaLeva
         </motion.h1>
-        {/* Apenas botão SAIR - Perfil fica na BottomNav */}
         <button 
           onClick={handleSignOut} 
           className="w-9 h-9 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition"
@@ -228,13 +223,21 @@ export function PassengerDashboard() {
       </header>
 
       <div className="mx-4 mt-4 space-y-4">
-        {/* Mapa ao vivo */}
+        {/* Mapa com fallback */}
         <div className="bg-[#1A1528] rounded-2xl overflow-hidden border border-white/10 h-56 relative">
-          {!apiKey ? (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-sm text-[#A0A0B0]">Configure a chave do Google Maps</p>
+          {!apiKey || mapsTimeout ? (
+            <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#1A1528] to-[#2D2342]">
+              <div className="text-center">
+                <MapPin size={48} className="mx-auto mb-2 text-[#F4D03F]/50" />
+                <p className="text-sm text-[#A0A0B0]">
+                  {mapsTimeout ? 'Mapa indisponível' : 'Configure a chave do Google Maps'}
+                </p>
+                <p className="text-xs text-[#A0A0B0]/60 mt-1">
+                  Digite os endereços manualmente
+                </p>
+              </div>
             </div>
-          ) : !mapsLoaded || !window.google ? (
+          ) : !mapsLoaded ? (
             <div className="h-full flex items-center justify-center">
               <div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
             </div>
@@ -304,7 +307,7 @@ export function PassengerDashboard() {
         </div>
 
         {/* Botão solicitar corrida */}
-        <button onClick={solicitarCorrida} disabled={solicitando}
+        <button onClick={solicitarCorrida} disabled={solicitando || !destino}
           className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 text-lg shadow-lg flex items-center justify-center gap-2">
           {solicitando ? (
             <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Buscando motorista...</>

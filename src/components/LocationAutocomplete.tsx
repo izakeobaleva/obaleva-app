@@ -24,6 +24,7 @@ export function LocationAutocomplete({
   const debounceRef = useRef<NodeJS.Timeout>();
   const autocompleteService = useRef<any>(null);
   const geocoderService = useRef<any>(null);
+  const mapsCheckInterval = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     // Check if Google Maps is already loaded
@@ -40,8 +41,38 @@ export function LocationAutocomplete({
       }
     }, 500);
 
-    return () => clearInterval(checkMaps);
+    mapsCheckInterval.current = checkMaps;
+
+    // Timeout de 8 segundos - se o Maps não carregar, continua mesmo assim
+    const timeout = setTimeout(() => {
+      if (!mapsReady) {
+        setMapsReady(true); // Força como pronto para não travar a UI
+      }
+    }, 8000);
+
+    return () => {
+      clearInterval(checkMaps);
+      clearTimeout(timeout);
+    };
   }, []);
+
+  const buscarSugestoesNominatim = async (query: string) => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=br`;
+      const res = await fetch(url, {
+        headers: { 'Accept-Language': 'pt-BR' }
+      });
+      const data = await res.json();
+      return data.map((item: any) => ({
+        place_id: item.place_id,
+        description: item.display_name,
+        lat: parseFloat(item.lat),
+        lon: parseFloat(item.lon)
+      }));
+    } catch {
+      return [];
+    }
+  };
 
   const handleInputChange = (val: string) => {
     onChange(val);
@@ -56,7 +87,8 @@ export function LocationAutocomplete({
       return;
     }
 
-    debounceRef.current = setTimeout(() => {
+    debounceRef.current = setTimeout(async () => {
+      // Tenta Google Maps primeiro
       if (autocompleteService.current) {
         autocompleteService.current.getPlacePredictions(
           {
@@ -66,34 +98,50 @@ export function LocationAutocomplete({
           },
           (predictions: any[] | null, status: string) => {
             if (status === 'OK' && predictions) {
-              setSuggestions(predictions);
+              setSuggestions(predictions.map(p => ({
+                place_id: p.place_id,
+                description: p.description,
+                lat: null,
+                lon: null
+              })));
               setShowSuggestions(true);
-            } else {
-              setSuggestions([]);
-              setShowSuggestions(false);
             }
           }
         );
+      } else {
+        // Fallback: usar Nominatim (OpenStreetMap)
+        const results = await buscarSugestoesNominatim(val);
+        if (results.length > 0) {
+          setSuggestions(results);
+          setShowSuggestions(true);
+        }
       }
     }, 300);
   };
 
-  const handleSelectSuggestion = (suggestion: any) => {
+  const handleSelectSuggestion = async (suggestion: any) => {
     const address = suggestion.description;
     onChange(address);
     setShowSuggestions(false);
 
-    // Get lat/lng from the selected address
-    if (geocoderService.current && onPlaceSelected) {
+    let lat = suggestion.lat;
+    let lng = suggestion.lon;
+
+    // Se veio do Google Places, precisa geocodificar para pegar lat/lng
+    if (!lat && geocoderService.current) {
       geocoderService.current.geocode(
         { address: address },
         (results: any[] | null, status: string) => {
           if (status === 'OK' && results && results[0]) {
             const location = results[0].geometry.location;
-            onPlaceSelected(location.lat(), location.lng(), address);
+            if (onPlaceSelected) {
+              onPlaceSelected(location.lat(), location.lng(), address);
+            }
           }
         }
       );
+    } else if (lat && onPlaceSelected) {
+      onPlaceSelected(lat, lng, address);
     }
   };
 
@@ -111,13 +159,12 @@ export function LocationAutocomplete({
         <input
           ref={inputRef}
           type="text"
-          placeholder={mapsReady ? placeholder : "Carregando..."}
+          placeholder={placeholder}
           value={value}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => {
             setFocused(false);
-            // Delay to allow click on suggestion
             setTimeout(() => setShowSuggestions(false), 200);
           }}
           className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm"
