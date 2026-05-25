@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { 
-  User, Edit, CreditCard, History, Star, Heart, Bell, Shield, 
-  HelpCircle, Truck, LogOut, ChevronRight, Award, MapPin, 
-  Save, X, Camera, Phone, Mail, FileText, Lock, CheckCircle, 
-  AlertCircle, DollarSign, Calendar, Clock, TrendingUp, 
-  MessageCircle, Share2, Smartphone, Home, Briefcase, 
-  Navigation, Moon, Sun, Globe, Info, ChevronLeft
+  User, Edit, CreditCard, History, Star, Heart, 
+  ChevronRight, Award, Camera, Phone, Mail,
+  LogOut, ChevronLeft, 
+  FileText, Lock, CheckCircle, AlertCircle
 } from 'lucide-react';
 
 interface PassengerProfileProps {
   user: any;
   onLogout: () => void;
-  onSejaMotorista: () => void;
   onRefresh: () => void;
 }
 
-const PassengerProfile: React.FC<PassengerProfileProps> = ({ user, onLogout, onSejaMotorista, onRefresh }) => {
+const PassengerProfile: React.FC<PassengerProfileProps> = ({ user, onLogout, onRefresh }) => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -31,16 +28,6 @@ const PassengerProfile: React.FC<PassengerProfileProps> = ({ user, onLogout, onS
     tempo_medio: 0,
     economizado: 0,
   });
-  const [favoritos] = useState([
-    { id: 1, nome: 'Casa', endereco: 'Rua Santo Antônio, 1095', icone: '🏠' },
-    { id: 2, nome: 'Trabalho', endereco: 'Av. Paulista, 1000', icone: '🏢' },
-    { id: 3, nome: 'Academia', endereco: 'Rua Augusta, 500', icone: '💪' },
-  ]);
-  const [recentes] = useState([
-    { id: 1, origem: 'Casa', destino: 'Trabalho', data: 'Hoje, 08:30', valor: 15.50 },
-    { id: 2, origem: 'Trabalho', destino: 'Casa', data: 'Ontem, 18:45', valor: 18.00 },
-    { id: 3, origem: 'Casa', destino: 'Shopping', data: '15/05, 14:20', valor: 22.50 },
-  ]);
 
   useEffect(() => {
     carregarPerfil();
@@ -48,14 +35,14 @@ const PassengerProfile: React.FC<PassengerProfileProps> = ({ user, onLogout, onS
     carregarFoto();
   }, [user]);
 
-  const carregarPerfil = async () => {
+  async function carregarPerfil() {
     const { data } = await supabase.from('usuarios').select('*').eq('id', user.id).single();
     setProfile(data);
     setEditData({ nome_completo: data?.nome_completo || '', telefone: data?.telefone || '' });
     setLoading(false);
-  };
+  }
 
-  const carregarEstatisticas = async () => {
+  async function carregarEstatisticas() {
     const { data: corridas } = await supabase
       .from('corridas')
       .select('valor_total, distancia_km')
@@ -74,15 +61,15 @@ const PassengerProfile: React.FC<PassengerProfileProps> = ({ user, onLogout, onS
         economizado: 45,
       });
     }
-  };
+  }
 
-  const carregarFoto = async () => {
+  async function carregarFoto() {
     const { data } = await supabase.storage.from('avatars').list(`${user.id}/`);
     if (data && data.length > 0) {
       const { data: url } = supabase.storage.from('avatars').getPublicUrl(`${user.id}/${data[0].name}`);
       setFotoPerfil(url.publicUrl);
     }
-  };
+  }
 
   const handleUploadFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -136,18 +123,8 @@ const PassengerProfile: React.FC<PassengerProfileProps> = ({ user, onLogout, onS
             <button onClick={() => setActiveMenu(null)} className="text-[#A0A0B0] hover:text-white"><ChevronLeft size={24} /></button>
             <h1 className="text-white text-xl font-bold">📜 Histórico de Corridas</h1>
           </div>
-          <div className="space-y-3">
-            {recentes.map((corrida) => (
-              <div key={corrida.id} className="bg-[#1A1528] rounded-xl p-4 border border-[#F4D03F]/15">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-white font-bold">{corrida.origem} → {corrida.destino}</p>
-                    <p className="text-[#A0A0B0] text-xs mt-1">{corrida.data}</p>
-                  </div>
-                  <p className="text-[#F4D03F] font-bold">R$ {corrida.valor.toFixed(2)}</p>
-                </div>
-              </div>
-            ))}
+          <div className="text-center py-8 text-[#A0A0B0]">
+            <p>Nenhuma corrida encontrada</p>
           </div>
         </div>
       </div>
@@ -162,17 +139,8 @@ const PassengerProfile: React.FC<PassengerProfileProps> = ({ user, onLogout, onS
             <button onClick={() => setActiveMenu(null)} className="text-[#A0A0B0] hover:text-white"><ChevronLeft size={24} /></button>
             <h1 className="text-white text-xl font-bold">❤️ Endereços Favoritos</h1>
           </div>
-          <div className="space-y-3">
-            {favoritos.map((fav) => (
-              <div key={fav.id} className="bg-[#1A1528] rounded-xl p-4 border border-[#F4D03F]/15 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#F4D03F]/20 flex items-center justify-center text-xl">{fav.icone}</div>
-                <div className="flex-1">
-                  <p className="text-white font-bold">{fav.nome}</p>
-                  <p className="text-[#A0A0B0] text-xs">{fav.endereco}</p>
-                </div>
-                <button className="text-[#F4D03F] text-xs">Editar</button>
-              </div>
-            ))}
+          <div className="text-center py-8 text-[#A0A0B0]">
+            <p>Nenhum endereço favorito</p>
           </div>
         </div>
       </div>
@@ -234,8 +202,6 @@ const PassengerProfile: React.FC<PassengerProfileProps> = ({ user, onLogout, onS
           <button className="w-full flex items-center justify-between p-3.5 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-3"><CreditCard size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Formas de pagamento</span></div><ChevronRight size={16} className="text-gray-500" /></button>
           <button onClick={() => setActiveMenu('historico')} className="w-full flex items-center justify-between p-3.5 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-3"><History size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Histórico de corridas</span></div><ChevronRight size={16} className="text-gray-500" /></button>
           <button onClick={() => setActiveMenu('favoritos')} className="w-full flex items-center justify-between p-3.5 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-3"><Heart size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Endereços favoritos</span></div><ChevronRight size={16} className="text-gray-500" /></button>
-          <div className="p-3 border-b border-white/10 bg-[#F4D03F]/5"><p className="text-[#F4D03F] text-xs font-bold">🌟 RECURSOS EXTRAS</p></div>
-          <button onClick={onSejaMotorista} className="w-full flex items-center justify-between p-3.5 hover:bg-white/5 transition border-b border-white/10"><div className="flex items-center gap-3"><Truck size={18} className="text-[#F4D03F]" /><span className="text-white text-sm">Seja Motorista</span></div><ChevronRight size={16} className="text-gray-500" /></button>
           <button onClick={onLogout} className="w-full flex items-center justify-between p-3.5 hover:bg-red-500/10 transition"><div className="flex items-center gap-3"><LogOut size={18} className="text-red-400" /><span className="text-red-400 text-sm font-medium">Sair da conta</span></div><ChevronRight size={16} className="text-red-400" /></button>
         </div>
       </div>
