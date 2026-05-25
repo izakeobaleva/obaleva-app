@@ -208,7 +208,7 @@ export function PassengerDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0F0B1A] pb-24">
-      {/* HEADER SIMPLIFICADO - sem botão perfil duplicado */}
+      {/* HEADER LIMPO - apenas logo + botão sair */}
       <header className="sticky top-0 z-20 bg-[#1A1528]/80 backdrop-blur-lg border-b border-white/10 flex justify-between items-center px-4 py-3">
         <motion.h1 
           initial={{ opacity: 0, x: -20 }} 
@@ -228,7 +228,7 @@ export function PassengerDashboard() {
       </header>
 
       <div className="mx-4 mt-4 space-y-4">
-        {/* Mapa */}
+        {/* Mapa ao vivo */}
         <div className="bg-[#1A1528] rounded-2xl overflow-hidden border border-white/10 h-56 relative">
           {!apiKey ? (
             <div className="h-full flex items-center justify-center">
@@ -247,7 +247,7 @@ export function PassengerDashboard() {
           </div>
         </div>
 
-        {/* Inputs */}
+        {/* Inputs de endereço */}
         <div className="bg-[#1A1528] rounded-2xl p-4 border border-white/10 space-y-3">
           <div className="relative">
             <label className="block text-xs text-[#A0A0B0] mb-1">📍 Origem</label>
@@ -303,7 +303,7 @@ export function PassengerDashboard() {
           )}
         </div>
 
-        {/* Botões */}
+        {/* Botão solicitar corrida */}
         <button onClick={solicitarCorrida} disabled={solicitando}
           className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 text-lg shadow-lg flex items-center justify-center gap-2">
           {solicitando ? (
@@ -311,6 +311,7 @@ export function PassengerDashboard() {
           ) : (<><Car size={22} /> Solicitar ObaLeva</>)}
         </button>
 
+        {/* Botão "Torne-se um Parceiro" */}
         <button onClick={() => navigate('/cadastro-motorista')}
           className="w-full bg-transparent border-2 border-[#F4D03F] text-[#F4D03F] font-bold py-3 rounded-2xl hover:bg-[#F4D03F]/10 transition-all flex items-center justify-center gap-2">
           <Car size={18} /> Torne-se um Parceiro
