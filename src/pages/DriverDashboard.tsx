@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { MapWithPersonCar } from '../components/MapWithPersonCar';
 import { BottomNav } from '../components/BottomNav';
 import { Skeleton } from '../components/Skeleton';
 import { RatingStars } from '../components/RatingStars';
@@ -37,7 +36,7 @@ export function DriverDashboard() {
     const channel = supabase
       .channel('novas-corridas-driver')
       .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'corridas', filter: `status=eq.pendente` }, 
+        { event: 'INSERT', schema: 'public', table: 'corridas', filter: 'status=eq.pendente' }, 
         (payload) => {
           if (disponivel) {
             const valor = payload.new.valor || 0;
@@ -135,14 +134,14 @@ export function DriverDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0F0B1A] pb-24">
-      <header className="glass-header sticky top-0 z-20 flex justify-between items-center px-6 py-4">
+      <header className="sticky top-0 z-20 flex justify-between items-center px-6 py-4 bg-[#1A1528]/80 backdrop-blur-lg border-b border-white/10">
         <div>
           <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</h1>
           <p className="text-xs text-[#A0A0B0]">Motorista</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => navigate('/profile')} className="btn-outline-dark px-3 py-2 text-sm">Perfil</button>
-          <button onClick={handleSignOut} className="btn-outline-dark px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 border-red-500/30 flex items-center gap-1">
+          <button onClick={() => navigate('/profile')} className="px-3 py-2 rounded-2xl border border-white/10 text-white hover:bg-white/5 transition-all text-sm">Perfil</button>
+          <button onClick={handleSignOut} className="px-3 py-2 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-1 text-sm">
             <LogOut size={16} /> Sair
           </button>
         </div>
@@ -161,22 +160,28 @@ export function DriverDashboard() {
               <div className={`px-4 py-2 rounded-full text-sm font-semibold ${disponivel ? 'bg-green-900/40 text-green-400' : 'bg-white/10 text-[#A0A0B0]'}`}>
                 {disponivel ? '🟢 Online' : '⚫ Offline'}
               </div>
-              <motion.button whileTap={{ scale: 0.95 }} onClick={() => { setDisponivel(!disponivel); if (!disponivel) toast.success('Você está online!'); else toast('Você ficou offline'); }} className={`px-6 py-2.5 rounded-2xl font-bold text-sm transition-all ${disponivel ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F]'}`}>
+              <motion.button 
+                whileTap={{ scale: 0.95 }} 
+                onClick={() => { setDisponivel(!disponivel); if (!disponivel) toast.success('Você está online!'); else toast('Você ficou offline'); }} 
+                className={`px-6 py-2.5 rounded-2xl font-bold text-sm transition-all ${disponivel ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F]'}`}
+              >
                 {disponivel ? 'Ficar Offline' : 'Ficar Online'}
               </motion.button>
             </div>
           </div>
         </motion.div>
 
-        {/* Mapa */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl overflow-hidden border border-white/10">
-          <MapWithPersonCar />
-        </motion.div>
-
         {/* Stats cards */}
         <div className="grid grid-cols-2 gap-3">
           {statCards.map((stat, index) => (
-            <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * index }} whileHover={{ scale: 1.02 }} className="bg-[#1A1528] p-4 rounded-2xl border border-white/10">
+            <motion.div 
+              key={stat.label} 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.1 * index }} 
+              whileHover={{ scale: 1.02 }} 
+              className="bg-[#1A1528] p-4 rounded-2xl border border-white/10"
+            >
               <div className="flex items-center gap-2 mb-2">
                 <div className="p-2 rounded-xl" style={{ backgroundColor: `${stat.color}20` }}>
                   <stat.icon size={16} color={stat.color} />
@@ -189,7 +194,12 @@ export function DriverDashboard() {
         </div>
 
         {/* Solicitações */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-[#1A1528] rounded-2xl border border-white/10 p-5">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ delay: 0.5 }} 
+          className="bg-[#1A1528] rounded-2xl border border-white/10 p-5"
+        >
           <h2 className="font-bold text-white mb-3 flex items-center gap-2">
             <Navigation size={18} className="text-[#F4D03F]" />
             Solicitações Próximas

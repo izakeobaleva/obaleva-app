@@ -10,6 +10,7 @@ export default function Trips() {
   const navigate = useNavigate()
   const [trips, setTrips] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const role = user?.user_metadata?.tipo || 'passageiro'
 
   useEffect(() => {
     fetchTrips()
@@ -27,7 +28,7 @@ export default function Trips() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
-      <header className="glass-header sticky top-0 z-20 px-6 py-4">
+      <header className="sticky top-0 z-20 bg-[#1A1528]/80 backdrop-blur-lg border-b border-white/10 px-6 py-4">
         <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Minhas Viagens</h1>
       </header>
       
@@ -69,7 +70,7 @@ export default function Trips() {
         )}
       </main>
 
-      <BottomNav role="passageiro" />
+      <BottomNav role={role} />
     </div>
   )
 }

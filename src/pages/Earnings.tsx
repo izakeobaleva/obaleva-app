@@ -28,9 +28,11 @@ export default function Earnings() {
     setLoading(false)
   }
 
+  const role = 'motorista'
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
-      <header className="glass-header sticky top-0 z-20 px-6 py-4">
+      <header className="sticky top-0 z-20 bg-[#1A1528]/80 backdrop-blur-lg border-b border-white/10 px-6 py-4">
         <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>Meus Ganhos</h1>
       </header>
       
@@ -73,7 +75,7 @@ export default function Earnings() {
         </div>
       </main>
 
-      <BottomNav role="motorista" />
+      <BottomNav role={role} />
     </div>
   )
 }

@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { MapWithPersonCar } from '../components/MapWithPersonCar';
-import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import { BottomNav } from '../components/BottomNav';
 import { Skeleton } from '../components/Skeleton';
 import { calcularPrecoCorrida } from '../lib/priceCalculator';
@@ -79,7 +77,7 @@ export function PassengerDashboard() {
       });
       
       if (error) throw error;
-      toast.success(' Corrida solicitada! Aguardando motorista...');
+      toast.success('✅ Corrida solicitada! Aguardando motorista...');
       setOrigem('');
       setDestino('');
       requestCache.delete(`trips_${user?.id}`);
@@ -102,36 +100,63 @@ export function PassengerDashboard() {
   return (
     <div className="min-h-screen bg-[#0F0B1A] pb-24">
       <header className="glass-header sticky top-0 z-20 flex justify-between items-center px-6 py-4">
-        <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-2xl font-bold bg-gradient-to-r from-[#F4D03F] to-amber-400 bg-clip-text text-transparent" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</motion.h1>
+        <motion.h1 
+          initial={{ opacity: 0, x: -20 }} 
+          animate={{ opacity: 1, x: 0 }} 
+          className="text-2xl font-bold bg-gradient-to-r from-[#F4D03F] to-amber-400 bg-clip-text text-transparent"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
+        >
+          ObaLeva
+        </motion.h1>
         <div className="flex gap-2">
-          <button onClick={() => navigate('/profile')} className="btn-outline-dark px-4 py-2 text-sm">Perfil</button>
-          <button onClick={handleSignOut} className="btn-outline-dark px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 border-red-500/30">
+          <button 
+            onClick={() => navigate('/profile')} 
+            className="px-4 py-2 rounded-2xl border border-white/10 text-white hover:bg-white/5 transition-all text-sm"
+          >
+            Perfil
+          </button>
+          <button 
+            onClick={handleSignOut} 
+            className="px-3 py-2 rounded-2xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all"
+          >
             <LogOut size={16} />
           </button>
         </div>
       </header>
 
-      <div className="relative -mt-1">
-        <MapWithPersonCar />
-      </div>
-
-      <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 100, delay: 0.1 }} className="mx-4 -mt-8 relative z-10">
+      <div className="mx-4 -mt-2 relative z-10">
         <div className="bg-[#1A1528] rounded-2xl shadow-xl p-5 space-y-4 border border-white/10">
           {/* Origem / Destino */}
           <div className="space-y-3">
             <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#F4D03F]">
               <MapPin size={18} className="text-green-400 shrink-0" />
-              <input type="text" placeholder="Onde você está?" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" value={origem} onChange={e => setOrigem(e.target.value)} />
+              <input 
+                type="text" 
+                placeholder="Onde você está?" 
+                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" 
+                value={origem} 
+                onChange={e => setOrigem(e.target.value)} 
+              />
             </div>
             <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#F4D03F]">
               <Navigation size={18} className="text-red-400 shrink-0" />
-              <input type="text" placeholder="Para onde vai?" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" value={destino} onChange={e => setDestino(e.target.value)} />
+              <input 
+                type="text" 
+                placeholder="Para onde vai?" 
+                className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" 
+                value={destino} 
+                onChange={e => setDestino(e.target.value)} 
+              />
             </div>
           </div>
 
           {/* Preço estimado */}
           {precoEstimado && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="bg-gradient-to-r from-purple-900/40 to-amber-900/40 p-3 rounded-xl border border-white/10">
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }} 
+              animate={{ height: 'auto', opacity: 1 }} 
+              className="bg-gradient-to-r from-purple-900/40 to-amber-900/40 p-3 rounded-xl border border-white/10"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <DollarSign size={20} className="text-[#F4D03F]" />
@@ -144,7 +169,12 @@ export function PassengerDashboard() {
           )}
 
           {/* Botão solicitar */}
-          <motion.button whileTap={{ scale: 0.98 }} onClick={solicitarCorrida} disabled={solicitando} className="btn-premium w-full py-4 rounded-xl text-lg font-bold shadow-lg">
+          <motion.button 
+            whileTap={{ scale: 0.98 }} 
+            onClick={solicitarCorrida} 
+            disabled={solicitando} 
+            className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 text-lg shadow-lg"
+          >
             {solicitando ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
@@ -154,21 +184,9 @@ export function PassengerDashboard() {
                 Buscando motorista...
               </span>
             ) : (
-              <span className="flex items-center justify-center gap-2"> Solicitar ObaLeva</span>
+              <span className="flex items-center justify-center gap-2">🚕 Solicitar ObaLeva</span>
             )}
           </motion.button>
-        </div>
-      </motion.div>
-
-      {/* Destinos rápidos */}
-      <div className="mx-4 mt-6">
-        <h2 className="font-semibold text-white mb-3">Destinos rápidos</h2>
-        <div className="flex gap-3 overflow-x-auto pb-2">
-          {QUICK_DESTINATIONS.map((place, index) => (
-            <motion.button key={place.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} whileTap={{ scale: 0.95 }} onClick={() => setDestino(place.label)} className="bg-[#1A1528] backdrop-blur-sm px-5 py-3 rounded-xl shadow-sm text-sm font-medium text-white hover:shadow-md transition-all whitespace-nowrap border border-white/10">
-              {place.icon} {place.label}
-            </motion.button>
-          ))}
         </div>
       </div>
 
@@ -187,7 +205,14 @@ export function PassengerDashboard() {
         ) : (
           <div className="space-y-2">
             {recentTrips.map((trip, index) => (
-              <motion.button key={trip.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }} onClick={() => navigate(`/trips/${trip.id}`)} className="w-full text-left bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/30 transition-all">
+              <motion.button 
+                key={trip.id} 
+                initial={{ opacity: 0, x: -20 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                transition={{ delay: index * 0.1 }} 
+                onClick={() => navigate(`/trips/${trip.id}`)} 
+                className="w-full text-left bg-[#1A1528] rounded-xl p-3 border border-white/10 hover:border-[#F4D03F]/30 transition-all"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-purple-900/40 p-2 rounded-full">
