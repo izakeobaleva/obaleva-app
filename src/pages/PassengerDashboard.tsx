@@ -7,7 +7,7 @@ import { Skeleton } from '../components/Skeleton';
 import { calcularPrecoCorrida } from '../lib/priceCalculator';
 import { supabase } from '../lib/supabaseClient';
 import { LocationAutocomplete } from '../components/LocationAutocomplete';
-import { MapPin, Navigation, DollarSign, History, LogOut, Bell, User, Car } from 'lucide-react';
+import { MapPin, Navigation, DollarSign, History, LogOut, Bell, User, Car, Crosshair, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const requestCache = new Map<string, any>();
@@ -29,12 +29,21 @@ export function PassengerDashboard() {
   const [recentTrips, setRecentTrips] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const mapsScriptLoadedRef = useRef(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const geocoderRef = useRef<any>(null);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  // Get user location on mount
+  // Inicializa o Geocoder de forma SEGURA (só depois do Google Maps carregar)
+  useEffect(() => {
+    if (mapsLoaded && window.google && window.google.maps) {
+      geocoderRef.current = new window.google.maps.Geocoder();
+    }
+  }, [mapsLoaded]);
+
+  // Get user location on mount (sem usar Google Maps)
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -43,16 +52,6 @@ export function PassengerDashboard() {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
-          // Reverse geocode to get address
-          const geocoder = new google.maps.Geocoder();
-          geocoder.geocode(
-            { location: { lat: position.coords.latitude, lng: position.coords.longitude } },
-            (results: any, status: string) => {
-              if (status === 'OK' && results[0]) {
-                setOrigem(results[0].formatted_address);
-              }
-            }
-          );
         },
         () => {
           setUserLocation({ lat: -23.5505, lng: -46.6333 });
@@ -67,28 +66,18 @@ export function PassengerDashboard() {
   // Load Google Maps API with Places library
   useEffect(() => {
     if (!apiKey) {
-      setMapsLoaded(true); // Allow UI to show even without key
+      setMapsLoaded(true);
       return;
     }
 
-    // Check if already loaded
     if (window.google && window.google.maps && window.google.maps.places) {
       setMapsLoaded(true);
       return;
     }
 
-    // Check if script is already being loaded
-    if (document.querySelector('#google-maps-script')) {
-      const checkLoaded = setInterval(() => {
-        if (window.google && window.google.maps && window.google.maps.places) {
-          setMapsLoaded(true);
-          clearInterval(checkLoaded);
-        }
-      }, 500);
-      return () => clearInterval(checkLoaded);
-    }
+    if (mapsScriptLoadedRef.current) return;
+    mapsScriptLoadedRef.current = true;
 
-    // Load the script
     const script = document.createElement('script');
     script.id = 'google-maps-script';
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initMap&v=weekly`;
@@ -107,6 +96,22 @@ export function PassengerDashboard() {
     document.head.appendChild(script);
   }, [apiKey]);
 
+  // Reverse geocode after maps loaded AND user location known
+  useEffect(() => {
+    if (mapsLoaded && geocoderRef.current && userLocation && !origem) {
+      geocoderRef.current.geocode(
+        { location: { lat: userLocation.lat, lng: userLocation.lng } },
+        (results: any, status: string) => {
+          if (status === 'OK' && results && results[0]) {
+            setOrigem(results[0].formatted_address);
+          } else {
+            setOrigem('Sua Localização Atual');
+          }
+        }
+      );
+    }
+  }, [mapsLoaded, userLocation]);
+
   // Initialize map after maps are loaded and user location is known
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation || !window.google) return;
@@ -122,13 +127,6 @@ export function PassengerDashboard() {
       streetViewControl: false,
       mapTypeControl: false,
       fullscreenControl: false,
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }],
-        },
-      ],
     });
 
     mapInstanceRef.current = map;
@@ -145,7 +143,6 @@ export function PassengerDashboard() {
       strokeWeight: 2,
     });
 
-    // Animate pulse
     let size = 30;
     let growing = true;
     const interval = setInterval(() => {
@@ -232,6 +229,39 @@ export function PassengerDashboard() {
     }
   };
 
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocalização não suportada');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+        
+        // Reverse geocode se o geocoder estiver pronto
+        if (geocoderRef.current) {
+          geocoderRef.current.geocode(
+            { location: { lat: latitude, lng: longitude } },
+            (results: any, status: string) => {
+              if (status === 'OK' && results && results[0]) {
+                setOrigem(results[0].formatted_address);
+              }
+            }
+          );
+        }
+        
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.setCenter({ lat: latitude, lng: longitude });
+          mapInstanceRef.current.setZoom(16);
+        }
+      },
+      () => toast.error('Erro ao obter localização'),
+      { enableHighAccuracy: true }
+    );
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-[#0F0B1A] p-4 space-y-4">
       <Skeleton className="h-12 w-full" />
@@ -248,7 +278,6 @@ export function PassengerDashboard() {
           initial={{ opacity: 0, x: -20 }} 
           animate={{ opacity: 1, x: 0 }} 
           className="text-xl font-bold bg-gradient-to-r from-[#F4D03F] to-amber-400 bg-clip-text text-transparent"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
         >
           ObaLeva
         </motion.h1>
@@ -273,17 +302,11 @@ export function PassengerDashboard() {
         <div className="bg-[#1A1528] rounded-2xl overflow-hidden border border-white/10 h-56 relative">
           {!apiKey ? (
             <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <MapPin size={32} className="mx-auto mb-2 text-[#A0A0B0]" />
-                <p className="text-sm text-[#A0A0B0]">Configure a chave do Google Maps</p>
-              </div>
+              <p className="text-sm text-[#A0A0B0]">Configure a chave do Google Maps</p>
             </div>
           ) : !mapsLoaded || !window.google ? (
             <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full mx-auto mb-2" />
-                <p className="text-xs text-[#A0A0B0]">Carregando mapa...</p>
-              </div>
+              <div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
             </div>
           ) : (
             <div ref={mapRef} className="w-full h-full" />
@@ -296,31 +319,61 @@ export function PassengerDashboard() {
           </div>
         </div>
 
-        {/* Address inputs with Autocomplete */}
+        {/* Address inputs */}
         <div className="bg-[#1A1528] rounded-2xl p-4 border border-white/10 space-y-3">
-          <div>
+          <div className="relative">
             <label className="block text-xs text-[#A0A0B0] mb-1">📍 Origem</label>
-            <LocationAutocomplete
-              placeholder="Onde você está?"
-              value={origem}
-              onChange={setOrigem}
-              icon="origin"
-              onPlaceSelected={handleOriginSelect}
-            />
+            <div className="relative">
+              <LocationAutocomplete
+                placeholder="Onde você está?"
+                value={origem}
+                onChange={setOrigem}
+                icon="origin"
+                onPlaceSelected={handleOriginSelect}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
+                <button 
+                  onClick={getCurrentLocation} 
+                  className="p-1 text-[#F4D03F] hover:text-white transition"
+                  title="Usar minha localização"
+                >
+                  <Crosshair size={16} />
+                </button>
+                {origem && (
+                  <button 
+                    onClick={() => setOrigem('')} 
+                    className="p-1 text-gray-400 hover:text-red-400 transition"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
           <div className="border-l-2 border-dashed border-white/20 ml-3 h-4" />
           <div>
             <label className="block text-xs text-[#A0A0B0] mb-1">🏁 Destino</label>
-            <LocationAutocomplete
-              placeholder="Para onde vai?"
-              value={destino}
-              onChange={setDestino}
-              icon="destination"
-              onPlaceSelected={handleDestinoSelect}
-            />
+            <div className="relative">
+              <LocationAutocomplete
+                placeholder="Para onde vai?"
+                value={destino}
+                onChange={setDestino}
+                icon="destination"
+                onPlaceSelected={handleDestinoSelect}
+              />
+              {destino && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <button 
+                    onClick={() => setDestino('')} 
+                    className="p-1 text-gray-400 hover:text-red-400 transition"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Estimated price */}
           {precoEstimado && (
             <motion.div 
               initial={{ height: 0, opacity: 0 }} 
@@ -374,7 +427,6 @@ export function PassengerDashboard() {
           
           {recentTrips.length === 0 ? (
             <div className="bg-[#1A1528]/80 backdrop-blur-sm rounded-xl p-6 text-center border border-white/10">
-              <History size={32} className="mx-auto mb-2 text-gray-600" />
               <p className="text-sm text-[#A0A0B0]">Nenhuma corrida ainda</p>
               <p className="text-xs text-[#A0A0B0] mt-1">Solicite sua primeira corrida!</p>
             </div>
