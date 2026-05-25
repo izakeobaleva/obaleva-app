@@ -314,12 +314,6 @@ export function PassengerDashboard() {
           ) : (<><Car size={22} /> Solicitar ObaLeva</>)}
         </button>
 
-        {/* Botão "Torne-se um Parceiro" */}
-        <button onClick={() => navigate('/cadastro-motorista')}
-          className="w-full bg-transparent border-2 border-[#F4D03F] text-[#F4D03F] font-bold py-3 rounded-2xl hover:bg-[#F4D03F]/10 transition-all flex items-center justify-center gap-2">
-          <Car size={18} /> Torne-se um Parceiro
-        </button>
-
         {/* Últimas corridas */}
         <div>
           <div className="flex items-center justify-between mb-3">

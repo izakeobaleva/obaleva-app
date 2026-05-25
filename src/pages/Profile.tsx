@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { BottomNav } from '../components/BottomNav';
 import { supabase } from '../lib/supabaseClient';
-import { User, Mail, Phone, LogOut, ChevronLeft, CreditCard, History, Heart, Edit } from 'lucide-react';
+import { User, Mail, Phone, LogOut, ChevronLeft, CreditCard, History, Heart, Edit, Car } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -108,6 +107,19 @@ export default function Profile() {
             </div>
             <ChevronLeft size={16} className="text-[#A0A0B0] rotate-180" />
           </button>
+          
+          {/* Botão Torne-se um Parceiro */}
+          <button 
+            onClick={() => navigate('/cadastro-motorista')}
+            className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition border-b border-white/10"
+          >
+            <div className="flex items-center gap-3">
+              <Car size={18} className="text-[#F4D03F]" />
+              <span className="text-white text-sm font-medium">Torne-se um Parceiro</span>
+            </div>
+            <ChevronLeft size={16} className="text-[#A0A0B0] rotate-180" />
+          </button>
+
           <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition border-b border-white/10">
             <div className="flex items-center gap-3">
               <CreditCard size={18} className="text-[#F4D03F]" />
@@ -115,6 +127,7 @@ export default function Profile() {
             </div>
             <ChevronLeft size={16} className="text-[#A0A0B0] rotate-180" />
           </button>
+          
           <button 
             onClick={handleSignOut}
             className="w-full flex items-center justify-between p-4 hover:bg-red-500/10 transition"
