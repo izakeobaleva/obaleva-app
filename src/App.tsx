@@ -17,6 +17,7 @@ import Earnings from './pages/Earnings';
 import TestLogin from './pages/TestLogin';
 import BulkCreateUsers from './pages/BulkCreateUsers';
 import Profile from './pages/Profile';
+import CadastroMotorista from './pages/CadastroMotorista';
 import { LoginComponent } from './components/LoginComponent';
 
 function LoginPage() {
@@ -51,6 +52,7 @@ function App() {
           <Route path="/test-login" element={<TestLogin />} />
           <Route path="/bulk-create" element={<BulkCreateUsers />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/cadastro-motorista" element={<CadastroMotorista />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="top-center" richColors />
