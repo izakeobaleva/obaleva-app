@@ -34,7 +34,7 @@ export function PassengerDashboard() {
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  // Get user location
+  // Get user location on mount
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -43,27 +43,55 @@ export function PassengerDashboard() {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          // Reverse geocode to get address
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode(
+            { location: { lat: position.coords.latitude, lng: position.coords.longitude } },
+            (results: any, status: string) => {
+              if (status === 'OK' && results[0]) {
+                setOrigem(results[0].formatted_address);
+              }
+            }
+          );
         },
         () => {
           setUserLocation({ lat: -23.5505, lng: -46.6333 });
-        }
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
       setUserLocation({ lat: -23.5505, lng: -46.6333 });
     }
   }, []);
 
-  // Load Google Maps
+  // Load Google Maps API with Places library
   useEffect(() => {
-    if (!apiKey) return;
-    
-    if (window.google && window.google.maps) {
+    if (!apiKey) {
+      setMapsLoaded(true); // Allow UI to show even without key
+      return;
+    }
+
+    // Check if already loaded
+    if (window.google && window.google.maps && window.google.maps.places) {
       setMapsLoaded(true);
       return;
     }
 
+    // Check if script is already being loaded
+    if (document.querySelector('#google-maps-script')) {
+      const checkLoaded = setInterval(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+          setMapsLoaded(true);
+          clearInterval(checkLoaded);
+        }
+      }, 500);
+      return () => clearInterval(checkLoaded);
+    }
+
+    // Load the script
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+    script.id = 'google-maps-script';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initMap&v=weekly`;
     script.async = true;
     script.defer = true;
     
@@ -71,42 +99,71 @@ export function PassengerDashboard() {
       setMapsLoaded(true);
     };
     
+    script.onerror = () => {
+      console.error('Failed to load Google Maps API');
+      setMapsLoaded(true);
+    };
+    
     document.head.appendChild(script);
   }, [apiKey]);
 
-  // Create map
+  // Initialize map after maps are loaded and user location is known
   useEffect(() => {
-    if (!mapsLoaded || !mapRef.current || !userLocation) return;
+    if (!mapsLoaded || !mapRef.current || !userLocation || !window.google) return;
 
     const map = new window.google.maps.Map(mapRef.current, {
       center: userLocation,
-      zoom: 15,
+      zoom: 16,
       disableDefaultUI: true,
       zoomControl: true,
+      zoomControlOptions: {
+        position: window.google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
       streetViewControl: false,
       mapTypeControl: false,
       fullscreenControl: false,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'off' }],
+        },
+      ],
     });
 
     mapInstanceRef.current = map;
 
-    new window.google.maps.Marker({
-      position: userLocation,
+    // Pulse animation circle
+    const pulseCircle = new window.google.maps.Circle({
       map: map,
-      title: 'Sua localização',
-      icon: {
-        path: window.google.maps.SymbolPath.CIRCLE,
-        scale: 10,
-        fillColor: '#F4D03F',
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: 3,
-      },
+      center: userLocation,
+      radius: 30,
+      fillColor: '#F4D03F',
+      fillOpacity: 0.35,
+      strokeColor: '#F4D03F',
+      strokeOpacity: 0.9,
+      strokeWeight: 2,
     });
+
+    // Animate pulse
+    let size = 30;
+    let growing = true;
+    const interval = setInterval(() => {
+      if (growing) {
+        size += 2;
+        if (size >= 50) growing = false;
+      } else {
+        size -= 2;
+        if (size <= 30) growing = true;
+      }
+      pulseCircle.setRadius(size);
+    }, 60);
+
+    return () => clearInterval(interval);
   }, [mapsLoaded, userLocation]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600);
+    const timer = setTimeout(() => setLoading(false), 800);
     fetchRecentTrips();
     return () => clearTimeout(timer);
   }, []);
@@ -178,7 +235,7 @@ export function PassengerDashboard() {
   if (loading) return (
     <div className="min-h-screen bg-[#0F0B1A] p-4 space-y-4">
       <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-64 w-full rounded-2xl" />
+      <Skeleton className="h-56 w-full rounded-2xl" />
       <Skeleton className="h-40 w-full rounded-2xl" />
       <Skeleton className="h-24 w-full rounded-2xl" />
     </div>
@@ -212,8 +269,8 @@ export function PassengerDashboard() {
       </header>
 
       <div className="mx-4 mt-4 space-y-4">
-        {/* Mapa ao vivo */}
-        <div className="bg-[#1A1528] rounded-2xl overflow-hidden border border-white/10 h-56">
+        {/* Live Map */}
+        <div className="bg-[#1A1528] rounded-2xl overflow-hidden border border-white/10 h-56 relative">
           {!apiKey ? (
             <div className="h-full flex items-center justify-center">
               <div className="text-center">
@@ -221,40 +278,49 @@ export function PassengerDashboard() {
                 <p className="text-sm text-[#A0A0B0]">Configure a chave do Google Maps</p>
               </div>
             </div>
-          ) : !mapsLoaded ? (
+          ) : !mapsLoaded || !window.google ? (
             <div className="h-full flex items-center justify-center">
-              <div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
+              <div className="text-center">
+                <div className="animate-spin w-8 h-8 border-2 border-[#F4D03F] border-t-transparent rounded-full mx-auto mb-2" />
+                <p className="text-xs text-[#A0A0B0]">Carregando mapa...</p>
+              </div>
             </div>
           ) : (
             <div ref={mapRef} className="w-full h-full" />
           )}
 
           {/* Status badge */}
-          <div className="absolute mt-2 ml-2 bg-black/60 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-2 border border-white/10">
+          <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-2 border border-white/10 z-10">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span className="text-xs text-white font-medium">Online</span>
           </div>
         </div>
 
-        {/* Campos de endereço com Autocomplete */}
+        {/* Address inputs with Autocomplete */}
         <div className="bg-[#1A1528] rounded-2xl p-4 border border-white/10 space-y-3">
-          <LocationAutocomplete
-            placeholder="Onde você está?"
-            value={origem}
-            onChange={setOrigem}
-            icon="origin"
-            onPlaceSelected={handleOriginSelect}
-          />
+          <div>
+            <label className="block text-xs text-[#A0A0B0] mb-1">📍 Origem</label>
+            <LocationAutocomplete
+              placeholder="Onde você está?"
+              value={origem}
+              onChange={setOrigem}
+              icon="origin"
+              onPlaceSelected={handleOriginSelect}
+            />
+          </div>
           <div className="border-l-2 border-dashed border-white/20 ml-3 h-4" />
-          <LocationAutocomplete
-            placeholder="Para onde vai?"
-            value={destino}
-            onChange={setDestino}
-            icon="destination"
-            onPlaceSelected={handleDestinoSelect}
-          />
+          <div>
+            <label className="block text-xs text-[#A0A0B0] mb-1">🏁 Destino</label>
+            <LocationAutocomplete
+              placeholder="Para onde vai?"
+              value={destino}
+              onChange={setDestino}
+              icon="destination"
+              onPlaceSelected={handleDestinoSelect}
+            />
+          </div>
 
-          {/* Preço estimado */}
+          {/* Estimated price */}
           {precoEstimado && (
             <motion.div 
               initial={{ height: 0, opacity: 0 }} 
@@ -273,7 +339,7 @@ export function PassengerDashboard() {
           )}
         </div>
 
-        {/* Botão solicitar */}
+        {/* Solicitar button */}
         <motion.button 
           whileTap={{ scale: 0.98 }} 
           onClick={solicitarCorrida} 
@@ -296,7 +362,7 @@ export function PassengerDashboard() {
           )}
         </motion.button>
 
-        {/* Últimas corridas */}
+        {/* Recent trips */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-white flex items-center gap-2">

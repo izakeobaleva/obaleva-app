@@ -19,21 +19,28 @@ export function LocationAutocomplete({
   const [focused, setFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [mapsReady, setMapsReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
   const autocompleteService = useRef<any>(null);
   const geocoderService = useRef<any>(null);
 
   useEffect(() => {
-    // Initialize Google services once loaded
-    if (window.google && window.google.maps) {
-      if (!autocompleteService.current) {
-        autocompleteService.current = new window.google.maps.places.AutocompleteService();
+    // Check if Google Maps is already loaded
+    const checkMaps = setInterval(() => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        if (!autocompleteService.current) {
+          autocompleteService.current = new window.google.maps.places.AutocompleteService();
+        }
+        if (!geocoderService.current) {
+          geocoderService.current = new window.google.maps.Geocoder();
+        }
+        setMapsReady(true);
+        clearInterval(checkMaps);
       }
-      if (!geocoderService.current) {
-        geocoderService.current = new window.google.maps.Geocoder();
-      }
-    }
+    }, 500);
+
+    return () => clearInterval(checkMaps);
   }, []);
 
   const handleInputChange = (val: string) => {
@@ -54,10 +61,10 @@ export function LocationAutocomplete({
         autocompleteService.current.getPlacePredictions(
           {
             input: val,
-            types: ['address'],
+            types: ['geocode'],
             componentRestrictions: { country: 'br' },
           },
-          (predictions: any[], status: string) => {
+          (predictions: any[] | null, status: string) => {
             if (status === 'OK' && predictions) {
               setSuggestions(predictions);
               setShowSuggestions(true);
@@ -80,8 +87,8 @@ export function LocationAutocomplete({
     if (geocoderService.current && onPlaceSelected) {
       geocoderService.current.geocode(
         { address: address },
-        (results: any[], status: string) => {
-          if (status === 'OK' && results[0]) {
+        (results: any[] | null, status: string) => {
+          if (status === 'OK' && results && results[0]) {
             const location = results[0].geometry.location;
             onPlaceSelected(location.lat(), location.lng(), address);
           }
@@ -104,7 +111,7 @@ export function LocationAutocomplete({
         <input
           ref={inputRef}
           type="text"
-          placeholder={placeholder}
+          placeholder={mapsReady ? placeholder : "Carregando..."}
           value={value}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setFocused(true)}
