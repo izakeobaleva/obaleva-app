@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { PassengerDashboard } from './pages/PassengerDashboard';
 import { DriverDashboard } from './pages/DriverDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -16,6 +16,7 @@ import TripDetails from './pages/TripDetails';
 import Earnings from './pages/Earnings';
 import TestLogin from './pages/TestLogin';
 import BulkCreateUsers from './pages/BulkCreateUsers';
+import Profile from './pages/Profile';
 import { LoginComponent } from './components/LoginComponent';
 
 function LoginPage() {
@@ -49,6 +50,7 @@ function App() {
           <Route path="/divulgar" element={<Divulgacao />} />
           <Route path="/test-login" element={<TestLogin />} />
           <Route path="/bulk-create" element={<BulkCreateUsers />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="top-center" richColors />
