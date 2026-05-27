@@ -14,12 +14,14 @@ import { toast } from 'sonner';
 export default function Home() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { mapsLoaded, mapsTimeout, buscarSugestoes, reverseGeocode } = useGoogleMaps();
+  const { mapsLoaded, mapsTimeout, buscarSugestoes, reverseGeocode, geocodeAddress } = useGoogleMaps();
   const { userLocation, getCurrentLocation } = useGeolocation();
-  const { solicitando, solicitarCorrida } = useRideRequest();
+  const { solicitando, precoEstimado, solicitarCorrida, calcularPreco } = useRideRequest();
 
   const [origem, setOrigem] = useState('');
   const [destino, setDestino] = useState('');
+  const [origemCoord, setOrigemCoord] = useState<{ lat: number; lng: number } | null>(null);
+  const [destinoCoord, setDestinoCoord] = useState<{ lat: number; lng: number } | null>(null);
   const [editingOrigem, setEditingOrigem] = useState(false);
   const [editingDestino, setEditingDestino] = useState(false);
   const [buscandoEndereco, setBuscandoEndereco] = useState(false);
@@ -30,6 +32,7 @@ export default function Home() {
 
   const debounceOrigem = useRef<NodeJS.Timeout>();
   const debounceDestino = useRef<NodeJS.Timeout>();
+  const debouncePreco = useRef<NodeJS.Timeout>();
   const enderecoBuscado = useRef(false);
 
   // Buscar endereço atual assim que tiver localização
@@ -37,12 +40,24 @@ export default function Home() {
     if (userLocation && !origem && !enderecoBuscado.current) {
       enderecoBuscado.current = true;
       setBuscandoEndereco(true);
+      setOrigemCoord(userLocation);
       reverseGeocode(userLocation.lat, userLocation.lng).then((endereco) => {
         setOrigem(endereco);
         setBuscandoEndereco(false);
       });
     }
   }, [userLocation, origem, reverseGeocode]);
+
+  // Calcular preço quando origem e destino mudarem
+  useEffect(() => {
+    if (debouncePreco.current) clearTimeout(debouncePreco.current);
+    
+    if (origem && destino) {
+      debouncePreco.current = setTimeout(() => {
+        calcularPreco(origem, destino);
+      }, 1000); // Espera 1 segundo após a última digitação
+    }
+  }, [origem, destino, calcularPreco]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -68,21 +83,28 @@ export default function Home() {
     }, 300);
   };
 
-  const handleSelectSugestao = (sugestao: any, type: 'origem' | 'destino') => {
+  const handleSelectSugestao = async (sugestao: any, type: 'origem' | 'destino') => {
     if (type === 'origem') {
       setOrigem(sugestao.description);
       setShowSugestoesOrigem(false);
       setEditingOrigem(false);
+      // Geocodificar a origem selecionada
+      const coords = await geocodeAddress(sugestao.description);
+      if (coords) setOrigemCoord(coords);
     } else {
       setDestino(sugestao.description);
       setShowSugestoesDestino(false);
       setEditingDestino(false);
+      // Geocodificar o destino selecionado
+      const coords = await geocodeAddress(sugestao.description);
+      if (coords) setDestinoCoord(coords);
     }
   };
 
   const handleGetCurrentLocation = useCallback(async () => {
     const loc = await getCurrentLocation();
     if (loc) {
+      setOrigemCoord(loc);
       setBuscandoEndereco(true);
       const endereco = await reverseGeocode(loc.lat, loc.lng);
       setOrigem(endereco);
@@ -96,9 +118,6 @@ export default function Home() {
   const handleSolicitarCorrida = () => {
     solicitarCorrida({ userId: user?.id, origem, destino });
   };
-
-  // Preço estimado
-  const precoEstimado = (origem || destino) ? 20.50 : null;
 
   return (
     <div className="h-screen w-full flex flex-col bg-[#0F0B1A] overflow-hidden">
@@ -186,8 +205,8 @@ export default function Home() {
           onSelectSugestao={(s) => handleSelectSugestao(s, 'destino')}
         />
 
-        {/* Preço estimado */}
-        <PriceEstimate preco={precoEstimado} visible={!!(origem || destino)} />
+        {/* Preço estimado com cálculo real */}
+        <PriceEstimate preco={precoEstimado} visible={!!(origem && destino)} />
 
         {/* Botão Chamar */}
         <button
@@ -203,7 +222,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* ===== 4. BANNER PUBLICITÁRIO NO FUNDO (substituiu o perfil) ===== */}
+      {/* ===== 4. BANNER PUBLICITÁRIO NO FUNDO ===== */}
       <div className="h-10 bg-gradient-to-r from-[#1A1528] to-[#2D2342] border-t border-white/10 flex items-center justify-center px-4 shrink-0">
         <div className="flex items-center gap-2">
           <Megaphone size={14} className="text-[#F4D03F]" />
