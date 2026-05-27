@@ -17,14 +17,22 @@ export function useGoogleMaps() {
 
     const initServices = () => {
       try {
-        // Usar AutocompleteSuggestion (novo) se disponível, senão fallback para o antigo
+        if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+          console.error('Google Maps API não carregada completamente');
+          return;
+        }
+        
         if (window.google?.maps?.places) {
-          if (window.google.maps.places.AutocompleteSuggestion) {
+          // Usar AutocompleteSuggestion (novo) se disponível
+          if (window.google.maps.places.AutocompleteSuggestion && !autocompleteService.current) {
             autocompleteService.current = new window.google.maps.places.AutocompleteSuggestion();
-          } else {
+          } else if (!autocompleteService.current) {
             autocompleteService.current = new window.google.maps.places.AutocompleteService();
           }
-          geocoderService.current = new window.google.maps.Geocoder();
+          
+          if (!geocoderService.current) {
+            geocoderService.current = new window.google.maps.Geocoder();
+          }
           setMapsLoaded(true);
         }
       } catch (e: any) {
@@ -32,29 +40,52 @@ export function useGoogleMaps() {
       }
     };
 
+    // Se já carregou, só inicia os serviços
     if (window.google?.maps?.places) {
       initServices();
       return;
     }
 
-    const script = document.createElement('script');
-    // Adicionar loading=async para melhor performance
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initMapsCallback&loading=async`;
-    script.async = true;
-    script.defer = true;
-    
-    (window as any).initMapsCallback = initServices;
-    
-    script.onerror = () => { 
-      try {
-        setMapsLoaded(true); 
-        setMapsTimeout(true);
-      } catch (e: any) {
-        if (!e.message?.includes('No Listener')) throw e;
-      }
-    };
-    
-    document.head.appendChild(script);
+    // Flag global para evitar carregar o script mais de uma vez
+    if (!(window as any).__googleMapsScriptLoaded) {
+      (window as any).__googleMapsScriptLoaded = true;
+      
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initMapsCallback&loading=async`;
+      script.async = true;
+      script.defer = true;
+      
+      (window as any).initMapsCallback = initServices;
+      
+      script.onerror = () => { 
+        try {
+          (window as any).__googleMapsScriptLoaded = false;
+          setMapsLoaded(true); 
+          setMapsTimeout(true);
+        } catch (e: any) {
+          if (!e.message?.includes('No Listener')) throw e;
+        }
+      };
+      
+      document.head.appendChild(script);
+    } else {
+      // Script já foi inserido, aguardar callback
+      const checkInterval = setInterval(() => {
+        if (window.google?.maps?.places) {
+          clearInterval(checkInterval);
+          initServices();
+        }
+      }, 200);
+      
+      // Timeout de segurança
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        if (!mapsLoaded) {
+          setMapsLoaded(true);
+          setMapsTimeout(true);
+        }
+      }, 10000);
+    }
 
     const timeout = setTimeout(() => {
       try {
@@ -69,32 +100,55 @@ export function useGoogleMaps() {
 
     return () => {
       clearTimeout(timeout);
-      delete (window as any).initMapsCallback;
     };
-  }, [apiKey]);
+  }, [apiKey]); // Só executa se apiKey mudar
 
   const buscarSugestoes = (input: string): Promise<any[]> => {
     return new Promise((resolve) => {
       try {
         if (!autocompleteService.current || input.length < 3) { resolve([]); return; }
 
-        autocompleteService.current.getPlacePredictions(
-          { input, types: ['geocode', 'establishment'], componentRestrictions: { country: 'br' }, language: 'pt-BR' },
-          (predictions: any[] | null, status: string) => {
-            try {
-              if (status === 'OK' && predictions) {
-                resolve(predictions.map(p => ({ 
-                  place_id: p.place_id, 
-                  description: p.description 
-                })));
-              } else {
-                resolve([]);
+        // AutocompleteSuggestion usa API diferente
+        if (window.google?.maps?.places?.AutocompleteSuggestion && 
+            !(autocompleteService.current instanceof window.google.maps.places.AutocompleteService)) {
+          // Nova API: AutocompleteSuggestion
+          autocompleteService.current.getPlacePredictions(
+            { input, types: ['geocode', 'establishment'], componentRestrictions: { country: 'br' }, language: 'pt-BR' },
+            (predictions: any[] | null, status: string) => {
+              try {
+                if (status === 'OK' && predictions) {
+                  resolve(predictions.map((p: any) => ({ 
+                    place_id: p.place_id, 
+                    description: p.description 
+                  })));
+                } else {
+                  resolve([]);
+                }
+              } catch (e: any) {
+                if (!e.message?.includes('No Listener')) throw e;
               }
-            } catch (e: any) {
-              if (!e.message?.includes('No Listener')) throw e;
             }
-          }
-        );
+          );
+        } else {
+          // API antiga: AutocompleteService
+          autocompleteService.current.getPlacePredictions(
+            { input, types: ['geocode', 'establishment'], componentRestrictions: { country: 'br' }, language: 'pt-BR' },
+            (predictions: any[] | null, status: string) => {
+              try {
+                if (status === 'OK' && predictions) {
+                  resolve(predictions.map((p: any) => ({ 
+                    place_id: p.place_id, 
+                    description: p.description 
+                  })));
+                } else {
+                  resolve([]);
+                }
+              } catch (e: any) {
+                if (!e.message?.includes('No Listener')) throw e;
+              }
+            }
+          );
+        }
       } catch (e: any) {
         if (!e.message?.includes('No Listener')) throw e;
         resolve([]);
