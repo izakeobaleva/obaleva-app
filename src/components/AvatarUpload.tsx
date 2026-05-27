@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Camera, Image as ImageIcon, Upload, CheckCircle, Loader, X, AlertTriangle } from 'lucide-react';
+import { Camera, Image as ImageIcon, Upload, CheckCircle, Loader, X, AlertTriangle, FlipHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
@@ -10,6 +10,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   const [uploading, setUploading] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const [usandoCameraFrontal, setUsandoCameraFrontal] = useState(false); // Estado para controlar frente/trás
 
   // Refs para inputs e câmera
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -29,46 +30,49 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     };
   }, []);
 
-  // ✅ MÉTODO 1: getUserMedia (câmera programática)
-  const abrirCameraMobile = async () => {
-    const timestamp = Date.now();
-    setDebugInfo(`📸 Clique capturado em ${new Date(timestamp).toLocaleTimeString()}`);
-    console.log('🔵 Botão Câmera clicado em', new Date(timestamp).toLocaleTimeString());
-    
+  // ✅ Função para iniciar/alternar a câmera
+  const iniciarCamera = async (frente: boolean) => {
     setCameraError(null);
     
     // Verifica HTTPS
     if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
       const msg = '⚠️ Câmera só funciona em HTTPS. Usando modo alternativo.';
       setCameraError(msg);
-      console.warn('🔴', msg);
-      // ✅ FALLBACK: input nativo
       cameraInputRef.current?.click();
       return;
     }
 
+    // Se já tem stream ativo, para antes de trocar
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+
     try {
-      console.log('🔵 Tentando getUserMedia com facingMode: environment');
+      const facingMode = frente ? 'user' : 'environment'; // 'user' = frontal, 'environment' = traseira
+      console.log(`🔵 Iniciando câmera: ${frente ? 'FRONTAL (selfie)' : 'TRASEIRA'}`);
+      
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
-          facingMode: 'environment',
+          facingMode,
           width: { ideal: 1080 },
           height: { ideal: 1080 }
         },
       });
       
       streamRef.current = stream;
+      setUsandoCameraFrontal(frente);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
-        console.log('✅ Câmera getUserMedia ativada com sucesso');
+        console.log('✅ Câmera ativada com sucesso');
       }
       
       setCameraError(null);
       
     } catch (err: any) {
-      console.error('❌ Erro getUserMedia:', err.name, err.message);
+      console.error('❌ Erro ao acessar câmera:', err);
       
       let mensagem = 'Não foi possível abrir a câmera. ';
       if (err.name === 'NotAllowedError') mensagem += 'Permissão negada.';
@@ -78,22 +82,40 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       
       setCameraError(mensagem);
       
-      // ✅ FALLBACK: input nativo (agora SEM capture, deixando o sistema escolher)
-      console.log('🔄 Fallback: acionando input file (sem capture)');
+      // Fallback: input nativo
       cameraInputRef.current?.click();
     }
   };
 
-  // ✅ MÉTODO 2: Input HTML nativo (sem capture - sistema mostra opções: frontal/traseira/galeria)
-  const abrirCameraInput = () => {
-    console.log('🔵 Abrindo câmera/galeria via input nativo (sem capture)');
-    setDebugInfo('📸 Abrindo seletor de mídia...');
+  // Alternar entre frente e trás
+  const alternarCamera = () => {
+    iniciarCamera(!usandoCameraFrontal);
+  };
+
+  // ✅ Abrir câmera frontal (selfie)
+  const abrirSelfie = () => {
+    const timestamp = Date.now();
+    setDebugInfo(`🤳 Selfie em ${new Date(timestamp).toLocaleTimeString()}`);
+    iniciarCamera(true);
+  };
+
+  // ✅ Abrir câmera traseira
+  const abrirCameraTraseira = () => {
+    const timestamp = Date.now();
+    setDebugInfo(`📸 Câmera traseira em ${new Date(timestamp).toLocaleTimeString()}`);
+    iniciarCamera(false);
+  };
+
+  // ✅ Input nativo (sistema mostra selfie/traseira/galeria)
+  const abrirSeletorNativo = () => {
+    console.log('🔵 Abrindo seletor nativo do sistema');
+    setDebugInfo('📱 Abrindo seletor do sistema...');
     cameraInputRef.current?.click();
   };
 
-  // ✅ MÉTODO 3: Galeria (sempre funciona)
+  // ✅ Galeria
   const abrirGaleria = () => {
-    console.log('🔵 Abrindo galeria via input nativo');
+    console.log('🔵 Abrindo galeria');
     setDebugInfo('🖼️ Abrindo galeria...');
     fileInputRef.current?.click();
   };
@@ -106,18 +128,11 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       return;
     }
 
-    console.log(`📸 Foto de origem: ${origem}`, {
-      nome: file.name,
-      tipo: file.type,
-      tamanho: (file.size / 1024).toFixed(2) + ' KB'
-    });
-
     setFotoBlob(file);
     setFotoPreview(URL.createObjectURL(file));
     setCameraError(null);
     setDebugInfo('');
 
-    // Se estava com stream da câmera, para
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
@@ -145,13 +160,21 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      canvas.getContext('2d')?.drawImage(video, 0, 0);
+      
+      const ctx = canvas.getContext('2d');
+      
+      // Se for câmera frontal, espelha a imagem horizontalmente (efeito espelho)
+      if (usandoCameraFrontal) {
+        ctx?.translate(canvas.width, 0);
+        ctx?.scale(-1, 1);
+      }
+      
+      ctx?.drawImage(video, 0, 0);
       
       canvas.toBlob((blob) => {
         if (blob) {
           setFotoBlob(blob);
           setFotoPreview(URL.createObjectURL(blob));
-          console.log('📸 Foto capturada manualmente:', (blob.size / 1024).toFixed(2) + ' KB');
         }
       }, 'image/jpeg', 0.9);
 
@@ -208,30 +231,62 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     setDebugInfo('');
   };
 
+  // Para a câmera
+  const pararCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+  };
+
   return (
     <div className="text-center space-y-4">
       
-      {/* 🔍 DEBUG INFO (visível apenas se houver) */}
+      {/* DEBUG INFO */}
       {debugInfo && (
         <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-2 text-center">
           <p className="text-blue-400 text-xs">{debugInfo}</p>
         </div>
       )}
 
-      {/* === LIVE CAMERA (captura manual) === */}
+      {/* === LIVE CAMERA === */}
       {streamRef.current && (
         <div className="relative bg-black rounded-2xl overflow-hidden max-w-sm mx-auto">
-          <video ref={videoRef} className="w-full aspect-square object-cover" playsInline autoPlay muted />
+          <video 
+            ref={videoRef} 
+            className={`w-full aspect-square object-cover ${usandoCameraFrontal ? 'scale-x-[-1]' : ''}`} 
+            playsInline autoPlay muted 
+          />
           <canvas ref={canvasRef} className="hidden" />
+          
+          {/* Indicador de qual câmera está ativa */}
+          <div className="absolute top-4 left-4 bg-black/60 rounded-full px-3 py-1">
+            <span className="text-white text-xs font-medium">
+              {usandoCameraFrontal ? '🤳 Selfie' : '📸 Traseira'}
+            </span>
+          </div>
+
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
+            {/* Botão para capturar */}
             <button 
               onClick={tirarFotoManual} 
               className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg hover:scale-105 transition"
             >
               <Camera size={28} className="text-gray-900" />
             </button>
+            
+            {/* Botão para alternar câmera */}
             <button 
-              onClick={() => { streamRef.current?.getTracks().forEach(t => t.stop()); streamRef.current = null; }} 
+              onClick={alternarCamera}
+              className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center shadow-lg hover:scale-105 transition"
+              title="Alternar câmera"
+            >
+              <FlipHorizontal size={22} className="text-gray-900" />
+            </button>
+
+            {/* Botão para fechar */}
+            <button 
+              onClick={pararCamera}
               className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center shadow-lg"
             >
               <X size={20} className="text-white" />
@@ -260,7 +315,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       {/* === BOTÕES DE AÇÃO === */}
       {!streamRef.current && !fotoBlob && (
         <>
-          {/* Aviso de erro da câmera */}
+          {/* Aviso de erro */}
           {cameraError && (
             <div className="bg-red-900/20 border border-red-500/30 rounded-xl p-3 flex items-start gap-2 text-left">
               <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
@@ -271,44 +326,53 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             </div>
           )}
 
-          <div className="flex justify-center gap-3">
-            {/* ✅ BOTÃO CÂMERA (agora sem capture - mostra opções: selfie/traseira/galeria) */}
+          {/* 3 Botões principais */}
+          <div className="flex justify-center gap-2">
+            {/* 🤳 Selfie (Câmera Frontal) */}
             <button 
-              onClick={abrirCameraMobile}
+              onClick={abrirSelfie}
               type="button"
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-28 cursor-pointer"
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-24"
             >
-              <Camera size={28} className="text-[#F4D03F]" />
-              <span className="text-xs text-white">Câmera 📸</span>
+              <span className="text-2xl">🤳</span>
+              <span className="text-xs text-white">Selfie</span>
             </button>
 
-            {/* ✅ BOTÃO GALERIA */}
+            {/* 📸 Câmera Traseira */}
+            <button 
+              onClick={abrirCameraTraseira}
+              type="button"
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-24"
+            >
+              <Camera size={24} className="text-[#F4D03F]" />
+              <span className="text-xs text-white">Traseira</span>
+            </button>
+
+            {/* 🖼️ Galeria */}
             <button 
               onClick={abrirGaleria}
               type="button"
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-28 cursor-pointer"
+              className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-24"
             >
-              <ImageIcon size={28} className="text-[#F4D03F]" />
-              <span className="text-xs text-white">Galeria 🖼️</span>
+              <ImageIcon size={24} className="text-[#F4D03F]" />
+              <span className="text-xs text-white">Galeria</span>
             </button>
           </div>
 
-          {/* ✅ ALTERNATIVA: Seletor nativo do sistema (sem capture) */}
+          {/* Alternativa: seletor nativo do sistema */}
           <div className="mt-2">
             <button 
-              onClick={abrirCameraInput}
+              onClick={abrirSeletorNativo}
               type="button"
               className="text-xs text-[#A0A0B0] hover:text-[#F4D03F] transition underline cursor-pointer"
             >
-              🔄 Alternativa: escolher foto ou câmera
+              🔄 Alternativa: selecionar foto ou câmera
             </button>
           </div>
         </>
       )}
 
       {/* === INPUTS OCULTOS === */}
-      
-      {/* ✅ Input único para CÂMERA/FOTO (agora SEM capture - sistema mostra as opções) */}
       <input
         ref={cameraInputRef}
         type="file"
@@ -316,8 +380,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
         className="hidden"
         onChange={handleCameraFileChange}
       />
-
-      {/* ✅ Input para GALERIA (sem capture) */}
       <input
         ref={fileInputRef}
         type="file"
@@ -341,11 +403,10 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
         </button>
       )}
 
-      {/* === INFO DO USUÁRIO === */}
+      {/* INFO */}
       {user && !fotoBlob && (
         <p className="text-[10px] text-[#A0A0B0]">
-          ✅ Conta: {user.email} <br />
-          <span className="text-[#F4D03F]">📸 Tire uma selfie, foto ou escolha da galeria</span>
+          ✅ Conta: {user.email}
         </p>
       )}
     </div>
