@@ -1,14 +1,54 @@
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, User, Mail, Lock, Phone, Eye, EyeOff, CheckCircle, Loader } from 'lucide-react'
-import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
 import { ProfilePhotoUpload } from '../components/ProfilePhotoUpload'
 
+// Componente Field memoizado para evitar re-renderizações
+const InputField = ({ icon: Icon, placeholder, value, onChange, type = 'text', maxLength, autoComplete, error, format }: any) => (
+  <div>
+    <div className={`flex items-center gap-2 bg-[#0F0B1A] border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#F4D03F] transition-all`}>
+      <Icon size={16} className="text-[#F4D03F] shrink-0" />
+      <input
+        type={type}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm"
+        value={value}
+        onChange={(e) => {
+          const val = format ? format(e.target.value) : e.target.value
+          onChange(val)
+        }}
+        required
+        maxLength={maxLength}
+      />
+      {value && !error && <CheckCircle size={14} className="text-green-400 shrink-0" />}
+    </div>
+    {error && <p className="text-red-400 text-[10px] mt-1 ml-2">{error}</p>}
+  </div>
+)
+
+// Helpers de formatação fora do componente
+function formatarCpf(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+  return digits
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+}
+
+function formatarTelefone(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+  if (digits.length <= 10) {
+    return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3')
+  }
+  return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+}
+
 export function RegisterPassenger() {
   const navigate = useNavigate()
-  const { signUpPassenger } = useAuth()
   
   const [nome, setNome] = useState('')
   const [cpf, setCpf] = useState('')
@@ -22,21 +62,22 @@ export function RegisterPassenger() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [fotoUrl, setFotoUrl] = useState<string | null>(null)
 
-  function formatarCpf(value: string) {
-    const digits = value.replace(/\D/g, '').slice(0, 11)
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
-  }
+  // Refs estáveis para callbacks
+  const errorsRef = useRef(errors)
+  errorsRef.current = errors
 
-  function formatarTelefone(value: string) {
-    const digits = value.replace(/\D/g, '').slice(0, 11)
-    if (digits.length <= 10) {
-      return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3')
-    }
-    return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
-  }
+  const setError = useCallback((field: string, msg: string) => {
+    setErrors(prev => ({ ...prev, [field]: msg }))
+  }, [])
+
+  const clearError = useCallback((field: string) => {
+    setErrors(prev => {
+      if (!prev[field]) return prev
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }, [])
 
   function validarCampos(): boolean {
     const newErrors: Record<string, string> = {}
@@ -70,14 +111,34 @@ export function RegisterPassenger() {
 
     setLoading(true)
     try {
-      await signUpPassenger({ 
-        nome_completo: nome.trim(), 
-        cpf, 
-        telefone, 
-        email, 
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
         password,
-        avatar_url: fotoUrl || undefined,
+        options: {
+          data: {
+            nome_completo: nome.trim(),
+            telefone,
+            tipo: 'passageiro'
+          }
+        }
       })
+
+      if (authError) throw authError
+
+      if (authData.user) {
+        await supabase.from('usuarios').insert({
+          id: authData.user.id,
+          nome_completo: nome.trim(),
+          email,
+          telefone,
+          cpf,
+          tipo: 'passageiro',
+          avatar_url: fotoUrl || null,
+        })
+
+        await supabase.from('passageiros').insert({ id: authData.user.id })
+      }
+
       toast.success('Conta criada com sucesso!')
       navigate('/', { replace: true })
     } catch (err: any) {
@@ -88,34 +149,6 @@ export function RegisterPassenger() {
       }
     }
     setLoading(false)
-  }
-
-  function InputField({ icon: Icon, placeholder, value, onChange, type = 'text', maxLength, autoComplete, error, format }: any) {
-    return (
-      <div>
-        <div className={`flex items-center gap-2 bg-[#0F0B1A] border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#F4D03F] transition-all`}>
-          <Icon size={16} className="text-[#F4D03F] shrink-0" />
-          <input
-            type={type}
-            placeholder={placeholder}
-            autoComplete={autoComplete}
-            className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-sm"
-            value={value}
-            onChange={(e) => {
-              const val = format ? format(e.target.value) : e.target.value
-              onChange(val)
-              if (errors[Object.keys(errors).find(k => placeholder.toLowerCase().includes(k)) || '']) {
-                setErrors(prev => ({ ...prev, [Object.keys(errors).find(k => placeholder.toLowerCase().includes(k)) || '']: '' }))
-              }
-            }}
-            required
-            maxLength={maxLength}
-          />
-          {value && !error && <CheckCircle size={14} className="text-green-400 shrink-0" />}
-        </div>
-        {error && <p className="text-red-400 text-[10px] mt-1 ml-2">{error}</p>}
-      </div>
-    )
   }
 
   return (
@@ -148,16 +181,16 @@ export function RegisterPassenger() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3">
-            <InputField icon={User} placeholder="Nome completo" autoComplete="name" value={nome} onChange={setNome} error={errors.nome} />
-            <InputField icon={User} placeholder="CPF" value={cpf} onChange={setCpf} format={formatarCpf} maxLength={14} error={errors.cpf} />
-            <InputField icon={Phone} placeholder="Telefone / WhatsApp" autoComplete="tel" value={telefone} onChange={setTelefone} format={formatarTelefone} error={errors.telefone} />
-            <InputField icon={Mail} placeholder="E-mail" autoComplete="email" type="email" value={email} onChange={setEmail} error={errors.email} />
+            <InputField icon={User} placeholder="Nome completo" autoComplete="name" value={nome} onChange={(v) => { setNome(v); clearError('nome') }} error={errors.nome} />
+            <InputField icon={User} placeholder="CPF" value={cpf} onChange={(v) => { setCpf(v); clearError('cpf') }} format={formatarCpf} maxLength={14} error={errors.cpf} />
+            <InputField icon={Phone} placeholder="Telefone / WhatsApp" autoComplete="tel" value={telefone} onChange={(v) => { setTelefone(v); clearError('telefone') }} format={formatarTelefone} error={errors.telefone} />
+            <InputField icon={Mail} placeholder="E-mail" autoComplete="email" type="email" value={email} onChange={(v) => { setEmail(v); clearError('email') }} error={errors.email} />
 
             {/* Senha */}
             <div>
               <div className={`flex items-center bg-[#0F0B1A] border ${errors.password ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-4 focus-within:ring-2 focus-within:ring-[#F4D03F]`}>
                 <Lock size={16} className="text-[#F4D03F] shrink-0 mr-2" />
-                <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6 caracteres)" className="flex-1 py-3 bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" value={password} onChange={e => { setPassword(e.target.value); setErrors(prev => ({ ...prev, password: '' })) }} minLength={6} required />
+                <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6 caracteres)" className="flex-1 py-3 bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" value={password} onChange={e => { setPassword(e.target.value); clearError('password') }} minLength={6} required />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -170,7 +203,7 @@ export function RegisterPassenger() {
             <div>
               <div className={`flex items-center bg-[#0F0B1A] border ${errors.confirmPassword ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-4 focus-within:ring-2 focus-within:ring-[#F4D03F]`}>
                 <Lock size={16} className="text-[#F4D03F] shrink-0 mr-2" />
-                <input type={showConfirm ? 'text' : 'password'} placeholder="Confirmar senha" className="flex-1 py-3 bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); setErrors(prev => ({ ...prev, confirmPassword: '' })) }} minLength={6} required />
+                <input type={showConfirm ? 'text' : 'password'} placeholder="Confirmar senha" className="flex-1 py-3 bg-transparent text-white placeholder-white/40 focus:outline-none text-sm" value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); clearError('confirmPassword') }} minLength={6} required />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
                   {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
