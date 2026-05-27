@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, User, Mail, Lock, Phone, Eye, EyeOff, CheckCircle, XCircle, Loader } from 'lucide-react'
+import { ArrowLeft, User, Mail, Lock, Phone, Eye, EyeOff, CheckCircle, Loader } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
+import { ProfilePhotoUpload } from '../components/ProfilePhotoUpload'
 
 export function RegisterPassenger() {
   const navigate = useNavigate()
@@ -19,6 +20,7 @@ export function RegisterPassenger() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [fotoUrl, setFotoUrl] = useState<string | null>(null)
 
   function formatarCpf(value: string) {
     const digits = value.replace(/\D/g, '').slice(0, 11)
@@ -68,7 +70,14 @@ export function RegisterPassenger() {
 
     setLoading(true)
     try {
-      await signUpPassenger({ nome_completo: nome.trim(), cpf, telefone, email, password })
+      await signUpPassenger({ 
+        nome_completo: nome.trim(), 
+        cpf, 
+        telefone, 
+        email, 
+        password,
+        avatar_url: fotoUrl || undefined,
+      })
       toast.success('Conta criada com sucesso!')
       navigate('/', { replace: true })
     } catch (err: any) {
@@ -128,6 +137,16 @@ export function RegisterPassenger() {
             </div>
           </div>
 
+          {/* Upload de foto - opcional */}
+          <div className="mb-4 flex justify-center">
+            <ProfilePhotoUpload
+              userId={email || 'temp'}
+              currentPhotoUrl={fotoUrl}
+              onPhotoUploaded={(url) => setFotoUrl(url)}
+              size="md"
+            />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-3">
             <InputField icon={User} placeholder="Nome completo" autoComplete="name" value={nome} onChange={setNome} error={errors.nome} />
             <InputField icon={User} placeholder="CPF" value={cpf} onChange={setCpf} format={formatarCpf} maxLength={14} error={errors.cpf} />
@@ -167,7 +186,7 @@ export function RegisterPassenger() {
 
           <div className="mt-4 text-center text-xs text-[#A0A0B0] space-y-1">
             <p>Já tem conta? <button onClick={() => navigate('/login')} className="text-[#F4D03F] hover:underline font-medium">Entrar</button></p>
-            <p>É motorista? <button onClick={() => navigate('/register-driver')} className="text-[#F4D03F] hover:underline font-medium">Cadastre-se como motorista</button></p>
+            <p>É motorista? <button onClick={() => navigate('/cadastro-motorista')} className="text-[#F4D03F] hover:underline font-medium">Cadastre-se como motorista</button></p>
           </div>
         </div>
       </motion.div>
