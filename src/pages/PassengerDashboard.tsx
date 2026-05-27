@@ -7,7 +7,7 @@ import { Skeleton } from '../components/Skeleton';
 import { calcularPrecoCorrida } from '../lib/priceCalculator';
 import { supabase } from '../lib/supabaseClient';
 import { LocationAutocomplete } from '../components/LocationAutocomplete';
-import { MapPin, Navigation, DollarSign, History, LogOut, Car, Crosshair, X } from 'lucide-react';
+import { MapPin, Navigation, DollarSign, History, LogOut, Car, Crosshair, X, Edit2, Map } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function PassengerDashboard() {
@@ -21,28 +21,66 @@ export function PassengerDashboard() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [mapsTimeout, setMapsTimeout] = useState(false);
+  const [editandoOrigem, setEditandoOrigem] = useState(false);
+  const [editandoDestino, setEditandoDestino] = useState(false);
+  const [buscandoEndereco, setBuscandoEndereco] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  // Pega localização do usuário
+  // Busca endereço automático baseado na localização
+  const buscarEnderecoAtual = useCallback(async (lat: number, lng: number) => {
+    setBuscandoEndereco(true);
+    try {
+      // Tenta Google Maps Geocoding primeiro
+      if (apiKey) {
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=pt-BR`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.status === 'OK' && data.results?.[0]?.formatted_address) {
+          setOrigem(data.results[0].formatted_address);
+          setBuscandoEndereco(false);
+          return;
+        }
+      }
+
+      // Fallback: Nominatim (OpenStreetMap)
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt-BR`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data?.display_name) {
+        setOrigem(data.display_name);
+      } else {
+        setOrigem(`📍 ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      }
+    } catch {
+      setOrigem(`📍 ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+    }
+    setBuscandoEndereco(false);
+  }, [apiKey]);
+
+  // Pega localização do usuário e busca endereço
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const loc = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          });
+          };
+          setUserLocation(loc);
+          buscarEnderecoAtual(loc.lat, loc.lng);
         },
-        () => setUserLocation({ lat: -23.5505, lng: -46.6333 }),
+        () => {
+          setUserLocation({ lat: -23.5505, lng: -46.6333 });
+        },
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
       setUserLocation({ lat: -23.5505, lng: -46.6333 });
     }
-  }, []);
+  }, [buscarEnderecoAtual]);
 
   // Carrega Google Maps com timeout
   useEffect(() => {
@@ -67,7 +105,6 @@ export function PassengerDashboard() {
     };
     document.head.appendChild(script);
 
-    // Timeout de 10 segundos
     const timeout = setTimeout(() => {
       if (!mapsLoaded) {
         setMapsLoaded(true);
@@ -156,6 +193,7 @@ export function PassengerDashboard() {
 
   const handleOriginSelect = (lat: number, lng: number, address: string) => {
     setOrigem(address);
+    setEditandoOrigem(false);
     if (mapInstanceRef.current && window.google) {
       mapInstanceRef.current.setCenter({ lat, lng });
       mapInstanceRef.current.setZoom(16);
@@ -164,6 +202,7 @@ export function PassengerDashboard() {
 
   const handleDestinoSelect = (lat: number, lng: number, address: string) => {
     setDestino(address);
+    setEditandoDestino(false);
     if (mapInstanceRef.current && window.google) {
       mapInstanceRef.current.setCenter({ lat, lng });
       mapInstanceRef.current.setZoom(14);
@@ -176,13 +215,7 @@ export function PassengerDashboard() {
       (position) => {
         const { latitude: lat, longitude: lng } = position.coords;
         setUserLocation({ lat, lng });
-        // Buscar endereço via Nominatim (OpenStreetMap)
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt`)
-          .then(res => res.json())
-          .then(data => {
-            if (data?.display_name) setOrigem(data.display_name);
-          })
-          .catch(() => setOrigem(`📍 ${lat.toFixed(4)}, ${lng.toFixed(4)}`));
+        buscarEnderecoAtual(lat, lng);
         if (mapInstanceRef.current && window.google) {
           mapInstanceRef.current.setCenter({ lat, lng });
           mapInstanceRef.current.setZoom(16);
@@ -223,17 +256,15 @@ export function PassengerDashboard() {
       </header>
 
       <div className="mx-4 mt-4 space-y-4">
-        {/* Mapa com fallback */}
+        {/* Mapa */}
         <div className="bg-[#1A1528] rounded-2xl overflow-hidden border border-white/10 h-56 relative">
           {!apiKey || mapsTimeout ? (
-            <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#1A1528] to-[#2D2342]">
+            <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0F0B1A] to-[#1A1528]">
               <div className="text-center">
-                <MapPin size={48} className="mx-auto mb-2 text-[#F4D03F]/50" />
-                <p className="text-sm text-[#A0A0B0]">
-                  {mapsTimeout ? 'Mapa indisponível' : 'Configure a chave do Google Maps'}
-                </p>
+                <Map size={48} className="mx-auto mb-2 text-[#F4D03F]/40" />
+                <p className="text-sm text-[#A0A0B0]">Mapa</p>
                 <p className="text-xs text-[#A0A0B0]/60 mt-1">
-                  Digite os endereços manualmente
+                  {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Buscando localização...'}
                 </p>
               </div>
             </div>
@@ -248,47 +279,90 @@ export function PassengerDashboard() {
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span className="text-xs text-white font-medium">Online</span>
           </div>
+          {userLocation && (
+            <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md rounded-full px-3 py-1 border border-white/10">
+              <span className="text-xs text-[#F4D03F] font-medium">
+                📍 {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Inputs de endereço */}
         <div className="bg-[#1A1528] rounded-2xl p-4 border border-white/10 space-y-3">
-          <div className="relative">
-            <label className="block text-xs text-[#A0A0B0] mb-1">📍 Origem</label>
-            <div className="relative">
+          {/* Origem */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-[#A0A0B0]">📍 Origem</label>
+              <div className="flex items-center gap-1">
+                {buscandoEndereco && (
+                  <div className="animate-spin w-3 h-3 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
+                )}
+                <button 
+                  onClick={() => setEditandoOrigem(!editandoOrigem)}
+                  className="text-[#F4D03F] hover:text-white transition p-1"
+                  title="Editar origem"
+                >
+                  <Edit2 size={14} />
+                </button>
+                <button 
+                  onClick={getCurrentLocation}
+                  className="text-green-400 hover:text-white transition p-1"
+                  title="Usar localização atual"
+                >
+                  <Crosshair size={14} />
+                </button>
+              </div>
+            </div>
+
+            {editandoOrigem ? (
               <LocationAutocomplete
-                placeholder="Onde você está?"
+                placeholder="Digite seu endereço..."
                 value={origem} onChange={setOrigem} icon="origin"
                 onPlaceSelected={handleOriginSelect}
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
-                <button onClick={getCurrentLocation} className="p-1 text-[#F4D03F] hover:text-white transition" title="Usar minha localização">
-                  <Crosshair size={16} />
-                </button>
-                {origem && (
-                  <button onClick={() => setOrigem('')} className="p-1 text-gray-400 hover:text-red-400 transition">
-                    <X size={14} />
-                  </button>
-                )}
+            ) : (
+              <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3">
+                <MapPin size={16} className="text-green-400 shrink-0" />
+                <p className="text-white text-sm flex-1 truncate">
+                  {origem || (buscandoEndereco ? 'Buscando endereço...' : 'Clique no lápis para editar')}
+                </p>
               </div>
-            </div>
+            )}
           </div>
+
           <div className="border-l-2 border-dashed border-white/20 ml-3 h-4" />
+
+          {/* Destino */}
           <div>
-            <label className="block text-xs text-[#A0A0B0] mb-1">🏁 Destino</label>
-            <div className="relative">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-[#A0A0B0]">🏁 Destino</label>
+              <button 
+                onClick={() => setEditandoDestino(!editandoDestino)}
+                className="text-[#F4D03F] hover:text-white transition p-1"
+                title="Editar destino"
+              >
+                <Edit2 size={14} />
+              </button>
+            </div>
+
+            {editandoDestino ? (
               <LocationAutocomplete
-                placeholder="Para onde vai?"
+                placeholder="Digite o destino..."
                 value={destino} onChange={setDestino} icon="destination"
                 onPlaceSelected={handleDestinoSelect}
               />
-              {destino && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <button onClick={() => setDestino('')} className="p-1 text-gray-400 hover:text-red-400 transition">
-                    <X size={14} />
-                  </button>
-                </div>
-              )}
-            </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 cursor-pointer" onClick={() => setEditandoDestino(true)}>
+                <Navigation size={16} className="text-red-400 shrink-0" />
+                <p className="text-white text-sm flex-1 truncate">
+                  {destino || 'Toque para adicionar destino'}
+                </p>
+                <button className="text-[#F4D03F] hover:text-white transition p-1">
+                  <Edit2 size={14} />
+                </button>
+              </div>
+            )}
           </div>
 
           {precoEstimado && (
