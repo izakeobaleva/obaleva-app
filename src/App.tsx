@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { PassengerDashboard } from './pages/PassengerDashboard';
@@ -18,27 +18,26 @@ import TestLogin from './pages/TestLogin';
 import BulkCreateUsers from './pages/BulkCreateUsers';
 import Profile from './pages/Profile';
 import CadastroMotorista from './pages/CadastroMotorista';
-import { LoginComponent } from './components/LoginComponent';
-
-function LoginPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-[#F4D03F]/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-50px] right-[-50px] w-[250px] h-[250px] bg-[#6B2D8C]/20 rounded-full blur-[100px]" />
-      </div>
-      <LoginComponent />
-    </div>
-  );
-}
+import PermissionLocation from './pages/PermissionLocation';
+import PermissionNotification from './pages/PermissionNotification';
+import Login from './pages/Login';
+import Home from './pages/Home';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<PassengerDashboard />} />
-          <Route path="/login" element={<LoginPage />} />
+          {/* NOVAS TELAS */}
+          <Route path="/permission-location" element={<PermissionLocation />} />
+          <Route path="/permission-notification" element={<PermissionNotification />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/home" element={<Home />} />
+
+          {/* REDIRECIONAR ROTA RAIZ PARA HOME */}
+          <Route path="/" element={<Navigate to="/permission-location" replace />} />
+
+          {/* ROTAS EXISTENTES */}
           <Route path="/register" element={<RegisterPassenger />} />
           <Route path="/driver" element={<DriverDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
