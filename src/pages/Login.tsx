@@ -116,9 +116,13 @@ export default function Login() {
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full py-3.5 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-sm"
+            className="w-full py-3.5 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-sm"
           >
-            <span className="text-xl">🔵</span>
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" 
+              alt="Google Logo" 
+              className="w-5 h-5"
+            />
             Entrar com Google
           </button>
 
