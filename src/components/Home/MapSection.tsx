@@ -15,7 +15,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
   const pulseIntervalRef = useRef<NodeJS.Timeout>();
   const userMarkerRef = useRef<any>(null);
 
-  // Criar mapa
+  // Criar mapa quando carregar
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation || !window.google?.maps) return;
 
@@ -52,7 +52,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
         },
       });
 
-      // Círculo pulsante
+      // Círculo pulsante amarelo
       let size = 30;
       let growing = true;
       pulseCircleRef.current = new window.google.maps.Circle({
@@ -78,6 +78,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
 
     return () => {
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
+      mapInstanceRef.current = null;
     };
   }, [mapsLoaded, userLocation]);
 
@@ -94,7 +95,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
         <div ref={mapRef} className="w-full h-full" />
         <button
           onClick={onGetCurrentLocation}
-          className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-[#1A1528]/90 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-[#1A1528] transition shadow-lg"
+          className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-[#1A1528]/90 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-[#1A1528] transition shadow-lg z-10"
           title="Centralizar na minha localização"
         >
           <Crosshair size={20} className="text-[#F4D03F]" />
