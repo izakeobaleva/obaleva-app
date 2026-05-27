@@ -9,6 +9,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   // Refs para inputs e câmera
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -20,7 +21,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
-      console.log('👤 Usuário logado:', data.user?.id);
     });
     return () => {
       if (streamRef.current) {
@@ -29,21 +29,30 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     };
   }, []);
 
-  // ✅ MÉTODO 1: Abrir CÂMERA via getUserMedia (para tirar foto personalizada)
+  // ✅ MÉTODO 1: getUserMedia (câmera programática - funciona em PWA certificado)
   const abrirCameraMobile = async () => {
+    // 🐛 DEBUG: Saber se o clique foi detectado
+    const timestamp = Date.now();
+    setDebugInfo(`📸 Clique capturado em ${new Date(timestamp).toLocaleTimeString()}`);
+    console.log('🔵 Botão Câmera clicado em', new Date(timestamp).toLocaleTimeString());
+    
     setCameraError(null);
     
-    // Verifica se está em HTTPS (exigido para getUserMedia)
+    // Verifica HTTPS
     if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-      setCameraError('⚠️ Câmera só funciona em HTTPS. Use o modo "Galeria".');
-      toast.error('Site precisa estar em HTTPS para usar a câmera');
+      const msg = '⚠️ Câmera só funciona em HTTPS. Usando modo alternativo.';
+      setCameraError(msg);
+      console.warn('🔴', msg);
+      // ✅ FALLBACK: input nativo
+      cameraInputRef.current?.click();
       return;
     }
 
     try {
+      console.log('🔵 Tentando getUserMedia com facingMode: environment');
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
-          facingMode: 'environment', // ✅ Câmera traseira (essential)
+          facingMode: 'environment',
           width: { ideal: 1080 },
           height: { ideal: 1080 }
         },
@@ -54,41 +63,39 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
+        console.log('✅ Câmera getUserMedia ativada com sucesso');
       }
       
       setCameraError(null);
       
     } catch (err: any) {
-      console.error('❌ Erro ao acessar câmera:', err);
+      console.error('❌ Erro getUserMedia:', err.name, err.message);
       
-      let mensagem = 'Não foi possível abrir a câmera';
-      
-      if (err.name === 'NotAllowedError') {
-        mensagem = 'Permissão negada. Vá em Configurações do navegador e permita o acesso à câmera.';
-      } else if (err.name === 'NotFoundError') {
-        mensagem = 'Nenhuma câmera encontrada no dispositivo.';
-      } else if (err.name === 'NotReadableError') {
-        mensagem = 'Câmera está sendo usada por outro aplicativo.';
-      } else if (err.message) {
-        mensagem = err.message;
-      }
+      let mensagem = 'Não foi possível abrir a câmera. ';
+      if (err.name === 'NotAllowedError') mensagem += 'Permissão negada.';
+      else if (err.name === 'NotFoundError') mensagem += 'Nenhuma câmera encontrada.';
+      else if (err.name === 'NotReadableError') mensagem += 'Câmera em uso.';
+      else mensagem += err.message;
       
       setCameraError(mensagem);
-      toast.error(mensagem);
       
-      // ✅ FALLBACK: Se getUserMedia falhar, usa o input HTML nativo
-      console.log('🔄 Fallback: usando <input type="file" capture="environment">');
+      // ✅ FALLBACK: input nativo com capture="environment"
+      console.log('🔄 Fallback: acionando input file com capture="environment"');
       cameraInputRef.current?.click();
     }
   };
 
-  // ✅ MÉTODO 2: Input HTML com capture="environment" (fallback + câmera nativa)
+  // ✅ MÉTODO 2: Input HTML nativo com capture (fallback + funciona em PWA)
   const abrirCameraInput = () => {
+    console.log('🔵 Abrindo câmera via input nativo (capture="environment")');
+    setDebugInfo('📸 Abrindo câmera do sistema...');
     cameraInputRef.current?.click();
   };
 
   // ✅ MÉTODO 3: Galeria (sempre funciona)
   const abrirGaleria = () => {
+    console.log('🔵 Abrindo galeria via input nativo');
+    setDebugInfo('🖼️ Abrindo galeria...');
     fileInputRef.current?.click();
   };
 
@@ -109,6 +116,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     setFotoBlob(file);
     setFotoPreview(URL.createObjectURL(file));
     setCameraError(null);
+    setDebugInfo('');
 
     // Se estava com stream da câmera, para
     if (streamRef.current) {
@@ -120,7 +128,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   const handleCameraFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) processarArquivo(file, 'camera');
-    e.target.value = ''; // Permite selecionar o mesmo arquivo novamente
+    e.target.value = '';
   };
 
   const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,7 +156,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
         }
       }, 'image/jpeg', 0.9);
 
-      // Para a câmera após capturar
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
       
@@ -165,12 +172,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     setUploading(true);
     const timestamp = Date.now();
     const filePath = `${user.id}/avatar-${timestamp}.jpg`;
-
-    console.log('📤 Enviando avatar:', {
-      user: user.id,
-      path: filePath,
-      size: (fotoBlob.size / 1024).toFixed(2) + ' KB'
-    });
 
     try {
       const { data, error } = await supabase.storage
@@ -205,23 +206,33 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     setFotoBlob(null);
     setFotoPreview(null);
     setCameraError(null);
+    setDebugInfo('');
   };
 
   return (
     <div className="text-center space-y-4">
       
+      {/* 🔍 DEBUG INFO (visível apenas se houver) */}
+      {debugInfo && (
+        <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-2 text-center">
+          <p className="text-blue-400 text-xs">{debugInfo}</p>
+        </div>
+      )}
+
       {/* === LIVE CAMERA (captura manual) === */}
       {streamRef.current && (
         <div className="relative bg-black rounded-2xl overflow-hidden max-w-sm mx-auto">
           <video ref={videoRef} className="w-full aspect-square object-cover" playsInline autoPlay muted />
           <canvas ref={canvasRef} className="hidden" />
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
-            <button onClick={tirarFotoManual} 
+            <button 
+              onClick={tirarFotoManual} 
               className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg hover:scale-105 transition"
             >
               <Camera size={28} className="text-gray-900" />
             </button>
-            <button onClick={() => { streamRef.current?.getTracks().forEach(t => t.stop()); streamRef.current = null; }} 
+            <button 
+              onClick={() => { streamRef.current?.getTracks().forEach(t => t.stop()); streamRef.current = null; }} 
               className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center shadow-lg"
             >
               <X size={20} className="text-white" />
@@ -238,7 +249,8 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             alt="Preview" 
             className="w-40 h-40 rounded-full object-cover border-4 border-[#F4D03F] shadow-xl mx-auto"
           />
-          <button onClick={limparFoto} 
+          <button 
+            onClick={limparFoto} 
             className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-105 transition"
           >
             <X size={16} />
@@ -261,27 +273,33 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
           )}
 
           <div className="flex justify-center gap-3">
-            {/* ✅ BOTÃO CÂMERA (prioridade: getUserMedia, fallback: input) */}
-            <button onClick={abrirCameraMobile} 
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-28"
+            {/* ✅ BOTÃO CÂMERA */}
+            <button 
+              onClick={abrirCameraMobile}
+              type="button"
+              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-28 cursor-pointer"
             >
               <Camera size={28} className="text-[#F4D03F]" />
               <span className="text-xs text-white">Câmera 📸</span>
             </button>
 
-            {/* ✅ BOTÃO GALERIA (sempre funciona) */}
-            <button onClick={abrirGaleria} 
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-28"
+            {/* ✅ BOTÃO GALERIA */}
+            <button 
+              onClick={abrirGaleria}
+              type="button"
+              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-[#1A1528] border border-white/10 hover:border-[#F4D03F]/50 transition w-28 cursor-pointer"
             >
               <ImageIcon size={28} className="text-[#F4D03F]" />
               <span className="text-xs text-white">Galeria 🖼️</span>
             </button>
           </div>
 
-          {/* ✅ BOTÃO EXTRA: Input nativo com capture (fallback) */}
+          {/* ✅ ALTERNATIVA: Câmera do sistema direto */}
           <div className="mt-2">
-            <button onClick={abrirCameraInput} 
-              className="text-xs text-[#A0A0B0] hover:text-[#F4D03F] transition underline"
+            <button 
+              onClick={abrirCameraInput}
+              type="button"
+              className="text-xs text-[#A0A0B0] hover:text-[#F4D03F] transition underline cursor-pointer"
             >
               🔄 Alternativa: abrir câmera do sistema
             </button>
@@ -291,7 +309,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
       {/* === INPUTS OCULTOS === */}
       
-      {/* Input para CÂMERA (com capture environment = força câmera traseira) */}
+      {/* ✅ Input para CÂMERA com capture="environment" (força câmera traseira) */}
       <input
         ref={cameraInputRef}
         type="file"
@@ -301,7 +319,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
         onChange={handleCameraFileChange}
       />
 
-      {/* Input para GALERIA (sem capture) */}
+      {/* ✅ Input para GALERIA (sem capture) */}
       <input
         ref={fileInputRef}
         type="file"
@@ -312,8 +330,10 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
       {/* === BOTÃO DE SALVAR === */}
       {fotoBlob && !streamRef.current && (
-        <button onClick={fazerUpload} disabled={uploading || !user}
-          className="w-full max-w-xs mx-auto py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+        <button 
+          onClick={fazerUpload} 
+          disabled={uploading || !user}
+          className="w-full max-w-xs mx-auto py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
         >
           {uploading ? (
             <><Loader size={18} className="animate-spin" /> Salvando...</>
