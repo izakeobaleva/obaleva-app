@@ -78,7 +78,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
 
     return () => {
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
-      mapInstanceRef.current = null;
     };
   }, [mapsLoaded, userLocation]);
 
@@ -87,6 +86,11 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
     if (!userMarkerRef.current || !pulseCircleRef.current || !userLocation) return;
     userMarkerRef.current.setPosition(userLocation);
     pulseCircleRef.current.setCenter(userLocation);
+    
+    // Centralizar mapa na nova localização
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.panTo(userLocation);
+    }
   }, [userLocation]);
 
   if (mapsLoaded && !mapsTimeout && userLocation && window.google?.maps) {
@@ -104,6 +108,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
     );
   }
 
+  // Placeholder quando mapa não está disponível
   return (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0F0B1A] to-[#1A1528]">
       <div className="text-center">
