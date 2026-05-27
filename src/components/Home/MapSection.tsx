@@ -16,7 +16,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
   const userMarkerRef = useRef<any>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-  // Função para forçar o resize do mapa quando o container mudar de tamanho
   const handleResize = useCallback(() => {
     if (mapInstanceRef.current && window.google?.maps?.event) {
       window.google.maps.event.trigger(mapInstanceRef.current, 'resize');
@@ -27,7 +26,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation || !window.google?.maps) return;
 
-    // Limpar instância anterior se existir
     if (mapInstanceRef.current) {
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
@@ -54,28 +52,54 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
       });
       mapInstanceRef.current = map;
 
-      // Forçar resize imediatamente após criar
       setTimeout(() => {
         window.google.maps.event.trigger(map, 'resize');
         map.setCenter(userLocation);
       }, 100);
 
-      // Marcador azul do usuário
-      userMarkerRef.current = new window.google.maps.Marker({
-        position: userLocation,
-        map,
-        title: 'Sua localização',
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: '#4285F4',
-          fillOpacity: 1,
-          strokeColor: '#FFFFFF',
-          strokeWeight: 3,
-        },
-      });
+      // Usar AdvancedMarkerElement (novo) se disponível, senão fallback para Marker
+      try {
+        if (window.google.maps.marker?.AdvancedMarkerElement) {
+          const { AdvancedMarkerElement } = window.google.maps.marker;
+          userMarkerRef.current = new AdvancedMarkerElement({
+            position: userLocation,
+            map,
+            title: 'Sua localização',
+          });
+        } else {
+          // Fallback para Marker antigo
+          userMarkerRef.current = new window.google.maps.Marker({
+            position: userLocation,
+            map,
+            title: 'Sua localização',
+            icon: {
+              path: window.google.maps.SymbolPath.CIRCLE,
+              scale: 10,
+              fillColor: '#4285F4',
+              fillOpacity: 1,
+              strokeColor: '#FFFFFF',
+              strokeWeight: 3,
+            },
+          });
+        }
+      } catch {
+        // Se AdvancedMarkerElement falhar, tenta Marker
+        userMarkerRef.current = new window.google.maps.Marker({
+          position: userLocation,
+          map,
+          title: 'Sua localização',
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#4285F4',
+            fillOpacity: 1,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 3,
+          },
+        });
+      }
 
-      // Círculo pulsante amarelo
+      // Círculo pulsante
       let size = 30;
       let growing = true;
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
@@ -98,7 +122,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
         pulseCircleRef.current?.setRadius(size);
       }, 60);
 
-      // Observer para redimensionamento do container
       if (mapRef.current && window.ResizeObserver) {
         resizeObserverRef.current = new ResizeObserver(() => {
           handleResize();
@@ -113,20 +136,22 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
     };
-  }, [mapsLoaded]); // Remove userLocation da dependência para evitar recriação
+  }, [mapsLoaded]);
 
-  // Atualizar posição do marcador se userLocation mudar, sem recriar o mapa
+  // Atualizar posição do marcador se userLocation mudar
   useEffect(() => {
     if (!mapInstanceRef.current || !userLocation) return;
     
     try {
       if (userMarkerRef.current) {
-        userMarkerRef.current.setPosition(userLocation);
+        // AdvancedMarkerElement usa position diretamente
+        if (userMarkerRef.current.position !== undefined) {
+          userMarkerRef.current.position = { lat: userLocation.lat, lng: userLocation.lng };
+        }
       }
       if (pulseCircleRef.current) {
         pulseCircleRef.current.setCenter(userLocation);
       }
-      // Centralizar mapa na nova localização
       mapInstanceRef.current.panTo(userLocation);
     } catch (err) {
       console.error('Erro ao atualizar posição:', err);
@@ -152,7 +177,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
     );
   }
 
-  // Placeholder quando mapa não está disponível
   return (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0F0B1A] to-[#1A1528]">
       <div className="text-center">
