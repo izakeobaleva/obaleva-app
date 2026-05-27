@@ -142,7 +142,7 @@ export default function Home() {
       </header>
 
       {/* ===== 2. MAPA AO VIVO - OCUPA TODO O ESPAÇO RESTANTE ===== */}
-      <div className="flex-1 relative w-full min-h-0">
+      <div className="flex-1 relative w-full" style={{ minHeight: '300px' }}>
         <MapSection
           userLocation={userLocation}
           mapsLoaded={mapsLoaded}

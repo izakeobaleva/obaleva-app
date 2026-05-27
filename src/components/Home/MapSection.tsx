@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Map, Crosshair } from 'lucide-react';
 
 interface MapSectionProps {
@@ -14,28 +14,51 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
   const pulseCircleRef = useRef<any>(null);
   const pulseIntervalRef = useRef<NodeJS.Timeout>();
   const userMarkerRef = useRef<any>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+  // Função para forçar o resize do mapa quando o container mudar de tamanho
+  const handleResize = useCallback(() => {
+    if (mapInstanceRef.current && window.google?.maps?.event) {
+      window.google.maps.event.trigger(mapInstanceRef.current, 'resize');
+    }
+  }, []);
 
   // Criar mapa quando carregar
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !userLocation || !window.google?.maps) return;
 
-    try {
-      if (mapInstanceRef.current) return;
+    // Limpar instância anterior se existir
+    if (mapInstanceRef.current) {
+      if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
+      if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
+      mapInstanceRef.current = null;
+    }
 
+    try {
       const map = new window.google.maps.Map(mapRef.current, {
         center: userLocation,
         zoom: 16,
         disableDefaultUI: true,
         zoomControl: true,
+        zoomControlOptions: {
+          position: window.google.maps.ControlPosition.RIGHT_BOTTOM,
+        },
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
+        clickableIcons: false,
         styles: [
           { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
           { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
         ],
       });
       mapInstanceRef.current = map;
+
+      // Forçar resize imediatamente após criar
+      setTimeout(() => {
+        window.google.maps.event.trigger(map, 'resize');
+        map.setCenter(userLocation);
+      }, 100);
 
       // Marcador azul do usuário
       userMarkerRef.current = new window.google.maps.Marker({
@@ -55,6 +78,8 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
       // Círculo pulsante amarelo
       let size = 30;
       let growing = true;
+      if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
+      
       pulseCircleRef.current = new window.google.maps.Circle({
         map,
         center: userLocation,
@@ -72,31 +97,50 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
         if (size <= 30) growing = true;
         pulseCircleRef.current?.setRadius(size);
       }, 60);
+
+      // Observer para redimensionamento do container
+      if (mapRef.current && window.ResizeObserver) {
+        resizeObserverRef.current = new ResizeObserver(() => {
+          handleResize();
+        });
+        resizeObserverRef.current.observe(mapRef.current);
+      }
     } catch (err) {
       console.error('Erro ao criar mapa:', err);
     }
 
     return () => {
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
+      if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
     };
-  }, [mapsLoaded, userLocation]);
+  }, [mapsLoaded]); // Remove userLocation da dependência para evitar recriação
 
-  // Atualizar posição do marcador se userLocation mudar
+  // Atualizar posição do marcador se userLocation mudar, sem recriar o mapa
   useEffect(() => {
-    if (!userMarkerRef.current || !pulseCircleRef.current || !userLocation) return;
-    userMarkerRef.current.setPosition(userLocation);
-    pulseCircleRef.current.setCenter(userLocation);
+    if (!mapInstanceRef.current || !userLocation) return;
     
-    // Centralizar mapa na nova localização
-    if (mapInstanceRef.current) {
+    try {
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setPosition(userLocation);
+      }
+      if (pulseCircleRef.current) {
+        pulseCircleRef.current.setCenter(userLocation);
+      }
+      // Centralizar mapa na nova localização
       mapInstanceRef.current.panTo(userLocation);
+    } catch (err) {
+      console.error('Erro ao atualizar posição:', err);
     }
   }, [userLocation]);
 
   if (mapsLoaded && !mapsTimeout && userLocation && window.google?.maps) {
     return (
-      <div className="w-full h-full relative">
-        <div ref={mapRef} className="w-full h-full" />
+      <div className="w-full h-full relative" style={{ minHeight: '100%' }}>
+        <div 
+          ref={mapRef} 
+          className="w-full h-full absolute inset-0"
+          style={{ minHeight: '300px' }}
+        />
         <button
           onClick={onGetCurrentLocation}
           className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-[#1A1528]/90 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-[#1A1528] transition shadow-lg z-10"
