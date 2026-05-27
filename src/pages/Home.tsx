@@ -8,8 +8,7 @@ import { useRideRequest } from '../hooks/useRideRequest';
 import { MapSection } from '../components/Home/MapSection';
 import { LocationInput } from '../components/Home/LocationInput';
 import { PriceEstimate } from '../components/Home/PriceEstimate';
-import { BottomNavBar } from '../components/Home/BottomNavBar';
-import { LogOut, Car } from 'lucide-react';
+import { LogOut, Car, Bell, User, Megaphone } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Home() {
@@ -101,37 +100,46 @@ export default function Home() {
 
   return (
     <div className="h-screen w-full flex flex-col bg-[#0F0B1A] overflow-hidden">
-      {/* MAPA */}
-      <MapSection
-        userLocation={userLocation}
-        mapsLoaded={mapsLoaded}
-        mapsTimeout={mapsTimeout}
-        onGetCurrentLocation={handleGetCurrentLocation}
-      />
-
-      {/* HEADER */}
-      <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-4 pb-12 z-10 pointer-events-none">
-        <div className="flex items-center justify-between pointer-events-auto">
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-xl font-bold bg-gradient-to-r from-[#F4D03F] to-amber-400 bg-clip-text text-transparent"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
-          >
-            ObaLeva
-          </motion.h1>
-          <button
-            onClick={handleSignOut}
-            className="w-9 h-9 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition"
-            title="Sair"
-          >
-            <LogOut size={16} className="text-red-400" />
-          </button>
+      {/* ===== 1. TOP BAR - INFORMAÇÕES DO APP ===== */}
+      <div className="bg-[#1A1528]/95 backdrop-blur-xl border-b border-white/10 px-4 py-3 z-20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-lg font-bold bg-gradient-to-r from-[#F4D03F] to-amber-400 bg-clip-text text-transparent"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
+            >
+              ObaLeva
+            </motion.h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition relative">
+              <Bell size={16} className="text-[#F4D03F]" />
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white font-bold">3</span>
+            </button>
+            <button 
+              onClick={() => navigate('/profile')}
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4D03F] to-amber-500 flex items-center justify-center"
+            >
+              <User size={16} className="text-[#1E1E2F]" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* PAINEL INFERIOR */}
-      <div className="bg-[#1A1528]/95 backdrop-blur-xl border-t border-white/10 px-4 pt-4 pb-2 z-10">
+      {/* ===== 2. ESPAÇO PUBLICITÁRIO ===== */}
+      <div className="bg-gradient-to-r from-[#1A1528] to-[#2D2342] border-b border-white/10 py-2 px-4 z-20">
+        <div className="flex items-center justify-center gap-2">
+          <Megaphone size={14} className="text-[#F4D03F]" />
+          <span className="text-xs text-white/60">
+            📢 Baixe o app e ganhe <strong className="text-[#F4D03F]">R$ 10</strong> na primeira corrida!
+          </span>
+        </div>
+      </div>
+
+      {/* ===== 3. CONTAINER ORIGEM / DESTINO ===== */}
+      <div className="bg-[#1A1528]/95 border-b border-white/10 px-4 pt-3 pb-2 z-20">
         {/* Campo Origem */}
         <LocationInput
           type="origem"
@@ -165,24 +173,49 @@ export default function Home() {
           onSelectSugestao={(s) => handleSelectSugestao(s, 'destino')}
         />
 
-        {/* Preço */}
+        {/* Preço estimado */}
         <PriceEstimate preco={precoEstimado} visible={!!(origem || destino)} />
 
         {/* Botão Chamar */}
         <button
           onClick={handleSolicitarCorrida}
           disabled={solicitando || !destino}
-          className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 text-lg shadow-lg flex items-center justify-center gap-2"
+          className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 text-base shadow-lg flex items-center justify-center gap-2 mb-2"
         >
           {solicitando ? (
             <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Buscando motorista...</>
           ) : (
-            <><Car size={22} /> Chamar ObaLeva</>
+            <><Car size={20} /> Chamar ObaLeva</>
           )}
         </button>
+      </div>
 
-        {/* Bottom Nav */}
-        <BottomNavBar />
+      {/* ===== 4. MAPA AO VIVO (GRANDE) ===== */}
+      <div className="flex-1 relative z-10">
+        <MapSection
+          userLocation={userLocation}
+          mapsLoaded={mapsLoaded}
+          mapsTimeout={mapsTimeout}
+          onGetCurrentLocation={handleGetCurrentLocation}
+        />
+      </div>
+
+      {/* ===== 5. BOTTOM BAR - LOGIN GOOGLE ===== */}
+      <div className="bg-[#1A1528]/95 backdrop-blur-xl border-t border-white/10 px-4 py-3 z-20">
+        <button
+          onClick={() => {
+            if (!user) navigate('/login');
+            else navigate('/profile');
+          }}
+          className="w-full py-3 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-sm"
+        >
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" 
+            alt="Google" 
+            className="w-5 h-5"
+          />
+          {user ? 'Meu Perfil' : 'Entrar com Google'}
+        </button>
       </div>
     </div>
   );

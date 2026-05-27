@@ -120,7 +120,7 @@ export default function Login() {
           >
             <img 
               src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" 
-              alt="Google Logo" 
+              alt="Google" 
               className="w-5 h-5"
             />
             Entrar com Google
