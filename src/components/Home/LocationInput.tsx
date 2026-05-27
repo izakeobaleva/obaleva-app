@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { MapPin, Navigation, Edit2, Check } from 'lucide-react';
 
 interface LocationInputProps {
@@ -32,6 +33,38 @@ export function LocationInput({
   onSelectSugestao,
 }: LocationInputProps) {
   const isOrigem = type === 'origem';
+  const autocompleteRef = useRef<HTMLInputElement>(null);
+  const [autocompleteInstance, setAutocompleteInstance] = useState<any>(null);
+  const autocompleteInitRef = useRef(false);
+
+  // Inicializar Google Places Autocomplete no campo Destino
+  useEffect(() => {
+    if (type !== 'destino') return;
+    if (!window.google?.maps?.places || !autocompleteRef.current) return;
+    if (autocompleteInitRef.current) return;
+
+    try {
+      autocompleteInitRef.current = true;
+
+      const autocomplete = new window.google.maps.places.Autocomplete(autocompleteRef.current, {
+        types: ['geocode', 'establishment'],
+        componentRestrictions: { country: 'br' },
+        fields: ['formatted_address', 'geometry', 'name'],
+      });
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place?.formatted_address) {
+          onChange(place.formatted_address);
+          onConfirm();
+        }
+      });
+
+      setAutocompleteInstance(autocomplete);
+    } catch (err) {
+      console.warn('Erro ao criar Autocomplete Places:', err);
+    }
+  }, [type, onChange, onConfirm]);
 
   return (
     <div className="mb-2 relative z-20">
@@ -52,6 +85,7 @@ export function LocationInput({
             <Navigation size={16} className="text-red-400 shrink-0" />
           )}
           <input
+            ref={type === 'destino' ? autocompleteRef : undefined}
             type="text"
             placeholder={loading ? 'Buscando endereço...' : placeholder}
             value={value}

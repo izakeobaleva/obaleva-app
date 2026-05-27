@@ -167,13 +167,17 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, mapsError, o
           className="w-full h-full absolute inset-0"
           style={{ minHeight: '300px' }}
         />
+        
+        {/* ✅ Botão de localização no CANTO SUPERIOR DIREITO */}
         <button
           onClick={onGetCurrentLocation}
-          className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-[#1A1528]/90 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-[#1A1528] transition shadow-lg z-10"
-          title="Centralizar na minha localização"
+          className="absolute top-3 right-3 w-11 h-11 rounded-full bg-[#1A1528] border-2 border-[#F4D03F]/50 flex items-center justify-center hover:bg-[#2D2342] transition shadow-lg z-10"
+          title="Minha localização"
         >
-          <Crosshair size={20} className="text-[#F4D03F]" />
+          <Crosshair size={18} className="text-[#F4D03F]" />
         </button>
+
+        {/* Indicador de mapa ativo no canto superior esquerdo */}
         <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-2 border border-white/10 z-10">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           <span className="text-xs text-white font-medium">Mapa ativo</span>
@@ -185,7 +189,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, mapsError, o
   // ✅ FALLBACK VISUAL BONITO - Mapa indisponível
   return (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1A1528] to-[#0F0B1A] relative" style={{ minHeight: '300px' }}>
-      {/* Grid decorativo de fundo */}
       <div className="absolute inset-0 opacity-10">
         <div className="w-full h-full" style={{
           backgroundImage: `radial-gradient(circle at 25% 25%, rgba(244, 208, 63, 0.1) 0%, transparent 50%),
@@ -198,14 +201,11 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, mapsError, o
         animate={{ opacity: 1, scale: 1 }}
         className="text-center relative z-10 px-6"
       >
-        {/* Ícone grande */}
         <div className="w-20 h-20 mx-auto mb-4 bg-red-900/30 rounded-full flex items-center justify-center border border-red-500/30">
           <AlertTriangle size={36} className="text-red-400" />
         </div>
 
-        <h3 className="text-lg font-bold text-white mb-2">
-          Mapa indisponível
-        </h3>
+        <h3 className="text-lg font-bold text-white mb-2">Mapa indisponível</h3>
 
         <p className="text-sm text-[#A0A0B0] mb-1 max-w-xs mx-auto">
           {mapsError === 'Chave de API não configurada'
@@ -216,7 +216,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, mapsError, o
           Você ainda pode digitar os endereços manualmente abaixo
         </p>
 
-        {/* Localização atual (se tiver GPS) */}
         {userLocation && (
           <div className="flex items-center justify-center gap-2 mb-4 bg-[#1A1528]/80 rounded-xl px-4 py-2 border border-white/10 mx-auto max-w-[200px]">
             <MapPin size={14} className="text-green-400" />
@@ -226,7 +225,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, mapsError, o
           </div>
         )}
 
-        {/* Botão Tentar Novamente */}
         {onRetry && (
           <button
             onClick={onRetry}
@@ -237,7 +235,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, mapsError, o
           </button>
         )}
 
-        {/* Inputs de texto SEMPRE funcionam (independente do mapa) */}
         <div className="mt-4 text-xs text-[#A0A0B0]/40">
           ↓ Digite seu endereço nos campos abaixo ↓
         </div>
