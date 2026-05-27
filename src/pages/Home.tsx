@@ -103,7 +103,14 @@ export default function Home() {
       {/* ===== 1. TOP BAR - INFORMAÇÕES DO APP ===== */}
       <div className="bg-[#1A1528]/95 backdrop-blur-xl border-b border-white/10 px-4 py-3 z-20">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSignOut}
+              className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition"
+              title="Sair"
+            >
+              <LogOut size={14} className="text-red-400" />
+            </button>
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -190,7 +197,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* ===== 4. MAPA AO VIVO (GRANDE) ===== */}
+      {/* ===== 4. MAPA AO VIVO (GRANDE!) ===== */}
       <div className="flex-1 relative z-10">
         <MapSection
           userLocation={userLocation}
@@ -200,22 +207,35 @@ export default function Home() {
         />
       </div>
 
-      {/* ===== 5. BOTTOM BAR - LOGIN GOOGLE ===== */}
+      {/* ===== 5. BOTTOM BAR - PERFIL + GOOGLE ===== */}
       <div className="bg-[#1A1528]/95 backdrop-blur-xl border-t border-white/10 px-4 py-3 z-20">
-        <button
-          onClick={() => {
-            if (!user) navigate('/login');
-            else navigate('/profile');
-          }}
-          className="w-full py-3 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-3 text-sm"
-        >
-          <img 
-            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" 
-            alt="Google" 
-            className="w-5 h-5"
-          />
-          {user ? 'Meu Perfil' : 'Entrar com Google'}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4D03F] to-amber-500 flex items-center justify-center shrink-0">
+            <User size={18} className="text-[#1E1E2F]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-sm font-medium truncate">
+              {user?.email?.split('@')[0] || 'Usuário'}
+            </p>
+            <p className="text-[#A0A0B0] text-xs truncate">
+              {user?.email || 'Não logado'}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              if (!user) navigate('/login');
+              else navigate('/profile');
+            }}
+            className="px-4 py-2.5 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-xs shrink-0"
+          >
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" 
+              alt="Google" 
+              className="w-4 h-4"
+            />
+            {user ? 'Perfil' : 'Entrar'}
+          </button>
+        </div>
       </div>
     </div>
   );

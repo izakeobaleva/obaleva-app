@@ -90,7 +90,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
 
   if (mapsLoaded && !mapsTimeout && userLocation && window.google?.maps) {
     return (
-      <div className="flex-1 relative">
+      <div className="w-full h-full relative">
         <div ref={mapRef} className="w-full h-full" />
         <button
           onClick={onGetCurrentLocation}
@@ -104,7 +104,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
   }
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-[#0F0B1A] to-[#1A1528]">
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0F0B1A] to-[#1A1528]">
       <div className="text-center">
         <Map size={48} className="mx-auto mb-2 text-[#F4D03F]/40" />
         <p className="text-sm text-[#A0A0B0]">{mapsTimeout ? 'Mapa indisponível' : 'Carregando mapa...'}</p>
