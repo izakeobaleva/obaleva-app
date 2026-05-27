@@ -9,10 +9,11 @@ import { MapSection } from '../components/Home/MapSection';
 import { LocationInput } from '../components/Home/LocationInput';
 import { PriceEstimate } from '../components/Home/PriceEstimate';
 import { LogOut, Car, Bell, User, Megaphone } from 'lucide-react';
+import { UserAvatar } from '../components/UserAvatar';
 import { toast } from 'sonner';
 
 export default function Home() {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { mapsLoaded, mapsTimeout, mapsError, buscarSugestoes, reverseGeocode, tentarNovamente } = useGoogleMaps();
   const { userLocation, getCurrentLocation } = useGeolocation();
@@ -21,7 +22,6 @@ export default function Home() {
   const [origem, setOrigem] = useState('');
   const [destino, setDestino] = useState('');
   const [origemCoord, setOrigemCoord] = useState<{ lat: number; lng: number } | null>(null);
-  const [destinoCoord, setDestinoCoord] = useState<{ lat: number; lng: number } | null>(null);
   const [editingOrigem, setEditingOrigem] = useState(false);
   const [editingDestino, setEditingDestino] = useState(false);
   const [buscandoEndereco, setBuscandoEndereco] = useState(false);
@@ -64,7 +64,6 @@ export default function Home() {
     navigate('/login');
   };
 
-  // ====== AUTOCOMPLETE (funciona mesmo sem mapa) ======
   const handleInputChange = (value: string, type: 'origem' | 'destino') => {
     if (type === 'origem') setOrigem(value);
     else setDestino(value);
@@ -124,7 +123,6 @@ export default function Home() {
     });
     
     if (success) {
-      // Limpar campos após sucesso
       setDestino('');
     }
   };
@@ -163,14 +161,18 @@ export default function Home() {
           </button>
           <button 
             onClick={() => navigate('/profile')}
-            className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4D03F] to-amber-500 flex items-center justify-center"
+            className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#F4D03F]/30"
           >
-            <User size={16} className="text-[#1E1E2F]" />
+            <UserAvatar 
+              url={profile?.avatar_url} 
+              name={profile?.nome_completo} 
+              size="sm" 
+            />
           </button>
         </div>
       </header>
 
-      {/* ===== 2. MAPA (ou fallback visual) ===== */}
+      {/* ===== 2. MAPA ===== */}
       <div className="flex-1 relative w-full" style={{ minHeight: '200px' }}>
         <MapSection
           userLocation={userLocation}
@@ -182,9 +184,8 @@ export default function Home() {
         />
       </div>
 
-      {/* ===== 3. INPUTS + BOTÃO (SEMPRE visíveis) ===== */}
+      {/* ===== 3. INPUTS + BOTÃO ===== */}
       <div className="bg-[#1A1528] border-t border-white/10 px-4 pt-3 pb-2 shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-        {/* Campo Origem */}
         <LocationInput
           type="origem"
           value={origem}
@@ -201,7 +202,6 @@ export default function Home() {
           onSelectSugestao={(s) => handleSelectSugestao(s, 'origem')}
         />
 
-        {/* Campo Destino */}
         <LocationInput
           type="destino"
           value={destino}
@@ -217,10 +217,8 @@ export default function Home() {
           onSelectSugestao={(s) => handleSelectSugestao(s, 'destino')}
         />
 
-        {/* Preço estimado */}
         <PriceEstimate preco={precoEstimado} visible={!!(origem && destino)} />
 
-        {/* Botão Chamar - SEMPRE visível e funcional */}
         <button
           onClick={handleSolicitarCorrida}
           disabled={solicitando || !destino}

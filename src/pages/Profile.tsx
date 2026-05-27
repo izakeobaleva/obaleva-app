@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { BottomNav } from '../components/BottomNav';
 import { supabase } from '../lib/supabaseClient';
+import { AvatarUpload } from '../components/AvatarUpload';
 import { User, Mail, Phone, LogOut, ChevronLeft, CreditCard, History, Heart, Edit, Car } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -38,6 +39,12 @@ export default function Profile() {
     }
   }
 
+  const handleAvatarUpload = async (url: string) => {
+    if (!user) return;
+    await supabase.from('usuarios').update({ avatar_url: url }).eq('id', user.id);
+    loadProfile();
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
@@ -55,16 +62,19 @@ export default function Profile() {
       </header>
 
       <main className="p-4 max-w-md mx-auto space-y-4">
-        {/* Avatar e nome */}
+        {/* Avatar + nome */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-[#1A1528] rounded-2xl p-6 border border-white/10 text-center"
         >
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#F4D03F] to-amber-500 flex items-center justify-center mx-auto mb-3">
-            <span className="text-3xl font-bold text-[#1E1E2F]">
-              {profile?.nome_completo?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'U'}
-            </span>
+          <div className="flex justify-center mb-4">
+            <AvatarUpload
+              userId={user?.id || ''}
+              currentUrl={profile?.avatar_url}
+              onUpload={handleAvatarUpload}
+              size="lg"
+            />
           </div>
           <h2 className="text-lg font-bold text-white">{profile?.nome_completo || 'Usuário'}</h2>
           <div className="flex items-center justify-center gap-2 mt-1">
@@ -77,6 +87,7 @@ export default function Profile() {
               <p className="text-sm text-[#A0A0B0]">{profile.telefone}</p>
             </div>
           )}
+          <p className="text-xs text-[#A0A0B0] mt-2">Clique no ícone da câmera para trocar a foto</p>
         </motion.div>
 
         {/* Estatísticas */}
@@ -108,7 +119,6 @@ export default function Profile() {
             <ChevronLeft size={16} className="text-[#A0A0B0] rotate-180" />
           </button>
           
-          {/* Botão Torne-se um Parceiro */}
           <button 
             onClick={() => navigate('/cadastro-motorista')}
             className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition border-b border-white/10"
