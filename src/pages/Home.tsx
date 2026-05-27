@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 export default function Home() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { mapsLoaded, mapsTimeout, buscarSugestoes, reverseGeocode, geocodeAddress } = useGoogleMaps();
+  const { mapsLoaded, mapsTimeout, mapsError, buscarSugestoes, reverseGeocode, tentarNovamente } = useGoogleMaps();
   const { userLocation, getCurrentLocation } = useGeolocation();
   const { solicitando, precoEstimado, solicitarCorrida, calcularPreco } = useRideRequest();
 
@@ -42,7 +42,7 @@ export default function Home() {
       setBuscandoEndereco(true);
       setOrigemCoord(userLocation);
       reverseGeocode(userLocation.lat, userLocation.lng).then((endereco) => {
-        setOrigem(endereco);
+        if (endereco) setOrigem(endereco);
         setBuscandoEndereco(false);
       });
     }
@@ -55,7 +55,7 @@ export default function Home() {
     if (origem && destino) {
       debouncePreco.current = setTimeout(() => {
         calcularPreco(origem, destino);
-      }, 1000); // Espera 1 segundo após a última digitação
+      }, 1000);
     }
   }, [origem, destino, calcularPreco]);
 
@@ -64,7 +64,7 @@ export default function Home() {
     navigate('/login');
   };
 
-  // ====== AUTOCOMPLETE ======
+  // ====== AUTOCOMPLETE (funciona mesmo sem mapa) ======
   const handleInputChange = (value: string, type: 'origem' | 'destino') => {
     if (type === 'origem') setOrigem(value);
     else setDestino(value);
@@ -88,16 +88,10 @@ export default function Home() {
       setOrigem(sugestao.description);
       setShowSugestoesOrigem(false);
       setEditingOrigem(false);
-      // Geocodificar a origem selecionada
-      const coords = await geocodeAddress(sugestao.description);
-      if (coords) setOrigemCoord(coords);
     } else {
       setDestino(sugestao.description);
       setShowSugestoesDestino(false);
       setEditingDestino(false);
-      // Geocodificar o destino selecionado
-      const coords = await geocodeAddress(sugestao.description);
-      if (coords) setDestinoCoord(coords);
     }
   };
 
@@ -107,7 +101,7 @@ export default function Home() {
       setOrigemCoord(loc);
       setBuscandoEndereco(true);
       const endereco = await reverseGeocode(loc.lat, loc.lng);
-      setOrigem(endereco);
+      if (endereco) setOrigem(endereco);
       setBuscandoEndereco(false);
       toast.success('📍 Localização atualizada!');
     } else {
@@ -115,13 +109,29 @@ export default function Home() {
     }
   }, [getCurrentLocation, reverseGeocode]);
 
-  const handleSolicitarCorrida = () => {
-    solicitarCorrida({ userId: user?.id, origem, destino });
+  const handleSolicitarCorrida = async () => {
+    if (!destino) {
+      toast.error('Digite o destino');
+      return;
+    }
+    
+    const success = await solicitarCorrida({ 
+      userId: user?.id, 
+      origem, 
+      destino,
+      origemLat: origemCoord?.lat,
+      origemLng: origemCoord?.lng,
+    });
+    
+    if (success) {
+      // Limpar campos após sucesso
+      setDestino('');
+    }
   };
 
   return (
     <div className="h-screen w-full flex flex-col bg-[#0F0B1A] overflow-hidden">
-      {/* ===== 1. TOP BAR - FIXO NO TOPO ===== */}
+      {/* ===== 1. TOP BAR ===== */}
       <header className="h-14 bg-[#1A1528]/95 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4 z-30 shrink-0">
         <div className="flex items-center gap-3">
           <button
@@ -160,17 +170,19 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ===== 2. MAPA AO VIVO - OCUPA TODO O ESPAÇO RESTANTE ===== */}
-      <div className="flex-1 relative w-full" style={{ minHeight: '300px' }}>
+      {/* ===== 2. MAPA (ou fallback visual) ===== */}
+      <div className="flex-1 relative w-full" style={{ minHeight: '200px' }}>
         <MapSection
           userLocation={userLocation}
           mapsLoaded={mapsLoaded}
           mapsTimeout={mapsTimeout}
+          mapsError={mapsError}
           onGetCurrentLocation={handleGetCurrentLocation}
+          onRetry={tentarNovamente}
         />
       </div>
 
-      {/* ===== 3. OVERLAY COM INPUTS - fundo escuro sólido para evitar glitch ===== */}
+      {/* ===== 3. INPUTS + BOTÃO (SEMPRE visíveis) ===== */}
       <div className="bg-[#1A1528] border-t border-white/10 px-4 pt-3 pb-2 shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         {/* Campo Origem */}
         <LocationInput
@@ -205,10 +217,10 @@ export default function Home() {
           onSelectSugestao={(s) => handleSelectSugestao(s, 'destino')}
         />
 
-        {/* Preço estimado com cálculo real */}
+        {/* Preço estimado */}
         <PriceEstimate preco={precoEstimado} visible={!!(origem && destino)} />
 
-        {/* Botão Chamar */}
+        {/* Botão Chamar - SEMPRE visível e funcional */}
         <button
           onClick={handleSolicitarCorrida}
           disabled={solicitando || !destino}
@@ -222,7 +234,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* ===== 4. BANNER PUBLICITÁRIO NO FUNDO ===== */}
+      {/* ===== 4. BANNER ===== */}
       <div className="h-10 bg-gradient-to-r from-[#1A1528] to-[#2D2342] border-t border-white/10 flex items-center justify-center px-4 shrink-0">
         <div className="flex items-center gap-2">
           <Megaphone size={14} className="text-[#F4D03F]" />

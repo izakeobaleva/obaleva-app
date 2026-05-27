@@ -1,14 +1,17 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { Map, Crosshair } from 'lucide-react';
+import { Map, Crosshair, MapPin, RefreshCw, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface MapSectionProps {
   userLocation: { lat: number; lng: number } | null;
   mapsLoaded: boolean;
   mapsTimeout: boolean;
+  mapsError?: string | null;
   onGetCurrentLocation: () => void;
+  onRetry?: () => void;
 }
 
-export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrentLocation }: MapSectionProps) {
+export function MapSection({ userLocation, mapsLoaded, mapsTimeout, mapsError, onGetCurrentLocation, onRetry }: MapSectionProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const pulseCircleRef = useRef<any>(null);
@@ -24,7 +27,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
 
   // Criar mapa quando carregar
   useEffect(() => {
-    if (!mapsLoaded || !mapRef.current || !userLocation || !window.google?.maps) return;
+    if (!mapsLoaded || mapsTimeout || mapsError || !mapRef.current || !userLocation || !window.google?.maps) return;
 
     if (mapInstanceRef.current) {
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
@@ -57,7 +60,7 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
         map.setCenter(userLocation);
       }, 100);
 
-      // Usar AdvancedMarkerElement (novo) se disponível, senão fallback para Marker
+      // Usar AdvancedMarkerElement (novo) se disponível
       try {
         if (window.google.maps.marker?.AdvancedMarkerElement) {
           const { AdvancedMarkerElement } = window.google.maps.marker;
@@ -67,7 +70,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
             title: 'Sua localização',
           });
         } else {
-          // Fallback para Marker antigo
           userMarkerRef.current = new window.google.maps.Marker({
             position: userLocation,
             map,
@@ -83,7 +85,6 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
           });
         }
       } catch {
-        // Se AdvancedMarkerElement falhar, tenta Marker
         userMarkerRef.current = new window.google.maps.Marker({
           position: userLocation,
           map,
@@ -136,15 +137,14 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
       if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
     };
-  }, [mapsLoaded]);
+  }, [mapsLoaded, mapsTimeout, mapsError, userLocation, handleResize]);
 
   // Atualizar posição do marcador se userLocation mudar
   useEffect(() => {
-    if (!mapInstanceRef.current || !userLocation) return;
+    if (!mapInstanceRef.current || !userLocation || mapsTimeout || mapsError) return;
     
     try {
       if (userMarkerRef.current) {
-        // AdvancedMarkerElement usa position diretamente
         if (userMarkerRef.current.position !== undefined) {
           userMarkerRef.current.position = { lat: userLocation.lat, lng: userLocation.lng };
         }
@@ -156,9 +156,10 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
     } catch (err) {
       console.error('Erro ao atualizar posição:', err);
     }
-  }, [userLocation]);
+  }, [userLocation, mapsTimeout, mapsError]);
 
-  if (mapsLoaded && !mapsTimeout && userLocation && window.google?.maps) {
+  // ✅ MAPA FUNCIONANDO NORMALMENTE
+  if (mapsLoaded && !mapsTimeout && !mapsError && userLocation && window.google?.maps) {
     return (
       <div className="w-full h-full relative" style={{ minHeight: '100%' }}>
         <div 
@@ -173,20 +174,74 @@ export function MapSection({ userLocation, mapsLoaded, mapsTimeout, onGetCurrent
         >
           <Crosshair size={20} className="text-[#F4D03F]" />
         </button>
+        <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-2 border border-white/10 z-10">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-xs text-white font-medium">Mapa ativo</span>
+        </div>
       </div>
     );
   }
 
+  // ✅ FALLBACK VISUAL BONITO - Mapa indisponível
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0F0B1A] to-[#1A1528]">
-      <div className="text-center">
-        <Map size={48} className="mx-auto mb-2 text-[#F4D03F]/40" />
-        <p className="text-sm text-[#A0A0B0]">{mapsTimeout ? 'Mapa indisponível' : 'Carregando mapa...'}</p>
-        {userLocation && (
-          <p className="text-xs text-[#A0A0B0]/60 mt-1">📍 {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}</p>
-        )}
-        {!mapsLoaded && <p className="text-xs text-yellow-400 mt-2">⚠️ Configure a chave do Google Maps no .env</p>}
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1A1528] to-[#0F0B1A] relative" style={{ minHeight: '300px' }}>
+      {/* Grid decorativo de fundo */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="w-full h-full" style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(244, 208, 63, 0.1) 0%, transparent 50%),
+                            radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%)`,
+        }} />
       </div>
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center relative z-10 px-6"
+      >
+        {/* Ícone grande */}
+        <div className="w-20 h-20 mx-auto mb-4 bg-red-900/30 rounded-full flex items-center justify-center border border-red-500/30">
+          <AlertTriangle size={36} className="text-red-400" />
+        </div>
+
+        <h3 className="text-lg font-bold text-white mb-2">
+          Mapa indisponível
+        </h3>
+
+        <p className="text-sm text-[#A0A0B0] mb-1 max-w-xs mx-auto">
+          {mapsError === 'Chave de API não configurada'
+            ? 'A chave do Google Maps não foi configurada. Adicione VITE_GOOGLE_MAPS_API_KEY no .env'
+            : 'O mapa não pôde ser carregado no momento.'}
+        </p>
+        <p className="text-xs text-[#A0A0B0]/60 mb-5">
+          Você ainda pode digitar os endereços manualmente abaixo
+        </p>
+
+        {/* Localização atual (se tiver GPS) */}
+        {userLocation && (
+          <div className="flex items-center justify-center gap-2 mb-4 bg-[#1A1528]/80 rounded-xl px-4 py-2 border border-white/10 mx-auto max-w-[200px]">
+            <MapPin size={14} className="text-green-400" />
+            <span className="text-xs text-[#A0A0B0]">
+              📍 {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+            </span>
+          </div>
+        )}
+
+        {/* Botão Tentar Novamente */}
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="px-6 py-2.5 rounded-2xl font-medium bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center gap-2 mx-auto text-sm"
+          >
+            <RefreshCw size={16} />
+            Tentar Novamente
+          </button>
+        )}
+
+        {/* Inputs de texto SEMPRE funcionam (independente do mapa) */}
+        <div className="mt-4 text-xs text-[#A0A0B0]/40">
+          ↓ Digite seu endereço nos campos abaixo ↓
+        </div>
+      </motion.div>
     </div>
   );
 }

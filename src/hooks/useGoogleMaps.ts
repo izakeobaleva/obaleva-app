@@ -1,24 +1,36 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export function useGoogleMaps() {
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [mapsTimeout, setMapsTimeout] = useState(false);
+  const [mapsError, setMapsError] = useState<string | null>(null);
   const autocompleteService = useRef<any>(null);
   const geocoderService = useRef<any>(null);
 
+  // ✅ Sempre pegar do import.meta.env - NUNCA hardcoded
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
+  const handleMapLoadError = useCallback((error?: string) => {
+    console.warn('⚠️ Google Maps falhou ao carregar:', error || 'Erro desconhecido');
+    setMapsError(error || 'Falha ao carregar mapa');
+    setMapsLoaded(true);
+    setMapsTimeout(true);
+    // Limpar flag para tentar novamente depois
+    (window as any).__googleMapsScriptLoaded = false;
+  }, []);
+
   useEffect(() => {
+    // Se não tem chave, já falha graciosamente
     if (!apiKey) {
-      setMapsLoaded(true);
-      setMapsTimeout(true);
+      console.warn('⚠️ Nenhuma chave VITE_GOOGLE_MAPS_API_KEY encontrada no .env');
+      handleMapLoadError('Chave de API não configurada');
       return;
     }
 
     const initServices = () => {
       try {
         if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-          console.error('Google Maps API não carregada completamente');
+          handleMapLoadError('Google Maps API não carregada');
           return;
         }
         
@@ -34,9 +46,14 @@ export function useGoogleMaps() {
             geocoderService.current = new window.google.maps.Geocoder();
           }
           setMapsLoaded(true);
+          setMapsTimeout(false);
+          setMapsError(null);
+        } else {
+          handleMapLoadError('Biblioteca places não disponível');
         }
       } catch (e: any) {
         if (!e.message?.includes('No Listener')) throw e;
+        handleMapLoadError(e.message);
       }
     };
 
@@ -57,14 +74,9 @@ export function useGoogleMaps() {
       
       (window as any).initMapsCallback = initServices;
       
-      script.onerror = () => { 
-        try {
-          (window as any).__googleMapsScriptLoaded = false;
-          setMapsLoaded(true); 
-          setMapsTimeout(true);
-        } catch (e: any) {
-          if (!e.message?.includes('No Listener')) throw e;
-        }
+      script.onerror = (event) => { 
+        const errorMsg = (event as any)?.message || 'Erro ao carregar script do Google Maps';
+        handleMapLoadError(errorMsg);
       };
       
       document.head.appendChild(script);
@@ -80,38 +92,30 @@ export function useGoogleMaps() {
       // Timeout de segurança
       setTimeout(() => {
         clearInterval(checkInterval);
-        if (!mapsLoaded) {
-          setMapsLoaded(true);
-          setMapsTimeout(true);
+        if (!mapsLoaded && !mapsError) {
+          handleMapLoadError('Tempo esgotado ao carregar mapa');
         }
-      }, 10000);
+      }, 12000);
     }
 
     const timeout = setTimeout(() => {
-      try {
-        if (!mapsLoaded) { 
-          setMapsLoaded(true); 
-          setMapsTimeout(true); 
-        }
-      } catch (e: any) {
-        if (!e.message?.includes('No Listener')) throw e;
+      if (!mapsLoaded && !mapsError) {
+        handleMapLoadError('Tempo esgotado ao carregar mapa');
       }
-    }, 10000);
+    }, 12000);
 
     return () => {
       clearTimeout(timeout);
     };
-  }, [apiKey]); // Só executa se apiKey mudar
+  }, [apiKey, handleMapLoadError, mapsLoaded, mapsError]);
 
   const buscarSugestoes = (input: string): Promise<any[]> => {
     return new Promise((resolve) => {
       try {
         if (!autocompleteService.current || input.length < 3) { resolve([]); return; }
 
-        // AutocompleteSuggestion usa API diferente
         if (window.google?.maps?.places?.AutocompleteSuggestion && 
             !(autocompleteService.current instanceof window.google.maps.places.AutocompleteService)) {
-          // Nova API: AutocompleteSuggestion
           autocompleteService.current.getPlacePredictions(
             { input, types: ['geocode', 'establishment'], componentRestrictions: { country: 'br' }, language: 'pt-BR' },
             (predictions: any[] | null, status: string) => {
@@ -130,7 +134,6 @@ export function useGoogleMaps() {
             }
           );
         } else {
-          // API antiga: AutocompleteService
           autocompleteService.current.getPlacePredictions(
             { input, types: ['geocode', 'establishment'], componentRestrictions: { country: 'br' }, language: 'pt-BR' },
             (predictions: any[] | null, status: string) => {
@@ -187,7 +190,7 @@ export function useGoogleMaps() {
     });
   };
 
-  const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+  const reverseGeocode = (lat: number, lng: number): Promise<string> => {
     return new Promise((resolve) => {
       try {
         if (!geocoderService.current) { 
@@ -217,13 +220,24 @@ export function useGoogleMaps() {
     });
   };
 
+  const tentarNovamente = useCallback(() => {
+    setMapsLoaded(false);
+    setMapsTimeout(false);
+    setMapsError(null);
+    (window as any).__googleMapsScriptLoaded = false;
+    // Recarregar a página para limpar qualquer estado residual do Maps
+    window.location.reload();
+  }, []);
+
   return {
     mapsLoaded,
     mapsTimeout,
+    mapsError,
     autocompleteService,
     geocoderService,
     buscarSugestoes,
     geocodeAddress,
     reverseGeocode,
+    tentarNovamente,
   };
 }
