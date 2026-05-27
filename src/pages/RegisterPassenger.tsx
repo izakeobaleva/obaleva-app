@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, User, Mail, Lock, Phone, Eye, EyeOff, CheckCircle, Loader } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
-import { ProfilePhotoUpload } from '../components/ProfilePhotoUpload'
 
 // Componente Field memoizado para evitar re-renderizações
 const InputField = ({ icon: Icon, placeholder, value, onChange, type = 'text', maxLength, autoComplete, error, format }: any) => (
@@ -30,7 +29,7 @@ const InputField = ({ icon: Icon, placeholder, value, onChange, type = 'text', m
   </div>
 )
 
-// Helpers de formatação fora do componente
+// Helpers de formatação
 function formatarCpf(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 11)
   return digits
@@ -60,15 +59,6 @@ export function RegisterPassenger() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [fotoUrl, setFotoUrl] = useState<string | null>(null)
-
-  // Refs estáveis para callbacks
-  const errorsRef = useRef(errors)
-  errorsRef.current = errors
-
-  const setError = useCallback((field: string, msg: string) => {
-    setErrors(prev => ({ ...prev, [field]: msg }))
-  }, [])
 
   const clearError = useCallback((field: string) => {
     setErrors(prev => {
@@ -81,23 +71,16 @@ export function RegisterPassenger() {
 
   function validarCampos(): boolean {
     const newErrors: Record<string, string> = {}
-    
     if (!nome.trim()) newErrors.nome = 'Nome é obrigatório'
     if (nome.trim().length < 3) newErrors.nome = 'Nome deve ter pelo menos 3 caracteres'
-    
     const cpfClean = cpf.replace(/\D/g, '')
     if (cpfClean.length !== 11) newErrors.cpf = 'CPF deve ter 11 dígitos'
-    
     if (!telefone.trim()) newErrors.telefone = 'Telefone é obrigatório'
-    
     if (!email.trim()) newErrors.email = 'E-mail é obrigatório'
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'E-mail inválido'
-    
     if (!password) newErrors.password = 'Senha é obrigatória'
     else if (password.length < 6) newErrors.password = 'Mínimo 6 caracteres'
-    
     if (password !== confirmPassword) newErrors.confirmPassword = 'Senhas não conferem'
-    
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -114,13 +97,7 @@ export function RegisterPassenger() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            nome_completo: nome.trim(),
-            telefone,
-            tipo: 'passageiro'
-          }
-        }
+        options: { data: { nome_completo: nome.trim(), telefone, tipo: 'passageiro' } }
       })
 
       if (authError) throw authError
@@ -133,14 +110,12 @@ export function RegisterPassenger() {
           telefone,
           cpf,
           tipo: 'passageiro',
-          avatar_url: fotoUrl || null,
         })
-
         await supabase.from('passageiros').insert({ id: authData.user.id })
       }
 
       toast.success('Conta criada com sucesso!')
-      navigate('/', { replace: true })
+      navigate('/complete-profile', { replace: true })
     } catch (err: any) {
       if (err.message?.includes('already registered') || err.message?.includes('already exists')) {
         toast.error('Este e-mail já está cadastrado. Faça login.')
@@ -168,16 +143,6 @@ export function RegisterPassenger() {
               <h1 className="text-lg font-bold text-white">Criar Conta</h1>
               <p className="text-xs text-[#A0A0B0]">Passageiro</p>
             </div>
-          </div>
-
-          {/* Upload de foto - opcional */}
-          <div className="mb-4 flex justify-center">
-            <ProfilePhotoUpload
-              userId={email || 'temp'}
-              currentPhotoUrl={fotoUrl}
-              onPhotoUploaded={(url) => setFotoUrl(url)}
-              size="md"
-            />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3">

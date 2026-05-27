@@ -22,6 +22,7 @@ import PermissionLocation from './pages/PermissionLocation';
 import PermissionNotification from './pages/PermissionNotification';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import CompleteProfile from './pages/CompleteProfile'; // <-- NOVO IMPORT
 import { useAuth } from './contexts/AuthContext';
 
 // Componente de rota protegida
@@ -46,7 +47,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   const { user, loading } = useAuth();
 
-  // Se está carregando, mostra loading
   if (loading) {
     return (
       <div className="h-screen bg-[#0F0B1A] flex items-center justify-center">
@@ -74,6 +74,7 @@ function AppRoutes() {
         <>
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} /> {/* <-- NOVA ROTA */}
           <Route path="/driver" element={<DriverDashboard />} />
           <Route path="/trips" element={<Trips />} />
           <Route path="/trips/:id" element={<TripDetails />} />
