@@ -29,9 +29,8 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     };
   }, []);
 
-  // ✅ MÉTODO 1: getUserMedia (câmera programática - funciona em PWA certificado)
+  // ✅ MÉTODO 1: getUserMedia (câmera programática)
   const abrirCameraMobile = async () => {
-    // 🐛 DEBUG: Saber se o clique foi detectado
     const timestamp = Date.now();
     setDebugInfo(`📸 Clique capturado em ${new Date(timestamp).toLocaleTimeString()}`);
     console.log('🔵 Botão Câmera clicado em', new Date(timestamp).toLocaleTimeString());
@@ -79,16 +78,16 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       
       setCameraError(mensagem);
       
-      // ✅ FALLBACK: input nativo com capture="environment"
-      console.log('🔄 Fallback: acionando input file com capture="environment"');
+      // ✅ FALLBACK: input nativo (agora SEM capture, deixando o sistema escolher)
+      console.log('🔄 Fallback: acionando input file (sem capture)');
       cameraInputRef.current?.click();
     }
   };
 
-  // ✅ MÉTODO 2: Input HTML nativo com capture (fallback + funciona em PWA)
+  // ✅ MÉTODO 2: Input HTML nativo (sem capture - sistema mostra opções: frontal/traseira/galeria)
   const abrirCameraInput = () => {
-    console.log('🔵 Abrindo câmera via input nativo (capture="environment")');
-    setDebugInfo('📸 Abrindo câmera do sistema...');
+    console.log('🔵 Abrindo câmera/galeria via input nativo (sem capture)');
+    setDebugInfo('📸 Abrindo seletor de mídia...');
     cameraInputRef.current?.click();
   };
 
@@ -273,7 +272,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
           )}
 
           <div className="flex justify-center gap-3">
-            {/* ✅ BOTÃO CÂMERA */}
+            {/* ✅ BOTÃO CÂMERA (agora sem capture - mostra opções: selfie/traseira/galeria) */}
             <button 
               onClick={abrirCameraMobile}
               type="button"
@@ -294,14 +293,14 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             </button>
           </div>
 
-          {/* ✅ ALTERNATIVA: Câmera do sistema direto */}
+          {/* ✅ ALTERNATIVA: Seletor nativo do sistema (sem capture) */}
           <div className="mt-2">
             <button 
               onClick={abrirCameraInput}
               type="button"
               className="text-xs text-[#A0A0B0] hover:text-[#F4D03F] transition underline cursor-pointer"
             >
-              🔄 Alternativa: abrir câmera do sistema
+              🔄 Alternativa: escolher foto ou câmera
             </button>
           </div>
         </>
@@ -309,12 +308,11 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
       {/* === INPUTS OCULTOS === */}
       
-      {/* ✅ Input para CÂMERA com capture="environment" (força câmera traseira) */}
+      {/* ✅ Input único para CÂMERA/FOTO (agora SEM capture - sistema mostra as opções) */}
       <input
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleCameraFileChange}
       />
@@ -347,7 +345,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       {user && !fotoBlob && (
         <p className="text-[10px] text-[#A0A0B0]">
           ✅ Conta: {user.email} <br />
-          <span className="text-[#F4D03F]">📸 Tire uma foto ou escolha da galeria</span>
+          <span className="text-[#F4D03F]">📸 Tire uma selfie, foto ou escolha da galeria</span>
         </p>
       )}
     </div>
