@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Camera, User, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { uploadAvatar, deleteOldAvatar } from '../lib/uploadAvatar';
 import { toast } from 'sonner';
 
 interface AvatarUploadProps {
@@ -38,39 +39,27 @@ export function AvatarUpload({ userId, currentUrl, onUpload, size = 'lg', editab
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Selecione uma imagem válida');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Imagem muito grande (máx 5MB)');
-      return;
-    }
-
+    // Preview instantâneo (mostra antes do upload)
     const reader = new FileReader();
     reader.onload = (ev) => setPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
 
+    // Upload
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `${userId}/${Date.now()}_${Math.random().toString(36).substring(2)}.${ext}`;
+      // Remove avatar antigo se existir
+      await deleteOldAvatar(userId, currentUrl);
 
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(path, file, { upsert: true });
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(data.path);
-
-      setPreview(publicUrl);
-      onUpload(publicUrl);
-      toast.success('✅ Foto salva!');
+      // Faz upload
+      const url = await uploadAvatar(userId, file);
+      
+      // Salva preview final
+      setPreview(url);
+      onUpload(url);
+      toast.success('✅ Foto salva com sucesso!');
     } catch (err: any) {
-      toast.error('Erro ao enviar: ' + (err.message || 'Erro'));
+      toast.error('Erro ao enviar: ' + (err.message || 'Erro desconhecido'));
+      // Reverte preview em caso de erro
       setPreview(currentUrl || null);
     }
     setUploading(false);
@@ -78,12 +67,15 @@ export function AvatarUpload({ userId, currentUrl, onUpload, size = 'lg', editab
 
   return (
     <div className="relative inline-block">
+      {/* Círculo do avatar */}
       <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-[#1A1528] border-2 border-[#F4D03F]/30 flex items-center justify-center`}>
         {preview ? (
           <img src={preview} alt="Avatar" className="w-full h-full object-cover" />
         ) : (
           <User size={iconSizes[size]} className="text-[#F4D03F]/60" />
         )}
+        
+        {/* Loading spinner */}
         {uploading && (
           <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
             <Loader size={20} className="animate-spin text-[#F4D03F]" />
@@ -91,16 +83,19 @@ export function AvatarUpload({ userId, currentUrl, onUpload, size = 'lg', editab
         )}
       </div>
 
+      {/* Botão câmera (canto inferior direito) */}
       {editable && (
         <>
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className={`absolute bottom-0 right-0 ${cameraSize[size]} rounded-full bg-[#F4D03F] border-2 border-[#1E1E2F] flex items-center justify-center hover:bg-[#FFD966] transition shadow-lg ${uploading ? 'opacity-50' : ''}`}
+            className={`absolute bottom-0 right-0 ${cameraSize[size]} rounded-full bg-[#F4D03F] border-2 border-[#1E1E2F] flex items-center justify-center hover:bg-[#FFD966] transition shadow-lg ${uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             title="Trocar foto"
           >
             <Camera size={size === 'sm' ? 10 : 14} className="text-[#1E1E2F]" />
           </button>
+          
+          {/* Input oculto */}
           <input
             ref={fileInputRef}
             type="file"
