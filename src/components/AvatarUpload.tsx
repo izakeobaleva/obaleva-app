@@ -13,7 +13,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const docInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -22,40 +21,95 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     });
   }, []);
 
-  const processarArquivo = (file: File) => {
-    if (!file) {
-      console.log('🔴 Nenhum arquivo selecionado');
-      return;
-    }
-    
-    console.log('🔵 Arquivo selecionado:', {
-      nome: file.name,
-      tipo: file.type,
-      tamanho: (file.size / 1024).toFixed(2) + ' KB'
+  // ==================== PROCESSAR ARQUIVO (CONVERTE PARA JPEG) ====================
+  const processarArquivo = (arquivo: File) => {
+    console.log('📸 Processando arquivo:', {
+      nome: arquivo.name || 'selfie',
+      tipo: arquivo.type,
+      tamanho: (arquivo.size / 1024).toFixed(2) + 'KB',
     });
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Selecione apenas imagens (JPG, PNG)');
+    if (!arquivo || !arquivo.size) {
+      console.error('❌ Arquivo inválido');
+      toast.error('Arquivo inválido. Tente novamente.');
       return;
     }
 
-    // Verificar tamanho (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Imagem muito grande! Máximo 5MB');
+    if (!arquivo.type.startsWith('image/')) {
+      console.error('❌ Arquivo não é imagem:', arquivo.type);
+      toast.error('Selecione apenas imagens.');
       return;
     }
 
-    setFotoBlob(file);
-    setFotoPreview(URL.createObjectURL(file));
-    setUploadStatus('foto_selecionada');
-    console.log('✅ Preview gerado');
+    if (arquivo.size > 10 * 1024 * 1024) {
+      toast.error('Imagem muito grande! Máximo 10MB.');
+      return;
+    }
+
+    // Converter para JPEG para garantir compatibilidade
+    const img = new Image();
+    const url = URL.createObjectURL(arquivo);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 400; // Redimensionar para 400px
+      canvas.height = 400;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.error('❌ Erro ao criar contexto canvas');
+        setFotoBlob(arquivo); // Fallback: usar arquivo original
+        setFotoPreview(URL.createObjectURL(arquivo));
+        setUploadStatus('foto_selecionada');
+        return;
+      }
+
+      // Centralizar e cortar para quadrado
+      const size = Math.min(img.width, img.height);
+      const sx = (img.width - size) / 2;
+      const sy = (img.height - size) / 2;
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, 400, 400);
+
+      // Converte para JPEG
+      canvas.toBlob(
+        (blobJpeg) => {
+          if (blobJpeg) {
+            console.log('✅ Imagem convertida para JPEG');
+            console.log(`📊 Tamanho original: ${(arquivo.size / 1024).toFixed(2)}KB`);
+            console.log(`📊 Tamanho convertido: ${(blobJpeg.size / 1024).toFixed(2)}KB`);
+
+            setFotoBlob(blobJpeg);
+            const previewUrl = URL.createObjectURL(blobJpeg);
+            setFotoPreview(previewUrl);
+            setUploadStatus('foto_selecionada');
+          } else {
+            console.error('❌ Falha na conversão para JPEG, usando original');
+            setFotoBlob(arquivo);
+            setFotoPreview(URL.createObjectURL(arquivo));
+            setUploadStatus('foto_selecionada');
+          }
+        },
+        'image/jpeg',
+        0.85 // Qualidade 85%
+      );
+    };
+
+    img.onerror = (error) => {
+      console.error('❌ Erro ao carregar imagem:', error);
+      toast.error('Erro ao processar imagem.');
+    };
+
+    img.src = url;
   };
 
+  // ==================== HANDLE FILE ====================
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log('🔵 handleFileSelect disparado');
+    console.log('🔵 handleFileSelect disparado', file?.name);
     if (file) processarArquivo(file);
-    e.target.value = ''; // Limpar para permitir selecionar o mesmo arquivo novamente
+    e.target.value = '';
   };
 
   const abrirCamera = () => {
@@ -70,185 +124,146 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
   const limparFoto = () => {
     console.log('🔵 Limpando foto');
-    if (fotoPreview) {
-      URL.revokeObjectURL(fotoPreview);
-    }
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     setFotoBlob(null);
     setFotoPreview(null);
     setUploadStatus(null);
     setEditingType(null);
   };
 
+  // ==================== UPLOAD ====================
   const fazerUpload = async () => {
-    console.log('🔵 Botão Salvar clicado');
-    console.log('🔵 Estado:', { 
-      temFotoBlob: !!fotoBlob, 
-      temPreview: !!fotoPreview, 
-      temUser: !!user,
-      userEmail: user?.email,
-      blobSize: fotoBlob?.size 
-    });
-    
-    if (!fotoBlob) { 
-      console.log('🔴 Erro: fotoBlob é null');
-      toast.error('Selecione ou tire uma foto primeiro'); 
-      return; 
+    console.log('🚀 Iniciando upload...');
+    console.log('fotoBlob existe?', !!fotoBlob);
+    console.log('fotoBlob tipo:', fotoBlob?.type);
+    console.log('fotoBlob tamanho:', fotoBlob?.size);
+    console.log('user:', user?.email);
+    console.log('user.id:', user?.id);
+
+    if (!fotoBlob) {
+      console.error('❌ fotoBlob é null');
+      toast.error('Selecione ou tire uma foto primeiro');
+      return;
     }
-    
-    if (!user) { 
-      console.log('🔴 Erro: user é null');
-      toast.error('Faça login primeiro'); 
-      return; 
+
+    if (!user) {
+      console.error('❌ user é null');
+      toast.error('Faça login primeiro');
+      return;
     }
 
     setUploading(true);
     setUploadStatus('salvando');
-    const timestamp = Date.now();
-    const filePath = `${user.id}/avatar-${timestamp}.jpg`;
-
-    console.log('🔵 Iniciando upload para:', filePath);
-    console.log('🔵 Tamanho do blob:', (fotoBlob.size / 1024).toFixed(2) + ' KB');
 
     try {
-      // Upload para o Supabase Storage
+      const filePath = `${user.id}/avatar-${Date.now()}.jpg`;
+      console.log('📤 Upload para:', filePath);
+
       const { data, error } = await supabase.storage
         .from('avatars')
-        .upload(filePath, fotoBlob, { 
-          contentType: 'image/jpeg', 
-          cacheControl: '3600', 
-          upsert: true 
+        .upload(filePath, fotoBlob, {
+          contentType: 'image/jpeg',
+          cacheControl: '3600',
+          upsert: true,
         });
 
       if (error) {
-        console.error('🔴 Erro no upload:', error);
+        console.error('❌ Erro Supabase:', error);
         throw error;
       }
 
-      console.log('✅ Upload feito com sucesso:', data);
+      console.log('✅ Upload OK:', data);
 
-      // Pegar URL pública
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      console.log('✅ URL pública gerada:', publicUrl);
+      console.log('🔗 URL pública:', publicUrl);
 
-      // Atualizar o usuário na tabela usuarios
       const { error: updateError } = await supabase
         .from('usuarios')
-        .update({ 
-          avatar_url: publicUrl, 
-          updated_at: new Date().toISOString() 
-        })
+        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
         .eq('id', user.id);
 
       if (updateError) {
-        console.error('🔴 Erro ao atualizar usuário:', updateError);
+        console.error('⚠️ Erro ao salvar no perfil:', updateError);
         throw updateError;
       }
 
-      console.log('✅ Usuário atualizado com avatar_url');
+      console.log('✅ Perfil atualizado!');
       toast.success('✅ Foto salva com sucesso!');
       setUploadStatus('sucesso');
-      
-      // Limpar e finalizar
+
       setTimeout(() => {
         limparFoto();
         if (onComplete) onComplete();
-      }, 1000);
-      
+      }, 1500);
     } catch (err: any) {
       console.error('❌ Erro completo:', err);
-      toast.error('Erro ao salvar: ' + (err.message || 'Erro desconhecido'));
+      toast.error('Erro: ' + (err.message || 'Erro desconhecido'));
       setUploadStatus('erro');
     }
     setUploading(false);
   };
 
   const handleDocUpload = () => {
-    const file = docInputRef.current?.files?.[0];
+    const file = fileInputRef.current?.files?.[0];
     if (!file) return;
-    toast.success(`✅ Documento "${file.name}" anexado com sucesso!`);
-    docInputRef.current.value = '';
+    toast.success(`✅ Documento "${file.name}" anexado!`);
   };
 
   return (
     <div className="text-center space-y-6">
-      
-      {/* ===== MODO FOTO ===== */}
       {editingType === 'foto' ? (
         <>
           <div className="flex items-center gap-2 mb-4">
-            <button 
-              onClick={limparFoto}
-              className="text-[#A0A0B0] hover:text-white transition text-sm flex items-center gap-1"
-            >
+            <button onClick={limparFoto} className="text-[#A0A0B0] hover:text-white transition text-sm">
               ← Voltar
             </button>
             <span className="text-white text-sm font-medium">Adicionar Foto</span>
           </div>
 
-          {/* Preview da foto */}
           {fotoPreview && (
             <div className="relative inline-block mb-4">
-              <div className="relative">
-                <img 
-                  src={fotoPreview} 
-                  alt="Preview" 
-                  className="w-40 h-40 rounded-full object-cover border-4 border-[#F4D03F] shadow-xl mx-auto"
-                />
-              </div>
-              <button 
-                onClick={limparFoto}
-                className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-105 transition"
-              >
+              <img src={fotoPreview} alt="Preview" className="w-40 h-40 rounded-full object-cover border-4 border-[#F4D03F] shadow-xl mx-auto" />
+              <button onClick={limparFoto} className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-105 transition">
                 <X size={16} />
               </button>
             </div>
           )}
 
-          {/* Status do upload */}
           {uploadStatus === 'salvando' && (
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 text-center">
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 text-center mb-4">
               <Loader size={24} className="animate-spin mx-auto mb-2 text-[#F4D03F]" />
               <p className="text-sm text-white">Salvando foto...</p>
-              <p className="text-xs text-[#A0A0B0]">Fazendo upload para o servidor</p>
             </div>
           )}
 
           {uploadStatus === 'sucesso' && (
-            <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-4 text-center">
+            <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-4 text-center mb-4">
               <CheckCircle size={24} className="mx-auto mb-2 text-green-400" />
-              <p className="text-sm text-green-400 font-medium">Foto salva com sucesso! ✅</p>
+              <p className="text-sm text-green-400 font-medium">Foto salva! ✅</p>
             </div>
           )}
 
           {uploadStatus === 'erro' && (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center">
+            <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center mb-4">
               <AlertTriangle size={24} className="mx-auto mb-2 text-red-400" />
-              <p className="text-sm text-red-400 font-medium">Erro ao salvar foto</p>
-              <p className="text-xs text-[#A0A0B0]">Tente novamente</p>
+              <p className="text-sm text-red-400 font-medium">Erro ao salvar</p>
+              <button onClick={() => setUploadStatus('foto_selecionada')} className="mt-2 text-xs bg-white/10 text-white px-3 py-1.5 rounded-xl hover:bg-white/20 transition">
+                Tentar novamente
+              </button>
             </div>
           )}
 
-          {/* Botões Câmera / Galeria (aparece apenas se não tiver foto) */}
           {!fotoPreview && uploadStatus !== 'salvando' && (
             <div className="flex justify-center gap-4">
-              <button 
-                onClick={abrirCamera}
-                type="button"
-                className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-[#1A1528] border-2 border-dashed border-white/20 hover:border-[#F4D03F] transition w-32 cursor-pointer"
-              >
+              <button onClick={abrirCamera} type="button" className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-[#1A1528] border-2 border-dashed border-white/20 hover:border-[#F4D03F] transition w-32 cursor-pointer">
                 <Camera size={32} className="text-[#F4D03F]" />
                 <span className="text-sm text-white font-medium">Câmera</span>
-                <span className="text-[10px] text-[#A0A0B0]">Selfie ou foto</span>
+                <span className="text-[10px] text-[#A0A0B0]">Selfie</span>
               </button>
-
-              <button 
-                onClick={abrirGaleria}
-                type="button"
-                className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-[#1A1528] border-2 border-dashed border-white/20 hover:border-[#F4D03F] transition w-32 cursor-pointer"
-              >
+              <button onClick={abrirGaleria} type="button" className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-[#1A1528] border-2 border-dashed border-white/20 hover:border-[#F4D03F] transition w-32 cursor-pointer">
                 <ImageIcon size={32} className="text-[#F4D03F]" />
                 <span className="text-sm text-white font-medium">Galeria</span>
                 <span className="text-[10px] text-[#A0A0B0]">Escolher foto</span>
@@ -256,100 +271,29 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             </div>
           )}
 
-          {/* Botão Salvar (aparece apenas se tiver foto e não estiver salvando/erro) */}
           {fotoPreview && uploadStatus !== 'salvando' && uploadStatus !== 'sucesso' && (
-            <button 
-              onClick={fazerUpload} 
-              disabled={uploading || !user}
-              className="w-full max-w-xs mx-auto py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-4"
-            >
-              {uploading ? (
-                <><Loader size={18} className="animate-spin" /> Salvando...</>
-              ) : (
-                <><Upload size={18} /> Salvar Foto</>
-              )}
+            <button onClick={fazerUpload} disabled={uploading} className="w-full max-w-xs mx-auto py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-4">
+              {uploading ? <><Loader size={18} className="animate-spin" /> Salvando...</> : <><Upload size={18} /> Salvar Foto</>}
             </button>
           )}
         </>
-      ) : editingType === 'documento' ? (
-        <>
-          <div className="flex items-center gap-2 mb-4">
-            <button 
-              onClick={() => setEditingType(null)}
-              className="text-[#A0A0B0] hover:text-white transition text-sm flex items-center gap-1"
-            >
-              ← Voltar
-            </button>
-            <span className="text-white text-sm font-medium">Upload de Documentos</span>
-          </div>
-
-          <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10">
-            <p className="text-sm text-[#A0A0B0] mb-4">
-              Envie seus documentos para validação (CNH, RG, CPF, etc.)
-            </p>
-            
-            <label className="block cursor-pointer">
-              <div className="border-2 border-dashed border-white/20 rounded-2xl p-6 text-center hover:border-[#F4D03F] transition">
-                <Upload size={32} className="mx-auto mb-2 text-[#F4D03F]" />
-                <p className="text-sm text-white font-medium">Clique para selecionar</p>
-                <p className="text-xs text-[#A0A0B0] mt-1">PDF, JPG ou PNG • Máx 10MB</p>
-              </div>
-              <input
-                ref={docInputRef}
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                className="hidden"
-                onChange={handleDocUpload}
-              />
-            </label>
-          </div>
-        </>
       ) : (
         <>
-          {/* ===== TELA INICIAL ===== */}
           <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#F4D03F]/30 to-amber-500/30 rounded-full flex items-center justify-center border-2 border-[#F4D03F]/50">
             <Camera size={36} className="text-[#F4D03F]" />
           </div>
-
           <p className="text-white text-sm font-medium">Personalize seu perfil</p>
-          <p className="text-xs text-[#A0A0B0]">Adicione uma foto ou documento</p>
-
+          <p className="text-xs text-[#A0A0B0]">Adicione uma foto</p>
           <div className="space-y-3 max-w-xs mx-auto">
-            <button
-              onClick={() => setEditingType('foto')}
-              className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Camera size={18} />
-              Adicionar Foto
-            </button>
-
-            <button
-              onClick={() => setEditingType('documento')}
-              className="w-full py-3.5 rounded-2xl font-medium border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Upload size={18} />
-              Enviar Documentos
+            <button onClick={() => setEditingType('foto')} className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <Camera size={18} /> Adicionar Foto
             </button>
           </div>
         </>
       )}
 
-      {/* Inputs ocultos - AMBOS chamam handleFileSelect */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        capture="environment"
-        onChange={handleFileSelect}
-      />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileSelect}
-      />
+      <input ref={cameraInputRef} type="file" accept="image/*" className="hidden" capture="environment" onChange={handleFileSelect} />
+      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
     </div>
   );
 }
