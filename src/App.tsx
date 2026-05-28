@@ -19,7 +19,7 @@ import CadastroMotorista from './pages/CadastroMotorista';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import CompleteProfile from './pages/CompleteProfile';
-import PassengerDashboard from './pages/PassengerDashboard';
+import { PassengerDashboard } from './pages/PassengerDashboard';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
