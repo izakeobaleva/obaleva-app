@@ -8,7 +8,7 @@ import { useRideRequest } from '../hooks/useRideRequest';
 import { MapSection } from '../components/Home/MapSection';
 import { LocationInput } from '../components/Home/LocationInput';
 import { PriceEstimate } from '../components/Home/PriceEstimate';
-import { LogOut, Car, Bell, User, Megaphone } from 'lucide-react';
+import { LogOut, Car, Bell, Megaphone } from 'lucide-react';
 import { UserAvatar } from '../components/UserAvatar';
 import { toast } from 'sonner';
 
@@ -128,9 +128,9 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-[#0F0B1A] overflow-hidden">
+    <div className="min-h-screen w-full bg-[#0F0B1A] flex flex-col">
       {/* ===== 1. TOP BAR ===== */}
-      <header className="h-14 bg-[#1A1528]/95 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4 z-30 shrink-0">
+      <header className="sticky top-0 z-30 h-14 shrink-0 bg-[#1A1528]/95 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
           <button
             onClick={handleSignOut}
@@ -139,12 +139,6 @@ export default function Home() {
           >
             <LogOut size={14} className="text-red-400" />
           </button>
-          <div className="w-8 h-8 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-[#1E1E2F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-            </svg>
-          </div>
           <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -161,7 +155,6 @@ export default function Home() {
           </button>
           <button 
             onClick={() => navigate('/profile')}
-            className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#F4D03F]/30"
           >
             <UserAvatar 
               url={profile?.avatar_url} 
@@ -172,8 +165,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ===== 2. MAPA ===== */}
-      <div className="flex-1 relative w-full" style={{ minHeight: '200px' }}>
+      {/* ===== 2. MAPA - ocupa todo o espaço disponível ===== */}
+      <div className="flex-1 relative w-full min-h-[200px]">
         <MapSection
           userLocation={userLocation}
           mapsLoaded={mapsLoaded}
@@ -185,7 +178,7 @@ export default function Home() {
       </div>
 
       {/* ===== 3. INPUTS + BOTÃO ===== */}
-      <div className="bg-[#1A1528] border-t border-white/10 px-4 pt-3 pb-2 shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+      <div className="shrink-0 bg-[#1A1528] border-t border-white/10 px-4 pt-3 pb-2 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <LocationInput
           type="origem"
           value={origem}
@@ -222,7 +215,7 @@ export default function Home() {
         <button
           onClick={handleSolicitarCorrida}
           disabled={solicitando || !destino}
-          className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 text-base shadow-lg flex items-center justify-center gap-2 mb-2"
+          className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 text-base shadow-lg flex items-center justify-center gap-2"
         >
           {solicitando ? (
             <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Buscando motorista...</>
@@ -232,8 +225,8 @@ export default function Home() {
         </button>
       </div>
 
-      {/* ===== 4. BANNER ===== */}
-      <div className="h-10 bg-gradient-to-r from-[#1A1528] to-[#2D2342] border-t border-white/10 flex items-center justify-center px-4 shrink-0">
+      {/* ===== 4. BANNER INFERIOR ===== */}
+      <div className="shrink-0 h-10 bg-gradient-to-r from-[#1A1528] to-[#2D2342] border-t border-white/10 flex items-center justify-center px-4">
         <div className="flex items-center gap-2">
           <Megaphone size={14} className="text-[#F4D03F]" />
           <span className="text-xs text-white/60">

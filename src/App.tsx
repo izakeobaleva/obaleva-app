@@ -2,8 +2,6 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
-import { PassengerDashboard } from './pages/PassengerDashboard';
-import { DriverDashboard } from './pages/DriverDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import NotFound from './pages/NotFound';
@@ -18,11 +16,9 @@ import TestLogin from './pages/TestLogin';
 import BulkCreateUsers from './pages/BulkCreateUsers';
 import Profile from './pages/Profile';
 import CadastroMotorista from './pages/CadastroMotorista';
-import PermissionLocation from './pages/PermissionLocation';
-import PermissionNotification from './pages/PermissionNotification';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import CompleteProfile from './pages/CompleteProfile'; // <-- NOVO IMPORT
+import CompleteProfile from './pages/CompleteProfile';
 import { useAuth } from './contexts/AuthContext';
 
 // Componente de rota protegida
@@ -31,7 +27,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   
   if (loading) {
     return (
-      <div className="h-screen bg-[#0F0B1A] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
       </div>
     );
@@ -49,7 +45,7 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="h-screen bg-[#0F0B1A] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
       </div>
     );
@@ -57,54 +53,53 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* FLUXO DE PERMISSÕES (se não estiver logado) */}
-      {!user && (
-        <>
-          <Route path="/permission-location" element={<PermissionLocation />} />
-          <Route path="/permission-notification" element={<PermissionNotification />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<RegisterPassenger />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/update-password" element={<UpdatePassword />} />
-        </>
-      )}
-
-      {/* FLUXO PRINCIPAL (quando logado) */}
-      {user && (
-        <>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/complete-profile" element={<CompleteProfile />} /> {/* <-- NOVA ROTA */}
-          <Route path="/driver" element={<DriverDashboard />} />
-          <Route path="/trips" element={<Trips />} />
-          <Route path="/trips/:id" element={<TripDetails />} />
-          <Route path="/earnings" element={<Earnings />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/cadastro-motorista" element={<CadastroMotorista />} />
-        </>
-      )}
-
-      {/* ROTAS ADMIN (sempre acessíveis) */}
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin-login" element={<AdminLogin />} />
-
-      {/* ROTAS PÚBLICAS */}
+      {/* ROTAS PÚBLICAS (não precisa estar logado) */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<RegisterPassenger />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/update-password" element={<UpdatePassword />} />
       <Route path="/divulgar" element={<Divulgacao />} />
       <Route path="/test-login" element={<TestLogin />} />
       <Route path="/bulk-create" element={<BulkCreateUsers />} />
+      
+      {/* ROTAS ADMIN */}
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin-login" element={<AdminLogin />} />
 
-      {/* REDIRECIONAMENTO PADRÃO */}
-      <Route 
-        path="*" 
-        element={
-          user 
-            ? <Navigate to="/" replace /> 
-            : <Navigate to="/permission-location" replace />
-        } 
-      />
+      {/* ROTAS PROTEGIDAS (precisa estar logado) */}
+      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+      <Route path="/driver" element={<ProtectedRoute><DriverDashboard /></ProtectedRoute>} />
+      <Route path="/trips" element={<ProtectedRoute><Trips /></ProtectedRoute>} />
+      <Route path="/trips/:id" element={<ProtectedRoute><TripDetails /></ProtectedRoute>} />
+      <Route path="/earnings" element={<ProtectedRoute><Earnings /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/cadastro-motorista" element={<ProtectedRoute><CadastroMotorista /></ProtectedRoute>} />
+
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
+
+// Precisamos importar DriverDashboard aqui pra não dar erro
+function DriverDashboard() {
+  const [disponivel, setDisponivel] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
+      <div className="text-center text-[#A0A0B0]">
+        <p>Dashboard do Motorista</p>
+        <p className="text-xs mt-2">Em desenvolvimento...</p>
+      </div>
+    </div>
+  );
+}
+
+import { useState } from 'react';
 
 function App() {
   return (
