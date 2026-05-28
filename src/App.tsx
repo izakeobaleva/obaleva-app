@@ -35,25 +35,37 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
+      {/* Fluxo de entrada para novos usuários */}
+      <Route path="/" element={<Navigate to="/permission-location" replace />} />
       <Route path="/permission-location" element={<PermissionLocation />} />
       <Route path="/permission-notification" element={<PermissionNotification />} />
+      
+      {/* Autenticação */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterPassenger />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/update-password" element={<UpdatePassword />} />
+      
+      {/* Páginas públicas */}
       <Route path="/divulgar" element={<Divulgacao />} />
       <Route path="/test-login" element={<TestLogin />} />
       <Route path="/bulk-create" element={<BulkCreateUsers />} />
+      
+      {/* Admin */}
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin-login" element={<AdminLogin />} />
-      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-      <Route path="/home" element={<ProtectedRoute><PassengerDashboard /></ProtectedRoute>} />
+      
+      {/* Páginas protegidas (precisa estar logado) */}
+      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/passenger" element={<ProtectedRoute><PassengerDashboard /></ProtectedRoute>} />
       <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
       <Route path="/trips" element={<ProtectedRoute><Trips /></ProtectedRoute>} />
       <Route path="/trips/:id" element={<ProtectedRoute><TripDetails /></ProtectedRoute>} />
       <Route path="/earnings" element={<ProtectedRoute><Earnings /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/cadastro-motorista" element={<ProtectedRoute><CadastroMotorista /></ProtectedRoute>} />
+      
+      {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
