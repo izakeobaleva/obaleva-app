@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Camera, Image as ImageIcon, Upload, Loader, X, AlertTriangle } from 'lucide-react';
+import { Camera, Image as ImageIcon, Upload, Loader, X, AlertTriangle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
@@ -8,6 +8,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   const [fotoBlob, setFotoBlob] = useState<Blob | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [editingType, setEditingType] = useState<'foto' | 'documento' | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -19,6 +20,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
+      console.log('🔵 Usuário carregado:', data.user?.email);
       setUser(data.user);
     });
     return () => {
@@ -29,15 +31,27 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   }, []);
 
   const processarArquivo = (file: File) => {
-    if (!file) return;
+    if (!file) {
+      console.log('🔴 Nenhum arquivo selecionado');
+      return;
+    }
     
+    console.log('🔵 Arquivo selecionado:', {
+      nome: file.name,
+      tipo: file.type,
+      tamanho: (file.size / 1024).toFixed(2) + ' KB'
+    });
+
     if (!file.type.startsWith('image/')) {
       toast.error('Selecione apenas imagens (JPG, PNG)');
       return;
     }
 
     setFotoBlob(file);
-    setFotoPreview(URL.createObjectURL(file));
+    const previewUrl = URL.createObjectURL(file);
+    setFotoPreview(previewUrl);
+    setUploadStatus('foto_selecionada');
+    console.log('✅ Preview gerado:', previewUrl);
 
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
@@ -47,6 +61,14 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
   const handleCameraFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log('🔵 handleCameraFileChange disparado');
+    if (file) processarArquivo(file);
+    e.target.value = '';
+  };
+
+  const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    console.log('🔵 handleGalleryFileChange disparado');
     if (file) processarArquivo(file);
     e.target.value = '';
   };
@@ -62,8 +84,13 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   };
 
   const limparFoto = () => {
+    console.log('🔵 Limpando foto');
+    if (fotoPreview) {
+      URL.revokeObjectURL(fotoPreview);
+    }
     setFotoBlob(null);
     setFotoPreview(null);
+    setUploadStatus(null);
     setEditingType(null);
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
@@ -72,14 +99,36 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   };
 
   const fazerUpload = async () => {
-    if (!fotoBlob) { toast.error('Selecione ou tire uma foto primeiro'); return; }
-    if (!user) { toast.error('Faça login primeiro'); return; }
+    console.log('🔵 Botão Salvar clicado');
+    console.log('🔵 Estado atual:', {
+      temFotoBlob: !!fotoBlob,
+      temPreview: !!fotoPreview,
+      temUser: !!user,
+      userEmail: user?.email
+    });
+    
+    if (!fotoBlob) { 
+      console.log('🔴 Erro: fotoBlob é null');
+      toast.error('Selecione ou tire uma foto primeiro'); 
+      return; 
+    }
+    
+    if (!user) { 
+      console.log('🔴 Erro: user é null');
+      toast.error('Faça login primeiro'); 
+      return; 
+    }
 
     setUploading(true);
+    setUploadStatus('salvando');
     const timestamp = Date.now();
     const filePath = `${user.id}/avatar-${timestamp}.jpg`;
 
+    console.log('🔵 Iniciando upload para:', filePath);
+    console.log('🔵 Tamanho do blob:', (fotoBlob.size / 1024).toFixed(2) + ' KB');
+
     try {
+      // Upload para o Supabase Storage
       const { data, error } = await supabase.storage
         .from('avatars')
         .upload(filePath, fotoBlob, { 
@@ -88,23 +137,48 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
           upsert: true 
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔴 Erro no upload:', error);
+        throw error;
+      }
 
+      console.log('✅ Upload feito com sucesso:', data);
+
+      // Pegar URL pública
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      await supabase
+      console.log('✅ URL pública gerada:', publicUrl);
+
+      // Atualizar o usuário na tabela usuarios
+      const { error: updateError } = await supabase
         .from('usuarios')
-        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+        .update({ 
+          avatar_url: publicUrl, 
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', user.id);
 
+      if (updateError) {
+        console.error('🔴 Erro ao atualizar usuário:', updateError);
+        throw updateError;
+      }
+
+      console.log('✅ Usuário atualizado com avatar_url');
       toast.success('✅ Foto salva com sucesso!');
-      limparFoto();
-      if (onComplete) onComplete();
+      setUploadStatus('sucesso');
+      
+      // Limpar e finalizar
+      setTimeout(() => {
+        limparFoto();
+        if (onComplete) onComplete();
+      }, 1000);
+      
     } catch (err: any) {
-      console.error('❌ Erro no upload:', err);
+      console.error('❌ Erro completo:', err);
       toast.error('Erro ao salvar: ' + (err.message || 'Erro desconhecido'));
+      setUploadStatus('erro');
     }
     setUploading(false);
   };
@@ -133,13 +207,19 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             <p className="text-white text-sm font-medium">Adicionar Foto</p>
           </div>
 
+          {/* Preview da foto */}
           {fotoPreview && (
             <div className="relative inline-block">
-              <img 
-                src={fotoPreview} 
-                alt="Preview" 
-                className="w-40 h-40 rounded-full object-cover border-4 border-[#F4D03F] shadow-xl mx-auto"
-              />
+              <div className="relative">
+                <img 
+                  src={fotoPreview} 
+                  alt="Preview" 
+                  className="w-40 h-40 rounded-full object-cover border-4 border-[#F4D03F] shadow-xl mx-auto"
+                />
+                <span className="absolute top-0 right-0 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                  ✅
+                </span>
+              </div>
               <button 
                 onClick={limparFoto}
                 className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-105 transition"
@@ -149,7 +229,32 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             </div>
           )}
 
-          {!fotoPreview && (
+          {/* Status do upload */}
+          {uploadStatus === 'salvando' && (
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 text-center">
+              <Loader size={24} className="animate-spin mx-auto mb-2 text-[#F4D03F]" />
+              <p className="text-sm text-white">Salvando foto...</p>
+              <p className="text-xs text-[#A0A0B0]">Fazendo upload para o servidor</p>
+            </div>
+          )}
+
+          {uploadStatus === 'sucesso' && (
+            <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-4 text-center">
+              <CheckCircle size={24} className="mx-auto mb-2 text-green-400" />
+              <p className="text-sm text-green-400 font-medium">Foto salva com sucesso! ✅</p>
+            </div>
+          )}
+
+          {uploadStatus === 'erro' && (
+            <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center">
+              <AlertTriangle size={24} className="mx-auto mb-2 text-red-400" />
+              <p className="text-sm text-red-400 font-medium">Erro ao salvar foto</p>
+              <p className="text-xs text-[#A0A0B0]">Tente novamente ou escolha outra foto</p>
+            </div>
+          )}
+
+          {/* Botões de seleção de mídia (aparece apenas se não tiver foto selecionada) */}
+          {!fotoPreview && uploadStatus !== 'salvando' && (
             <div className="flex justify-center gap-4">
               <button 
                 onClick={abrirCameraOuGaleria}
@@ -173,7 +278,8 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             </div>
           )}
 
-          {fotoBlob && (
+          {/* Botão de salvar (aparece apenas se tiver foto) */}
+          {fotoBlob && fotoPreview && uploadStatus !== 'salvando' && uploadStatus !== 'sucesso' && (
             <button 
               onClick={fazerUpload} 
               disabled={uploading || !user}
@@ -264,7 +370,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={handleCameraFileChange}
+        onChange={handleGalleryFileChange}
       />
     </div>
   );
