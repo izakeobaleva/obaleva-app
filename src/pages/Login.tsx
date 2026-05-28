@@ -9,7 +9,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const loginGratis = () => {
+  const handleLogin = () => {
     navigate('/home');
   };
 
@@ -57,7 +57,7 @@ export default function Login() {
             </div>
 
             <button
-              onClick={loginGratis}
+              onClick={handleLogin}
               className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all"
             >
               🔐 Entrar
@@ -79,7 +79,7 @@ export default function Login() {
               Entrar com Google
             </button>
 
-            <div className="mt-4 text-center space-y-2">
+            <div className="mt-4 text-center space-y-3">
               <button
                 onClick={() => navigate('/register')}
                 className="text-[#F4D03F] hover:underline font-medium block w-full"

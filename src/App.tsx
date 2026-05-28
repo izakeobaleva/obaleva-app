@@ -15,10 +15,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/permission-location" element={<PermissionLocation />} />
         <Route path="/permission-notification" element={<PermissionNotification />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<Home />} />
         <Route path="/register" element={<RegisterPassenger />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="*" element={<NotFound />} />
