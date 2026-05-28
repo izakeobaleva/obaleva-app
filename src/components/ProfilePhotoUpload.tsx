@@ -31,7 +31,6 @@ export function ProfilePhotoUpload({ userId, currentPhotoUrl, onPhotoUploaded, s
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validações
     if (!file.type.startsWith('image/')) {
       toast.error('Selecione apenas imagens (JPG, PNG)');
       return;
@@ -42,29 +41,29 @@ export function ProfilePhotoUpload({ userId, currentPhotoUrl, onPhotoUploaded, s
       return;
     }
 
-    // Preview instantâneo (antes do upload)
     const reader = new FileReader();
     reader.onload = (event) => {
       setPreviewUrl(event.target?.result as string);
     };
     reader.readAsDataURL(file);
 
-    // Upload para o Supabase
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `${userId}_${Date.now()}.${fileExt}`;
       
+      // Comprimir a imagem antes do upload
+      const compressedFile = await compressImage(file, 800, 0.7);
+      
       const { data, error } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, {
+        .upload(fileName, compressedFile, {
           cacheControl: '3600',
           upsert: true,
         });
 
       if (error) throw error;
 
-      // Pegar URL pública
       const { data: publicUrl } = supabase.storage
         .from('avatars')
         .getPublicUrl(data.path);
@@ -76,11 +75,60 @@ export function ProfilePhotoUpload({ userId, currentPhotoUrl, onPhotoUploaded, s
     } catch (err: any) {
       console.error('Erro ao fazer upload:', err);
       toast.error('Erro ao enviar foto: ' + (err.message || 'Erro desconhecido'));
-      // Reverter preview em caso de erro
       setPreviewUrl(currentPhotoUrl || null);
     }
     setUploading(false);
   };
+
+  // Função para comprimir a imagem
+  function compressImage(file: File, maxWidth: number, quality: number): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Erro ao criar canvas'));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              reject(new Error('Erro ao comprimir imagem'));
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Erro ao carregar imagem'));
+      };
+    });
+  }
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -88,7 +136,6 @@ export function ProfilePhotoUpload({ userId, currentPhotoUrl, onPhotoUploaded, s
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Botão circular para foto */}
       <button
         onClick={triggerFileInput}
         disabled={uploading}
@@ -105,7 +152,6 @@ export function ProfilePhotoUpload({ userId, currentPhotoUrl, onPhotoUploaded, s
               alt="Foto de perfil" 
               className="w-full h-full object-cover rounded-full"
             />
-            {/* Overlay na hover */}
             <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
               <Camera size={iconSizes[size]} className="text-white" />
             </div>
@@ -119,7 +165,6 @@ export function ProfilePhotoUpload({ userId, currentPhotoUrl, onPhotoUploaded, s
           </div>
         )}
 
-        {/* Loading spinner */}
         {uploading && (
           <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
             <div className="animate-spin w-6 h-6 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
@@ -127,17 +172,14 @@ export function ProfilePhotoUpload({ userId, currentPhotoUrl, onPhotoUploaded, s
         )}
       </button>
 
-      {/* Input file oculto */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleFileSelect}
       />
 
-      {/* Texto auxiliar */}
       <p className="text-[10px] text-[#A0A0B0] text-center max-w-[200px]">
         {previewUrl 
           ? 'Clique na foto para alterar' 
