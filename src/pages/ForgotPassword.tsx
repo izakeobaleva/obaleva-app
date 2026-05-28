@@ -25,12 +25,12 @@ function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+    <div className="w-full h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-[#F4D03F]/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-[-50px] right-[-50px] w-[250px] h-[250px] bg-[#6B2D8C]/20 rounded-full blur-[100px]" />
       </div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full max-w-md">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full max-w-[460px]">
         <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-8">
           <div className="flex items-center gap-3 mb-6">
             <button onClick={() => navigate('/login')} className="back-button-outline" aria-label="Voltar"><ArrowLeft size={22} /></button>
@@ -40,7 +40,7 @@ function ForgotPassword() {
             <div className="text-center py-6">
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4"><Mail size={28} className="text-green-400" /></div>
               <p className="text-white font-medium mb-2">E-mail enviado!</p>
-              <p className="text-sm text-[#A0A0B0] mb-6">Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
+              <p className="text-sm text-[#A0A0B0] mb-6">Verifique sua caixa de entrada</p>
               <button onClick={() => navigate('/login')} className="btn-outline-dark px-6 py-2.5 text-sm">Voltar ao login</button>
             </div>
           ) : (
