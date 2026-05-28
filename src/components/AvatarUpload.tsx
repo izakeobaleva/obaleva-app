@@ -55,7 +55,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     const file = e.target.files?.[0];
     console.log('🔵 handleFileSelect disparado');
     if (file) processarArquivo(file);
-    e.target.value = '';
+    e.target.value = ''; // Limpar para permitir selecionar o mesmo arquivo novamente
   };
 
   const abrirCamera = () => {
@@ -97,49 +97,19 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     
     if (!user) { 
       console.log('🔴 Erro: user é null');
-      console.log('🔴 Tentando obter usuário novamente...');
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        toast.error('Faça login primeiro'); 
-        return;
-      }
-      setUser(data.user);
-    }
-
-    const userId = user?.id || (await supabase.auth.getUser()).data.user?.id;
-    if (!userId) {
       toast.error('Faça login primeiro'); 
-      return;
+      return; 
     }
 
     setUploading(true);
     setUploadStatus('salvando');
     const timestamp = Date.now();
-    const fileExt = 'jpg';
-    const filePath = `${userId}/avatar-${timestamp}.${fileExt}`;
+    const filePath = `${user.id}/avatar-${timestamp}.jpg`;
 
     console.log('🔵 Iniciando upload para:', filePath);
     console.log('🔵 Tamanho do blob:', (fotoBlob.size / 1024).toFixed(2) + ' KB');
-    console.log('🔵 Tipo do blob:', fotoBlob.type);
 
     try {
-      // Verificar se o bucket 'avatars' existe
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      console.log('🔵 Buckets disponíveis:', buckets?.map(b => b.name));
-      
-      if (bucketsError) {
-        console.error('🔴 Erro ao listar buckets:', bucketsError);
-      }
-
-      const bucketExists = buckets?.some(b => b.name === 'avatars');
-      if (!bucketExists) {
-        console.log('🔴 Bucket avatars não encontrado!');
-        toast.error('Bucket de avatars não encontrado. Configure no Supabase.');
-        setUploadStatus('erro');
-        setUploading(false);
-        return;
-      }
-
       // Upload para o Supabase Storage
       const { data, error } = await supabase.storage
         .from('avatars')
@@ -151,8 +121,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
       if (error) {
         console.error('🔴 Erro no upload:', error);
-        console.error('🔴 Código do erro:', error?.code);
-        console.error('🔴 Mensagem:', error?.message);
         throw error;
       }
 
@@ -166,45 +134,32 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       console.log('✅ URL pública gerada:', publicUrl);
 
       // Atualizar o usuário na tabela usuarios
-      const { error: updateError, data: updateData } = await supabase
+      const { error: updateError } = await supabase
         .from('usuarios')
         .update({ 
           avatar_url: publicUrl, 
           updated_at: new Date().toISOString() 
         })
-        .eq('id', userId)
-        .select();
+        .eq('id', user.id);
 
       if (updateError) {
         console.error('🔴 Erro ao atualizar usuário:', updateError);
         throw updateError;
       }
 
-      console.log('✅ Usuário atualizado:', updateData);
+      console.log('✅ Usuário atualizado com avatar_url');
       toast.success('✅ Foto salva com sucesso!');
       setUploadStatus('sucesso');
       
+      // Limpar e finalizar
       setTimeout(() => {
         limparFoto();
         if (onComplete) onComplete();
-      }, 1500);
+      }, 1000);
       
     } catch (err: any) {
       console.error('❌ Erro completo:', err);
-      console.error('❌ Nome do erro:', err?.name);
-      console.error('❌ Stack:', err?.stack);
-      
-      let mensagem = err?.message || 'Erro desconhecido';
-      
-      if (mensagem.includes('bucket')) {
-        mensagem = 'Bucket "avatars" não encontrado. Crie um bucket chamado "avatars" no Storage do Supabase.';
-      } else if (mensagem.includes('permission') || mensagem.includes('unauthorized')) {
-        mensagem = 'Sem permissão para upload. Verifique as políticas RLS do bucket "avatars".';
-      } else if (mensagem.includes('network') || mensagem.includes('fetch')) {
-        mensagem = 'Erro de rede. Verifique sua conexão com a internet.';
-      }
-      
-      toast.error('Erro ao salvar: ' + mensagem);
+      toast.error('Erro ao salvar: ' + (err.message || 'Erro desconhecido'));
       setUploadStatus('erro');
     }
     setUploading(false);
@@ -242,11 +197,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
                   alt="Preview" 
                   className="w-40 h-40 rounded-full object-cover border-4 border-[#F4D03F] shadow-xl mx-auto"
                 />
-                {uploadStatus === 'foto_selecionada' && (
-                  <span className="absolute top-0 right-0 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                    ✅
-                  </span>
-                )}
               </div>
               <button 
                 onClick={limparFoto}
@@ -259,31 +209,25 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
           {/* Status do upload */}
           {uploadStatus === 'salvando' && (
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 text-center mb-4">
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 text-center">
               <Loader size={24} className="animate-spin mx-auto mb-2 text-[#F4D03F]" />
               <p className="text-sm text-white">Salvando foto...</p>
-              <p className="text-xs text-[#A0A0B0]">Enviando para o servidor</p>
+              <p className="text-xs text-[#A0A0B0]">Fazendo upload para o servidor</p>
             </div>
           )}
 
           {uploadStatus === 'sucesso' && (
-            <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-4 text-center mb-4">
+            <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-4 text-center">
               <CheckCircle size={24} className="mx-auto mb-2 text-green-400" />
               <p className="text-sm text-green-400 font-medium">Foto salva com sucesso! ✅</p>
             </div>
           )}
 
           {uploadStatus === 'erro' && (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center mb-4">
+            <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center">
               <AlertTriangle size={24} className="mx-auto mb-2 text-red-400" />
               <p className="text-sm text-red-400 font-medium">Erro ao salvar foto</p>
-              <p className="text-xs text-[#A0A0B0]">Verifique o console para mais detalhes</p>
-              <button 
-                onClick={() => setUploadStatus('foto_selecionada')}
-                className="mt-2 text-xs bg-white/10 text-white px-3 py-1.5 rounded-xl hover:bg-white/20 transition"
-              >
-                Tentar novamente
-              </button>
+              <p className="text-xs text-[#A0A0B0]">Tente novamente</p>
             </div>
           )}
 
@@ -312,11 +256,11 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             </div>
           )}
 
-          {/* Botão Salvar (aparece apenas se tiver foto e não estiver salvando) */}
-          {fotoPreview && uploadStatus !== 'salvando' && uploadStatus !== 'sucesso' && uploadStatus !== 'erro' && (
+          {/* Botão Salvar (aparece apenas se tiver foto e não estiver salvando/erro) */}
+          {fotoPreview && uploadStatus !== 'salvando' && uploadStatus !== 'sucesso' && (
             <button 
               onClick={fazerUpload} 
-              disabled={uploading}
+              disabled={uploading || !user}
               className="w-full max-w-xs mx-auto py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-4"
             >
               {uploading ? (
