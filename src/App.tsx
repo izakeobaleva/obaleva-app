@@ -20,6 +20,8 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import CompleteProfile from './pages/CompleteProfile';
 import { PassengerDashboard } from './pages/PassengerDashboard';
+import PermissionLocation from './pages/PermissionLocation';
+import PermissionNotification from './pages/PermissionNotification';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -31,18 +33,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0F0B1A] flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-2 border-[#F4D03F] border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
   return (
     <Routes>
+      <Route path="/permission-location" element={<PermissionLocation />} />
+      <Route path="/permission-notification" element={<PermissionNotification />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterPassenger />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
