@@ -18,19 +18,77 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
-      if (!data.user) {
-        setDebugInfo('❌ Nenhum usuário logado');
-      } else {
-        setDebugInfo(`✅ Usuário: ${data.user.email?.substring(0, 20)}...`);
-      }
+      if (!data.user) setDebugInfo('❌ Nenhum usuário logado');
+      else setDebugInfo(`✅ Usuário: ${data.user.email?.substring(0, 20)}...`);
     });
   }, []);
 
-  const processarArquivo = (file: File) => {
+  // ==================== REDUZIR IMAGEM ANTES DO UPLOAD ====================
+  const reduzirImagem = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        
+        // Redimensionar para no máximo 800px
+        let width = img.width;
+        let height = img.height;
+        const maxSize = 800;
+        
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = (height / width) * maxSize;
+            width = maxSize;
+          } else {
+            width = (width / height) * maxSize;
+            height = maxSize;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          // Fallback: retorna o arquivo original
+          resolve(file);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Converter para JPEG com qualidade 70% (fica ~100-300KB)
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              resolve(file); // Fallback
+            }
+          },
+          'image/jpeg',
+          0.7
+        );
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file); // Fallback
+      };
+
+      img.src = url;
+    });
+  };
+
+  // ==================== PROCESSAR ARQUIVO ====================
+  const processarArquivo = async (file: File) => {
     if (!file) return;
     
     const info = `📸 ${file.name || 'selfie'} - ${(file.size / 1024).toFixed(1)}KB - ${file.type}`;
-    setDebugInfo(info);
+    setDebugInfo(info + ' 🔄 Reduzindo...');
     console.log(info);
 
     if (!file.type.startsWith('image/')) {
@@ -38,15 +96,29 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Imagem muito grande! Máximo 5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Imagem muito grande! Máximo 10MB');
       return;
     }
 
-    setFotoBlob(file);
-    setFotoPreview(URL.createObjectURL(file));
-    setUploadStatus('foto_selecionada');
-    setDebugInfo(info + ' ✅ Preview OK');
+    try {
+      // Reduzir a imagem antes de mostrar preview
+      const imagemReduzida = await reduzirImagem(file);
+      
+      console.log(`✅ Imagem reduzida: ${(imagemReduzida.size / 1024).toFixed(1)}KB`);
+      setDebugInfo(`📸 ${file.name} → ${(imagemReduzida.size / 1024).toFixed(1)}KB ✅`);
+      
+      setFotoBlob(imagemReduzida);
+      const previewUrl = URL.createObjectURL(imagemReduzida);
+      setFotoPreview(previewUrl);
+      setUploadStatus('foto_selecionada');
+    } catch (err) {
+      console.error('Erro ao reduzir:', err);
+      // Fallback: usar original
+      setFotoBlob(file);
+      setFotoPreview(URL.createObjectURL(file));
+      setUploadStatus('foto_selecionada');
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,19 +139,18 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     setDebugInfo('');
   };
 
+  // ==================== UPLOAD PARA SUPABASE ====================
   const fazerUpload = async () => {
     if (!fotoBlob) { toast.error('Selecione uma foto primeiro'); return; }
     if (!user) { toast.error('Faça login primeiro'); return; }
 
     setUploading(true);
     setUploadStatus('salvando');
-    setDebugInfo('🔄 Iniciando upload...');
 
     try {
       const filePath = `${user.id}/avatar-${Date.now()}.jpg`;
-      setDebugInfo(`📤 Upload: ${filePath}`);
+      setDebugInfo(`📤 Upload: ${filePath} (${(fotoBlob.size / 1024).toFixed(1)}KB)`);
 
-      // COM TIMEOUT para não travar
       const uploadPromise = supabase.storage
         .from('avatars')
         .upload(filePath, fotoBlob, { 
@@ -87,9 +158,9 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
           upsert: true 
         });
 
-      // Timeout de 15 segundos
+      // Timeout de 30 SEGUNDOS
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('⏱️ Timeout - upload demorou mais de 15 segundos')), 15000)
+        setTimeout(() => reject(new Error('⏱️ Timeout - upload demorou mais de 30 segundos. Verifique sua internet.')), 30000)
       );
 
       const { data, error } = await Promise.race([uploadPromise, timeoutPromise]) as any;
@@ -113,7 +184,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
       toast.success('✅ Foto salva com sucesso!');
       setUploadStatus('sucesso');
-      setDebugInfo('✅ COMPLETO! Perfil atualizado');
+      setDebugInfo('✅ COMPLETO!');
       
       setTimeout(() => {
         limparFoto();
@@ -124,12 +195,10 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       console.error('❌ Erro:', err);
       setDebugInfo(`❌ ${err.message || 'Erro desconhecido'}`);
       
-      // Mensagens amigáveis
       let msg = err.message || 'Erro desconhecido';
-      if (msg.includes('bucket')) msg = 'Bucket "avatars" não existe no Storage do Supabase';
-      else if (msg.includes('permission') || msg.includes('401')) msg = 'Sem permissão. Configure as políticas RLS';
-      else if (msg.includes('Timeout')) msg = 'Tempo esgotado. Verifique sua internet';
-      else if (msg.includes('NetworkError') || msg.includes('Failed to fetch')) msg = 'Erro de rede. Conexão com Supabase falhou';
+      if (msg.includes('bucket')) msg = 'Bucket "avatars" não existe';
+      else if (msg.includes('permission') || msg.includes('401')) msg = 'Sem permissão no Supabase';
+      else if (msg.includes('Timeout')) msg = 'Tempo esgotado. Sua internet pode estar lenta';
       
       toast.error('❌ ' + msg);
       setUploadStatus('erro');
@@ -139,7 +208,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
   return (
     <div className="text-center space-y-6">
-      {/* DEBUG - mostra informações na tela */}
+      {/* DEBUG */}
       {debugInfo && (
         <div className="bg-[#0F0B1A] border border-white/10 rounded-xl p-3 text-left">
           <p className="text-[10px] text-[#A0A0B0] font-mono break-all">{debugInfo}</p>
@@ -165,7 +234,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
           {uploadStatus === 'salvando' && (
             <div className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 text-center">
               <Loader size={24} className="animate-spin mx-auto mb-2 text-[#F4D03F]" />
-              <p className="text-sm text-white">Salvando... (aguarde até 15s)</p>
+              <p className="text-sm text-white">Salvando... (até 30s)</p>
             </div>
           )}
 
