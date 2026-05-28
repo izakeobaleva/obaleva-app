@@ -15,17 +15,19 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={jaViuOnboarding ? <Home /> : <Navigate to="/permission-location" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/permission-location" element={<PermissionLocation />} />
-        <Route path="/permission-notification" element={<PermissionNotification />} />
-        <Route path="/register" element={<RegisterPassenger />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster position="top-center" richColors />
+      <div style={{ width: '100%', minHeight: '100vh' }}>
+        <Routes>
+          <Route path="/" element={jaViuOnboarding ? <Home /> : <Navigate to="/permission-location" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/permission-location" element={<PermissionLocation />} />
+          <Route path="/permission-notification" element={<PermissionNotification />} />
+          <Route path="/register" element={<RegisterPassenger />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster position="top-center" richColors />
+      </div>
     </BrowserRouter>
   );
 }
