@@ -5,6 +5,21 @@ import { MapPin } from 'lucide-react';
 export default function PermissionLocation() {
   const navigate = useNavigate();
 
+  const handleAllow = () => {
+    // Tentar pedir permissão de localização
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        () => {},
+        () => {}
+      );
+    }
+    navigate('/permission-notification');
+  };
+
+  const handleLater = () => {
+    navigate('/permission-notification');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-6">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -23,13 +38,13 @@ export default function PermissionLocation() {
           </p>
 
           <button
-            onClick={() => navigate('/permission-notification')}
+            onClick={handleAllow}
             className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all mb-3"
           >
             SEMPRE PERMITIR
           </button>
           <button
-            onClick={() => navigate('/permission-notification')}
+            onClick={handleLater}
             className="w-full py-3.5 rounded-2xl text-[#A0A0B0] border border-white/10 hover:text-white hover:border-white/20 transition-all"
           >
             Agora não

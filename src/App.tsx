@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import './App.css';
 import NotFound from './pages/NotFound';
@@ -11,11 +11,14 @@ import { RegisterPassenger } from './pages/RegisterPassenger';
 import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
+  const jaViuOnboarding = localStorage.getItem('obaleva_onboarding') === 'true';
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={jaViuOnboarding ? <Home /> : <Navigate to="/permission-location" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/permission-location" element={<PermissionLocation />} />
         <Route path="/permission-notification" element={<PermissionNotification />} />
         <Route path="/register" element={<RegisterPassenger />} />

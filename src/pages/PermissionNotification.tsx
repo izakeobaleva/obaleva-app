@@ -5,6 +5,21 @@ import { Bell } from 'lucide-react';
 export default function PermissionNotification() {
   const navigate = useNavigate();
 
+  const handleAllow = () => {
+    // Tentar pedir permissão de notificação
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    // Marca que o onboarding foi visto
+    localStorage.setItem('obaleva_onboarding', 'true');
+    navigate('/login');
+  };
+
+  const handleLater = () => {
+    localStorage.setItem('obaleva_onboarding', 'true');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-6">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -29,13 +44,13 @@ export default function PermissionNotification() {
           </ul>
 
           <button
-            onClick={() => navigate('/login')}
+            onClick={handleAllow}
             className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all mb-3"
           >
             PERMITIR
           </button>
           <button
-            onClick={() => navigate('/login')}
+            onClick={handleLater}
             className="w-full py-3.5 rounded-2xl text-[#A0A0B0] border border-white/10 hover:text-white hover:border-white/20 transition-all"
           >
             Agora não
