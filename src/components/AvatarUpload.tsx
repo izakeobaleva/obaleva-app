@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Camera, Image as ImageIcon, Upload, Loader, X, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Camera, Image as ImageIcon, Upload, Loader, X, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
@@ -11,9 +11,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [editingType, setEditingType] = useState<'foto' | 'documento' | null>(null);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -23,11 +20,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       console.log('🔵 Usuário carregado:', data.user?.email);
       setUser(data.user);
     });
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(t => t.stop());
-      }
-    };
   }, []);
 
   const processarArquivo = (file: File) => {
@@ -48,33 +40,20 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     }
 
     setFotoBlob(file);
-    const previewUrl = URL.createObjectURL(file);
-    setFotoPreview(previewUrl);
+    setFotoPreview(URL.createObjectURL(file));
     setUploadStatus('foto_selecionada');
-    console.log('✅ Preview gerado:', previewUrl);
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
+    console.log('✅ Preview gerado');
   };
 
-  const handleCameraFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log('🔵 handleCameraFileChange disparado');
+    console.log('🔵 handleFileSelect disparado');
     if (file) processarArquivo(file);
-    e.target.value = '';
+    e.target.value = ''; // Limpar para permitir selecionar o mesmo arquivo novamente
   };
 
-  const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    console.log('🔵 handleGalleryFileChange disparado');
-    if (file) processarArquivo(file);
-    e.target.value = '';
-  };
-
-  const abrirCameraOuGaleria = () => {
-    console.log('🔵 Abrindo seletor de mídia');
+  const abrirCamera = () => {
+    console.log('🔵 Abrindo câmera');
     cameraInputRef.current?.click();
   };
 
@@ -92,19 +71,16 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     setFotoPreview(null);
     setUploadStatus(null);
     setEditingType(null);
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
   };
 
   const fazerUpload = async () => {
     console.log('🔵 Botão Salvar clicado');
-    console.log('🔵 Estado atual:', {
-      temFotoBlob: !!fotoBlob,
-      temPreview: !!fotoPreview,
+    console.log('🔵 Estado:', { 
+      temFotoBlob: !!fotoBlob, 
+      temPreview: !!fotoPreview, 
       temUser: !!user,
-      userEmail: user?.email
+      userEmail: user?.email,
+      blobSize: fotoBlob?.size 
     });
     
     if (!fotoBlob) { 
@@ -169,7 +145,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       toast.success('✅ Foto salva com sucesso!');
       setUploadStatus('sucesso');
       
-      // Limpar e finalizar
       setTimeout(() => {
         limparFoto();
         if (onComplete) onComplete();
@@ -183,10 +158,9 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     setUploading(false);
   };
 
-  const handleDocUpload = async () => {
+  const handleDocUpload = () => {
     const file = docInputRef.current?.files?.[0];
     if (!file) return;
-    
     toast.success(`✅ Documento "${file.name}" anexado com sucesso!`);
     docInputRef.current.value = '';
   };
@@ -197,28 +171,30 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
       {/* ===== MODO FOTO ===== */}
       {editingType === 'foto' ? (
         <>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-4">
             <button 
-              onClick={() => { limparFoto(); }}
+              onClick={limparFoto}
               className="text-[#A0A0B0] hover:text-white transition text-sm flex items-center gap-1"
             >
               ← Voltar
             </button>
-            <p className="text-white text-sm font-medium">Adicionar Foto</p>
+            <span className="text-white text-sm font-medium">Adicionar Foto</span>
           </div>
 
           {/* Preview da foto */}
           {fotoPreview && (
-            <div className="relative inline-block">
+            <div className="relative inline-block mb-4">
               <div className="relative">
                 <img 
                   src={fotoPreview} 
                   alt="Preview" 
                   className="w-40 h-40 rounded-full object-cover border-4 border-[#F4D03F] shadow-xl mx-auto"
                 />
-                <span className="absolute top-0 right-0 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                  ✅
-                </span>
+                {uploadStatus === 'foto_selecionada' && (
+                  <span className="absolute top-0 right-0 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                    ✅
+                  </span>
+                )}
               </div>
               <button 
                 onClick={limparFoto}
@@ -231,7 +207,7 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
 
           {/* Status do upload */}
           {uploadStatus === 'salvando' && (
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 text-center">
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 text-center mb-4">
               <Loader size={24} className="animate-spin mx-auto mb-2 text-[#F4D03F]" />
               <p className="text-sm text-white">Salvando foto...</p>
               <p className="text-xs text-[#A0A0B0]">Fazendo upload para o servidor</p>
@@ -239,25 +215,25 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
           )}
 
           {uploadStatus === 'sucesso' && (
-            <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-4 text-center">
+            <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-4 text-center mb-4">
               <CheckCircle size={24} className="mx-auto mb-2 text-green-400" />
               <p className="text-sm text-green-400 font-medium">Foto salva com sucesso! ✅</p>
             </div>
           )}
 
           {uploadStatus === 'erro' && (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center">
+            <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center mb-4">
               <AlertTriangle size={24} className="mx-auto mb-2 text-red-400" />
               <p className="text-sm text-red-400 font-medium">Erro ao salvar foto</p>
-              <p className="text-xs text-[#A0A0B0]">Tente novamente ou escolha outra foto</p>
+              <p className="text-xs text-[#A0A0B0]">Tente novamente</p>
             </div>
           )}
 
-          {/* Botões de seleção de mídia (aparece apenas se não tiver foto selecionada) */}
+          {/* Botões Câmera / Galeria (aparece apenas se não tiver foto) */}
           {!fotoPreview && uploadStatus !== 'salvando' && (
             <div className="flex justify-center gap-4">
               <button 
-                onClick={abrirCameraOuGaleria}
+                onClick={abrirCamera}
                 type="button"
                 className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-[#1A1528] border-2 border-dashed border-white/20 hover:border-[#F4D03F] transition w-32 cursor-pointer"
               >
@@ -278,12 +254,12 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
             </div>
           )}
 
-          {/* Botão de salvar (aparece apenas se tiver foto) */}
-          {fotoBlob && fotoPreview && uploadStatus !== 'salvando' && uploadStatus !== 'sucesso' && (
+          {/* Botão Salvar (aparece apenas se tiver foto e não estiver salvando) */}
+          {fotoPreview && uploadStatus !== 'salvando' && uploadStatus !== 'sucesso' && (
             <button 
               onClick={fazerUpload} 
               disabled={uploading || !user}
-              className="w-full max-w-xs mx-auto py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full max-w-xs mx-auto py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-4"
             >
               {uploading ? (
                 <><Loader size={18} className="animate-spin" /> Salvando...</>
@@ -295,18 +271,18 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
         </>
       ) : editingType === 'documento' ? (
         <>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-4">
             <button 
               onClick={() => setEditingType(null)}
               className="text-[#A0A0B0] hover:text-white transition text-sm flex items-center gap-1"
             >
               ← Voltar
             </button>
-            <p className="text-white text-sm font-medium">Upload de Documentos</p>
+            <span className="text-white text-sm font-medium">Upload de Documentos</span>
           </div>
 
-          <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10 space-y-3">
-            <p className="text-sm text-[#A0A0B0]">
+          <div className="bg-[#1A1528] rounded-2xl p-6 border border-white/10">
+            <p className="text-sm text-[#A0A0B0] mb-4">
               Envie seus documentos para validação (CNH, RG, CPF, etc.)
             </p>
             
@@ -356,21 +332,21 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
         </>
       )}
 
-      {/* Inputs ocultos */}
+      {/* Inputs ocultos - AMBOS chamam handleFileSelect */}
       <input
         ref={cameraInputRef}
         type="file"
         accept="image/*"
         className="hidden"
         capture="environment"
-        onChange={handleCameraFileChange}
+        onChange={handleFileSelect}
       />
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={handleGalleryFileChange}
+        onChange={handleFileSelect}
       />
     </div>
   );
