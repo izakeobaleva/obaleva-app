@@ -10,7 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
 
   const loginGratis = () => {
-    navigate('/permission-location');
+    navigate('/home');
   };
 
   return (

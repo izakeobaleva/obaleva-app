@@ -1,7 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './App.css';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
@@ -15,7 +14,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<PermissionLocation />} />
+        <Route path="/" element={<Home />} />
         <Route path="/permission-location" element={<PermissionLocation />} />
         <Route path="/permission-notification" element={<PermissionNotification />} />
         <Route path="/login" element={<Login />} />
