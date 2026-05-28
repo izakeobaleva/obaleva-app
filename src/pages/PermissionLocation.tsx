@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Crosshair } from 'lucide-react';
 import MapBackground from '../components/MapBackground';
 
 export default function PermissionLocation() {
@@ -19,52 +18,34 @@ export default function PermissionLocation() {
   };
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-[#0F0B1A]">
-      <div className="fixed inset-0 z-0">
+    <div className="permission-screen">
+      <div className="absolute inset-0 z-0">
         <MapBackground />
       </div>
-      <div className="fixed inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
-
-      <div className="relative z-20 w-full min-h-screen flex items-center justify-center px-5">
-        <div className="w-full max-w-[450px]">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="w-28 h-28 mx-auto mb-8 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-3xl flex items-center justify-center shadow-2xl">
-              <Crosshair size={52} className="text-[#1E1E2F]" />
-            </div>
-
-            <h1 className="text-4xl font-bold text-white mb-3" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              ObaLeva
-            </h1>
-            <h2 className="text-2xl text-[#E0E0E0] mb-3 font-medium">Acesso à localização</h2>
-            <p className="text-lg text-[#A0A0B0] leading-relaxed mb-10 max-w-[380px] mx-auto">
-              Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.
-            </p>
-
-            <button
-              onClick={handleAllow}
-              className="w-full h-[56px] rounded-2xl font-bold bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white hover:shadow-lg transition-all text-lg flex items-center justify-center gap-2 shadow-xl"
-            >
-              <Crosshair size={22} />
-              PERMITIR
-            </button>
-
-            <button
-              onClick={() => navigate('/permission-notification')}
-              className="w-full h-[56px] rounded-2xl font-medium text-[#A0A0B0] hover:text-white transition-all text-lg mt-3"
-            >
-              Agora não
-            </button>
-          </motion.div>
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+      
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative z-20"
+      >
+        <div className="permission-icon" style={{ background: 'linear-gradient(135deg, #F4D03F, #FFD966)' }}>
+          📍
         </div>
-      </div>
+        <h2>Acesso à localização</h2>
+        <p>Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.</p>
+        
+        <button className="permit-btn" onClick={handleAllow}>
+          PERMITIR
+        </button>
+        <button className="later-btn" onClick={() => navigate('/permission-notification')}>
+          Agora não
+        </button>
 
-      <div className="fixed bottom-6 left-0 right-0 z-20 text-center">
-        <p className="text-xs text-white/30">ObaLeva © 2025</p>
-      </div>
+        <p style={{ position: 'fixed', bottom: 24, left: 0, right: 0, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
+          ObaLeva © 2025
+        </p>
+      </motion.div>
     </div>
   );
 }

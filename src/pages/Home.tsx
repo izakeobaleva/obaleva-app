@@ -5,23 +5,19 @@ import { useAuth } from '../contexts/AuthContext';
 import { useGoogleMaps } from '../hooks/useGoogleMaps';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useRideRequest } from '../hooks/useRideRequest';
-import { MapSection } from '../components/Home/MapSection';
-import { LocationInput } from '../components/Home/LocationInput';
-import { PriceEstimate } from '../components/Home/PriceEstimate';
-import { LogOut, Car, Bell, Megaphone } from 'lucide-react';
+import { LogOut, Bell, MapPin, Navigation, Crosshair, Car, Edit2, Check } from 'lucide-react';
 import { UserAvatar } from '../components/UserAvatar';
 import { toast } from 'sonner';
 
 export default function Home() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
-  const { mapsLoaded, mapsTimeout, mapsError, buscarSugestoes, reverseGeocode, tentarNovamente } = useGoogleMaps();
+  const { mapsLoaded, buscarSugestoes, reverseGeocode } = useGoogleMaps();
   const { userLocation, getCurrentLocation } = useGeolocation();
-  const { solicitando, precoEstimado, solicitarCorrida, calcularPreco } = useRideRequest();
+  const { solicitando, solicitarCorrida } = useRideRequest();
 
   const [origem, setOrigem] = useState('');
   const [destino, setDestino] = useState('');
-  const [origemCoord, setOrigemCoord] = useState<{ lat: number; lng: number } | null>(null);
   const [editingOrigem, setEditingOrigem] = useState(false);
   const [editingDestino, setEditingDestino] = useState(false);
   const [buscandoEndereco, setBuscandoEndereco] = useState(false);
@@ -30,17 +26,12 @@ export default function Home() {
   const [showSugestoesOrigem, setShowSugestoesOrigem] = useState(false);
   const [showSugestoesDestino, setShowSugestoesDestino] = useState(false);
 
-  const debounceOrigem = useRef<NodeJS.Timeout>();
-  const debounceDestino = useRef<NodeJS.Timeout>();
-  const debouncePreco = useRef<NodeJS.Timeout>();
   const enderecoBuscado = useRef(false);
 
-  // Buscar endereço atual assim que tiver localização
   useEffect(() => {
     if (userLocation && !origem && !enderecoBuscado.current) {
       enderecoBuscado.current = true;
       setBuscandoEndereco(true);
-      setOrigemCoord(userLocation);
       reverseGeocode(userLocation.lat, userLocation.lng).then((endereco) => {
         if (endereco) setOrigem(endereco);
         setBuscandoEndereco(false);
@@ -48,56 +39,14 @@ export default function Home() {
     }
   }, [userLocation, origem, reverseGeocode]);
 
-  // Calcular preço quando origem e destino mudarem
-  useEffect(() => {
-    if (debouncePreco.current) clearTimeout(debouncePreco.current);
-    
-    if (origem && destino) {
-      debouncePreco.current = setTimeout(() => {
-        calcularPreco(origem, destino);
-      }, 1000);
-    }
-  }, [origem, destino, calcularPreco]);
-
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
   };
 
-  const handleInputChange = (value: string, type: 'origem' | 'destino') => {
-    if (type === 'origem') setOrigem(value);
-    else setDestino(value);
-
-    const debounceRef = type === 'origem' ? debounceOrigem : debounceDestino;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      const sugestoes = await buscarSugestoes(value);
-      if (type === 'origem') {
-        setSugestoesOrigem(sugestoes);
-        setShowSugestoesOrigem(sugestoes.length > 0);
-      } else {
-        setSugestoesDestino(sugestoes);
-        setShowSugestoesDestino(sugestoes.length > 0);
-      }
-    }, 300);
-  };
-
-  const handleSelectSugestao = async (sugestao: any, type: 'origem' | 'destino') => {
-    if (type === 'origem') {
-      setOrigem(sugestao.description);
-      setShowSugestoesOrigem(false);
-      setEditingOrigem(false);
-    } else {
-      setDestino(sugestao.description);
-      setShowSugestoesDestino(false);
-      setEditingDestino(false);
-    }
-  };
-
   const handleGetCurrentLocation = useCallback(async () => {
     const loc = await getCurrentLocation();
     if (loc) {
-      setOrigemCoord(loc);
       setBuscandoEndereco(true);
       const endereco = await reverseGeocode(loc.lat, loc.lng);
       if (endereco) setOrigem(endereco);
@@ -113,124 +62,140 @@ export default function Home() {
       toast.error('Digite o destino');
       return;
     }
-    
-    const success = await solicitarCorrida({ 
-      userId: user?.id, 
-      origem, 
-      destino,
-      origemLat: origemCoord?.lat,
-      origemLng: origemCoord?.lng,
-    });
-    
-    if (success) {
-      setDestino('');
-    }
+    await solicitarCorrida({ userId: user?.id, origem, destino });
+    setDestino('');
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#0F0B1A] flex flex-col">
-      {/* ===== 1. TOP BAR ===== */}
-      <header className="sticky top-0 z-30 h-14 shrink-0 bg-[#1A1528]/95 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSignOut}
-            className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition"
-            title="Sair"
-          >
+    <div className="map-screen">
+      {/* TOP BAR */}
+      <header style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 20,
+        height: 56, background: 'rgba(26, 21, 40, 0.95)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={handleSignOut} className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center" title="Sair">
             <LogOut size={14} className="text-red-400" />
           </button>
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-lg font-bold text-[#F4D03F]"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
-          >
-            ObaLeva
-          </motion.h1>
+          <h1 style={{ color: '#F4D03F', fontSize: 20, fontWeight: 'bold' }}>ObaLeva</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition relative">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center relative">
             <Bell size={16} className="text-[#F4D03F]" />
-            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white font-bold">3</span>
+            <span style={{
+              position: 'absolute', top: -2, right: -2, width: 14, height: 14,
+              background: '#EF4444', borderRadius: '50%', fontSize: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'white', fontWeight: 'bold'
+            }}>3</span>
           </button>
-          <button 
-            onClick={() => navigate('/profile')}
-          >
-            <UserAvatar 
-              url={profile?.avatar_url} 
-              name={profile?.nome_completo} 
-              size="sm" 
-            />
+          <button onClick={() => navigate('/profile')}>
+            <UserAvatar url={profile?.avatar_url} name={profile?.nome_completo} size="sm" />
           </button>
         </div>
       </header>
 
-      {/* ===== 2. MAPA - ocupa todo o espaço disponível ===== */}
-      <div className="flex-1 relative w-full min-h-[200px]">
-        <MapSection
-          userLocation={userLocation}
-          mapsLoaded={mapsLoaded}
-          mapsTimeout={mapsTimeout}
-          mapsError={mapsError}
-          onGetCurrentLocation={handleGetCurrentLocation}
-          onRetry={tentarNovamente}
-        />
-      </div>
-
-      {/* ===== 3. INPUTS + BOTÃO ===== */}
-      <div className="shrink-0 bg-[#1A1528] border-t border-white/10 px-4 pt-3 pb-2 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-        <LocationInput
-          type="origem"
-          value={origem}
-          editing={editingOrigem}
-          placeholder="Onde você está?"
-          loading={buscandoEndereco}
-          onEditToggle={() => setEditingOrigem(true)}
-          onConfirm={() => { setEditingOrigem(false); setShowSugestoesOrigem(false); }}
-          onChange={(v) => handleInputChange(v, 'origem')}
-          onFocus={() => { setEditingOrigem(true); if (sugestoesOrigem.length > 0) setShowSugestoesOrigem(true); }}
-          onBlur={() => setTimeout(() => setShowSugestoesOrigem(false), 200)}
-          sugestoes={sugestoesOrigem}
-          showSugestoes={showSugestoesOrigem}
-          onSelectSugestao={(s) => handleSelectSugestao(s, 'origem')}
-        />
-
-        <LocationInput
-          type="destino"
-          value={destino}
-          editing={editingDestino}
-          placeholder="Para onde vai?"
-          onEditToggle={() => setEditingDestino(true)}
-          onConfirm={() => { setEditingDestino(false); setShowSugestoesDestino(false); }}
-          onChange={(v) => handleInputChange(v, 'destino')}
-          onFocus={() => { setEditingDestino(true); if (sugestoesDestino.length > 0) setShowSugestoesDestino(true); }}
-          onBlur={() => setTimeout(() => setShowSugestoesDestino(false), 200)}
-          sugestoes={sugestoesDestino}
-          showSugestoes={showSugestoesDestino}
-          onSelectSugestao={(s) => handleSelectSugestao(s, 'destino')}
-        />
-
-        <PriceEstimate preco={precoEstimado} visible={!!(origem && destino)} />
-
-        <button
-          onClick={handleSolicitarCorrida}
-          disabled={solicitando || !destino}
-          className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 text-base shadow-lg flex items-center justify-center gap-2"
-        >
-          {solicitando ? (
-            <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Buscando motorista...</>
-          ) : (
-            <><Car size={20} /> Chamar ObaLeva</>
+      {/* MAPA */}
+      <div className="map-area" style={{ marginTop: 56, height: 'calc(100% - 56px)' }}>
+        <div className="map-placeholder">
+          🗺️ Mapa indisponível
+          {userLocation && (
+            <div className="coordinates">
+              📍 {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+            </div>
           )}
-        </button>
+        </div>
       </div>
 
-      {/* ===== 4. BANNER INFERIOR ===== */}
-      <div className="shrink-0 h-10 bg-gradient-to-r from-[#1A1528] to-[#2D2342] border-t border-white/10 flex items-center justify-center px-4">
-        <div className="flex items-center gap-2">
-          <Megaphone size={14} className="text-[#F4D03F]" />
-          <span className="text-xs text-white/60">
-            📢 Baixe o app e ganhe <strong className="text-[#F4D03F]">R$ 10</strong> na primeira corrida!
+      {/* BOTTOM SHEET */}
+      <div className="ride-bottom-sheet" style={{ paddingTop: 20 }}>
+        {/* ORIGEM */}
+        <div className="location-field">
+          <div className="location-label">
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <MapPin size={12} className="text-green-400" />
+              ONDE VOCÊ ESTÁ?
+            </span>
+          </div>
+          {editingOrigem ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="text"
+                placeholder="Digite seu endereço"
+                className="w-full bg-[#1A1528] text-white border border-[#F4D03F] rounded-xl px-4 py-2 text-sm focus:outline-none"
+                value={origem}
+                onChange={(e) => setOrigem(e.target.value)}
+                autoFocus
+              />
+              <button
+                onClick={() => { setEditingOrigem(false); setShowSugestoesOrigem(false); }}
+                className="bg-[#22C55E] text-white px-3 py-2 rounded-xl text-xs font-medium"
+              >
+                OK
+              </button>
+            </div>
+          ) : (
+            <div className="location-value">
+              <span>{buscandoEndereco ? 'Buscando...' : origem || 'Toque para definir'}</span>
+              <span className="edit-link" onClick={() => setEditingOrigem(true)}>
+                <Edit2 size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                Editar
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* DESTINO */}
+        <div className="location-field">
+          <div className="location-label">
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Navigation size={12} className="text-red-400" />
+              PARA ONDE VOCÊ VAI?
+            </span>
+          </div>
+          {editingDestino ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="text"
+                placeholder="Digite o destino"
+                className="w-full bg-[#1A1528] text-white border border-[#F4D03F] rounded-xl px-4 py-2 text-sm focus:outline-none"
+                value={destino}
+                onChange={(e) => setDestino(e.target.value)}
+                autoFocus
+              />
+              <button
+                onClick={() => { setEditingDestino(false); setShowSugestoesDestino(false); }}
+                className="bg-[#22C55E] text-white px-3 py-2 rounded-xl text-xs font-medium"
+              >
+                OK
+              </button>
+            </div>
+          ) : (
+            <div className="location-value">
+              <span style={{ color: destino ? 'white' : '#A0A0B0' }}>{destino || 'Para onde vai?'}</span>
+              <span className="edit-link" onClick={() => setEditingDestino(true)}>
+                <Edit2 size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                Editar
+              </span>
+            </div>
+          )}
+        </div>
+
+        <button className="ride-button" onClick={handleSolicitarCorrida} disabled={solicitando}>
+          {solicitando ? 'Buscando motorista...' : 'Chamar ObaLeva'}
+        </button>
+
+        {/* OUTDOOR INFO */}
+        <div style={{
+          marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.05)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+        }}>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
+            📢 Baixe o app e ganhe <strong style={{ color: '#F4D03F' }}>R$ 10</strong> na primeira corrida!
           </span>
         </div>
       </div>
