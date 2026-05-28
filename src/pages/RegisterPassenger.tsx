@@ -53,7 +53,7 @@ export function RegisterPassenger() {
         await supabase.from('passageiros').insert({ id: authData.user.id })
       }
       toast.success('Conta criada com sucesso!')
-      navigate('/complete-profile', { replace: true })
+      navigate('/login', { replace: true })
     } catch (err: any) {
       if (err.message?.includes('already registered')) toast.error('Este e-mail já está cadastrado. Faça login.')
       else toast.error(err.message || 'Erro ao cadastrar')
@@ -62,8 +62,8 @@ export function RegisterPassenger() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-      <div className="w-full max-w-[450px]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
+      <div className="w-full max-w-[500px]">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="bg-[#1A1528]/95 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-8">
             <div className="flex items-center gap-4 mb-8">
@@ -71,56 +71,56 @@ export function RegisterPassenger() {
                 <ArrowLeft size={24} className="text-[#A0A0B0]" />
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-white">Criar Conta</h1>
-                <p className="text-base text-[#A0A0B0]">Passageiro</p>
+                <h1 className="text-2xl font-bold text-white">Criar Conta</h1>
+                <p className="text-sm text-[#A0A0B0]">Passageiro</p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 h-[56px] focus-within:ring-2 focus-within:ring-[#F4D03F]">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
                 <User size={20} className="text-[#F4D03F] shrink-0" />
-                <input type="text" placeholder="Nome completo" autoComplete="name" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-lg" value={nome} onChange={e => setNome(e.target.value)} required />
+                <input type="text" placeholder="Nome completo" autoComplete="name" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none" value={nome} onChange={e => setNome(e.target.value)} required />
               </div>
 
-              <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 h-[56px] focus-within:ring-2 focus-within:ring-[#F4D03F]">
+              <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
                 <User size={20} className="text-[#F4D03F] shrink-0" />
-                <input type="text" placeholder="CPF" maxLength={14} className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-lg" value={cpf} onChange={e => setCpf(formatarCpf(e.target.value))} required />
+                <input type="text" placeholder="CPF" maxLength={14} className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none" value={cpf} onChange={e => setCpf(formatarCpf(e.target.value))} required />
               </div>
 
-              <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 h-[56px] focus-within:ring-2 focus-within:ring-[#F4D03F]">
+              <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
                 <Phone size={20} className="text-[#F4D03F] shrink-0" />
-                <input type="tel" placeholder="Telefone / WhatsApp" autoComplete="tel" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-lg" value={telefone} onChange={e => setTelefone(formatarTelefone(e.target.value))} required />
+                <input type="tel" placeholder="Telefone / WhatsApp" autoComplete="tel" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none" value={telefone} onChange={e => setTelefone(formatarTelefone(e.target.value))} required />
               </div>
 
-              <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 h-[56px] focus-within:ring-2 focus-within:ring-[#F4D03F]">
+              <div className="flex items-center gap-3 bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
                 <Mail size={20} className="text-[#F4D03F] shrink-0" />
-                <input type="email" placeholder="E-mail" autoComplete="email" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none text-lg" value={email} onChange={e => setEmail(e.target.value)} required />
+                <input type="email" placeholder="E-mail" autoComplete="email" className="w-full bg-transparent text-white placeholder-white/40 focus:outline-none" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
 
-              <div className="flex items-center bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 h-[56px] focus-within:ring-2 focus-within:ring-[#F4D03F]">
+              <div className="flex items-center bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
                 <Lock size={20} className="text-[#F4D03F] shrink-0 mr-3" />
-                <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6)" className="flex-1 bg-transparent text-white placeholder-white/40 focus:outline-none text-lg" value={password} onChange={e => setPassword(e.target.value)} minLength={6} required />
+                <input type={showPassword ? 'text' : 'password'} placeholder="Senha (mín. 6)" className="flex-1 bg-transparent text-white placeholder-white/40 focus:outline-none" value={password} onChange={e => setPassword(e.target.value)} minLength={6} required />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
 
-              <div className="flex items-center bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 h-[56px] focus-within:ring-2 focus-within:ring-[#F4D03F]">
+              <div className="flex items-center bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 focus-within:ring-2 focus-within:ring-[#F4D03F]">
                 <Lock size={20} className="text-[#F4D03F] shrink-0 mr-3" />
-                <input type={showConfirm ? 'text' : 'password'} placeholder="Confirmar senha" className="flex-1 bg-transparent text-white placeholder-white/40 focus:outline-none text-lg" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} minLength={6} required />
+                <input type={showConfirm ? 'text' : 'password'} placeholder="Confirmar senha" className="flex-1 bg-transparent text-white placeholder-white/40 focus:outline-none" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} minLength={6} required />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-[#A0A0B0] hover:text-white transition shrink-0">
                   {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
 
-              <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full h-[56px] rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-lg mt-2">
+              <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 mt-2">
                 {loading ? <><Loader size={20} className="animate-spin" /> Criando conta...</> : 'Criar Conta'}
               </motion.button>
             </form>
 
             <div className="mt-6 text-center space-y-2">
-              <p className="text-base text-[#A0A0B0]">Já tem conta? <button onClick={() => navigate('/login')} className="text-[#F4D03F] hover:underline font-medium">Entrar</button></p>
-              <p className="text-base text-[#A0A0B0]">É motorista? <button onClick={() => navigate('/cadastro-motorista')} className="text-[#F4D03F] hover:underline font-medium">Cadastre-se como motorista</button></p>
+              <p className="text-sm text-[#A0A0B0]">Já tem conta? <button onClick={() => navigate('/login')} className="text-[#F4D03F] hover:underline font-medium">Entrar</button></p>
+              <p className="text-sm text-[#A0A0B0]">É motorista? <button onClick={() => navigate('/cadastro-motorista')} className="text-[#F4D03F] hover:underline font-medium">Cadastre-se como motorista</button></p>
             </div>
           </div>
         </motion.div>

@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex flex-col">
       {/* MAPA DE FUNDO - Ocupa toda a parte superior */}
-      <div className="flex-[1.3] relative overflow-hidden" style={{ minHeight: '55vh' }}>
+      <div className="flex-1 relative overflow-hidden" style={{ minHeight: '55vh' }}>
         {/* Mapa online via iframe do Google Maps */}
         <div className="absolute inset-0">
           <iframe
@@ -39,7 +39,7 @@ export default function Home() {
       </div>
 
       {/* BOTTOM SHEET - Área de inputs */}
-      <div className="bg-[#1A1528] rounded-t-3xl border-t border-white/10 p-6 pb-10 shadow-xl flex-1 overflow-y-auto">
+      <div className="bg-[#1A1528] rounded-t-3xl border-t border-white/10 p-6 pb-10 shadow-xl overflow-y-auto">
         <div className="mb-4">
           <div className="bg-[#0F0B1A] rounded-2xl p-5 border border-white/10">
             <p className="text-xs text-[#A0A0B0] mb-2 flex items-center gap-1">

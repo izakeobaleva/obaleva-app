@@ -9,10 +9,6 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    navigate('/home');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -31,44 +27,21 @@ export default function Login() {
           </div>
 
           <div className="space-y-4">
-            <input
-              type="email"
-              placeholder="E-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]"
-            />
-
+            <input type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#F4D03F]" />
             <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] pr-12"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A0A0B0] hover:text-white transition"
-              >
+              <input type={showPassword ? 'text' : 'password'} placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-[#0F0B1A] border border-white/10 rounded-2xl px-5 py-3.5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] pr-12" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A0A0B0] hover:text-white transition">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-
-            <button
-              onClick={handleLogin}
-              className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all"
-            >
+            <button onClick={() => navigate('/home')} className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all">
               🔐 Entrar
             </button>
-
             <div className="flex items-center gap-3 my-2">
               <div className="flex-1 h-px bg-white/10" />
               <span className="text-xs text-[#A0A0B0]">ou</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
-
             <button className="w-full py-3 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2">
               <svg viewBox="0 0 48 48" className="w-5 h-5">
                 <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
@@ -78,20 +51,9 @@ export default function Login() {
               </svg>
               Entrar com Google
             </button>
-
             <div className="mt-4 text-center space-y-3">
-              <button
-                onClick={() => navigate('/register')}
-                className="text-[#F4D03F] hover:underline font-medium block w-full"
-              >
-                Criar Conta Gratuita
-              </button>
-              <button
-                onClick={() => navigate('/forgot-password')}
-                className="text-[#A0A0B0] hover:text-white block w-full text-sm"
-              >
-                Esqueci minha senha
-              </button>
+              <button onClick={() => navigate('/register')} className="text-[#F4D03F] hover:underline font-medium block w-full">Criar Conta Gratuita</button>
+              <button onClick={() => navigate('/forgot-password')} className="text-[#A0A0B0] hover:text-white block w-full text-sm">Esqueci minha senha</button>
             </div>
           </div>
         </div>
