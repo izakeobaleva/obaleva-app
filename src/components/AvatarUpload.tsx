@@ -56,7 +56,6 @@ export function AvatarUpload({ onComplete }: { onComplete?: () => void }) {
     try {
       const filePath = `${user.id}/avatar-${Date.now()}.jpg`;
       
-      // Usar o arquivo original (já validamos que é pequeno)
       const { data, error } = await supabase.storage
         .from('avatars')
         .upload(filePath, fotoArquivo, { upsert: true });
