@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Crosshair } from 'lucide-react';
+import MapBackground from '../components/MapBackground';
 
 export default function PermissionLocation() {
   const navigate = useNavigate();
@@ -18,12 +19,18 @@ export default function PermissionLocation() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-      <div className="w-full max-w-[450px] min-h-[100vh] flex flex-col justify-center mx-auto">
+    <div className="relative w-full min-h-screen overflow-hidden bg-[#0F0B1A]">
+      <div className="fixed inset-0 z-0">
+        <MapBackground />
+      </div>
+
+      <div className="fixed inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+
+      <div className="relative z-20 w-full max-w-[450px] min-h-screen flex flex-col justify-center mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center px-6"
+          className="text-center"
         >
           <div className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-3xl flex items-center justify-center shadow-2xl">
             <Crosshair size={44} className="text-[#1E1E2F]" />
@@ -52,6 +59,10 @@ export default function PermissionLocation() {
             Agora não
           </button>
         </motion.div>
+      </div>
+
+      <div className="fixed bottom-6 left-0 right-0 z-20 text-center">
+        <p className="text-xs text-white/30">ObaLeva © 2025</p>
       </div>
     </div>
   );

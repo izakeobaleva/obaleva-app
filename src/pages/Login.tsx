@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader } from 'lucide-react';
+import MapBackground from '../components/MapBackground';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -43,19 +44,20 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center p-4">
-      <div className="w-full max-w-[450px] min-h-[100vh] flex flex-col justify-center mx-auto">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-150px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#F4D03F]/5 rounded-full blur-[150px]" />
-          <div className="absolute bottom-[-100px] right-[-100px] w-[400px] h-[400px] bg-[#6B2D8C]/20 rounded-full blur-[120px]" />
-        </div>
+    <div className="relative w-full min-h-screen overflow-hidden bg-[#0F0B1A]">
+      <div className="fixed inset-0 z-0">
+        <MapBackground />
+      </div>
 
+      <div className="fixed inset-0 z-10 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
+
+      <div className="relative z-20 w-full max-w-[450px] min-h-screen flex flex-col justify-center mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative z-10"
+          className="w-full"
         >
-          <div className="bg-[#1A1528]/95 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-8">
+          <div className="bg-[#1A1528]/90 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-8">
             <div className="text-center mb-8">
               <div className="w-24 h-24 mx-auto mb-5 bg-gradient-to-br from-[#F4D03F] to-amber-500 rounded-3xl flex items-center justify-center shadow-2xl">
                 <span className="text-5xl">🚕</span>
@@ -133,6 +135,10 @@ export default function Login() {
             </div>
           </div>
         </motion.div>
+      </div>
+
+      <div className="fixed bottom-6 left-0 right-0 z-20 text-center">
+        <p className="text-xs text-white/20">ObaLeva © 2025</p>
       </div>
     </div>
   );
