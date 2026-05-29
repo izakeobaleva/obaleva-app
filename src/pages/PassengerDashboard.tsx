@@ -80,7 +80,7 @@ export function PassengerDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] p-4 space-y-4">
+      <div className="w-full min-h-screen bg-[#0F0B1A] p-4 space-y-4">
         <Skeleton className="h-12 w-full rounded-2xl" />
         <Skeleton className="h-56 w-full rounded-2xl" />
         <Skeleton className="h-40 w-full rounded-2xl" />
@@ -90,22 +90,19 @@ export function PassengerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
-      <header className="sticky top-0 z-20 bg-black/40 backdrop-blur-xl border-b border-white/10 px-5 py-4">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          >
-            <div className="w-9 h-9 bg-gradient-to-br from-[#FFD966] to-[#F4D03F] rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-lg">🚕</span>
+    <div className="w-full min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-28">
+      {/* Header */}
+      <header className="sticky top-0 z-20 glass px-5 py-4">
+        <div className="w-full max-w-lg mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#FFD966] to-[#F4D03F] rounded-xl flex items-center justify-center shadow-lg shadow-[#F4D03F]/20">
+              <span className="text-xl">🚕</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}>ObaLeva</h1>
+              <h1 className="text-xl font-bold text-white">ObaLeva</h1>
               <p className="text-[10px] text-[#A0A0B0] -mt-0.5">Mobilidade premium</p>
             </div>
-          </motion.div>
+          </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1">
               <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
@@ -113,20 +110,18 @@ export function PassengerDashboard() {
             </div>
             <button 
               onClick={handleSignOut}
-              className="w-9 h-9 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition-all"
+              className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition-all"
             >
-              <LogOut size={15} className="text-red-400" />
+              <LogOut size={16} className="text-red-400" />
             </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-lg mx-auto px-4 mt-4 space-y-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-[#1A1528] rounded-2xl border border-white/10 overflow-hidden h-52 relative"
-        >
+      {/* Conteúdo */}
+      <div className="w-full px-4 mt-4 max-w-lg mx-auto space-y-4">
+        {/* Card do Mapa */}
+        <div className="card overflow-hidden h-52 relative">
           <div className="w-full h-full bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center">
             <div className="text-center">
               <MapPin size={40} className="mx-auto mb-2 text-[#F4D03F]/40" />
@@ -153,27 +148,23 @@ export function PassengerDashboard() {
               <Crosshair size={16} className="text-[#F4D03F]" />
             </button>
           )}
-        </motion.div>
+        </div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-[#1A1528] rounded-2xl border border-white/10 p-4 space-y-3"
-        >
+        {/* Card de Endereços */}
+        <div className="card p-4 space-y-3">
           <div>
             <label className="text-[10px] text-[#A0A0B0] mb-1.5 flex items-center gap-1.5">
               <MapPin size={11} className="text-green-400" />
               ORIGEM
             </label>
-            <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#F4D03F] focus-within:border-transparent transition-all">
+            <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-xl px-4 py-3.5 focus-within:ring-2 focus-within:ring-[#F4D03F] focus-within:border-transparent transition-all">
               <MapPin size={16} className="text-green-400 shrink-0" />
               <input
                 type="text"
                 placeholder="Onde você está?"
                 value={origem}
                 onChange={e => setOrigem(e.target.value)}
-                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-[16px]"
               />
               {origem && (
                 <button onClick={() => setOrigem('')} className="text-gray-500 hover:text-red-400 transition p-0.5">
@@ -190,14 +181,14 @@ export function PassengerDashboard() {
               <Navigation size={11} className="text-red-400" />
               DESTINO
             </label>
-            <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#F4D03F] focus-within:border-transparent transition-all">
+            <div className="flex items-center gap-2 bg-[#0F0B1A] border border-white/10 rounded-xl px-4 py-3.5 focus-within:ring-2 focus-within:ring-[#F4D03F] focus-within:border-transparent transition-all">
               <Navigation size={16} className="text-red-400 shrink-0" />
               <input
                 type="text"
                 placeholder="Para onde vai?"
                 value={destino}
                 onChange={e => setDestino(e.target.value)}
-                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-sm"
+                className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none text-[16px]"
               />
               {destino && (
                 <button onClick={() => setDestino('')} className="text-gray-500 hover:text-red-400 transition p-0.5">
@@ -208,11 +199,7 @@ export function PassengerDashboard() {
           </div>
 
           {precoEstimado && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              className="bg-gradient-to-r from-purple-900/30 to-amber-900/30 rounded-xl p-3 border border-purple-500/20"
-            >
+            <div className="bg-gradient-to-r from-purple-900/30 to-amber-900/30 rounded-xl p-3 border border-purple-500/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <DollarSign size={16} className="text-[#F4D03F]" />
@@ -221,28 +208,25 @@ export function PassengerDashboard() {
                 </div>
                 <span className="text-xs text-[#A0A0B0]">~15 min</span>
               </div>
-            </motion.div>
+            </div>
           )}
-        </motion.div>
+        </div>
 
-        <motion.button
-          whileTap={{ scale: 0.97 }}
+        {/* Botão Solicitar */}
+        <button
           onClick={solicitarCorrida}
           disabled={solicitando || !destino}
-          className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 text-base shadow-lg flex items-center justify-center gap-3"
+          className="btn-primary w-full flex items-center justify-center gap-3 text-base"
         >
           {solicitando ? (
             <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Buscando motorista...</>
           ) : (
             <><Car size={20} /> Solicitar ObaLeva</>
           )}
-        </motion.button>
+        </button>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        {/* Últimas corridas */}
+        <div>
           <div className="flex items-center justify-between mb-3 px-1">
             <h2 className="text-sm font-semibold text-white/80 flex items-center gap-2">
               <History size={14} className="text-[#F4D03F]" />
@@ -254,7 +238,7 @@ export function PassengerDashboard() {
           </div>
 
           {recentTrips.length === 0 ? (
-            <div className="bg-[#1A1528] rounded-2xl border border-white/10 py-8 text-center">
+            <div className="card py-8 text-center">
               <Car size={32} className="mx-auto mb-3 text-[#F4D03F]/40" />
               <p className="text-sm text-[#A0A0B0]">Nenhuma corrida ainda</p>
               <p className="text-xs text-[#A0A0B0]/60 mt-1">Digite o destino e solicite sua primeira corrida!</p>
@@ -262,13 +246,10 @@ export function PassengerDashboard() {
           ) : (
             <div className="space-y-2">
               {recentTrips.map((trip, i) => (
-                <motion.button
+                <button
                   key={trip.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.05 }}
                   onClick={() => navigate(`/trips/${trip.id}`)}
-                  className="w-full text-left bg-[#1A1528] rounded-2xl border border-white/10 p-3 hover:border-[#F4D03F]/20 transition-all flex items-center justify-between"
+                  className="w-full text-left card p-3 hover:border-[#F4D03F]/20 transition-all flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-[#0F0B1A] rounded-xl flex items-center justify-center">
@@ -280,11 +261,11 @@ export function PassengerDashboard() {
                     </div>
                   </div>
                   <span className="font-bold text-sm text-[#F4D03F]">R$ {trip.valor?.toFixed(2) || '0.00'}</span>
-                </motion.button>
+                </button>
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       <BottomNav role="passageiro" />

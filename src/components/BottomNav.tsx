@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Clock, User, DollarSign, Navigation } from 'lucide-react'
+import { Home, Clock, User, DollarSign } from 'lucide-react'
 
 interface BottomNavProps {
   role: 'passageiro' | 'motorista'
@@ -25,13 +25,13 @@ export function BottomNav({ role }: BottomNavProps) {
   const tabs = role === 'motorista' ? driverTabs : passengerTabs
 
   const isActive = (path: string) => {
-    if (path === '/') return currentPath === '/'
+    if (path === '/') return currentPath === '/' || currentPath === ''
     return currentPath.startsWith(path)
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-2 bg-gradient-to-t from-[#0F0B1A] to-transparent pt-3">
-      <div className="bg-[#1A1528] border border-white/10 rounded-2xl max-w-md w-full mx-4 shadow-xl">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-2 bg-gradient-to-t from-[#0F0B1A] via-[#0F0B1A]/95 to-transparent pt-3">
+      <div className="bg-[#1A1528] border border-white/10 rounded-2xl w-[95%] max-w-md mx-2 shadow-xl shadow-black/30">
         <div className="flex justify-around px-5 py-3">
           {tabs.map((tab) => (
             <button
