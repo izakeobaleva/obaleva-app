@@ -76,9 +76,13 @@ const MainScreen: React.FC = () => {
             <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-300 hidden sm:block">Olá, {user?.email?.split('@')[0] || 'Passageiro'}</span>
+            <span className="text-sm text-gray-300 hidden sm:block">
+              Olá, {user?.email?.split('@')[0] || 'Passageiro'}
+            </span>
             <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-              <span className="text-yellow-400 text-sm font-bold">{user?.email?.charAt(0).toUpperCase() || 'P'}</span>
+              <span className="text-yellow-400 text-sm font-bold">
+                {user?.email?.charAt(0).toUpperCase() || 'P'}
+              </span>
             </div>
           </div>
         </div>
