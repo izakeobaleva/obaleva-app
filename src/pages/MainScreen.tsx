@@ -4,7 +4,6 @@ import { MapPin, Navigation, Car, Gift, ShieldCheck } from 'lucide-react';
 
 // =====================================================
 // TELA PRINCIPAL - OBALEVÁ (VERSÃO ESTÁVEL)
-// Usa APENAS estilo inline - NÃO depende de CSS externo
 // =====================================================
 
 const MainScreen = () => {
@@ -25,7 +24,6 @@ const MainScreen = () => {
   };
 
   return (
-    // Container fixo - força ocupar 100% da tela
     <div style={{
       position: 'fixed',
       top: 0,
@@ -39,9 +37,7 @@ const MainScreen = () => {
     }}>
       <Toaster position="top-center" richColors />
       
-      {/* ========================================== */}
-      {/* 1. TOP BAR (60px FIXO) */}
-      {/* ========================================== */}
+      {/* TOP BAR (60px FIXO) */}
       <div style={{
         height: '60px',
         flexShrink: 0,
@@ -79,9 +75,7 @@ const MainScreen = () => {
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* 2. MAPA (OCUPA TODO ESPAÇO QUE SOBRA - flex-1) */}
-      {/* ========================================== */}
+      {/* MAPA (OCUPA TODO ESPAÇO QUE SOBRA) */}
       <div style={{
         flex: 1,
         backgroundColor: '#1f2937',
@@ -110,7 +104,6 @@ const MainScreen = () => {
           <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '4px' }}>📞 -23.5543, -46.6475</p>
         </div>
         
-        {/* Marcador de localização simulado */}
         <div style={{
           position: 'absolute',
           bottom: '16px',
@@ -123,9 +116,7 @@ const MainScreen = () => {
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* 3. ORIGEM + DESTINO */}
-      {/* ========================================== */}
+      {/* ORIGEM + DESTINO */}
       <div style={{
         flexShrink: 0,
         backgroundColor: '#111827',
@@ -133,7 +124,6 @@ const MainScreen = () => {
         borderTop: '1px solid #1f2937'
       }}>
         
-        {/* ONDE VOCÊ ESTÁ? */}
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <MapPin size={14} color="#4ade80" />
@@ -152,7 +142,6 @@ const MainScreen = () => {
           </div>
         </div>
 
-        {/* PARA ONDE VOCÊ VAI? */}
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <Navigation size={14} color="#f87171" />
@@ -184,7 +173,6 @@ const MainScreen = () => {
           </div>
         </div>
 
-        {/* BOTÃO CHAMAR */}
         <button
           onClick={handleRequestRide}
           disabled={isRequesting}
@@ -197,17 +185,14 @@ const MainScreen = () => {
             borderRadius: '12px',
             fontWeight: 'bold',
             fontSize: '15px',
-            cursor: !isRequesting ? 'pointer' : 'not-allowed',
-            transition: 'all 0.2s'
+            cursor: !isRequesting ? 'pointer' : 'not-allowed'
           }}
         >
           {isRequesting ? 'Procurando motorista...' : '🚗 Chamar ObaLeva'}
         </button>
       </div>
 
-      {/* ========================================== */}
-      {/* 4. ESPAÇO PUBLICITÁRIO (50px FIXO) */}
-      {/* ========================================== */}
+      {/* ESPAÇO PUBLICITÁRIO (50px FIXO) */}
       <div style={{
         height: '50px',
         flexShrink: 0,
@@ -237,4 +222,6 @@ const MainScreen = () => {
   );
 };
 
+// ✅ EXPORTAÇÃO NOMEADA + DEFAULT (ambas funcionam)
+export { MainScreen };
 export default MainScreen;
