@@ -1,57 +1,40 @@
-import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Clock, User, DollarSign } from 'lucide-react'
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Home, History, User, Car } from 'lucide-react';
 
-interface BottomNavProps {
-  role: 'passageiro' | 'motorista'
-}
+const BottomNav: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-export function BottomNav({ role }: BottomNavProps) {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const currentPath = location.pathname
-
-  const passengerTabs = [
-    { path: '/', label: 'Início', icon: Home },
-    { path: '/trips', label: 'Viagens', icon: Clock },
-    { path: '/profile', label: 'Perfil', icon: User },
-  ]
-
-  const driverTabs = [
-    { path: '/driver', label: 'Início', icon: Home },
-    { path: '/earnings', label: 'Ganhos', icon: DollarSign },
-    { path: '/profile', label: 'Perfil', icon: User },
-  ]
-
-  const tabs = role === 'motorista' ? driverTabs : passengerTabs
-
-  const isActive = (path: string) => {
-    if (path === '/') return currentPath === '/' || currentPath === ''
-    return currentPath.startsWith(path)
-  }
+  const navItems = [
+    { path: '/', icon: Home, label: 'Início' },
+    { path: '/trips', icon: History, label: 'Viagens' },
+    { path: '/driver', icon: Car, label: 'Motorista' },
+    { path: '/profile', icon: User, label: 'Perfil' },
+  ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-2 bg-gradient-to-t from-[#0F0B1A] via-[#0F0B1A]/95 to-transparent pt-3">
-      <div className="bg-[#1A1528] border border-white/10 rounded-2xl w-[95%] max-w-md mx-2 shadow-xl shadow-black/30">
-        <div className="flex justify-around px-5 py-3">
-          {tabs.map((tab) => (
-            <button
-              key={tab.path}
-              onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center gap-1 transition-all ${
-                isActive(tab.path) 
-                  ? 'text-[#F4D03F] scale-110' 
-                  : 'text-[#A0A0B0] hover:text-white'
-              }`}
-            >
-              <tab.icon size={22} />
-              <span className="text-[10px] font-medium">{tab.label}</span>
-              {isActive(tab.path) && (
-                <div className="w-1 h-1 rounded-full bg-[#F4D03F] mt-0.5" />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
+    <nav className="h-16 bg-gray-900 border-t border-gray-800 flex items-center justify-around px-4">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = location.pathname === item.path;
+        
+        return (
+          <button
+            key={item.path}
+            onClick={() => navigate(item.path)}
+            className={`
+              flex flex-col items-center gap-1 transition-all
+              ${isActive ? 'text-yellow-400' : 'text-gray-500 hover:text-gray-300'}
+            `}
+          >
+            <Icon className="w-5 h-5" />
+            <span className="text-xs">{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+};
+
+export default BottomNav;
