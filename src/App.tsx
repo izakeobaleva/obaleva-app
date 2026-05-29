@@ -19,6 +19,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import PermissionLocation from './pages/PermissionLocation';
 import PermissionNotification from './pages/PermissionNotification';
 import AuthGate from './components/AuthGate';
+import { DriverDashboard } from './pages/DriverDashboard';
 
 function App() {
   return (
