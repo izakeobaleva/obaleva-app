@@ -17,7 +17,7 @@ function App() {
     <BrowserRouter>
       <div style={{ width: '100%', minHeight: '100vh' }}>
         <Routes>
-          <Route path="/" element={jaViuOnboarding ? <Home /> : <Navigate to="/permission-location" replace />} />
+          <Route path="/" element={jaViuOnboarding ? <Navigate to="/home" replace /> : <Navigate to="/permission-location" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
           <Route path="/permission-location" element={<PermissionLocation />} />
