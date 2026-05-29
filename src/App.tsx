@@ -1,12 +1,11 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import './App.css';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
-import { PassengerDashboard } from './pages/PassengerDashboard';
-import { DriverDashboard } from './pages/DriverDashboard';
+import Home from './pages/Home';
 import { RegisterPassenger } from './pages/RegisterPassenger';
 import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
@@ -25,7 +24,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="w-full min-h-screen bg-[#0F0B1A]">
+        <div className="w-full h-screen bg-[#0F0B1A] overflow-hidden">
           <Routes>
             {/* Rotas públicas */}
             <Route path="/login" element={<Login />} />
@@ -34,8 +33,8 @@ function App() {
             <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             
-            {/* Rotas protegidas (precisa estar logado) */}
-            <Route path="/" element={<AuthGate><PassengerDashboard /></AuthGate>} />
+            {/* Rotas protegidas */}
+            <Route path="/" element={<AuthGate><Home /></AuthGate>} />
             <Route path="/driver" element={<AuthGate><DriverDashboard /></AuthGate>} />
             <Route path="/trips" element={<AuthGate><Trips /></AuthGate>} />
             <Route path="/trips/:id" element={<AuthGate><TripDetails /></AuthGate>} />
@@ -44,7 +43,7 @@ function App() {
             <Route path="/cadastro-motorista" element={<AuthGate><CadastroMotorista /></AuthGate>} />
             <Route path="/admin" element={<AuthGate><AdminDashboard /></AuthGate>} />
             
-            {/* Páginas antigas de onboarding */}
+            {/* Onboarding */}
             <Route path="/permission-location" element={<PermissionLocation />} />
             <Route path="/permission-notification" element={<PermissionNotification />} />
             
