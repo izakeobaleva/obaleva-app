@@ -1,21 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useGeolocation } from '../hooks/useGeolocation';
+import { useGoogleMaps } from '../hooks/useGoogleMaps';
+import { MapBackground } from '../components/MapBackground';
+import { LocationAutocomplete } from '../components/LocationAutocomplete';
 import { Toaster, toast } from 'sonner';
-import { MapPin, Navigation, Car, Gift, ShieldCheck } from 'lucide-react';
-
-// =====================================================
-// TELA PRINCIPAL - OBALEVÁ (VERSÃO ESTÁVEL)
-// =====================================================
+import { Car, MapPin, Navigation, DollarSign, Gift, ShieldCheck, User } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 const MainScreen = () => {
-  const [origin, setOrigin] = useState('R. Santo Antônio, 1091 - Bela Vista');
-  const [destination, setDestination] = useState('');
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [origin, setOrigin] = useState<string>('R. Santo Antônio, 1091 - Bela Vista');
+  const [destination, setDestination] = useState<string>('');
+  const [price, setPrice] = useState<number | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
+  const [showOriginPicker, setShowOriginPicker] = useState(false);
+  const [showDestPicker, setShowDestPicker] = useState(false);
+  
+  const { userLocation, getCurrentLocation } = useGeolocation();
+  const { isLoaded, geocodeAddress, reverseGeocode } = useGoogleMaps();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+  }, []);
+
+  useEffect(() => {
+    if (userLocation && origin === 'R. Santo Antônio, 1091 - Bela Vista') {
+      reverseGeocode(userLocation.lat, userLocation.lng).then(address => {
+        if (address) setOrigin(address);
+      });
+    }
+  }, [userLocation]);
+
+  const handlePickOrigin = async () => {
+    const loc = await getCurrentLocation();
+    if (loc) {
+      const address = await reverseGeocode(loc.lat, loc.lng);
+      if (address) setOrigin(address);
+    }
+    setShowOriginPicker(false);
+  };
+
+  const handlePlaceSelected = async (lat: number, lng: number, address: string, type: 'origin' | 'destination') => {
+    if (type === 'origin') setOrigin(address);
+    else setDestination(address);
+  };
 
   const handleRequestRide = () => {
-    if (!destination) {
-      toast.error('Digite um destino');
-      return;
-    }
+    if (!destination) { toast.error('Digite um destino'); return; }
     setIsRequesting(true);
     setTimeout(() => {
       toast.success('Procurando motorista... 🚗');
@@ -24,204 +57,156 @@ const MainScreen = () => {
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: '#111827',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
-    }}>
+    <div className="h-screen w-full bg-gray-900 flex flex-col overflow-hidden">
       <Toaster position="top-center" richColors />
       
-      {/* TOP BAR (60px FIXO) */}
-      <div style={{
-        height: '60px',
-        flexShrink: 0,
-        backgroundColor: '#111827',
-        borderBottom: '1px solid #1f2937',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: '#facc15',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Car size={18} color="#111827" />
+      {/* TOP BAR */}
+      <div className="h-[60px] flex-shrink-0 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 shadow-lg z-50">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
+            <Car className="w-5 h-5 text-gray-900" />
           </div>
-          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#facc15' }}>ObaLeva</span>
+          <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
         </div>
-        <div style={{
-          width: '32px',
-          height: '32px',
-          backgroundColor: '#1f2937',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <span style={{ color: '#facc15', fontSize: '14px', fontWeight: 'bold' }}>P</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-300">
+            {user?.email?.split('@')[0] || 'Passageiro'}
+          </span>
+          <button onClick={() => user ? navigate('/profile') : navigate('/login')} className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+            <User className="w-4 h-4 text-yellow-400" />
+          </button>
         </div>
       </div>
 
-      {/* MAPA (OCUPA TODO ESPAÇO QUE SOBRA) */}
-      <div style={{
-        flex: 1,
-        backgroundColor: '#1f2937',
-        margin: '16px',
-        borderRadius: '16px',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            backgroundColor: '#374151',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 12px auto'
-          }}>
-            <span style={{ fontSize: '32px' }}>🗺️</span>
+      {/* MAPA */}
+      <div className="flex-1 relative">
+        {isLoaded && userLocation ? (
+          <MapBackground 
+            center={{ lat: userLocation.lat, lng: userLocation.lng }}
+            zoom={15}
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Navigation className="w-8 h-8 text-yellow-400 animate-pulse" />
+              </div>
+              <p className="text-gray-400">Carregando mapa...</p>
+              <p className="text-gray-500 text-xs mt-1">📍 Aguardando localização</p>
+            </div>
           </div>
-          <p style={{ color: '#9ca3af', fontSize: '14px' }}>Mapa indisponível</p>
-          <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '4px' }}>📞 -23.5543, -46.6475</p>
-        </div>
+        )}
         
-        <div style={{
-          position: 'absolute',
-          bottom: '16px',
-          right: '16px',
-          backgroundColor: '#111827cc',
-          borderRadius: '50%',
-          padding: '8px'
-        }}>
-          <div style={{ width: '12px', height: '12px', backgroundColor: '#3b82f6', borderRadius: '50%' }}></div>
+        {/* Marcador central */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
+          <div className="relative">
+            <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
+            <div className="absolute -top-1 -left-1 w-8 h-8 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
+          </div>
         </div>
       </div>
 
-      {/* ORIGEM + DESTINO */}
-      <div style={{
-        flexShrink: 0,
-        backgroundColor: '#111827',
-        padding: '16px',
-        borderTop: '1px solid #1f2937'
-      }}>
+      {/* PAINEL INFERIOR */}
+      <div className="flex-shrink-0 bg-gray-900 px-4 py-3 border-t border-gray-800 shadow-2xl">
         
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <MapPin size={14} color="#4ade80" />
-            <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '500' }}>ONDE VOCÊ ESTÁ?</span>
+        {showOriginPicker ? (
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <MapPin className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-gray-400">ONDE VOCÊ ESTÁ?</span>
+            </div>
+            <div className="flex gap-2">
+              <div className="flex-1 bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <LocationAutocomplete
+                  placeholder="Digite seu endereço"
+                  onPlaceSelected={(lat, lng, address) => handlePlaceSelected(lat, lng, address, 'origin')}
+                />
+              </div>
+              <button 
+                onClick={handlePickOrigin}
+                className="px-3 py-2 bg-blue-600 rounded-xl text-white text-xs font-medium hover:bg-blue-500 transition"
+              >
+                🎯 GPS
+              </button>
+            </div>
           </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            backgroundColor: '#1f2937',
-            borderRadius: '12px',
-            padding: '8px 12px'
-          }}>
-            <span style={{ fontSize: '13px', color: '#f3f4f6', flex: 1 }}>{origin}</span>
-            <button style={{ fontSize: '11px', color: '#facc15' }}>[Editar]</button>
+        ) : (
+          <div className="mb-3" onClick={() => setShowOriginPicker(true)}>
+            <div className="flex items-center gap-2 mb-1">
+              <MapPin className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-gray-400">ONDE VOCÊ ESTÁ?</span>
+            </div>
+            <div className="flex items-center justify-between bg-gray-800 rounded-xl px-3 py-2.5 border border-gray-700 cursor-pointer">
+              <span className="text-sm text-white truncate flex-1">{origin}</span>
+              <span className="text-xs text-yellow-400 font-medium ml-2">[Alterar]</span>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <Navigation size={14} color="#f87171" />
-            <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '500' }}>PARA ONDE VOCÊ VAI?</span>
-          </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            backgroundColor: '#1f2937',
-            borderRadius: '12px',
-            padding: '8px 12px'
-          }}>
-            <input
-              type="text"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="Para onde vai?"
-              style={{
-                flex: 1,
-                backgroundColor: 'transparent',
-                border: 'none',
-                outline: 'none',
-                color: '#f3f4f6',
-                fontSize: '13px'
-              }}
+        {showDestPicker ? (
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Navigation className="w-4 h-4 text-red-400" />
+              <span className="text-xs text-gray-400">PARA ONDE VOCÊ VAI?</span>
+            </div>
+            <LocationAutocomplete
+              placeholder="Digite seu destino"
+              onPlaceSelected={(lat, lng, address) => handlePlaceSelected(lat, lng, address, 'destination')}
             />
-            <button style={{ fontSize: '11px', color: '#facc15' }}>[Editar]</button>
           </div>
-        </div>
+        ) : (
+          <div className="mb-3" onClick={() => setShowDestPicker(true)}>
+            <div className="flex items-center gap-2 mb-1">
+              <Navigation className="w-4 h-4 text-red-400" />
+              <span className="text-xs text-gray-400">PARA ONDE VOCÊ VAI?</span>
+            </div>
+            <div className="flex items-center justify-between bg-gray-800 rounded-xl px-3 py-2.5 border border-gray-700 cursor-pointer">
+              <span className={`text-sm ${destination ? 'text-white' : 'text-gray-500'} truncate flex-1`}>
+                {destination || 'Para onde vai?'}
+              </span>
+              <span className="text-xs text-yellow-400 font-medium ml-2">{destination ? '[Alterar]' : '[Selecionar]'}</span>
+            </div>
+          </div>
+        )}
 
         <button
           onClick={handleRequestRide}
-          disabled={isRequesting}
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: !isRequesting ? '#facc15' : '#4b5563',
-            color: !isRequesting ? '#111827' : '#9ca3af',
-            border: 'none',
-            borderRadius: '12px',
-            fontWeight: 'bold',
-            fontSize: '15px',
-            cursor: !isRequesting ? 'pointer' : 'not-allowed'
-          }}
+          disabled={isRequesting || !destination}
+          className={`w-full py-3.5 rounded-2xl font-bold text-base transition-all ${
+            destination && !isRequesting 
+              ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300 active:scale-[0.98] shadow-lg shadow-yellow-400/20' 
+              : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+          }`}
         >
-          {isRequesting ? 'Procurando motorista...' : '🚗 Chamar ObaLeva'}
+          {isRequesting ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
+              Procurando motorista...
+            </div>
+          ) : (
+            '🚗 Chamar ObaLeva'
+          )}
         </button>
       </div>
 
-      {/* ESPAÇO PUBLICITÁRIO (50px FIXO) */}
-      <div style={{
-        height: '50px',
-        flexShrink: 0,
-        backgroundColor: '#1f2937',
-        borderTop: '1px solid #374151',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Gift size={12} color="#facc15" />
-            <span style={{ fontSize: '11px', color: '#d1d5db' }}>
-              <strong style={{ color: '#facc15' }}>10% OFF</strong> 1ª corrida
+      {/* RODAPÉ */}
+      <div className="h-[50px] flex-shrink-0 bg-gray-800 border-t border-gray-700 flex items-center justify-between px-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <Gift className="w-3.5 h-3.5 text-yellow-400" />
+            <span className="text-xs text-gray-300">
+              <strong className="text-yellow-400">10% OFF</strong> 1ª corrida
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <ShieldCheck size={12} color="#facc15" />
-            <span style={{ fontSize: '11px', color: '#9ca3af' }}>Segurança 24h</span>
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-yellow-400" />
+            <span className="text-xs text-gray-400">Segurança 24h</span>
           </div>
         </div>
-        <button style={{ fontSize: '11px', color: '#facc15' }}>Saiba mais →</button>
+        <button className="text-xs text-yellow-400 font-medium">Saiba mais →</button>
       </div>
-
     </div>
   );
 };
 
-// ✅ EXPORTAÇÃO NOMEADA + DEFAULT (ambas funcionam)
-export { MainScreen };
 export default MainScreen;
