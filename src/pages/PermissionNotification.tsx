@@ -12,79 +12,36 @@ const PermissionNotification = () => {
   };
 
   return (
-    <div style={{
-      backgroundColor: '#111827',
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      <div style={{
-        backgroundColor: '#1f2937',
-        borderRadius: '24px',
-        padding: '32px 24px',
-        maxWidth: '320px',
-        width: '100%'
-      }}>
-        <div style={{
-          width: '64px',
-          height: '64px',
-          backgroundColor: '#facc15',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 20px',
-          fontSize: '32px'
-        }}>
-          🔔
+    <div className="h-screen w-full bg-black flex items-center justify-center p-5">
+      <div className="bg-black rounded-3xl p-6 w-full max-w-sm border border-gray-800">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-yellow-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">🔔</span>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">Permitir notificações?</h2>
+          <p className="text-gray-400 text-sm mb-3">
+            Para receber alertas importantes como:
+          </p>
+          <ul className="text-left text-gray-300 text-sm space-y-1 mb-6 pl-2">
+            <li>• "Motorista a caminho"</li>
+            <li>• "Estou chegando!"</li>
+            <li>• "Corrida confirmada"</li>
+            <li>• "Promoções e descontos"</li>
+            <li>• "Avalie sua corrida"</li>
+          </ul>
+          <button
+            onClick={handleAllow}
+            className="w-full py-3.5 bg-yellow-400 text-black font-bold rounded-xl text-base mb-3"
+          >
+            PERMITIR
+          </button>
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full py-3 text-gray-500 font-medium text-sm"
+          >
+            Agora não
+          </button>
         </div>
-        <h2 style={{ color: '#facc15', fontSize: '22px', marginBottom: '12px', textAlign: 'center' }}>
-          Permitir notificações?
-        </h2>
-        <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '16px', textAlign: 'center' }}>
-          Para receber alertas importantes como:
-        </p>
-        <ul style={{ color: '#d1d5db', fontSize: '13px', marginBottom: '24px', paddingLeft: '20px' }}>
-          <li style={{ marginBottom: '4px' }}>• "Motorista a caminho"</li>
-          <li style={{ marginBottom: '4px' }}>• "Estou chegando!"</li>
-          <li style={{ marginBottom: '4px' }}>• "Corrida confirmada"</li>
-          <li style={{ marginBottom: '4px' }}>• "Promoções e descontos"</li>
-          <li>• "Avalie sua corrida"</li>
-        </ul>
-        <button
-          onClick={handleAllow}
-          style={{
-            width: '100%',
-            backgroundColor: '#facc15',
-            color: '#111827',
-            padding: '14px',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            marginBottom: '12px',
-            cursor: 'pointer'
-          }}
-        >
-          PERMITIR
-        </button>
-        <button
-          onClick={() => navigate('/login')}
-          style={{
-            width: '100%',
-            backgroundColor: 'transparent',
-            color: '#6b7280',
-            padding: '14px',
-            border: 'none',
-            fontSize: '14px',
-            cursor: 'pointer'
-          }}
-        >
-          Agora não
-        </button>
       </div>
     </div>
   );
