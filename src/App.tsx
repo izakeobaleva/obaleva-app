@@ -15,7 +15,7 @@ import Earnings from './pages/Earnings';
 import CadastroMotorista from './pages/CadastroMotorista';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
-import { MainScreen } from './pages/MainScreen';
+import TelaNova from './pages/TelaNova';
 import { DriverDashboard } from './pages/DriverDashboard';
 import AuthGate from './components/AuthGate';
 
@@ -30,7 +30,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/" element={<AuthGate><MainScreen /></AuthGate>} />
+          <Route path="/" element={<TelaNova />} />
           <Route path="/driver" element={<AuthGate><DriverDashboard /></AuthGate>} />
           <Route path="/trips" element={<AuthGate><Trips /></AuthGate>} />
           <Route path="/trips/:id" element={<AuthGate><TripDetails /></AuthGate>} />
