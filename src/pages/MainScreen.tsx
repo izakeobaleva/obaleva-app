@@ -36,9 +36,10 @@ const MainScreen = () => {
     <div className="h-screen w-full bg-black flex flex-col overflow-hidden">
       <Toaster position="top-center" richColors />
       
+      {/* TOP BAR */}
       <div className="h-[60px] flex-shrink-0 bg-black border-b border-gray-800 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
             <span className="text-lg">🚗</span>
           </div>
           <span className="text-xl font-bold text-white">ObaLeva</span>
@@ -46,6 +47,7 @@ const MainScreen = () => {
         <div className="text-sm text-gray-500">Passageiro</div>
       </div>
 
+      {/* MAPA - OCUPA TELA INTEIRA */}
       <div className="flex-1 relative">
         {isLoaded && location ? (
           <MapBackground 
@@ -53,7 +55,7 @@ const MainScreen = () => {
             zoom={15}
           />
         ) : (
-          <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center">
+          <div className="w-full h-full bg-[#1a1a1a] flex flex-col items-center justify-center">
             <div className="text-center">
               <div className="text-5xl mb-3">🗺️</div>
               <p className="text-gray-400">Carregando mapa...</p>
@@ -62,12 +64,14 @@ const MainScreen = () => {
           </div>
         )}
         
+        {/* Marcador central */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
           <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
           <div className="absolute -top-1 -left-1 w-8 h-8 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
         </div>
       </div>
 
+      {/* ORIGEM + DESTINO */}
       <div className="flex-shrink-0 bg-black px-4 py-3 border-t border-gray-800">
         
         <div className="mb-3">
@@ -75,11 +79,11 @@ const MainScreen = () => {
             <span className="text-green-400 text-sm">📍</span>
             <span className="text-xs text-gray-500 font-medium">ONDE VOCÊ ESTÁ?</span>
           </div>
-          <div className="flex items-center justify-between bg-gray-900 rounded-xl px-3 py-2 border border-gray-800">
+          <div className="flex items-center justify-between bg-[#1a1a1a] rounded-xl px-3 py-2 border border-gray-800">
             <span className="text-sm text-white truncate flex-1">
               {locationLoading ? 'Carregando...' : location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : 'Localização não disponível'}
             </span>
-            <button className="text-xs text-yellow-400 ml-2">[Alterar]</button>
+            <button className="text-xs text-yellow-500 ml-2">[Alterar]</button>
           </div>
         </div>
 
@@ -88,7 +92,7 @@ const MainScreen = () => {
             <span className="text-red-400 text-sm">🎯</span>
             <span className="text-xs text-gray-500 font-medium">PARA ONDE VOCÊ VAI?</span>
           </div>
-          <div className="flex items-center justify-between bg-gray-900 rounded-xl px-3 py-2 border border-gray-800">
+          <div className="flex items-center justify-between bg-[#1a1a1a] rounded-xl px-3 py-2 border border-gray-800">
             <input
               type="text"
               value={destination}
@@ -96,7 +100,7 @@ const MainScreen = () => {
               placeholder="Para onde vai?"
               className="flex-1 bg-transparent text-sm text-white outline-none placeholder-gray-600"
             />
-            <button className="text-xs text-yellow-400 ml-2">[Selecionar]</button>
+            <button className="text-xs text-yellow-500 ml-2">[Selecionar]</button>
           </div>
         </div>
 
@@ -106,7 +110,7 @@ const MainScreen = () => {
           className={`
             w-full py-3 rounded-xl font-bold text-base transition-all
             ${!isRequesting 
-              ? 'bg-yellow-400 text-black' 
+              ? 'bg-yellow-500 text-black' 
               : 'bg-gray-800 text-gray-600 cursor-not-allowed'}
           `}
         >
@@ -114,18 +118,18 @@ const MainScreen = () => {
         </button>
       </div>
 
-      <div className="flex-shrink-0 bg-gray-900 border-t border-gray-800 flex items-center justify-between px-4 py-3">
+      <div className="flex-shrink-0 bg-[#1a1a1a] border-t border-gray-800 flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
-            <span className="text-yellow-400 text-xs">🔥</span>
-            <span className="text-xs text-gray-400"><strong className="text-yellow-400">10% OFF</strong> 1ª corrida</span>
+            <span className="text-yellow-500 text-xs">🔥</span>
+            <span className="text-xs text-gray-400"><strong className="text-yellow-500">10% OFF</strong> 1ª corrida</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-yellow-400 text-xs">🛡️</span>
+            <span className="text-yellow-500 text-xs">🛡️</span>
             <span className="text-xs text-gray-500">Segurança 24h</span>
           </div>
         </div>
-        <button className="text-xs text-yellow-400">Saiba mais →</button>
+        <button className="text-xs text-yellow-500">Saiba mais →</button>
       </div>
     </div>
   );
