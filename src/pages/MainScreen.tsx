@@ -68,7 +68,6 @@ const MainScreen: React.FC = () => {
       <Toaster position="top-center" richColors />
       
       <div className="h-screen w-full flex flex-col bg-gray-900 overflow-hidden">
-        {/* TOP BAR */}
         <div className="flex-shrink-0 h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 shadow-lg z-50">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
@@ -76,7 +75,6 @@ const MainScreen: React.FC = () => {
             </div>
             <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
           </div>
-          
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-300 hidden sm:block">
               Olá, {user?.email?.split('@')[0] || 'Passageiro'}
@@ -89,13 +87,9 @@ const MainScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* MAPA */}
         <div className="flex-1 relative">
           {isLoaded && location ? (
-            <MapBackground 
-              center={{ lat: location.lat, lng: location.lng }}
-              zoom={15}
-            />
+            <MapBackground center={{ lat: location.lat, lng: location.lng }} zoom={15} />
           ) : (
             <div className="w-full h-full bg-gray-800 flex items-center justify-center">
               <div className="text-center">
@@ -104,7 +98,6 @@ const MainScreen: React.FC = () => {
               </div>
             </div>
           )}
-          
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
             <div className="relative">
               <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
@@ -113,7 +106,6 @@ const MainScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* CARDS ORIGEM + DESTINO */}
         <div className="absolute left-4 right-4 top-24 z-20 space-y-3">
           <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 border border-gray-700 shadow-lg">
             <div className="flex items-center gap-3">
@@ -130,15 +122,9 @@ const MainScreen: React.FC = () => {
                   <p className="text-sm text-gray-400">Selecione sua localização</p>
                 )}
               </div>
-              <button 
-                onClick={() => document.getElementById('origin-input')?.click()}
-                className="text-xs bg-gray-700 px-3 py-1 rounded-lg text-yellow-400"
-              >
-                Editar
-              </button>
+              <button onClick={() => document.getElementById('origin-input')?.click()} className="text-xs bg-gray-700 px-3 py-1 rounded-lg text-yellow-400">Editar</button>
             </div>
           </div>
-
           <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 border border-gray-700 shadow-lg">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
@@ -146,43 +132,18 @@ const MainScreen: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="text-xs text-gray-400">Para onde você vai?</p>
-                {destination ? (
-                  <p className="text-sm text-gray-200 truncate">{destination.address}</p>
-                ) : (
-                  <p className="text-sm text-gray-400">Digite seu destino</p>
-                )}
+                {destination ? <p className="text-sm text-gray-200 truncate">{destination.address}</p> : <p className="text-sm text-gray-400">Digite seu destino</p>}
               </div>
-              <button 
-                onClick={() => document.getElementById('destination-input')?.click()}
-                className="text-xs bg-gray-700 px-3 py-1 rounded-lg text-yellow-400"
-              >
-                Editar
-              </button>
+              <button onClick={() => document.getElementById('destination-input')?.click()} className="text-xs bg-gray-700 px-3 py-1 rounded-lg text-yellow-400">Editar</button>
             </div>
           </div>
         </div>
 
-        {/* INPUTS OCULTOS */}
         <div className="hidden">
-          <LocationAutocomplete
-            id="origin-input"
-            placeholder="Onde você está?"
-            onSelect={(address, lat, lng) => {
-              setOrigin({ lat, lng, address });
-              toast.success('Origem confirmada!');
-            }}
-          />
-          <LocationAutocomplete
-            id="destination-input"
-            placeholder="Para onde você vai?"
-            onSelect={(address, lat, lng) => {
-              setDestination({ lat, lng, address });
-              toast.success('Destino confirmado! Agora é só chamar');
-            }}
-          />
+          <LocationAutocomplete id="origin-input" placeholder="Onde você está?" onSelect={(address, lat, lng) => { setOrigin({ lat, lng, address }); toast.success('Origem confirmada!'); }} />
+          <LocationAutocomplete id="destination-input" placeholder="Para onde você vai?" onSelect={(address, lat, lng) => { setDestination({ lat, lng, address }); toast.success('Destino confirmado! Agora é só chamar'); }} />
         </div>
 
-        {/* BOTÃO CHAMAR + PREÇO */}
         <div className="absolute bottom-20 left-4 right-4 z-20">
           {destination && price && (
             <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 mb-3 border border-gray-700 flex items-center justify-between">
@@ -190,34 +151,19 @@ const MainScreen: React.FC = () => {
                 <DollarSign className="w-5 h-5 text-green-400" />
                 <span className="text-white font-bold">Valor estimado:</span>
               </div>
-              <span className="text-yellow-400 font-bold text-xl">
-                R$ {price.toFixed(2)}
-              </span>
+              <span className="text-yellow-400 font-bold text-xl">R$ {price.toFixed(2)}</span>
             </div>
           )}
-          
-          <button
-            onClick={handleRequestRide}
-            disabled={isRequesting || !destination}
-            className={`
-              w-full py-4 rounded-xl font-bold text-lg transition-all
-              ${destination && !isRequesting 
-                ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300 active:scale-95' 
-                : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
-            `}
-          >
+          <button onClick={handleRequestRide} disabled={isRequesting || !destination} className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${destination && !isRequesting ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300 active:scale-95' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}`}>
             {isRequesting ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
                 Procurando motorista...
               </div>
-            ) : (
-              '🚗 Chamar ObaLeva'
-            )}
+            ) : '🚗 Chamar ObaLeva'}
           </button>
         </div>
 
-        {/* BOTTOM NAV */}
         <div className="flex-shrink-0">
           <BottomNav />
         </div>

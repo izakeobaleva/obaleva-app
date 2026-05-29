@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, History, User, Car } from 'lucide-react';
 
-const BottomNav: React.FC = () => {
+const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
