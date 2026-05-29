@@ -15,10 +15,8 @@ import Earnings from './pages/Earnings';
 import CadastroMotorista from './pages/CadastroMotorista';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
-import PermissionLocation from './pages/PermissionLocation';
-import PermissionNotification from './pages/PermissionNotification';
+import { PassengerDashboard } from './pages/PassengerDashboard';
 import { DriverDashboard } from './pages/DriverDashboard';
-import Home from './pages/Home';
 import AuthGate from './components/AuthGate';
 
 function App() {
@@ -32,9 +30,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/permission-location" element={<PermissionLocation />} />
-          <Route path="/permission-notification" element={<PermissionNotification />} />
-          <Route path="/" element={<AuthGate><Home /></AuthGate>} />
+          <Route path="/" element={<AuthGate><PassengerDashboard /></AuthGate>} />
           <Route path="/driver" element={<AuthGate><DriverDashboard /></AuthGate>} />
           <Route path="/trips" element={<AuthGate><Trips /></AuthGate>} />
           <Route path="/trips/:id" element={<AuthGate><TripDetails /></AuthGate>} />
