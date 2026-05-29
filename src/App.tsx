@@ -17,6 +17,8 @@ import Earnings from './pages/Earnings';
 import CadastroMotorista from './pages/CadastroMotorista';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import PermissionLocation from './pages/PermissionLocation';
+import PermissionNotification from './pages/PermissionNotification';
 import AuthGate from './components/AuthGate';
 
 function App() {
@@ -42,7 +44,7 @@ function App() {
             <Route path="/cadastro-motorista" element={<AuthGate><CadastroMotorista /></AuthGate>} />
             <Route path="/admin" element={<AuthGate><AdminDashboard /></AuthGate>} />
             
-            {/* Páginas antigas de onboarding (só mostra se não tiver visto) */}
+            {/* Páginas antigas de onboarding */}
             <Route path="/permission-location" element={<PermissionLocation />} />
             <Route path="/permission-notification" element={<PermissionNotification />} />
             
