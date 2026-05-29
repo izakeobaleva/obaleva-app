@@ -20,8 +20,8 @@ export function PassengerDashboard() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const precoEstimado = useMemo(
-    () => (origem || destino) ? calcularPrecoCorrida({ distanciaKm: 5.2, tempoMin: 15 }) : null,
-    [origem, destino]
+    () => (destino) ? calcularPrecoCorrida({ distanciaKm: 5.2, tempoMin: 15 }) : null,
+    [destino]
   );
 
   useEffect(() => {
