@@ -2,7 +2,12 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, History, User, Car } from 'lucide-react';
 
-const BottomNav = () => {
+// ============================================
+// EXPORTAÇÃO COM NOME (NAMED EXPORT)
+// Isso resolve o erro do import { BottomNav }
+// ============================================
+
+export const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,4 +42,5 @@ const BottomNav = () => {
   );
 };
 
+// Também exporta como default para compatibilidade
 export default BottomNav;
