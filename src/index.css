@@ -11,17 +11,7 @@
 html, body {
   width: 100%;
   height: 100%;
-  overflow: hidden; /* remove rolagem da página toda */
-}
-
-/* Esconde visualmente a barra de rolagem mas mantém funcionalidade */
-::-webkit-scrollbar {
-  display: none; /* Chrome/Safari: esconde barra */
-}
-
-* {
-  scrollbar-width: none; /* Firefox: esconde barra */
-  -ms-overflow-style: none; /* IE/Edge: esconde barra */
+  overflow: hidden;
 }
 
 body {
@@ -30,70 +20,14 @@ body {
   color: #fff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  transform: none;
+  zoom: 1;
 }
 
 #root {
   width: 100vw;
   height: 100vh;
-  height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-}
-
-/* Reset de inputs no mobile */
-input, textarea, button, select {
-  font-family: inherit;
-  font-size: 16px !important; /* Evita zoom automático no iOS */
-}
-
-/* Classes utilitárias */
-.btn-primary {
-  @apply py-3.5 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg hover:shadow-[#F4D03F]/20 active:scale-[0.98] transition-all duration-200 text-[16px] leading-tight;
-}
-
-.btn-outline {
-  @apply py-3.5 rounded-2xl font-medium border border-white/20 text-white hover:bg-white/5 hover:border-white/30 transition-all duration-200 text-[16px] leading-tight;
-}
-
-.btn-danger {
-  @apply py-3.5 rounded-2xl font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all duration-200 text-[16px] leading-tight;
-}
-
-.card {
-  @apply bg-[#1A1528] rounded-2xl border border-white/[0.08];
-}
-
-.glass {
-  @apply bg-black/50 backdrop-blur-xl border-b border-white/10;
-}
-
-.input-dark {
-  @apply w-full bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3.5 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] focus:border-transparent transition-all text-[16px] leading-tight;
-}
-
-/* Animação fade in */
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Garantir que tudo use toda a largura */
-.max-w-app {
-  @apply w-full max-w-lg mx-auto px-4;
-}
-
-/* Container com rolagem interna (quando necessário) */
-.scroll-y {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scroll-y::-webkit-scrollbar {
-  display: none;
 }
