@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useGoogleMaps } from '../hooks/useGoogleMaps';
 import { MapBackground } from '../components/MapBackground';
@@ -9,25 +9,18 @@ import { BottomNav } from '../components/BottomNav';
 import { Toaster, toast } from 'sonner';
 import { Car, MapPin, Navigation, DollarSign } from 'lucide-react';
 
-// ============================================
-// TELA PRINCIPAL DO PASSAGEIRO - OBALEVÁ
-// ============================================
-
 const MainScreen: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // Estado para origem e destino
   const [origin, setOrigin] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [destination, setDestination] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [price, setPrice] = useState<number | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
   
-  // Pegar localização do usuário
-  const { location, loading: locationLoading, error: locationError } = useGeolocation();
+  const { location, loading: locationLoading } = useGeolocation();
   const { isLoaded } = useGoogleMaps();
 
-  // Quando tiver localização, setar como origem automática
   useEffect(() => {
     if (location && !origin) {
       setOrigin({
@@ -38,11 +31,9 @@ const MainScreen: React.FC = () => {
     }
   }, [location, origin]);
 
-  // Calcular preço quando destino for selecionado
   useEffect(() => {
     if (origin && destination) {
-      // Simulação de cálculo de preço (substituir por API real depois)
-      const distanceInKm = Math.random() * 10 + 2; // 2-12 km
+      const distanceInKm = Math.random() * 10 + 2;
       const basePrice = 5.00;
       const pricePerKm = 2.50;
       const calculatedPrice = basePrice + (distanceInKm * pricePerKm);
@@ -61,15 +52,11 @@ const MainScreen: React.FC = () => {
     setIsRequesting(true);
     
     try {
-      // TODO: Integrar com Supabase para criar corrida
       toast.success('Procurando motorista...');
-      
-      // Simular delay
       setTimeout(() => {
         toast.success('Motorista encontrado! 🚗');
         setIsRequesting(false);
       }, 2000);
-      
     } catch (error) {
       toast.error('Erro ao solicitar corrida');
       setIsRequesting(false);
@@ -80,14 +67,9 @@ const MainScreen: React.FC = () => {
     <>
       <Toaster position="top-center" richColors />
       
-      {/* CONTAINER PRINCIPAL - SEM BARRAS DE ROLAGEM */}
       <div className="h-screen w-full flex flex-col bg-gray-900 overflow-hidden">
-        
-        {/* ========================================== */}
-        {/* TOP BAR - 60dp FIXO */}
-        {/* ========================================== */}
+        {/* TOP BAR */}
         <div className="flex-shrink-0 h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 shadow-lg z-50">
-          {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
               <Car className="w-5 h-5 text-gray-900" />
@@ -95,7 +77,6 @@ const MainScreen: React.FC = () => {
             <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
           </div>
           
-          {/* Info do usuário */}
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-300 hidden sm:block">
               Olá, {user?.email?.split('@')[0] || 'Passageiro'}
@@ -108,9 +89,7 @@ const MainScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* ========================================== */}
-        {/* MAPA - OCUPA TODO ESPAÇO DISPONÍVEL */}
-        {/* ========================================== */}
+        {/* MAPA */}
         <div className="flex-1 relative">
           {isLoaded && location ? (
             <MapBackground 
@@ -126,7 +105,6 @@ const MainScreen: React.FC = () => {
             </div>
           )}
           
-          {/* Marcador de localização (flutuante no centro) */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
             <div className="relative">
               <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
@@ -135,11 +113,8 @@ const MainScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* ========================================== */}
-        {/* ORIGEM + DESTINO - CARDS FLUTUANTES */}
-        {/* ========================================== */}
+        {/* CARDS ORIGEM + DESTINO */}
         <div className="absolute left-4 right-4 top-24 z-20 space-y-3">
-          {/* Card de Origem */}
           <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 border border-gray-700 shadow-lg">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -164,7 +139,6 @@ const MainScreen: React.FC = () => {
             </div>
           </div>
 
-          {/* Card de Destino */}
           <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 border border-gray-700 shadow-lg">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
@@ -188,9 +162,7 @@ const MainScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* ========================================== */}
-        {/* INPUTS OCULTOS PARA AUTOCOMPLETE */}
-        {/* ========================================== */}
+        {/* INPUTS OCULTOS */}
         <div className="hidden">
           <LocationAutocomplete
             id="origin-input"
@@ -210,9 +182,7 @@ const MainScreen: React.FC = () => {
           />
         </div>
 
-        {/* ========================================== */}
-        {/* BOTÃO CHAMAR + PREÇO (se houver destino) */}
-        {/* ========================================== */}
+        {/* BOTÃO CHAMAR + PREÇO */}
         <div className="absolute bottom-20 left-4 right-4 z-20">
           {destination && price && (
             <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 mb-3 border border-gray-700 flex items-center justify-between">
@@ -247,13 +217,10 @@ const MainScreen: React.FC = () => {
           </button>
         </div>
 
-        {/* ========================================== */}
-        {/* BOTTOM NAV - BARRA INFERIOR FIXA */}
-        {/* ========================================== */}
+        {/* BOTTOM NAV */}
         <div className="flex-shrink-0">
           <BottomNav />
         </div>
-
       </div>
     </>
   );
