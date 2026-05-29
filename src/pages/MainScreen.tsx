@@ -76,13 +76,9 @@ const MainScreen: React.FC = () => {
             <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-300 hidden sm:block">
-              Olá, {user?.email?.split('@')[0] || 'Passageiro'}
-            </span>
+            <span className="text-sm text-gray-300 hidden sm:block">Olá, {user?.email?.split('@')[0] || 'Passageiro'}</span>
             <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-              <span className="text-yellow-400 text-sm font-bold">
-                {user?.email?.charAt(0).toUpperCase() || 'P'}
-              </span>
+              <span className="text-yellow-400 text-sm font-bold">{user?.email?.charAt(0).toUpperCase() || 'P'}</span>
             </div>
           </div>
         </div>
@@ -114,13 +110,7 @@ const MainScreen: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="text-xs text-gray-400">Onde você está?</p>
-                {locationLoading ? (
-                  <p className="text-sm text-gray-300">Obtendo localização...</p>
-                ) : origin ? (
-                  <p className="text-sm text-gray-200 truncate">{origin.address}</p>
-                ) : (
-                  <p className="text-sm text-gray-400">Selecione sua localização</p>
-                )}
+                {locationLoading ? <p className="text-sm text-gray-300">Obtendo localização...</p> : origin ? <p className="text-sm text-gray-200 truncate">{origin.address}</p> : <p className="text-sm text-gray-400">Selecione sua localização</p>}
               </div>
               <button onClick={() => document.getElementById('origin-input')?.click()} className="text-xs bg-gray-700 px-3 py-1 rounded-lg text-yellow-400">Editar</button>
             </div>
@@ -141,7 +131,7 @@ const MainScreen: React.FC = () => {
 
         <div className="hidden">
           <LocationAutocomplete id="origin-input" placeholder="Onde você está?" onSelect={(address, lat, lng) => { setOrigin({ lat, lng, address }); toast.success('Origem confirmada!'); }} />
-          <LocationAutocomplete id="destination-input" placeholder="Para onde você vai?" onSelect={(address, lat, lng) => { setDestination({ lat, lng, address }); toast.success('Destino confirmado! Agora é só chamar'); }} />
+          <LocationAutocomplete id="destination-input" placeholder="Para onde você vai?" onSelect={(address, lat, lng) => { setDestination({ lat, lng, address }); toast.success('Destino confirmado!'); }} />
         </div>
 
         <div className="absolute bottom-20 left-4 right-4 z-20">
