@@ -28,7 +28,7 @@ export default function PermissionLocation() {
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
       <div className="relative z-10 flex-1 flex items-center justify-center px-6">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-[480px]">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
           <div className="bg-[#1A1528]/95 backdrop-blur-xl border border-white/20 rounded-3xl p-10 text-center shadow-2xl">
             <div className="w-28 h-28 bg-[#F4D03F]/15 rounded-full flex items-center justify-center mx-auto mb-8 border-2 border-[#F4D03F]/30">
               <MapPin size={48} className="text-[#F4D03F]" />

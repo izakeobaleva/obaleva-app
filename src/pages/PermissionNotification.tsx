@@ -23,8 +23,8 @@ export default function PermissionNotification() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-50px] right-[-50px] w-[300px] h-[300px] bg-[#6B2D8C]/20 rounded-full blur-[100px]" />
       </div>
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full max-w-[480px]">
-        <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-10 text-center">
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full max-w-md">
+        <div className="bg-[#1A1528] rounded-3xl border border-white/10 shadow-xl p-8 text-center">
           <div className="w-28 h-28 bg-[#F4D03F]/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#F4D03F]/20">
             <Bell size={48} className="text-[#F4D03F]" />
           </div>
