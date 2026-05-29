@@ -17,43 +17,34 @@ import Earnings from './pages/Earnings';
 import CadastroMotorista from './pages/CadastroMotorista';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
-import PermissionLocation from './pages/PermissionLocation';
-import PermissionNotification from './pages/PermissionNotification';
+import AuthGate from './components/AuthGate';
 
 function App() {
-  const jaViuOnboarding = localStorage.getItem('obaleva_onboarding') === 'true';
-
   return (
     <BrowserRouter>
       <AuthProvider>
         <div className="w-full min-h-screen bg-[#0F0B1A]">
           <Routes>
-            {/* Rotas principais */}
-            <Route path="/" element={<PassengerDashboard />} />
+            {/* Rotas públicas */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<RegisterPassenger />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/update-password" element={<UpdatePassword />} />
-            
-            {/* Rotas de motorista */}
-            <Route path="/driver" element={<DriverDashboard />} />
-            <Route path="/earnings" element={<Earnings />} />
-            <Route path="/cadastro-motorista" element={<CadastroMotorista />} />
-            
-            {/* Rotas de corridas */}
-            <Route path="/trips" element={<Trips />} />
-            <Route path="/trips/:id" element={<TripDetails />} />
-            
-            {/* Rotas de perfil */}
-            <Route path="/profile" element={<Profile />} />
-            
-            {/* Rotas de onboarding */}
-            <Route path="/permission-location" element={jaViuOnboarding ? <Navigate to="/" replace /> : <PermissionLocation />} />
-            <Route path="/permission-notification" element={jaViuOnboarding ? <Navigate to="/" replace /> : <PermissionNotification />} />
-            
-            {/* Rotas de admin */}
             <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            
+            {/* Rotas protegidas (precisa estar logado) */}
+            <Route path="/" element={<AuthGate><PassengerDashboard /></AuthGate>} />
+            <Route path="/driver" element={<AuthGate><DriverDashboard /></AuthGate>} />
+            <Route path="/trips" element={<AuthGate><Trips /></AuthGate>} />
+            <Route path="/trips/:id" element={<AuthGate><TripDetails /></AuthGate>} />
+            <Route path="/profile" element={<AuthGate><Profile /></AuthGate>} />
+            <Route path="/earnings" element={<AuthGate><Earnings /></AuthGate>} />
+            <Route path="/cadastro-motorista" element={<AuthGate><CadastroMotorista /></AuthGate>} />
+            <Route path="/admin" element={<AuthGate><AdminDashboard /></AuthGate>} />
+            
+            {/* Páginas antigas de onboarding (só mostra se não tiver visto) */}
+            <Route path="/permission-location" element={<PermissionLocation />} />
+            <Route path="/permission-notification" element={<PermissionNotification />} />
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
