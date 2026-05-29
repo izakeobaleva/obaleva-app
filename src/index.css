@@ -11,7 +11,17 @@
 html, body {
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
+  overflow: hidden; /* remove rolagem da página toda */
+}
+
+/* Esconde visualmente a barra de rolagem mas mantém funcionalidade */
+::-webkit-scrollbar {
+  display: none; /* Chrome/Safari: esconde barra */
+}
+
+* {
+  scrollbar-width: none; /* Firefox: esconde barra */
+  -ms-overflow-style: none; /* IE/Edge: esconde barra */
 }
 
 body {
@@ -23,29 +33,18 @@ body {
 }
 
 #root {
-  width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* Reset de inputs no mobile */
 input, textarea, button, select {
   font-family: inherit;
   font-size: 16px !important; /* Evita zoom automático no iOS */
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(244, 208, 63, 0.2);
-  border-radius: 10px;
 }
 
 /* Classes utilitárias */
@@ -86,4 +85,15 @@ input, textarea, button, select {
 /* Garantir que tudo use toda a largura */
 .max-w-app {
   @apply w-full max-w-lg mx-auto px-4;
+}
+
+/* Container com rolagem interna (quando necessário) */
+.scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-y::-webkit-scrollbar {
+  display: none;
 }
