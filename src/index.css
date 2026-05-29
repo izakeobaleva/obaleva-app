@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ============================================
-   REMOVE TODAS AS BARRAS DE ROLAGEM DO APP
+   REMOVE TODAS AS BARRAS DE ROLAGEM
    ============================================ */
 
 html, body, #root {
@@ -36,7 +36,7 @@ div, section, main, article {
   overflow: visible;
 }
 
-/* Apenas elementos que PRECISAM de rolagem (como listas longas) */
+/* Apenas elementos que PRECISAM de rolagem */
 .scrollable {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
