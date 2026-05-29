@@ -1,64 +1,70 @@
-import { useEffect, useRef } from 'react';
+import React from 'react';
+import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+
+// ============================================
+// COMPONENTE MAP BACKGROUND - OBALEVÁ
+// ============================================
+// EXPORTAÇÃO COM NOME (NAMED EXPORT)
+// Isso resolve o erro do import { MapBackground }
+// ============================================
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%',
+};
+
+const defaultCenter = {
+  lat: -23.5505,
+  lng: -46.6333, // São Paulo
+};
 
 interface MapBackgroundProps {
   center?: { lat: number; lng: number };
   zoom?: number;
 }
 
-export default function MapBackground({ center = { lat: -23.5505, lng: -46.6333 }, zoom = 14 }: MapBackgroundProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+export const MapBackground: React.FC<MapBackgroundProps> = ({ 
+  center = defaultCenter, 
+  zoom = 14 
+}) => {
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+  });
 
-  useEffect(() => {
-    if (!apiKey || !mapRef.current) return;
-
-    if (window.google?.maps) {
-      initializeMap();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initMapBackground`;
-    script.async = true;
-    script.defer = true;
-    (window as any).initMapBackground = initializeMap;
-    document.head.appendChild(script);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiKey]);
-
-  const initializeMap = () => {
-    if (!mapRef.current || mapInstanceRef.current) return;
-    try {
-      mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
-        center,
-        zoom,
-        disableDefaultUI: true,
-        styles: [
-          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-          { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-        ],
-      });
-    } catch (err) {
-      console.error('Erro ao criar mapa:', err);
-    }
-  };
-
-  if (!apiKey) {
+  if (loadError) {
     return (
-      <div className="w-full h-full bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] flex items-center justify-center">
+      <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+        <p className="text-red-400">Erro ao carregar o mapa</p>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="w-full h-full bg-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-full h-full bg-[#0F0B1A]" />
+          <div className="w-8 h-8 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p className="text-gray-400">Carregando mapa...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div 
-      ref={mapRef} 
-      className="w-full h-full"
-      style={{ filter: 'blur(1px) brightness(0.7)' }}
+    <GoogleMap
+      mapContainerStyle={mapContainerStyle}
+      center={center}
+      zoom={zoom}
+      options={{
+        disableDefaultUI: true,
+        zoomControl: true,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: false,
+      }}
     />
   );
-}
+};
+
+// Também exporta como default para compatibilidade
+export default MapBackground;
