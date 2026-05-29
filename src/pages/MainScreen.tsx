@@ -5,7 +5,7 @@ import { useGeolocation } from '../hooks/useGeolocation';
 import { useGoogleMaps } from '../hooks/useGoogleMaps';
 import { MapBackground } from '../components/MapBackground';
 import { LocationAutocomplete } from '../components/LocationAutocomplete';
-import { BottomNav } from '../components/BottomNav';
+import BottomNav from '../components/BottomNav';
 import { Toaster, toast } from 'sonner';
 import { Car, MapPin, Navigation, DollarSign } from 'lucide-react';
 
