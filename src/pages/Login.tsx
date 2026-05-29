@@ -8,126 +8,72 @@ const Login = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.setItem('isLoggedIn', 'true');
+    navigate('/');
+  };
+
+  const handleGoogleLogin = () => {
+    localStorage.setItem('isLoggedIn', 'true');
     navigate('/');
   };
 
   return (
-    <div style={{
-      backgroundColor: '#111827',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{
-          width: '72px',
-          height: '72px',
-          backgroundColor: '#facc15',
-          borderRadius: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 16px',
-          fontSize: '36px'
-        }}>
-          🚗
+    <div className="h-screen w-full bg-gray-900 flex flex-col items-center justify-center p-6">
+      <div className="text-center mb-8">
+        <div className="w-20 h-20 bg-yellow-400 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <span className="text-4xl">🚗</span>
         </div>
-        <h1 style={{ color: '#facc15', fontSize: '32px', marginBottom: '4px' }}>ObaLeva</h1>
-        <p style={{ color: '#6b7280', fontSize: '14px' }}>Sua corrida, do seu jeito</p>
+        <h1 className="text-3xl font-bold text-yellow-400">ObaLeva</h1>
+        <p className="text-gray-400 text-sm mt-1">Sua corrida, do seu jeito</p>
       </div>
 
-      <form onSubmit={handleLogin} style={{ width: '100%', maxWidth: '320px' }}>
+      <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4">
         <input
           type="email"
           placeholder="E-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '14px 16px',
-            backgroundColor: '#1f2937',
-            border: '1px solid #374151',
-            borderRadius: '12px',
-            color: '#fff',
-            fontSize: '14px',
-            marginBottom: '12px',
-            outline: 'none'
-          }}
+          className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-yellow-400"
         />
         <input
           type="password"
           placeholder="Senha"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '14px 16px',
-            backgroundColor: '#1f2937',
-            border: '1px solid #374151',
-            borderRadius: '12px',
-            color: '#fff',
-            fontSize: '14px',
-            marginBottom: '20px',
-            outline: 'none'
-          }}
+          className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-yellow-400"
         />
         <button
           type="submit"
-          style={{
-            width: '100%',
-            backgroundColor: '#facc15',
-            color: '#111827',
-            padding: '14px',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
+          className="w-full py-3 bg-yellow-400 text-gray-900 font-bold rounded-xl flex items-center justify-center gap-2"
         >
-          Entrar
+          <span>🔒</span> Entrar
         </button>
       </form>
 
-      <div style={{ width: '100%', maxWidth: '320px', marginTop: '20px', textAlign: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-          <div style={{ flex: 1, height: '1px', backgroundColor: '#374151' }}></div>
-          <span style={{ padding: '0 12px', color: '#6b7280', fontSize: '12px' }}>ou</span>
-          <div style={{ flex: 1, height: '1px', backgroundColor: '#374151' }}></div>
+      <div className="relative w-full max-w-sm my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-700"></div>
         </div>
-
-        <button
-          style={{
-            width: '100%',
-            backgroundColor: '#1f2937',
-            color: '#fff',
-            padding: '12px',
-            border: '1px solid #374151',
-            borderRadius: '12px',
-            fontSize: '14px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            cursor: 'pointer'
-          }}
-        >
-          <span style={{ fontSize: '18px' }}>🔗</span> Entrar com Google
-        </button>
-
-        <p style={{ color: '#6b7280', fontSize: '13px', marginTop: '20px' }}>
-          Não tem conta? <span style={{ color: '#facc15', cursor: 'pointer' }}>Cadastre-se</span>
-        </p>
-        <p style={{ color: '#4b5563', fontSize: '12px', marginTop: '8px', cursor: 'pointer' }}>
-          Esqueci minha senha
-        </p>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-gray-900 text-gray-500">ou</span>
+        </div>
       </div>
 
-      <p style={{ color: '#374151', fontSize: '10px', marginTop: '40px' }}>obaleva.com.br/login</p>
+      <button
+        onClick={handleGoogleLogin}
+        className="w-full max-w-sm py-3 bg-gray-800 border border-gray-700 rounded-xl text-white font-medium flex items-center justify-center gap-2"
+      >
+        <span>🔗</span> Entrar com Google
+      </button>
+
+      <div className="mt-6 text-center">
+        <p className="text-gray-400 text-sm">
+          Não tem conta? <button className="text-yellow-400 font-medium">Cadastre-se</button>
+        </p>
+        <button className="text-gray-500 text-xs mt-2">Esqueci minha senha</button>
+      </div>
+
+      <p className="text-gray-600 text-xs mt-8">obaleva.com.br/login</p>
     </div>
   );
 };
