@@ -1,168 +1,129 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useGeolocation } from '../hooks/useGeolocation';
-import { useGoogleMaps } from '../hooks/useGoogleMaps';
-import { MapBackground } from '../components/MapBackground';
-import { LocationAutocomplete } from '../components/LocationAutocomplete';
-import BottomNav from '../components/BottomNav';
 import { Toaster, toast } from 'sonner';
-import { Car, MapPin, Navigation, DollarSign } from 'lucide-react';
+import { MapPin, Navigation, Car } from 'lucide-react';
+
+// ============================================
+// TELA PRINCIPAL - IGUAL ÀS IMAGENS
+// SEM BARRAS DE ROLAGEM
+// ============================================
 
 export const MainScreen = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const [origin, setOrigin] = useState<{ lat: number; lng: number; address: string } | null>(null);
-  const [destination, setDestination] = useState<{ lat: number; lng: number; address: string } | null>(null);
-  const [price, setPrice] = useState<number | null>(null);
+  const [origin, setOrigin] = useState('R. Santo Antônio, 1091 - Bela Vís');
+  const [destination, setDestination] = useState('');
   const [isRequesting, setIsRequesting] = useState(false);
-  
-  const { location, loading: locationLoading } = useGeolocation();
-  const { isLoaded } = useGoogleMaps();
 
-  useEffect(() => {
-    if (location && !origin) {
-      setOrigin({
-        lat: location.lat,
-        lng: location.lng,
-        address: 'Sua localização atual'
-      });
-    }
-  }, [location, origin]);
-
-  useEffect(() => {
-    if (origin && destination) {
-      const distanceInKm = Math.random() * 10 + 2;
-      const basePrice = 5.00;
-      const pricePerKm = 2.50;
-      const calculatedPrice = basePrice + (distanceInKm * pricePerKm);
-      setPrice(calculatedPrice);
-    } else {
-      setPrice(null);
-    }
-  }, [origin, destination]);
-
-  const handleRequestRide = async () => {
-    if (!origin || !destination) {
-      toast.error('Selecione origem e destino');
+  const handleRequestRide = () => {
+    if (!destination) {
+      toast.error('Digite um destino');
       return;
     }
-
     setIsRequesting(true);
-    
-    try {
+    setTimeout(() => {
       toast.success('Procurando motorista...');
-      setTimeout(() => {
-        toast.success('Motorista encontrado! 🚗');
-        setIsRequesting(false);
-      }, 2000);
-    } catch (error) {
-      toast.error('Erro ao solicitar corrida');
       setIsRequesting(false);
-    }
+    }, 2000);
   };
 
   return (
-    <>
+    // CONTAINER PRINCIPAL - SEM ROLAGEM
+    <div className="fixed inset-0 bg-gray-900 flex flex-col overflow-hidden">
       <Toaster position="top-center" richColors />
       
-      <div className="h-screen w-full flex flex-col bg-gray-900 overflow-hidden">
-        <div className="flex-shrink-0 h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 shadow-lg z-50">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
-              <Car className="w-5 h-5 text-gray-900" />
-            </div>
-            <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
+      {/* ========================================== */}
+      {/* TOPO - Logo e nome do app */}
+      {/* ========================================== */}
+      <div className="flex-shrink-0 pt-8 pb-4 px-4">
+        <div className="flex items-center justify-center gap-2">
+          <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center">
+            <Car className="w-6 h-6 text-gray-900" />
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-300 hidden sm:block">
-              Olá, {user?.email?.split('@')[0] || 'Passageiro'}
-            </span>
-            <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-              <span className="text-yellow-400 text-sm font-bold">
-                {user?.email?.charAt(0).toUpperCase() || 'P'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 relative">
-          {isLoaded && location ? (
-            <MapBackground center={{ lat: location.lat, lng: location.lng }} zoom={15} />
-          ) : (
-            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-              <div className="text-center">
-                <Navigation className="w-12 h-12 text-yellow-400 mx-auto mb-2 animate-pulse" />
-                <p className="text-gray-400">Carregando mapa...</p>
-              </div>
-            </div>
-          )}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
-            <div className="relative">
-              <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
-              <div className="absolute -top-1 -left-1 w-8 h-8 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute left-4 right-4 top-24 z-20 space-y-3">
-          <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 border border-gray-700 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
-                <MapPin className="w-4 h-4 text-green-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-400">Onde você está?</p>
-                {locationLoading ? <p className="text-sm text-gray-300">Obtendo localização...</p> : origin ? <p className="text-sm text-gray-200 truncate">{origin.address}</p> : <p className="text-sm text-gray-400">Selecione sua localização</p>}
-              </div>
-              <button onClick={() => document.getElementById('origin-input')?.click()} className="text-xs bg-gray-700 px-3 py-1 rounded-lg text-yellow-400">Editar</button>
-            </div>
-          </div>
-          <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 border border-gray-700 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
-                <Navigation className="w-4 h-4 text-red-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-400">Para onde você vai?</p>
-                {destination ? <p className="text-sm text-gray-200 truncate">{destination.address}</p> : <p className="text-sm text-gray-400">Digite seu destino</p>}
-              </div>
-              <button onClick={() => document.getElementById('destination-input')?.click()} className="text-xs bg-gray-700 px-3 py-1 rounded-lg text-yellow-400">Editar</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="hidden">
-          <LocationAutocomplete id="origin-input" placeholder="Onde você está?" onSelect={(address, lat, lng) => { setOrigin({ lat, lng, address }); toast.success('Origem confirmada!'); }} />
-          <LocationAutocomplete id="destination-input" placeholder="Para onde você vai?" onSelect={(address, lat, lng) => { setDestination({ lat, lng, address }); toast.success('Destino confirmado!'); }} />
-        </div>
-
-        <div className="absolute bottom-20 left-4 right-4 z-20">
-          {destination && price && (
-            <div className="bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 mb-3 border border-gray-700 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-green-400" />
-                <span className="text-white font-bold">Valor estimado:</span>
-              </div>
-              <span className="text-yellow-400 font-bold text-xl">R$ {price.toFixed(2)}</span>
-            </div>
-          )}
-          <button onClick={handleRequestRide} disabled={isRequesting || !destination} className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${destination && !isRequesting ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300 active:scale-95' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}`}>
-            {isRequesting ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
-                Procurando motorista...
-              </div>
-            ) : '🚗 Chamar ObaLeva'}
-          </button>
-        </div>
-
-        <div className="flex-shrink-0">
-          <BottomNav />
+          <h1 className="text-2xl font-bold text-yellow-400">ObaLeva</h1>
         </div>
       </div>
-    </>
+
+      {/* ========================================== */}
+      {/* ÁREA DO MAPA (simulada por enquanto) */}
+      {/* ========================================== */}
+      <div className="flex-1 mx-4 mb-4 rounded-2xl overflow-hidden relative bg-gray-800">
+        {/* Mapa mockado (igual à imagem) */}
+        <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex flex-col items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-3xl">🗺️</span>
+            </div>
+            <p className="text-gray-400 text-sm">Mapa indisponível</p>
+            <p className="text-gray-500 text-xs mt-1">📞 -23.5543, -46.6475</p>
+          </div>
+        </div>
+        
+        {/* Marcador de localização simulado */}
+        <div className="absolute bottom-4 right-4 bg-gray-900/80 rounded-full p-2">
+          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+        </div>
+      </div>
+
+      {/* ========================================== */}
+      {/* ORIGEM + DESTINO */}
+      {/* ========================================== */}
+      <div className="flex-shrink-0 bg-gray-800 mx-4 rounded-2xl p-4 space-y-4">
+        
+        {/* ONDE VOCÊ ESTÁ? */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <MapPin className="w-4 h-4 text-green-400" />
+            <span className="text-xs text-gray-400 font-medium">ONDE VOCÊ ESTÁ?</span>
+          </div>
+          <div className="flex items-center justify-between bg-gray-700 rounded-xl px-3 py-2">
+            <span className="text-sm text-white truncate flex-1">{origin}</span>
+            <button className="text-xs text-yellow-400 font-medium ml-2">[Editar]</button>
+          </div>
+        </div>
+
+        {/* PARA ONDE VOCÊ VAI? */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Navigation className="w-4 h-4 text-red-400" />
+            <span className="text-xs text-gray-400 font-medium">PARA ONDE VOCÊ VAI?</span>
+          </div>
+          <div className="flex items-center justify-between bg-gray-700 rounded-xl px-3 py-2">
+            <input
+              type="text"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="Para onde vai?"
+              className="flex-1 bg-transparent text-sm text-white outline-none"
+            />
+            <button className="text-xs text-yellow-400 font-medium ml-2">[Editar]</button>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================== */}
+      {/* BOTÃO CHAMAR OBALEVÁ */}
+      {/* ========================================== */}
+      <div className="flex-shrink-0 p-4">
+        <button
+          onClick={handleRequestRide}
+          disabled={isRequesting}
+          className={`
+            w-full py-4 rounded-2xl font-bold text-lg transition-all
+            ${!isRequesting 
+              ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300 active:scale-95' 
+              : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
+          `}
+        >
+          {isRequesting ? 'Procurando...' : 'Chamar ObaLeva'}
+        </button>
+      </div>
+
+      {/* ESPAÇO PARA A BARRA INFERIOR (simulando navegação) */}
+      <div className="flex-shrink-0 h-16" />
+    </div>
   );
 };
 

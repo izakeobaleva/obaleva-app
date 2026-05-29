@@ -2,71 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ============================================
+   REMOVE TODAS AS BARRAS DE ROLAGEM DO APP
+   ============================================ */
 
 html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden !important;
-  height: 100% !important;
-  width: 100% !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
+/* Esconde barras de rolagem em todos os elementos */
 ::-webkit-scrollbar {
   display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 * {
-  scrollbar-width: none !important;
   -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
-body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #0F0B1A;
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Garante que nenhum elemento cria rolagem */
+div, section, main, article {
+  overflow: visible;
 }
 
-#root {
-  min-height: 100vh;
-  width: 100%;
+/* Apenas elementos que PRECISAM de rolagem (como listas longas) */
+.scrollable {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 10px;
-}
-
-.btn-primary {
-  @apply py-3 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50;
-}
-
-.btn-outline {
-  @apply py-3 rounded-2xl font-bold border border-white/20 text-white hover:bg-white/5 transition-all;
-}
-
-.btn-premium {
-  @apply rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg transition-all disabled:opacity-50;
-}
-
-.card {
-  @apply bg-[#1A1528] rounded-2xl border border-white/10;
-}
-
-.glass {
-  @apply bg-[#1A1528]/80 backdrop-blur-lg border-b border-white/10;
-}
-
-.back-button-outline {
-  @apply w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition;
+.scrollable::-webkit-scrollbar {
+  display: none !important;
 }
