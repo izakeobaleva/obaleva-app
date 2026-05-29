@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 
-// ESTILOS INLINE - NÃO DEPENDE DE CSS EXTERNO
-// ISSO VAI FUNCIONAR MESMO QUE O RESTO DO APP ESTEJA QUEBRADO
-
 const TelaNova = () => {
   const [destination, setDestination] = useState('');
   const [isRequesting, setIsRequesting] = useState(false);
@@ -26,7 +23,7 @@ const TelaNova = () => {
       left: 0,
       width: '100%',
       height: '100%',
-      backgroundColor: '#000000',
+      backgroundColor: '#111827',
       display: 'flex',
       flexDirection: 'column',
       fontFamily: 'system-ui, -apple-system, sans-serif'
@@ -35,8 +32,8 @@ const TelaNova = () => {
       {/* TOPO */}
       <div style={{
         padding: '20px 16px 10px 16px',
-        backgroundColor: '#000000',
-        borderBottom: '1px solid #222222'
+        backgroundColor: '#111827',
+        borderBottom: '1px solid #1f2937'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
@@ -58,45 +55,45 @@ const TelaNova = () => {
       {/* ÁREA DO MAPA */}
       <div style={{
         flex: 1,
-        backgroundColor: '#1a1a1a',
+        backgroundColor: '#1f2937',
         margin: '16px',
         borderRadius: '20px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        border: '1px solid #333333'
+        border: '1px solid #374151'
       }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '48px', marginBottom: '10px' }}>🗺️</div>
-          <p style={{ color: '#888888', fontSize: '14px', margin: 0 }}>Mapa indisponível</p>
-          <p style={{ color: '#555555', fontSize: '12px', marginTop: '5px' }}>📍 -23.5543, -46.6475</p>
+          <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0 }}>Mapa indisponível</p>
+          <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '5px' }}>📍 -23.5543, -46.6475</p>
         </div>
       </div>
 
       {/* FORMULÁRIO */}
       <div style={{
         padding: '16px',
-        backgroundColor: '#000000',
-        borderTop: '1px solid #222222'
+        backgroundColor: '#111827',
+        borderTop: '1px solid #1f2937'
       }}>
         
         {/* Origem */}
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
             <span style={{ fontSize: '12px', color: '#4ade80' }}>📍</span>
-            <span style={{ fontSize: '11px', color: '#666666', fontWeight: '500' }}>ONDE VOCÊ ESTÁ?</span>
+            <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '500' }}>ONDE VOCÊ ESTÁ?</span>
           </div>
           <div style={{
-            backgroundColor: '#111111',
+            backgroundColor: '#1f2937',
             borderRadius: '12px',
             padding: '12px 14px',
-            border: '1px solid #222222',
+            border: '1px solid #374151',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <span style={{ color: '#ffffff', fontSize: '14px' }}>R. Santo Antônio, 1091 - Bela Vista</span>
+            <span style={{ color: '#f3f4f6', fontSize: '14px' }}>R. Santo Antônio, 1091 - Bela Vista</span>
             <button style={{ color: '#facc15', fontSize: '12px', background: 'none', border: 'none' }}>[Editar]</button>
           </div>
         </div>
@@ -105,13 +102,13 @@ const TelaNova = () => {
         <div style={{ marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
             <span style={{ fontSize: '12px', color: '#f87171' }}>🎯</span>
-            <span style={{ fontSize: '11px', color: '#666666', fontWeight: '500' }}>PARA ONDE VOCÊ VAI?</span>
+            <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '500' }}>PARA ONDE VOCÊ VAI?</span>
           </div>
           <div style={{
-            backgroundColor: '#111111',
+            backgroundColor: '#1f2937',
             borderRadius: '12px',
             padding: '12px 14px',
-            border: '1px solid #222222',
+            border: '1px solid #374151',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
@@ -125,7 +122,7 @@ const TelaNova = () => {
                 background: 'transparent',
                 border: 'none',
                 outline: 'none',
-                color: '#ffffff',
+                color: '#f3f4f6',
                 fontSize: '14px',
                 flex: 1
               }}
@@ -141,8 +138,8 @@ const TelaNova = () => {
           style={{
             width: '100%',
             padding: '14px',
-            backgroundColor: isRequesting ? '#333333' : '#facc15',
-            color: isRequesting ? '#888888' : '#000000',
+            backgroundColor: isRequesting ? '#374151' : '#facc15',
+            color: isRequesting ? '#9ca3af' : '#111827',
             border: 'none',
             borderRadius: '14px',
             fontSize: '16px',
@@ -158,15 +155,15 @@ const TelaNova = () => {
       {/* Rodapé */}
       <div style={{
         padding: '12px 16px',
-        backgroundColor: '#0a0a0a',
-        borderTop: '1px solid #1a1a1a',
+        backgroundColor: '#1f2937',
+        borderTop: '1px solid #374151',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', gap: '16px' }}>
           <span style={{ fontSize: '11px', color: '#facc15' }}>🔥 10% OFF</span>
-          <span style={{ fontSize: '11px', color: '#666666' }}>🛡️ Segurança 24h</span>
+          <span style={{ fontSize: '11px', color: '#9ca3af' }}>🛡️ Segurança 24h</span>
         </div>
         <span style={{ fontSize: '11px', color: '#facc15' }}>Saiba mais →</span>
       </div>

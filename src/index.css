@@ -1,100 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* FORÇA ESCALA 100% */
-html, body, #root {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-  min-height: 100% !important;
-  overflow: hidden;
+/* RESET COMPLETO - FORÇA CORES E ESTILOS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* DESABILITA QUALQUER ZOOM/TRANSFORM QUE POSSA ESTAR FORÇANDO ESCALA */
-* {
-  zoom: 1 !important;
-  transform: scale(1) !important;
-  -webkit-transform: scale(1) !important;
-  transform-origin: top left !important;
-  -webkit-transform-origin: top left !important;
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  background-color: #111827 !important;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #0F0B1A;
-  color: white;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  background-color: #111827 !important;
 }
 
-/* Scrollbar personalizada */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+/* REMOVE TODAS AS BARRAS DE ROLAGEM */
+::-webkit-scrollbar {
+  display: none;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-/* REMOVE qualquer transform/zoom que esteja forçando */
-* {
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-}
-
-/* Glass effect */
-.glass {
-  background: rgba(26, 21, 40, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Card padrão */
-.card {
-  background: #1A1528;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  padding: 1rem;
-}
-
-/* Botões padrão */
-.btn-primary {
-  background: linear-gradient(to right, #FFD966, #F4D03F);
-  color: #1E1E2F;
-  font-weight: bold;
-  padding: 0.75rem 1.5rem;
-  border-radius: 1rem;
-  transition: all 0.2s;
-}
-
-.btn-primary:hover {
-  box-shadow: 0 4px 15px rgba(244, 208, 63, 0.3);
-  transform: scale(1.01);
-}
-
-.btn-primary:active {
-  transform: scale(0.98);
-}
-
-.btn-outline {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  font-weight: 500;
-  padding: 0.75rem 1.5rem;
-  border-radius: 1rem;
-  transition: all 0.2s;
-}
-
-.btn-outline:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.3);
+/* CORREÇÃO DO FUNDO AZUL */
+div, section, main, article, header, footer, nav {
+  background-color: transparent;
 }
