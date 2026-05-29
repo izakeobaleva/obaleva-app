@@ -1,69 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useGeolocation } from '../hooks/useGeolocation';
-import { useGoogleMaps } from '../hooks/useGoogleMaps';
-import { MapBackground } from '../components/MapBackground';
-import { LocationAutocomplete } from '../components/LocationAutocomplete';
 import { Toaster, toast } from 'sonner';
-import { Car, MapPin, Navigation, DollarSign, Bell, Award, Shield, Sparkles, ChevronRight } from 'lucide-react';
+import { Car, MapPin, Navigation, DollarSign, Bell, Award, Shield, Sparkles, ChevronRight, User } from 'lucide-react';
 
 // ============================================
-// LAYOUT FIXO COM CONTAINERS
-// ┌─────────────────────────────┐
-// │ TOP BAR (60dp)              │ ← FIXO
-// ├─────────────────────────────┤
-// │ MAPA (flex-1)               │ ← OCUPA TUDO
-// ├─────────────────────────────┤
-// │ ORIGEM + DESTINO            │ ← wrap_content
-// ├─────────────────────────────┤
-// │ ESPAÇO PUBLICITÁRIO (50dp)  │ ← FIXO INTERATIVO
-// └─────────────────────────────┘
+// LAYOUT FINAL - CONTAINERS FIXOS
+// ┌─────────────────────────────────┐
+// │ TOP BAR (60px)                  │ FIXO
+// ├─────────────────────────────────┤
+// │ MAPA (flex-1)                   │ OCUPA TUDO
+// ├─────────────────────────────────┤
+// │ ORIGEM + DESTINO + BOTÃO        │ wrap
+// ├─────────────────────────────────┤
+// │ BANNER (50px)                   │ FIXO
+// └─────────────────────────────────┘
 // ============================================
 
 export const MainScreen = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const [origin, setOrigin] = useState<{ lat: number; lng: number; address: string } | null>(null);
-  const [destination, setDestination] = useState<{ lat: number; lng: number; address: string } | null>(null);
-  const [price, setPrice] = useState<number | null>(null);
+  const [origin] = useState('R. Santo Antônio, 1091 - Bela Vista');
+  const [destination, setDestination] = useState('');
+  const [showPrice, setShowPrice] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
-  
-  const { location, loading: locationLoading } = useGeolocation();
-  const { isLoaded } = useGoogleMaps();
+  const [editingDest, setEditingDest] = useState(false);
 
   const bannerSlides = [
     { icon: Sparkles, title: '🔥 10% OFF na 1ª corrida!', color: '#F59E0B' },
     { icon: Shield, title: '🛡️ Segurança 24h monitorada', color: '#3B82F6' },
     { icon: Award, title: '⭐ Motoristas nota 4.8', color: '#10B981' },
-    { icon: DollarSign, title: '💰 Preço justo sem taxas', color: '#8B5CF6' },
+    { icon: DollarSign, title: '💰 Preço justo sem taxas surpresa', color: '#8B5CF6' },
   ];
 
-  useEffect(() => {
-    if (location && !origin) {
-      setOrigin({
-        lat: location.lat,
-        lng: location.lng,
-        address: 'Sua localização atual'
-      });
-    }
-  }, [location, origin]);
-
-  useEffect(() => {
-    if (origin && destination) {
-      const distanceInKm = Math.random() * 10 + 2;
-      const basePrice = 5.00;
-      const pricePerKm = 2.50;
-      const calculatedPrice = basePrice + (distanceInKm * pricePerKm);
-      setPrice(calculatedPrice);
-    } else {
-      setPrice(null);
-    }
-  }, [origin, destination]);
-
-  // Banner auto-play
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerIndex(prev => (prev + 1) % bannerSlides.length);
@@ -71,14 +41,19 @@ export const MainScreen = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleRequestRide = async () => {
-    if (!origin || !destination) {
-      toast.error('Selecione origem e destino');
+  const handleRequestRide = () => {
+    if (!destination && !editingDest) {
+      toast.error('Digite um destino');
       return;
     }
+    if (!destination) {
+      toast.error('Digite um destino');
+      return;
+    }
+    setShowPrice(true);
     setIsRequesting(true);
     setTimeout(() => {
-      toast.success('Procurando motorista... 🚗');
+      toast.success('Motorista encontrado!');
       setIsRequesting(false);
     }, 2000);
   };
@@ -87,182 +62,154 @@ export const MainScreen = () => {
   const SlideIcon = slide.icon;
 
   return (
-    <div className="h-screen w-full bg-gray-900 flex flex-col overflow-hidden">
+    <div className="h-screen w-full bg-[#0F0B1A] flex flex-col overflow-hidden">
       <Toaster position="top-center" richColors />
-      
+
       {/* ========================================== */}
-      {/* 1. TOP BAR - 60dp FIXO */}
+      {/* 1. TOP BAR - 60px FIXO */}
       {/* ========================================== */}
-      <div className="h-[60px] flex-shrink-0 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
-            <Car className="w-5 h-5 text-gray-900" />
+      <div className="h-[60px] flex-shrink-0 bg-[#1A1528] border-b border-white/10 flex items-center justify-between px-5 z-40">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 bg-gradient-to-br from-[#FFD966] to-[#F4D03F] rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
+            <Car className="w-5 h-5 text-[#1E1E2F]" />
           </div>
-          <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
+          <span className="text-xl font-bold text-[#F4D03F]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ObaLeva</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="text-xs bg-yellow-400/10 text-yellow-400 px-3 py-1.5 rounded-lg border border-yellow-400/20 hover:bg-yellow-400/20 transition font-medium">
-            {user?.email?.split('@')[0] || 'Entrar'}
-          </button>
-        </div>
+        <button className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-2 hover:bg-white/10 transition">
+          <User size={16} className="text-[#F4D03F]" />
+          <span className="text-sm font-medium text-white">{user?.email?.split('@')[0] || 'Entrar'}</span>
+        </button>
       </div>
 
       {/* ========================================== */}
       {/* 2. MAPA - OCUPA TODO ESPAÇO (flex-1) */}
       {/* ========================================== */}
-      <div className="flex-1 relative min-h-0">
-        {isLoaded && location ? (
-          <MapBackground 
-            center={{ lat: location.lat, lng: location.lng }}
-            zoom={15}
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Navigation className="w-8 h-8 text-yellow-400 animate-pulse" />
-              </div>
-              <p className="text-gray-400">Carregando mapa...</p>
-              <p className="text-gray-500 text-xs mt-1">📍 Sua localização</p>
-            </div>
-          </div>
-        )}
+      <div className="flex-1 relative min-h-0 bg-gradient-to-br from-[#1A1528] to-[#0F0B1A]">
+        {/* Grid de fundo simulando ruas */}
+        <div className="absolute inset-0 opacity-5" 
+             style={{ 
+               backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', 
+               backgroundSize: '50px 50px' 
+             }} 
+        />
         
-        {/* Marcador de localização central */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
+        {/* Círculos decorativos */}
+        <div className="absolute top-1/4 left-1/3 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl" />
+        
+        {/* Marcador central */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="relative">
-            <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
-            <div className="absolute -top-1 -left-1 w-8 h-8 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
+            <div className="w-5 h-5 bg-blue-500 rounded-full border-[3px] border-white shadow-xl shadow-blue-500/50" />
+            <div className="absolute -top-2 -left-2 w-9 h-9 bg-blue-500/30 rounded-full animate-ping" />
           </div>
+        </div>
+
+        {/* Label do mapa */}
+        <div className="absolute top-6 left-6 bg-[#1A1528]/90 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/10 shadow-xl">
+          <p className="text-sm text-white font-medium">📍 Av. Paulista, 1000</p>
+          <p className="text-xs text-[#A0A0B0] mt-0.5">São Paulo - SP</p>
+        </div>
+
+        {/* Indicador de zoom */}
+        <div className="absolute bottom-4 right-4 bg-[#1A1528]/80 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+          <button className="w-10 h-10 flex items-center justify-center text-white hover:text-[#F4D03F] transition text-lg font-bold">+</button>
+          <div className="h-px bg-white/10 mx-2" />
+          <button className="w-10 h-10 flex items-center justify-center text-white hover:text-[#F4D03F] transition text-lg font-bold">−</button>
         </div>
       </div>
 
       {/* ========================================== */}
-      {/* 3. ORIGEM + DESTINO - wrap_content */}
+      {/* 3. ORIGEM + DESTINO + BOTÃO - wrap_content */}
       {/* ========================================== */}
-      <div className="flex-shrink-0 bg-gray-900 px-4 py-3 border-t border-gray-800">
+      <div className="flex-shrink-0 bg-[#1A1528] px-5 py-4 border-t border-white/10">
         {/* Origem */}
         <div className="mb-3">
-          <div className="flex items-center gap-2 mb-1">
-            <MapPin className="w-4 h-4 text-green-400" />
-            <span className="text-xs text-gray-400 font-medium">ONDE VOCÊ ESTÁ?</span>
+          <div className="flex items-center gap-2 mb-1.5">
+            <MapPin size={16} className="text-green-400" />
+            <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">Onde você está?</span>
           </div>
-          <div className="flex items-center justify-between bg-gray-800 rounded-xl px-3 py-2 border border-gray-700">
-            <span className="text-sm text-white truncate flex-1">
-              {origin?.address || (locationLoading ? 'Obtendo localização...' : 'Toque para selecionar')}
-            </span>
-            <button 
-              onClick={() => document.getElementById('origin-input')?.click()}
-              className="text-xs text-green-400 font-medium ml-2 bg-green-500/10 px-2 py-1 rounded-lg hover:bg-green-500/20 transition"
-            >
-              Editar
-            </button>
+          <div className="flex items-center bg-[#0F0B1A] rounded-2xl px-4 py-3 border border-white/10">
+            <span className="text-sm text-white font-medium flex-1 truncate">{origin}</span>
+            <button className="text-xs text-green-400 font-medium ml-2 shrink-0">Editar</button>
           </div>
         </div>
 
         {/* Destino */}
         <div className="mb-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Navigation className="w-4 h-4 text-red-400" />
-            <span className="text-xs text-gray-400 font-medium">PARA ONDE VOCÊ VAI?</span>
+          <div className="flex items-center gap-2 mb-1.5">
+            <Navigation size={16} className="text-red-400" />
+            <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">Para onde você vai?</span>
           </div>
-          <div className="flex items-center justify-between bg-gray-800 rounded-xl px-3 py-2 border border-gray-700">
-            <span className="text-sm text-white truncate flex-1">
-              {destination?.address || 'Digite seu destino'}
-            </span>
-            <button 
-              onClick={() => document.getElementById('destination-input')?.click()}
-              className="text-xs text-red-400 font-medium ml-2 bg-red-500/10 px-2 py-1 rounded-lg hover:bg-red-500/20 transition"
-            >
-              Editar
-            </button>
+          <div className="flex items-center bg-[#0F0B1A] rounded-2xl px-4 py-3 border border-white/10">
+            <input
+              type="text"
+              value={destination}
+              onChange={e => setDestination(e.target.value)}
+              onFocus={() => setEditingDest(true)}
+              onBlur={() => setEditingDest(false)}
+              placeholder="Digite seu destino..."
+              className="flex-1 bg-transparent text-sm text-white placeholder-white/30 outline-none"
+            />
+            <button className="text-xs text-[#F4D03F] font-medium ml-2 shrink-0">OK</button>
           </div>
         </div>
 
-        {/* Preço (só aparece se tiver destino) */}
-        {destination && price && (
-          <div className="mb-3 flex items-center justify-between bg-gray-800 rounded-xl px-3 py-2 border border-green-500/30">
+        {/* Preço estimado */}
+        {showPrice && (
+          <div className="mb-3 flex items-center justify-between bg-green-900/20 rounded-2xl px-4 py-3 border border-green-500/30">
             <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-green-400" />
-              <span className="text-xs text-gray-400">Valor estimado:</span>
+              <DollarSign size={18} className="text-green-400" />
+              <span className="text-sm text-white/80">Valor estimado</span>
             </div>
-            <span className="text-green-400 font-bold text-base">R$ {price.toFixed(2)}</span>
+            <span className="text-lg font-bold text-green-400">R$ 24,50</span>
           </div>
         )}
 
         {/* Botão Chamar */}
         <button
           onClick={handleRequestRide}
-          disabled={isRequesting || !destination}
-          className={`
-            w-full py-3 rounded-xl font-bold text-base transition-all
-            ${destination && !isRequesting 
-              ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300 active:scale-[0.98] shadow-lg shadow-yellow-400/20' 
-              : 'bg-gray-700 text-gray-500 cursor-not-allowed'}
-          `}
+          disabled={isRequesting}
+          className="w-full py-4 rounded-2xl font-bold text-base bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg hover:shadow-yellow-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isRequesting ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
+            <>
+              <div className="w-5 h-5 border-2 border-[#1E1E2F] border-t-transparent rounded-full animate-spin" />
               Procurando motorista...
-            </div>
+            </>
           ) : (
-            <div className="flex items-center justify-center gap-2">
-              <Car size={18} className="text-gray-900" />
+            <>
+              <Car size={20} />
               Chamar ObaLeva
-            </div>
+            </>
           )}
         </button>
       </div>
 
       {/* ========================================== */}
-      {/* 4. ESPAÇO PUBLICITÁRIO - 50dp FIXO INTERATIVO */}
+      {/* 4. BANNER INTERATIVO - 50px FIXO */}
       {/* ========================================== */}
-      <div className="h-[50px] flex-shrink-0 bg-gray-800 border-t border-gray-700 flex items-center px-4 relative overflow-hidden group cursor-pointer hover:bg-gray-750 transition-all"
-        onClick={() => toast.info('Em breve mais novidades! 🎉')}
+      <div 
+        className="h-[50px] flex-shrink-0 bg-[#1A1528] border-t border-white/5 flex items-center px-5 cursor-pointer hover:bg-white/5 transition-all group relative overflow-hidden"
+        onClick={() => toast.success('Promoção válida por tempo limitado!')}
       >
-        {/* Gradiente animado */}
-        <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        
         <div className="flex items-center gap-3 w-full relative z-10">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${slide.color}15` }}>
-            <SlideIcon size={14} style={{ color: slide.color }} />
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${slide.color}20` }}>
+            <SlideIcon size={16} style={{ color: slide.color }} />
           </div>
-          <span className="text-sm font-medium text-white truncate flex-1">{slide.title}</span>
-          <ChevronRight size={14} className="text-gray-500 group-hover:text-gray-300 transition shrink-0" />
+          <span className="text-sm font-medium text-white flex-1 truncate">{slide.title}</span>
+          <ChevronRight size={16} className="text-gray-500 group-hover:text-white transition shrink-0" />
         </div>
         
         {/* Indicadores de slide */}
-        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1.5">
           {bannerSlides.map((_, i) => (
             <div 
               key={i} 
-              className={`w-1 h-1 rounded-full transition-all duration-500 ${i === bannerIndex ? 'w-3 bg-yellow-400' : 'bg-gray-600'}`}
+              className={`rounded-full transition-all duration-500 ${i === bannerIndex ? 'w-4 h-1 bg-[#F4D03F]' : 'w-1 h-1 bg-white/20'}`}
             />
           ))}
         </div>
-      </div>
-
-      {/* ========================================== */}
-      {/* INPUTS OCULTOS PARA AUTOCOMPLETE */}
-      {/* ========================================== */}
-      <div className="hidden">
-        <LocationAutocomplete
-          id="origin-input"
-          placeholder="Onde você está?"
-          onSelect={(address, lat, lng) => {
-            setOrigin({ lat, lng, address });
-            toast.success('📍 Origem confirmada!');
-          }}
-        />
-        <LocationAutocomplete
-          id="destination-input"
-          placeholder="Para onde você vai?"
-          onSelect={(address, lat, lng) => {
-            setDestination({ lat, lng, address });
-            toast.success('🎯 Destino confirmado!');
-          }}
-        />
       </div>
     </div>
   );
