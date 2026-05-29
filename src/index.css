@@ -14,4 +14,69 @@ html, body, #root {
   background: #0F0B1A;
   color: #fff;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(244, 208, 63, 0.2);
+  border-radius: 10px;
+}
+
+/* Animações suaves */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Botões padronizados */
+.btn-primary {
+  @apply py-3 rounded-2xl font-bold bg-gradient-to-r from-[#FFD966] to-[#F4D03F] text-[#1E1E2F] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200;
+}
+
+.btn-outline {
+  @apply py-3 rounded-2xl font-medium border border-white/20 text-white hover:bg-white/5 hover:border-white/30 transition-all duration-200;
+}
+
+.btn-danger {
+  @apply py-3 rounded-2xl font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all duration-200;
+}
+
+/* Cartões */
+.card {
+  @apply bg-[#1A1528] rounded-2xl border border-white/[0.08] p-4;
+}
+
+.card-glow {
+  @apply bg-[#1A1528] rounded-2xl border border-[#F4D03F]/20 p-4 shadow-lg shadow-[#F4D03F]/5;
+}
+
+/* Inputs */
+.input-dark {
+  @apply w-full bg-[#0F0B1A] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#F4D03F] focus:border-transparent transition-all;
+}
+
+/* Fundo com gradiente */
+.bg-gradient-page {
+  @apply bg-gradient-to-br from-[#0F0B1A] to-[#1A1528];
+}
+
+/* Efeito glassmorphism */
+.glass {
+  @apply bg-black/40 backdrop-blur-xl border border-white/10;
+}
+
+/* Text gradient */
+.text-gradient {
+  @apply bg-gradient-to-r from-[#FFD966] to-[#F4D03F] bg-clip-text text-transparent;
 }

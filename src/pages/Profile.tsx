@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { BottomNav } from '../components/BottomNav';
 import { supabase } from '../lib/supabaseClient';
-import { AvatarUpload } from '../components/AvatarUpload';
-import { User, Mail, Phone, LogOut, ChevronLeft, CreditCard, History, Heart, Edit, Car } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { User, Mail, Phone, LogOut, ChevronLeft, History, CreditCard, Heart, Car, Camera, Edit } from 'lucide-react';
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -31,19 +30,12 @@ export default function Profile() {
       .select('valor, distancia_km')
       .eq('passageiro_id', user.id)
       .eq('status', 'finalizada');
-    
     if (data) {
       const total = data.reduce((acc, c) => acc + (c.valor || 0), 0);
       const km = data.reduce((acc, c) => acc + (c.distancia_km || 0), 0);
-      setStats({ corridas: data.length, km, gasto: total });
+      setStats({ corridas: data.length, km: Math.round(km), gasto: Math.round(total) });
     }
   }
-
-  const handleAvatarUpload = async (url: string) => {
-    if (!user) return;
-    await supabase.from('usuarios').update({ avatar_url: url }).eq('id', user.id);
-    loadProfile();
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -51,108 +43,117 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F0B1A] to-[#1A1528] pb-24">
-      <header className="sticky top-0 z-20 bg-[#1A1528]/80 backdrop-blur-lg border-b border-white/10 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/')} className="text-[#A0A0B0] hover:text-white">
-            <ChevronLeft size={24} />
-          </button>
-          <h1 className="text-lg font-bold text-white">Meu Perfil</h1>
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0B1A] to-[#1A1528] pb-24">
+      {/* Header */}
+      <header className="sticky top-0 z-20 glass px-5 py-4">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/')} className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
+              <ChevronLeft size={18} className="text-white" />
+            </button>
+            <h1 className="text-lg font-bold text-white">Meu Perfil</h1>
+          </div>
         </div>
       </header>
 
-      <main className="p-4 max-w-md mx-auto space-y-4">
-        {/* Avatar + nome */}
-        <motion.div 
+      <div className="max-w-lg mx-auto px-4 mt-4 space-y-4">
+        {/* Card Principal */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#1A1528] rounded-2xl p-6 border border-white/10 text-center"
+          className="card text-center py-8"
         >
-          <div className="flex justify-center mb-4">
-            <AvatarUpload
-              userId={user?.id || ''}
-              currentUrl={profile?.avatar_url}
-              onUpload={handleAvatarUpload}
-              size="lg"
-            />
+          <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#FFD966] to-[#F4D03F]/30 border-2 border-[#F4D03F]/40 flex items-center justify-center shadow-xl overflow-hidden">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <User size={40} className="text-[#F4D03F]" />
+            )}
           </div>
-          <h2 className="text-lg font-bold text-white">{profile?.nome_completo || 'Usuário'}</h2>
+          <h2 className="text-xl font-bold text-white">{profile?.nome_completo || 'Usuário'}</h2>
           <div className="flex items-center justify-center gap-2 mt-1">
-            <Mail size={14} className="text-[#A0A0B0]" />
+            <Mail size={12} className="text-[#A0A0B0]" />
             <p className="text-sm text-[#A0A0B0]">{user?.email}</p>
           </div>
           {profile?.telefone && (
-            <div className="flex items-center justify-center gap-2 mt-1">
-              <Phone size={14} className="text-[#A0A0B0]" />
+            <div className="flex items-center justify-center gap-2 mt-0.5">
+              <Phone size={12} className="text-[#A0A0B0]" />
               <p className="text-sm text-[#A0A0B0]">{profile.telefone}</p>
             </div>
           )}
-          <p className="text-xs text-[#A0A0B0] mt-2">Clique no ícone da câmera para trocar a foto</p>
+          <div className="inline-flex items-center gap-1.5 mt-3 bg-[#0F0B1A] rounded-full px-4 py-1.5 border border-white/10">
+            <span className="text-xs text-[#A0A0B0]">🚶</span>
+            <span className="text-xs font-medium text-white">Passageiro</span>
+          </div>
         </motion.div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-[#1A1528] rounded-xl p-3 text-center border border-white/10">
-            <p className="text-2xl font-bold text-white">{stats.corridas}</p>
-            <p className="text-xs text-[#A0A0B0]">Corridas</p>
-          </div>
-          <div className="bg-[#1A1528] rounded-xl p-3 text-center border border-white/10">
-            <p className="text-2xl font-bold text-white">{stats.km.toFixed(0)}</p>
-            <p className="text-xs text-[#A0A0B0]">Km</p>
-          </div>
-          <div className="bg-[#1A1528] rounded-xl p-3 text-center border border-white/10">
-            <p className="text-2xl font-bold text-[#F4D03F]">R$ {stats.gasto.toFixed(0)}</p>
-            <p className="text-xs text-[#A0A0B0]">Gasto</p>
-          </div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-3 gap-3"
+        >
+          {[
+            { label: 'Corridas', value: stats.corridas, icon: Car },
+            { label: 'Km', value: stats.km, icon: History },
+            { label: 'Gasto', value: `R$ ${stats.gasto}`, icon: CreditCard },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.05 }}
+              className="card text-center py-4"
+            >
+              <item.icon size={18} className="mx-auto mb-2 text-[#F4D03F]" />
+              <p className="text-lg font-bold text-white">{item.value}</p>
+              <p className="text-[10px] text-[#A0A0B0]">{item.label}</p>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {/* Menu */}
-        <div className="bg-[#1A1528] rounded-2xl border border-white/10 overflow-hidden">
-          <button 
-            onClick={() => navigate('/trips')}
-            className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition border-b border-white/10"
-          >
-            <div className="flex items-center gap-3">
-              <History size={18} className="text-[#F4D03F]" />
-              <span className="text-white text-sm">Histórico de corridas</span>
-            </div>
-            <ChevronLeft size={16} className="text-[#A0A0B0] rotate-180" />
-          </button>
-          
-          <button 
-            onClick={() => navigate('/cadastro-motorista')}
-            className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition border-b border-white/10"
-          >
-            <div className="flex items-center gap-3">
-              <Car size={18} className="text-[#F4D03F]" />
-              <span className="text-white text-sm font-medium">Torne-se um Parceiro</span>
-            </div>
-            <ChevronLeft size={16} className="text-[#A0A0B0] rotate-180" />
-          </button>
-
-          <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition border-b border-white/10">
-            <div className="flex items-center gap-3">
-              <CreditCard size={18} className="text-[#F4D03F]" />
-              <span className="text-white text-sm">Formas de pagamento</span>
-            </div>
-            <ChevronLeft size={16} className="text-[#A0A0B0] rotate-180" />
-          </button>
-          
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="card overflow-hidden divide-y divide-white/5"
+        >
+          <MenuItem icon={History} label="Histórico de corridas" onClick={() => navigate('/trips')} />
+          <MenuItem icon={Car} label="Torne-se Motorista" onClick={() => navigate('/cadastro-motorista')} />
+          <MenuItem icon={Heart} label="Endereços favoritos" />
+          <MenuItem icon={Edit} label="Editar perfil" />
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center justify-between p-4 hover:bg-red-500/10 transition"
+            className="w-full flex items-center justify-between px-4 py-4 hover:bg-red-500/5 transition-all group"
           >
             <div className="flex items-center gap-3">
               <LogOut size={18} className="text-red-400" />
-              <span className="text-red-400 text-sm font-medium">Sair da conta</span>
+              <span className="text-sm font-medium text-red-400 group-hover:text-red-300">Sair da conta</span>
             </div>
           </button>
-        </div>
+        </motion.div>
 
-        <p className="text-center text-xs text-[#A0A0B0]">ObaLeva v1.0</p>
-      </main>
+        <p className="text-center text-[10px] text-[#A0A0B0]/50 mt-2">ObaLeva v1.0 • Mobilidade premium</p>
+      </div>
 
       <BottomNav role="passageiro" />
     </div>
-  )
+  );
+}
+
+function MenuItem({ icon: Icon, label, onClick }: { icon: any; label: string; onClick?: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center justify-between px-4 py-4 hover:bg-white/5 transition-all group"
+    >
+      <div className="flex items-center gap-3">
+        <Icon size={18} className="text-[#F4D03F]" />
+        <span className="text-sm text-white/80 group-hover:text-white">{label}</span>
+      </div>
+      <ChevronLeft size={14} className="text-[#A0A0B0] rotate-180" />
+    </button>
+  );
 }

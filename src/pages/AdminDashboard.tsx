@@ -64,14 +64,15 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0F0B1A] flex">
-      <aside className="hidden lg:flex lg:flex-col w-64 bg-[#1A1528] border-r border-white/10 p-4">
-        <div className="flex items-center gap-2 mb-8 px-2">
-          <button onClick={() => navigate('/')} className="back-button-outline" type="button">
-            <ArrowLeft size={22} />
+      {/* Sidebar Desktop */}
+      <aside className="hidden lg:flex lg:flex-col w-64 bg-[#1A1528] border-r border-white/5 p-4">
+        <div className="flex items-center gap-3 mb-8 px-2">
+          <button onClick={() => navigate('/')} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition" type="button">
+            <ArrowLeft size={18} className="text-white" />
           </button>
           <div>
             <h1 className="text-lg font-bold text-white">Admin</h1>
-            <p className="text-xs text-[#A0A0B0]">{profile?.email || 'Admin'}</p>
+            <p className="text-[10px] text-[#A0A0B0]">{profile?.email || 'Admin'}</p>
           </div>
         </div>
 
@@ -80,60 +81,85 @@ function AdminDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-[#F4D03F]/10 text-[#F4D03F] border border-[#F4D03F]/20'
                   : 'text-[#A0A0B0] hover:text-white hover:bg-white/5'
               }`}
             >
-              <tab.icon size={18} />
+              <tab.icon size={17} />
               {tab.label}
             </button>
           ))}
         </nav>
 
-        <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all mt-4">
-          <LogOut size={18} /> Sair
+        <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all mt-4">
+          <LogOut size={17} /> Sair
         </button>
       </aside>
 
       <div className="flex-1 flex flex-col min-h-screen">
-        <header className="lg:hidden glass-header sticky top-0 z-30 flex items-center justify-between px-4 py-3">
+        {/* Header Mobile */}
+        <header className="lg:hidden glass sticky top-0 z-30 flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/')} className="back-button-outline" type="button">
-              <ArrowLeft size={22} />
+            <button onClick={() => navigate('/')} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition" type="button">
+              <ArrowLeft size={18} className="text-white" />
             </button>
             <h1 className="text-lg font-bold text-white">Admin</h1>
           </div>
-          <button onClick={() => setSidebarOpen(true)} className="p-2 text-[#A0A0B0] hover:text-white transition">
-            <Menu size={24} />
+          <button onClick={() => setSidebarOpen(true)} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
+            <Menu size={18} className="text-white" />
           </button>
         </header>
 
+        {/* Sidebar Mobile */}
         <AnimatePresence>
           {sidebarOpen && (
             <>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/60 z-40 lg:hidden" />
-              <motion.aside initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed top-0 right-0 bottom-0 w-72 bg-[#1A1528] border-l border-white/10 z-50 lg:hidden p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSidebarOpen(false)}
+                className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+              />
+              <motion.aside
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-0 right-0 bottom-0 w-72 bg-[#1A1528] border-l border-white/10 z-50 lg:hidden p-4"
+              >
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-lg font-bold text-white">Menu</h2>
-                  <button onClick={() => setSidebarOpen(false)} className="p-2 text-[#A0A0B0] hover:text-white"><X size={24} /></button>
+                  <button onClick={() => setSidebarOpen(false)} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
+                    <X size={18} className="text-white" />
+                  </button>
                 </div>
                 <nav className="space-y-1">
                   {tabs.map(tab => (
-                    <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSidebarOpen(false) }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-[#F4D03F]/10 text-[#F4D03F] border border-[#F4D03F]/20' : 'text-[#A0A0B0] hover:text-white hover:bg-white/5'}`}>
-                      <tab.icon size={18} /> {tab.label}
+                    <button
+                      key={tab.id}
+                      onClick={() => { setActiveTab(tab.id); setSidebarOpen(false) }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                        activeTab === tab.id
+                          ? 'bg-[#F4D03F]/10 text-[#F4D03F] border border-[#F4D03F]/20'
+                          : 'text-[#A0A0B0] hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <tab.icon size={17} /> {tab.label}
                     </button>
                   ))}
                 </nav>
-                <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all mt-4 w-full">
-                  <LogOut size={18} /> Sair
+                <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all mt-4 w-full">
+                  <LogOut size={17} /> Sair
                 </button>
               </motion.aside>
             </>
           )}
         </AnimatePresence>
 
+        {/* Conteúdo */}
         <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
           {renderContent()}
         </main>
