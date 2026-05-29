@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Toaster, toast } from 'sonner';
-import { Car, MapPin, Navigation, DollarSign, Bell, Award, Shield, Sparkles, ChevronRight, User } from 'lucide-react';
+import { Car, MapPin, Navigation, DollarSign, Award, Shield, Sparkles, ChevronRight, User } from 'lucide-react';
 
 // ============================================
-// LAYOUT FINAL - CONTAINERS FIXOS
+// LAYOUT - CONTAINERS FIXOS
 // ┌─────────────────────────────────┐
 // │ TOP BAR (60px)                  │ FIXO
 // ├─────────────────────────────────┤
@@ -25,7 +25,6 @@ export const MainScreen = () => {
   const [showPrice, setShowPrice] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [editingDest, setEditingDest] = useState(false);
 
   const bannerSlides = [
     { icon: Sparkles, title: '🔥 10% OFF na 1ª corrida!', color: '#F59E0B' },
@@ -42,10 +41,6 @@ export const MainScreen = () => {
   }, []);
 
   const handleRequestRide = () => {
-    if (!destination && !editingDest) {
-      toast.error('Digite um destino');
-      return;
-    }
     if (!destination) {
       toast.error('Digite um destino');
       return;
@@ -62,6 +57,7 @@ export const MainScreen = () => {
   const SlideIcon = slide.icon;
 
   return (
+    // overflow-hidden APENAS nesta div, não no global
     <div className="h-screen w-full bg-[#0F0B1A] flex flex-col overflow-hidden">
       <Toaster position="top-center" richColors />
 
@@ -70,10 +66,10 @@ export const MainScreen = () => {
       {/* ========================================== */}
       <div className="h-[60px] flex-shrink-0 bg-[#1A1528] border-b border-white/10 flex items-center justify-between px-5 z-40">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-gradient-to-br from-[#FFD966] to-[#F4D03F] rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
+          <div className="w-9 h-9 bg-gradient-to-br from-[#FFD966] to-[#F4D03F] rounded-xl flex items-center justify-center">
             <Car className="w-5 h-5 text-[#1E1E2F]" />
           </div>
-          <span className="text-xl font-bold text-[#F4D03F]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ObaLeva</span>
+          <span className="text-xl font-bold text-[#F4D03F]">ObaLeva</span>
         </div>
         <button className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-2 hover:bg-white/10 transition">
           <User size={16} className="text-[#F4D03F]" />
@@ -85,7 +81,7 @@ export const MainScreen = () => {
       {/* 2. MAPA - OCUPA TODO ESPAÇO (flex-1) */}
       {/* ========================================== */}
       <div className="flex-1 relative min-h-0 bg-gradient-to-br from-[#1A1528] to-[#0F0B1A]">
-        {/* Grid de fundo simulando ruas */}
+        {/* Grid de fundo */}
         <div className="absolute inset-0 opacity-5" 
              style={{ 
                backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', 
@@ -109,13 +105,6 @@ export const MainScreen = () => {
         <div className="absolute top-6 left-6 bg-[#1A1528]/90 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/10 shadow-xl">
           <p className="text-sm text-white font-medium">📍 Av. Paulista, 1000</p>
           <p className="text-xs text-[#A0A0B0] mt-0.5">São Paulo - SP</p>
-        </div>
-
-        {/* Indicador de zoom */}
-        <div className="absolute bottom-4 right-4 bg-[#1A1528]/80 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
-          <button className="w-10 h-10 flex items-center justify-center text-white hover:text-[#F4D03F] transition text-lg font-bold">+</button>
-          <div className="h-px bg-white/10 mx-2" />
-          <button className="w-10 h-10 flex items-center justify-center text-white hover:text-[#F4D03F] transition text-lg font-bold">−</button>
         </div>
       </div>
 
@@ -146,8 +135,6 @@ export const MainScreen = () => {
               type="text"
               value={destination}
               onChange={e => setDestination(e.target.value)}
-              onFocus={() => setEditingDest(true)}
-              onBlur={() => setEditingDest(false)}
               placeholder="Digite seu destino..."
               className="flex-1 bg-transparent text-sm text-white placeholder-white/30 outline-none"
             />
