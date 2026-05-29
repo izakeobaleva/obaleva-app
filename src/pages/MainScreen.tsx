@@ -9,7 +9,7 @@ import BottomNav from '../components/BottomNav';
 import { Toaster, toast } from 'sonner';
 import { Car, MapPin, Navigation, DollarSign } from 'lucide-react';
 
-const MainScreen: React.FC = () => {
+export const MainScreen = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
