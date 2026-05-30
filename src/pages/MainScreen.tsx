@@ -1,7 +1,7 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGeolocation } from '../hooks/useGeolocation';
-import { useGoogleMaps } from '../hooks/useGoogleMaps';
 import { MapBackground } from '../components/MapBackground';
 import { Toaster, toast } from 'sonner';
 
@@ -9,14 +9,29 @@ const MainScreen = () => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState('');
   const [isRequesting, setIsRequesting] = useState(false);
-  
-  const { location, loading: locationLoading } = useGeolocation();
-  const { isLoaded } = useGoogleMaps();
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (!isLoggedIn) {
       navigate('/login');
+    }
+
+    // Pegar localização do usuário
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        () => {
+          setUserLocation({ lat: -23.5505, lng: -46.6333 }); // Fallback São Paulo
+        }
+      );
+    } else {
+      setUserLocation({ lat: -23.5505, lng: -46.6333 });
     }
   }, [navigate]);
 
@@ -33,25 +48,14 @@ const MainScreen = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-black flex flex-col overflow-hidden">
+    <div className="relative h-screen w-full overflow-hidden">
       <Toaster position="top-center" richColors />
       
-      {/* TOP BAR */}
-      <div className="h-[60px] flex-shrink-0 bg-black border-b border-gray-800 flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
-            <span className="text-lg">🚗</span>
-          </div>
-          <span className="text-xl font-bold text-white">ObaLeva</span>
-        </div>
-        <div className="text-sm text-gray-500">Passageiro</div>
-      </div>
-
-      {/* MAPA - OCUPA TELA INTEIRA */}
-      <div className="flex-1 relative">
-        {isLoaded && location ? (
+      {/* MAPA AO VIVO - TELA INTEIRA */}
+      <div className="absolute inset-0 w-full h-full">
+        {userLocation ? (
           <MapBackground 
-            center={{ lat: location.lat, lng: location.lng }}
+            center={userLocation}
             zoom={15}
           />
         ) : (
@@ -63,73 +67,97 @@ const MainScreen = () => {
             </div>
           </div>
         )}
-        
-        {/* Marcador central */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
-          <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
-          <div className="absolute -top-1 -left-1 w-8 h-8 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
-        </div>
       </div>
-
-      {/* ORIGEM + DESTINO */}
-      <div className="flex-shrink-0 bg-black px-4 py-3 border-t border-gray-800">
+      
+      {/* OVERLAY LEVE */}
+      <div className="absolute inset-0 bg-black/30" />
+      
+      {/* CONTEÚDO SOBRE O MAPA */}
+      <div className="relative z-10 h-full flex flex-col">
         
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-green-400 text-sm">📍</span>
-            <span className="text-xs text-gray-500 font-medium">ONDE VOCÊ ESTÁ?</span>
+        {/* TOP BAR */}
+        <div className="h-[60px] flex-shrink-0 bg-black/50 backdrop-blur-sm border-b border-yellow-500/50 flex items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
+              <span className="text-lg">🚗</span>
+            </div>
+            <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
           </div>
-          <div className="flex items-center justify-between bg-[#1a1a1a] rounded-xl px-3 py-2 border border-gray-800">
-            <span className="text-sm text-white truncate flex-1">
-              {locationLoading ? 'Carregando...' : location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : 'Localização não disponível'}
-            </span>
-            <button className="text-xs text-yellow-500 ml-2">[Alterar]</button>
-          </div>
+          <button 
+            onClick={() => { localStorage.removeItem('isLoggedIn'); navigate('/login'); }}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Sair
+          </button>
         </div>
 
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-red-400 text-sm">🎯</span>
-            <span className="text-xs text-gray-500 font-medium">PARA ONDE VOCÊ VAI?</span>
+        {/* ESPAÇO FLEXÍVEL */}
+        <div className="flex-1" />
+
+        {/* CARDS ORIGEM/DESTINO */}
+        <div className="flex-shrink-0 bg-black/70 backdrop-blur-md rounded-t-3xl p-4 border-t border-yellow-500/50">
+          
+          {/* Onde você está */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-green-400 text-sm">📍</span>
+              <span className="text-xs text-gray-300 font-medium">ONDE VOCÊ ESTÁ?</span>
+            </div>
+            <div className="flex items-center justify-between bg-[#1a1a1a] rounded-xl px-3 py-2 border border-gray-700">
+              <span className="text-sm text-white truncate flex-1">
+                {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Carregando...'}
+              </span>
+              <button className="text-xs text-yellow-500 ml-2">[Alterar]</button>
+            </div>
           </div>
-          <div className="flex items-center justify-between bg-[#1a1a1a] rounded-xl px-3 py-2 border border-gray-800">
-            <input
-              type="text"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="Para onde vai?"
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder-gray-600"
-            />
-            <button className="text-xs text-yellow-500 ml-2">[Selecionar]</button>
+
+          {/* Para onde você vai */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-red-400 text-sm">🎯</span>
+              <span className="text-xs text-gray-300 font-medium">PARA ONDE VOCÊ VAI?</span>
+            </div>
+            <div className="flex items-center justify-between bg-[#1a1a1a] rounded-xl px-3 py-2 border border-gray-700">
+              <input
+                type="text"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                placeholder="Para onde vai?"
+                className="flex-1 bg-transparent text-sm text-white outline-none placeholder-gray-500"
+              />
+              <button className="text-xs text-yellow-500 ml-2">[Selecionar]</button>
+            </div>
           </div>
+
+          {/* Botão Chamar */}
+          <button
+            onClick={handleRequestRide}
+            disabled={isRequesting}
+            className={`
+              w-full py-3 rounded-xl font-bold text-base transition-all
+              ${!isRequesting 
+                ? 'bg-yellow-500 text-black hover:bg-yellow-400' 
+                : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
+            `}
+          >
+            {isRequesting ? 'Procurando motorista...' : '🚗 Chamar ObaLeva'}
+          </button>
         </div>
 
-        <button
-          onClick={handleRequestRide}
-          disabled={isRequesting}
-          className={`
-            w-full py-3 rounded-xl font-bold text-base transition-all
-            ${!isRequesting 
-              ? 'bg-yellow-500 text-black' 
-              : 'bg-gray-800 text-gray-600 cursor-not-allowed'}
-          `}
-        >
-          {isRequesting ? 'Procurando motorista...' : '🚗 Chamar ObaLeva'}
-        </button>
-      </div>
-
-      <div className="flex-shrink-0 bg-[#1a1a1a] border-t border-gray-800 flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <span className="text-yellow-500 text-xs">🔥</span>
-            <span className="text-xs text-gray-400"><strong className="text-yellow-500">10% OFF</strong> 1ª corrida</span>
+        {/* ESPAÇO PUBLICITÁRIO */}
+        <div className="flex-shrink-0 bg-black/50 backdrop-blur-sm border-t border-gray-800 flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <span className="text-yellow-500 text-xs">🔥</span>
+              <span className="text-xs text-gray-300"><strong className="text-yellow-500">10% OFF</strong> 1ª corrida</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-yellow-500 text-xs">🛡️</span>
+              <span className="text-xs text-gray-400">Segurança 24h</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-yellow-500 text-xs">🛡️</span>
-            <span className="text-xs text-gray-500">Segurança 24h</span>
-          </div>
+          <button className="text-xs text-yellow-500">Saiba mais →</button>
         </div>
-        <button className="text-xs text-yellow-500">Saiba mais →</button>
       </div>
     </div>
   );
