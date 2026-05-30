@@ -27,25 +27,32 @@ const MainScreen = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  // Pegar localização do usuário
+  // Verificar se está logado
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (!isLoggedIn) navigate('/login');
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const loc = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          setUserLocation(loc);
-          if (map) map.setCenter(loc);
-        },
-        () => {}
-      );
+    if (!isLoggedIn) {
+      navigate('/login');
     }
-  }, [map, navigate]);
+  }, [navigate]);
+
+  // Pegar localização do usuário
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const loc = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserLocation(loc);
+        if (map) {
+          map.setCenter(loc);
+        }
+      },
+      (error) => {
+        console.log('Erro ao obter localização:', error);
+      }
+    );
+  }, [map]);
 
   const suggestions = [
     'Av. Paulista, 1000 - Bela Vista, SP',
@@ -164,15 +171,16 @@ const MainScreen = () => {
         </div>
       </div>
 
-      {/* MAPA REAL - OCUPA MÁXIMO ESPAÇO */}
+      {/* MAPA - OCUPA MÁXIMO ESPAÇO */}
       <div style={{ flex: 1, position: 'relative' }}>
         <RealMap 
           center={userLocation || undefined}
           zoom={14}
           onLoad={(mapInstance) => setMap(mapInstance)}
+          showUserLocation={!!userLocation}
         />
         
-        {/* Botões do mapa (canto inferior direito) */}
+        {/* Botões do mapa (sem cores exageradas) */}
         <div style={{
           position: 'absolute',
           bottom: '16px',
@@ -187,7 +195,7 @@ const MainScreen = () => {
             style={{
               width: '40px',
               height: '40px',
-              backgroundColor: COLORS.amarelo,
+              backgroundColor: '#2a2a3e',
               borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
@@ -195,16 +203,20 @@ const MainScreen = () => {
               border: 'none',
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              color: '#fff',
+              transition: 'all 0.2s',
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3a3a4e'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2a2a3e'}
           >
-            <ZoomIn size={20} color={COLORS.fundo} />
+            <ZoomIn size={20} />
           </button>
           <button
             onClick={handleZoomOut}
             style={{
               width: '40px',
               height: '40px',
-              backgroundColor: COLORS.amarelo,
+              backgroundColor: '#2a2a3e',
               borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
@@ -212,16 +224,20 @@ const MainScreen = () => {
               border: 'none',
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              color: '#fff',
+              transition: 'all 0.2s',
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3a3a4e'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2a2a3e'}
           >
-            <ZoomOut size={20} color={COLORS.fundo} />
+            <ZoomOut size={20} />
           </button>
           <button
             onClick={handleCenterLocation}
             style={{
               width: '40px',
               height: '40px',
-              backgroundColor: COLORS.verde,
+              backgroundColor: '#2a2a3e',
               borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
@@ -229,9 +245,13 @@ const MainScreen = () => {
               border: 'none',
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              color: '#fff',
+              transition: 'all 0.2s',
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3a3a4e'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2a2a3e'}
           >
-            <Crosshair size={20} color={COLORS.fundo} />
+            <Crosshair size={20} />
           </button>
         </div>
       </div>

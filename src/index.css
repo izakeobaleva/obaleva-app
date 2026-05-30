@@ -1,5 +1,9 @@
-/* RESET */
-*, *::before, *::after {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RESET COMPLETO */
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -8,12 +12,42 @@
 html, body, #root {
   width: 100%;
   height: 100%;
-  margin: 0;
-  padding: 0;
-  background: #000;
+  overflow: hidden;
 }
 
+/* REMOVE BARRAS DE ROLAGEM */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ESTILOS GLOBAIS */
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #0f0f0f;
+  color: #ffffff;
+}
+
+/* ANIMAÇÕES */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+}
+
+.animate-pulse-circle {
+  animation: pulse 2s ease-in-out infinite;
 }

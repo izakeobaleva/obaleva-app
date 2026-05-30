@@ -21,7 +21,7 @@ const Login = () => {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       
-      {/* MAPA REAL DO GOOGLE - TELA INTEIRA */}
+      {/* MAPA NO FUNDO */}
       <div className="absolute inset-0 w-full h-full">
         <RealMap zoom={14} />
       </div>
@@ -78,12 +78,11 @@ const Login = () => {
             </div>
           </div>
 
-          {/* BOTÃO GOOGLE COM LOGO */}
+          {/* BOTÃO GOOGLE COM LOGO - VERMELHO */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full py-3 bg-[#2a2a3e] border border-purple-500/30 rounded-xl text-white font-medium flex items-center justify-center gap-3 hover:bg-[#3a3a4e] transition"
+            className="w-full py-3 bg-red-600 border border-red-500/30 rounded-xl text-white font-medium flex items-center justify-center gap-3 hover:bg-red-700 transition"
           >
-            {/* Logo oficial do Google */}
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -98,7 +97,9 @@ const Login = () => {
             <p className="text-gray-400 text-sm">
               Não tem conta? <button className="text-yellow-500 font-medium">Cadastre-se</button>
             </p>
-            <button className="text-gray-600 text-xs mt-2">Esqueci minha senha</button>
+            <button className="text-gray-600 text-xs mt-2 hover:text-gray-500 transition">
+              Esqueci minha senha
+            </button>
           </div>
         </div>
         
