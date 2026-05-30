@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, User, Mail, Phone, Camera, Upload, 
   Briefcase, History, CreditCard, Settings, LogOut,
-  Edit3
+  Calendar, MapPin, FileText, Shield, Smartphone,
+  Edit2, Users, ChevronRight, AlertCircle, CheckCircle,
+  XCircle, File, Home, CreditCard as CardIcon
 } from 'lucide-react';
 
 const COLORS = {
@@ -21,46 +23,52 @@ const COLORS = {
 const ProfileScreen = () => {
   const navigate = useNavigate();
   
-  // Estados para informações do usuário (persistidas no localStorage)
-  const [userName, setUserName] = useState(() => {
-    return localStorage.getItem('userName') || 'João Silva';
-  });
-  const [userEmail, setUserEmail] = useState(() => {
-    return localStorage.getItem('userEmail') || 'joao@email.com';
-  });
-  const [userPhone, setUserPhone] = useState(() => {
-    return localStorage.getItem('userPhone') || '(11) 99999-9999';
-  });
+  // ==============================================
+  // ESTADOS DO USUÁRIO (PERSISTIDOS NO LOCALSTORAGE)
+  // ==============================================
   const [profileImage, setProfileImage] = useState(() => {
     return localStorage.getItem('profileImage') || null;
   });
   
-  // Estados para controle de edição
-  const [editingField, setEditingField] = useState<'nome' | 'email' | 'telefone' | null>(null);
-  const [editValue, setEditValue] = useState('');
+  const [userData, setUserData] = useState(() => {
+    const saved = localStorage.getItem('userData');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      nome: 'João Silva',
+      email: 'joao@email.com',
+      cpf: '123.456.789-00',
+      telefone: '(11) 99999-9999',
+      dataNascimento: '15/05/1990',
+      endereco: 'Rua Santo Antônio, 1095 - Centro, São Paulo - SP'
+    };
+  });
   
+  // ==============================================
+  // ESTADOS DA INTERFACE
+  // ==============================================
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
   const [cameraMode, setCameraMode] = useState<'user' | 'environment'>('environment');
-
-  // Salvar informações no localStorage sempre que mudarem
-  useEffect(() => {
-    localStorage.setItem('userName', userName);
-  }, [userName]);
+  const [editingSection, setEditingSection] = useState(false);
+  const [editFormData, setEditFormData] = useState(userData);
   
+  // ==============================================
+  // SALVAR DADOS NO LOCALSTORAGE
+  // ==============================================
   useEffect(() => {
-    localStorage.setItem('userEmail', userEmail);
-  }, [userEmail]);
-  
-  useEffect(() => {
-    localStorage.setItem('userPhone', userPhone);
-  }, [userPhone]);
+    localStorage.setItem('userData', JSON.stringify(userData));
+  }, [userData]);
   
   useEffect(() => {
     if (profileImage) {
       localStorage.setItem('profileImage', profileImage);
     }
   }, [profileImage]);
-
-  // Função para abrir a câmera
+  
+  // ==============================================
+  // FUNÇÃO PARA ABRIR CÂMERA
+  // ==============================================
   const handleOpenCamera = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -75,8 +83,8 @@ const ProfileScreen = () => {
         }
         const reader = new FileReader();
         reader.onload = (event) => {
-          const imageData = event.target?.result as string;
-          setProfileImage(imageData);
+          setProfileImage(event.target?.result as string);
+          setShowPhotoOptions(false);
           alert('✅ Foto salva com sucesso!');
         };
         reader.readAsDataURL(file);
@@ -84,72 +92,82 @@ const ProfileScreen = () => {
     };
     input.click();
   };
-
-  // Função para abrir a galeria (anexar arquivo)
+  
+  // ==============================================
+  // FUNÇÃO PARA ANEXAR ARQUIVO
+  // ==============================================
   const handleOpenGallery = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*, application/pdf';
+    input.accept = 'image/*';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        if (file.size > 5 * 1024 * 1024) {
-          alert('Arquivo muito grande! Máximo 5MB');
+        if (file.size > 2 * 1024 * 1024) {
+          alert('Arquivo muito grande! Máximo 2MB');
           return;
         }
         const reader = new FileReader();
         reader.onload = (event) => {
-          if (file.type.startsWith('image/')) {
-            const imageData = event.target?.result as string;
-            setProfileImage(imageData);
-            alert('✅ Foto anexada com sucesso!');
-          } else {
-            alert('✅ Documento anexado com sucesso!');
-          }
+          setProfileImage(event.target?.result as string);
+          setShowPhotoOptions(false);
+          alert('✅ Foto anexada com sucesso!');
         };
         reader.readAsDataURL(file);
       }
     };
     input.click();
   };
-
-  // Função para abrir edição
-  const handleEdit = (field: 'nome' | 'email' | 'telefone') => {
-    if (field === 'nome') {
-      setEditValue(userName);
-    } else if (field === 'email') {
-      setEditValue(userEmail);
-    } else {
-      setEditValue(userPhone);
-    }
-    setEditingField(field);
-  };
-
-  // Função para salvar edição
+  
+  // ==============================================
+  // FUNÇÃO PARA SALVAR EDIÇÃO DE INFORMAÇÕES
+  // ==============================================
   const handleSaveEdit = () => {
-    if (editingField === 'nome') {
-      setUserName(editValue);
-    } else if (editingField === 'email') {
-      setUserEmail(editValue);
-    } else if (editingField === 'telefone') {
-      setUserPhone(editValue);
-    }
-    setEditingField(null);
-    alert('✅ Informação salva com sucesso!');
+    setUserData(editFormData);
+    setEditingSection(false);
+    alert('✅ Informações salvas com sucesso!');
   };
-
-  // Função para cancelar edição
-  const handleCancelEdit = () => {
-    setEditingField(null);
+  
+  // ==============================================
+  // FUNÇÃO PARA FORMATAR CPF
+  // ==============================================
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return numbers.replace(/(\d{3})(\d{1,})/, '$1.$2');
+    if (numbers.length <= 9) return numbers.replace(/(\d{3})(\d{3})(\d{1,})/, '$1.$2.$3');
+    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{1,})/, '$1.$2.$3-$4');
   };
-
+  
+  // ==============================================
+  // FUNÇÃO PARA FORMATAR TELEFONE
+  // ==============================================
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 2) return `(${numbers}`;
+    if (numbers.length <= 7) return `(${numbers.slice(0,2)}) ${numbers.slice(2)}`;
+    return `(${numbers.slice(0,2)}) ${numbers.slice(2,7)}-${numbers.slice(7,11)}`;
+  };
+  
+  // ==============================================
+  // FUNÇÃO PARA FORMATAR DATA
+  // ==============================================
+  const formatDate = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 4) return `${numbers.slice(0,2)}/${numbers.slice(2)}`;
+    return `${numbers.slice(0,2)}/${numbers.slice(2,4)}/${numbers.slice(4,8)}`;
+  };
+  
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     navigate('/login');
   };
-
-  // Tela de edição (se estiver editando)
-  if (editingField) {
+  
+  // ==============================================
+  // TELA DE EDIÇÃO DE INFORMAÇÕES
+  // ==============================================
+  if (editingSection) {
     return (
       <div style={{
         height: '100vh',
@@ -157,7 +175,9 @@ const ProfileScreen = () => {
         backgroundColor: COLORS.fundo,
         display: 'flex',
         flexDirection: 'column',
+        overflow: 'auto',
       }}>
+        {/* TOP BAR */}
         <div style={{
           flexShrink: 0,
           backgroundColor: COLORS.card,
@@ -167,46 +187,186 @@ const ProfileScreen = () => {
           alignItems: 'center',
           gap: '16px',
         }}>
-          <button onClick={handleCancelEdit} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
+          <button onClick={() => setEditingSection(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
             <ArrowLeft size={20} color={COLORS.verde} />
           </button>
           <span style={{ fontSize: '18px', fontWeight: 'bold', color: COLORS.amarelo }}>
-            EDITAR {editingField === 'nome' ? 'NOME' : editingField === 'email' ? 'E-MAIL' : 'TELEFONE'}
+            ✏️ EDITAR PERFIL
           </span>
         </div>
         
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div className="bg-[#1a1a2e] rounded-3xl p-6 w-full max-w-[320px] border border-purple-500/30">
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                {editingField === 'nome' && <User size={32} color={COLORS.roxo} />}
-                {editingField === 'email' && <Mail size={32} color={COLORS.roxo} />}
-                {editingField === 'telefone' && <Phone size={32} color={COLORS.roxo} />}
-              </div>
-              <h3 className="text-white font-medium">
-                {editingField === 'nome' && 'Nome Completo'}
-                {editingField === 'email' && 'E-mail'}
-                {editingField === 'telefone' && 'Telefone'}
-              </h3>
+        {/* FORMULÁRIO DE EDIÇÃO */}
+        <div style={{ flex: 1, padding: '20px' }}>
+          <div style={{
+            backgroundColor: COLORS.card,
+            borderRadius: '20px',
+            padding: '20px',
+            border: `1px solid ${COLORS.roxo}40`,
+          }}>
+            
+            {/* Nome */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ color: COLORS.textoCinza, fontSize: '12px', marginBottom: '4px', display: 'block' }}>
+                Nome completo
+              </label>
+              <input
+                type="text"
+                value={editFormData.nome}
+                onChange={(e) => setEditFormData({ ...editFormData, nome: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: COLORS.fundo,
+                  border: `1px solid ${COLORS.roxo}40`,
+                  borderRadius: '12px',
+                  color: COLORS.texto,
+                  fontSize: '14px',
+                }}
+              />
             </div>
             
-            <input
-              type={editingField === 'email' ? 'email' : 'text'}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              className="w-full px-4 py-3 bg-[#2a2a3e] border border-purple-500/30 rounded-xl text-white mb-4 focus:outline-none focus:border-yellow-500"
-            />
+            {/* E-mail */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ color: COLORS.textoCinza, fontSize: '12px', marginBottom: '4px', display: 'block' }}>
+                E-mail
+              </label>
+              <input
+                type="email"
+                value={editFormData.email}
+                onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: COLORS.fundo,
+                  border: `1px solid ${COLORS.roxo}40`,
+                  borderRadius: '12px',
+                  color: COLORS.texto,
+                  fontSize: '14px',
+                }}
+              />
+            </div>
             
+            {/* CPF */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ color: COLORS.textoCinza, fontSize: '12px', marginBottom: '4px', display: 'block' }}>
+                CPF
+              </label>
+              <input
+                type="text"
+                value={editFormData.cpf}
+                onChange={(e) => setEditFormData({ ...editFormData, cpf: formatCPF(e.target.value) })}
+                maxLength={14}
+                placeholder="000.000.000-00"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: COLORS.fundo,
+                  border: `1px solid ${COLORS.roxo}40`,
+                  borderRadius: '12px',
+                  color: COLORS.texto,
+                  fontSize: '14px',
+                }}
+              />
+            </div>
+            
+            {/* Telefone */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ color: COLORS.textoCinza, fontSize: '12px', marginBottom: '4px', display: 'block' }}>
+                Telefone
+              </label>
+              <input
+                type="tel"
+                value={editFormData.telefone}
+                onChange={(e) => setEditFormData({ ...editFormData, telefone: formatPhone(e.target.value) })}
+                maxLength={15}
+                placeholder="(11) 99999-9999"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: COLORS.fundo,
+                  border: `1px solid ${COLORS.roxo}40`,
+                  borderRadius: '12px',
+                  color: COLORS.texto,
+                  fontSize: '14px',
+                }}
+              />
+            </div>
+            
+            {/* Data de Nascimento */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ color: COLORS.textoCinza, fontSize: '12px', marginBottom: '4px', display: 'block' }}>
+                Data de nascimento
+              </label>
+              <input
+                type="text"
+                value={editFormData.dataNascimento}
+                onChange={(e) => setEditFormData({ ...editFormData, dataNascimento: formatDate(e.target.value) })}
+                maxLength={10}
+                placeholder="DD/MM/AAAA"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: COLORS.fundo,
+                  border: `1px solid ${COLORS.roxo}40`,
+                  borderRadius: '12px',
+                  color: COLORS.texto,
+                  fontSize: '14px',
+                }}
+              />
+            </div>
+            
+            {/* Endereço */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ color: COLORS.textoCinza, fontSize: '12px', marginBottom: '4px', display: 'block' }}>
+                Endereço
+              </label>
+              <textarea
+                value={editFormData.endereco}
+                onChange={(e) => setEditFormData({ ...editFormData, endereco: e.target.value })}
+                rows={2}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: COLORS.fundo,
+                  border: `1px solid ${COLORS.roxo}40`,
+                  borderRadius: '12px',
+                  color: COLORS.texto,
+                  fontSize: '14px',
+                  resize: 'vertical',
+                }}
+              />
+            </div>
+            
+            {/* Botões */}
             <button
               onClick={handleSaveEdit}
-              className="w-full py-3 bg-green-600 text-white font-bold rounded-xl mb-3 hover:bg-green-700 transition"
+              style={{
+                width: '100%',
+                padding: '14px',
+                backgroundColor: COLORS.verde,
+                color: COLORS.fundo,
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                marginBottom: '12px',
+              }}
             >
               💾 SALVAR ALTERAÇÕES
             </button>
             
             <button
-              onClick={handleCancelEdit}
-              className="w-full py-3 text-gray-500 font-medium text-sm hover:text-gray-400 transition"
+              onClick={() => setEditingSection(false)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: 'transparent',
+                color: COLORS.textoCinza,
+                border: 'none',
+                fontSize: '14px',
+                cursor: 'pointer',
+              }}
             >
               Cancelar
             </button>
@@ -215,8 +375,10 @@ const ProfileScreen = () => {
       </div>
     );
   }
-
-  // Tela principal do perfil
+  
+  // ==============================================
+  // TELA PRINCIPAL DO PERFIL
+  // ==============================================
   return (
     <div style={{
       height: '100vh',
@@ -227,7 +389,9 @@ const ProfileScreen = () => {
       overflow: 'auto',
     }}>
       
-      {/* TOP BAR COM VOLTAR */}
+      {/* ========================================== */}
+      {/* TOP BAR */}
+      {/* ========================================== */}
       <div style={{
         flexShrink: 0,
         backgroundColor: COLORS.card,
@@ -235,7 +399,7 @@ const ProfileScreen = () => {
         borderBottom: `1px solid ${COLORS.roxo}40`,
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
+        justifyContent: 'space-between',
       }}>
         <button
           onClick={() => navigate('/home')}
@@ -254,218 +418,415 @@ const ProfileScreen = () => {
         <span style={{ fontSize: '18px', fontWeight: 'bold', color: COLORS.amarelo }}>
           👤 PERFIL
         </span>
+        <div style={{ width: '60px' }} />
       </div>
 
-      {/* ÁREA DA FOTO COM BEM-VINDO */}
+      {/* ========================================== */}
+      {/* FOTO DO PERFIL COM BOTÃO DE EDITAR */}
+      {/* ========================================== */}
       <div style={{
         flexShrink: 0,
-        padding: '20px',
+        padding: '24px 20px 12px 20px',
         display: 'flex',
         justifyContent: 'center',
       }}>
-        <div style={{ width: '200px', textAlign: 'center' }}>
-          
-          {/* Bem-vindo */}
-          <p style={{ color: COLORS.amarelo, fontSize: '14px', marginBottom: '8px' }}>
-            Bem-vindo, {userName.split(' ')[0]}! 👋
-          </p>
-          
-          {/* Foto */}
-          <div style={{
-            width: '120px',
-            height: '120px',
-            backgroundColor: COLORS.roxo + '30',
-            borderRadius: '60px',
-            margin: '0 auto 12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            border: `2px solid ${COLORS.amarelo}`,
-          }}>
+        <div style={{ position: 'relative' }}>
+          {/* Círculo da foto */}
+          <div
+            onClick={() => setShowPhotoOptions(!showPhotoOptions)}
+            style={{
+              width: '100px',
+              height: '100px',
+              backgroundColor: COLORS.roxo + '30',
+              borderRadius: '50px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              border: `3px solid ${COLORS.amarelo}`,
+              cursor: 'pointer',
+              position: 'relative',
+            }}
+          >
             {profileImage ? (
               <img src={profileImage} alt="Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               <User size={48} color={COLORS.roxo} />
             )}
-          </div>
-          
-          {/* Botões de câmera */}
-          <div style={{ marginBottom: '12px' }}>
-            <button
-              onClick={() => setCameraMode(cameraMode === 'user' ? 'environment' : 'user')}
-              style={{
-                fontSize: '11px',
-                color: COLORS.amarelo,
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              🔄 Alternar câmera ({cameraMode === 'user' ? 'FRONTAL' : 'TRASEIRA'})
-            </button>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <button
-              onClick={handleOpenCamera}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 16px',
-                backgroundColor: COLORS.verde,
-                border: 'none',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                color: COLORS.fundo,
-              }}
-            >
-              <Camera size={14} /> TIRAR FOTO
-            </button>
             
-            <button
-              onClick={handleOpenGallery}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 16px',
-                backgroundColor: COLORS.amarelo,
-                border: 'none',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                color: COLORS.fundo,
-              }}
-            >
-              <Upload size={14} /> ANEXAR
+            {/* Botão de editar (ícone pequeno) */}
+            <div style={{
+              position: 'absolute',
+              bottom: '0',
+              right: '0',
+              backgroundColor: COLORS.amarelo,
+              borderRadius: '50%',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: `2px solid ${COLORS.fundo}`,
+            }}>
+              <Edit2 size={14} color={COLORS.fundo} />
+            </div>
+          </div>
+          
+          {/* Modal de opções da câmera */}
+          {showPhotoOptions && (
+            <div style={{
+              position: 'absolute',
+              top: '110px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: COLORS.card,
+              borderRadius: '16px',
+              padding: '12px',
+              border: `1px solid ${COLORS.roxo}40`,
+              zIndex: 100,
+              width: '200px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            }}>
+              <button
+                onClick={handleOpenCamera}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: COLORS.verde,
+                  border: 'none',
+                  borderRadius: '10px',
+                  marginBottom: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: COLORS.fundo,
+                }}
+              >
+                <Camera size={14} /> TIRAR FOTO
+              </button>
+              
+              <button
+                onClick={handleOpenGallery}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: COLORS.amarelo,
+                  border: 'none',
+                  borderRadius: '10px',
+                  marginBottom: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: COLORS.fundo,
+                }}
+              >
+                <Upload size={14} /> ANEXAR FOTO
+              </button>
+              
+              <button
+                onClick={() => setCameraMode(cameraMode === 'user' ? 'environment' : 'user')}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  color: COLORS.amarelo,
+                }}
+              >
+                🔄 Alternar câmera ({cameraMode === 'user' ? 'FRONTAL' : 'TRASEIRA'})
+              </button>
+              
+              <button
+                onClick={() => setShowPhotoOptions(false)}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  color: COLORS.textoCinza,
+                  marginTop: '4px',
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ========================================== */}
+      {/* INFORMAÇÕES PESSOAIS */}
+      {/* ========================================== */}
+      <div style={{
+        flexShrink: 0,
+        backgroundColor: COLORS.card,
+        margin: '12px 16px',
+        borderRadius: '16px',
+        border: `1px solid ${COLORS.roxo}40`,
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 16px',
+          backgroundColor: COLORS.roxo + '15',
+          borderBottom: `1px solid ${COLORS.roxo}40`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FileText size={16} color={COLORS.amarelo} />
+            <span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>📝 INFORMAÇÕES PESSOAIS</span>
+          </div>
+          <button
+            onClick={() => {
+              setEditFormData(userData);
+              setEditingSection(true);
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <Edit2 size={12} color={COLORS.amarelo} />
+            <span style={{ color: COLORS.amarelo, fontSize: '11px' }}>Editar</span>
+          </button>
+        </div>
+        
+        <div style={{ padding: '12px 16px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{ color: COLORS.textoCinza, fontSize: '11px' }}>Nome completo</span>
+            <p style={{ color: COLORS.texto, fontSize: '14px', marginTop: '2px' }}>{userData.nome}</p>
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{ color: COLORS.textoCinza, fontSize: '11px' }}>E-mail</span>
+            <p style={{ color: COLORS.texto, fontSize: '14px', marginTop: '2px' }}>{userData.email}</p>
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{ color: COLORS.textoCinza, fontSize: '11px' }}>CPF</span>
+            <p style={{ color: COLORS.texto, fontSize: '14px', marginTop: '2px' }}>{userData.cpf}</p>
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{ color: COLORS.textoCinza, fontSize: '11px' }}>Telefone</span>
+            <p style={{ color: COLORS.texto, fontSize: '14px', marginTop: '2px' }}>{userData.telefone}</p>
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{ color: COLORS.textoCinza, fontSize: '11px' }}>Data de nascimento</span>
+            <p style={{ color: COLORS.texto, fontSize: '14px', marginTop: '2px' }}>{userData.dataNascimento}</p>
+          </div>
+          <div>
+            <span style={{ color: COLORS.textoCinza, fontSize: '11px' }}>Endereço</span>
+            <p style={{ color: COLORS.texto, fontSize: '14px', marginTop: '2px' }}>{userData.endereco}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================== */}
+      {/* INFORMAÇÕES DO APLICATIVO */}
+      {/* ========================================== */}
+      <div style={{
+        flexShrink: 0,
+        backgroundColor: COLORS.card,
+        margin: '0 16px 12px 16px',
+        borderRadius: '16px',
+        border: `1px solid ${COLORS.roxo}40`,
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          padding: '12px 16px',
+          backgroundColor: COLORS.roxo + '15',
+          borderBottom: `1px solid ${COLORS.roxo}40`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Smartphone size={16} color={COLORS.amarelo} />
+            <span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>📌 INFORMAÇÕES DO APLICATIVO</span>
+          </div>
+        </div>
+        
+        <div style={{ padding: '8px 0' }}>
+          {/* Mudar passageiro */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${COLORS.roxo}20`,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Users size={16} color={COLORS.roxo} />
+              <span style={{ color: COLORS.texto, fontSize: '13px' }}>👤 Mudar passageiro</span>
+            </div>
+            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+              Selecionar →
+            </button>
+          </div>
+          
+          {/* Seja Parceiro */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${COLORS.roxo}20`,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Briefcase size={16} color={COLORS.verde} />
+              <span style={{ color: COLORS.texto, fontSize: '13px' }}>🚗 Seja Parceiro (Motorista)</span>
+            </div>
+            <button style={{ color: COLORS.verde, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+              Cadastrar →
+            </button>
+          </div>
+          
+          {/* Histórico */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${COLORS.roxo}20`,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <History size={16} color={COLORS.roxo} />
+              <span style={{ color: COLORS.texto, fontSize: '13px' }}>📜 Histórico de viagens</span>
+            </div>
+            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+              Ver →
+            </button>
+          </div>
+          
+          {/* Pagamento */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${COLORS.roxo}20`,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <CardIcon size={16} color={COLORS.roxo} />
+              <span style={{ color: COLORS.texto, fontSize: '13px' }}>💳 Formas de pagamento</span>
+            </div>
+            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+              Ver →
+            </button>
+          </div>
+          
+          {/* Configurações */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Settings size={16} color={COLORS.roxo} />
+              <span style={{ color: COLORS.texto, fontSize: '13px' }}>⚙️ Configurações</span>
+            </div>
+            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
+              Abrir →
             </button>
           </div>
         </div>
       </div>
 
-      {/* INFORMAÇÕES DO USUÁRIO */}
+      {/* ========================================== */}
+      {/* SOBRE */}
+      {/* ========================================== */}
       <div style={{
         flexShrink: 0,
         backgroundColor: COLORS.card,
-        margin: '0 16px 16px 16px',
+        margin: '0 16px 12px 16px',
         borderRadius: '16px',
-        padding: '12px',
         border: `1px solid ${COLORS.roxo}40`,
+        overflow: 'hidden',
       }}>
+        <div style={{
+          padding: '12px 16px',
+          backgroundColor: COLORS.roxo + '15',
+          borderBottom: `1px solid ${COLORS.roxo}40`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Shield size={16} color={COLORS.amarelo} />
+            <span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>ℹ️ SOBRE</span>
+          </div>
+        </div>
         
-        <div style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: `1px solid ${COLORS.roxo}20` }}>
-          <span style={{ color: COLORS.amarelo, fontSize: '12px', fontWeight: 'bold' }}>📝 INFORMAÇÕES PESSOAIS</span>
-        </div>
-
-        {/* Nome */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${COLORS.roxo}20` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <User size={16} color={COLORS.roxo} />
-            <span style={{ color: COLORS.texto, fontSize: '13px' }}>Nome:</span>
-            <span style={{ color: COLORS.textoCinza, fontSize: '13px' }}>{userName}</span>
+        <div style={{ padding: '12px 16px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>Versão do aplicativo</span>
+            <p style={{ color: COLORS.texto, fontSize: '13px', marginTop: '2px' }}>ObaLeva v1.0.0</p>
           </div>
-          <button onClick={() => handleEdit('nome')} style={{ color: COLORS.amarelo, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Edit3 size={12} /> Editar
-          </button>
-        </div>
-
-        {/* E-mail */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${COLORS.roxo}20` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Mail size={16} color={COLORS.roxo} />
-            <span style={{ color: COLORS.texto, fontSize: '13px' }}>E-mail:</span>
-            <span style={{ color: COLORS.textoCinza, fontSize: '13px' }}>{userEmail}</span>
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>Termos de uso</span>
+            <p style={{ color: COLORS.amarelo, fontSize: '12px', marginTop: '2px', cursor: 'pointer' }}>Consultar termos →</p>
           </div>
-          <button onClick={() => handleEdit('email')} style={{ color: COLORS.amarelo, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Edit3 size={12} /> Editar
-          </button>
-        </div>
-
-        {/* Telefone */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${COLORS.roxo}20` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Phone size={16} color={COLORS.roxo} />
-            <span style={{ color: COLORS.texto, fontSize: '13px' }}>Telefone:</span>
-            <span style={{ color: COLORS.textoCinza, fontSize: '13px' }}>{userPhone}</span>
+          <div>
+            <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>Política de privacidade</span>
+            <p style={{ color: COLORS.amarelo, fontSize: '12px', marginTop: '2px', cursor: 'pointer' }}>Consultar política →</p>
           </div>
-          <button onClick={() => handleEdit('telefone')} style={{ color: COLORS.amarelo, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Edit3 size={12} /> Editar
-          </button>
         </div>
       </div>
 
-      {/* SEJA PARCEIRO */}
+      {/* ========================================== */}
+      {/* BOTÃO SAIR (FIXO COMO FAIXA INFERIOR) */}
+      {/* ========================================== */}
       <div style={{
         flexShrink: 0,
-        backgroundColor: COLORS.card,
-        margin: '0 16px 16px 16px',
-        borderRadius: '16px',
-        padding: '12px',
-        border: `1px solid ${COLORS.roxo}40`,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Briefcase size={16} color={COLORS.verde} />
-            <span style={{ color: COLORS.texto, fontSize: '13px', fontWeight: 'bold' }}>🚗 SEJA PARCEIRO</span>
-          </div>
-          <button style={{ color: COLORS.verde, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>[Cadastrar]</button>
-        </div>
-        <div style={{ backgroundColor: COLORS.roxo + '15', borderRadius: '12px', padding: '8px 12px' }}>
-          <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>
-            Cadastre-se como motorista e ganhe dinheiro com o ObaLeva!
-          </span>
-        </div>
-      </div>
-
-      {/* BOTÕES RÁPIDOS */}
-      <div style={{
-        flexShrink: 0,
-        display: 'flex',
-        gap: '12px',
         margin: '0 16px 16px 16px',
       }}>
-        <button style={{ flex: 1, backgroundColor: COLORS.card, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', padding: '12px', textAlign: 'center', cursor: 'pointer' }}>
-          <History size={20} color={COLORS.roxo} style={{ margin: '0 auto 4px' }} />
-          <span style={{ fontSize: '10px', color: COLORS.textoCinza }}>Histórico</span>
-        </button>
-        <button style={{ flex: 1, backgroundColor: COLORS.card, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', padding: '12px', textAlign: 'center', cursor: 'pointer' }}>
-          <CreditCard size={20} color={COLORS.roxo} style={{ margin: '0 auto 4px' }} />
-          <span style={{ fontSize: '10px', color: COLORS.textoCinza }}>Pagamento</span>
-        </button>
-        <button style={{ flex: 1, backgroundColor: COLORS.card, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', padding: '12px', textAlign: 'center', cursor: 'pointer' }}>
-          <Settings size={20} color={COLORS.roxo} style={{ margin: '0 auto 4px' }} />
-          <span style={{ fontSize: '10px', color: COLORS.textoCinza }}>Config.</span>
-        </button>
-      </div>
-
-      {/* BOTÃO SAIR */}
-      <div style={{ padding: '0 16px 20px 16px' }}>
         <button
           onClick={handleLogout}
           style={{
             width: '100%',
-            padding: '12px',
+            padding: '14px',
             backgroundColor: COLORS.vermelho,
             color: COLORS.texto,
             border: 'none',
-            borderRadius: '12px',
-            fontSize: '14px',
+            borderRadius: '14px',
+            fontSize: '15px',
             fontWeight: 'bold',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
+            gap: '10px',
           }}
         >
-          <LogOut size={16} /> SAIR DA CONTA
+          <LogOut size={18} /> SAIR DA CONTA
         </button>
       </div>
+
+      {/* ========================================== */}
+      {/* RODAPÉ */}
+      {/* ========================================== */}
+      <div style={{
+        flexShrink: 0,
+        padding: '0 16px 20px 16px',
+        textAlign: 'center',
+      }}>
+        <span style={{ fontSize: '9px', color: COLORS.vinho }}>
+          obaleva.com.br/profile
+        </span>
+      </div>
+
     </div>
   );
 };
