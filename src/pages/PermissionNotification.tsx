@@ -1,62 +1,48 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import RealMap from '../components/RealMap';
 
-export default function PermissionNotification() {
+const PermissionNotification = () => {
   const navigate = useNavigate();
 
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-  });
-
   const handleAllow = () => {
-    if ('Notification' in window) Notification.requestPermission();
+    if ('Notification' in window) {
+      Notification.requestPermission();
+    }
     navigate('/login');
   };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', overflow: 'hidden' }}>
+    <div className="relative h-screen w-full overflow-hidden">
       
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '100%' }}
-            center={{ lat: -23.5505, lng: -46.6333 }}
-            zoom={14}
-            options={{
-              disableDefaultUI: true,
-              zoomControl: false,
-              streetViewControl: false,
-              mapTypeControl: false,
-              fullscreenControl: false,
-            }}
-          />
-        ) : (
-          <div style={{ width: '100%', height: '100%', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="text-center">
-              <div style={{ width: 32, height: 32, border: '4px solid #eab308', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 8px' }} />
-              <p style={{ color: '#9ca3af' }}>Carregando mapa...</p>
-            </div>
-          </div>
-        )}
+      {/* MAPA REAL DO GOOGLE - TELA INTEIRA */}
+      <div className="absolute inset-0 w-full h-full">
+        <RealMap zoom={14} />
       </div>
       
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.6)' }} />
+      {/* ESCUREÇO O FUNDO */}
+      <div className="absolute inset-0 bg-black/60" />
       
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-        <div style={{ background: '#1a1a1a', borderRadius: 24, padding: 24, width: '100%', maxWidth: 320, border: '1px solid #374151', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+      {/* CONTAINER CENTRALIZADO */}
+      <div className="absolute inset-0 flex items-center justify-center p-5">
+        <div className="bg-[#1a1a2e] rounded-3xl p-6 w-full max-w-[320px] border border-purple-500/30 shadow-2xl">
           
           <div className="text-center">
-            <div style={{ width: 64, height: 64, background: 'rgba(234,179,8,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <span style={{ fontSize: 28 }}>🔔</span>
+            {/* Ícone */}
+            <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">🔔</span>
             </div>
             
-            <h2 style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>Permitir notificações?</h2>
+            {/* Título */}
+            <h2 className="text-xl font-bold text-white mb-3">Permitir notificações?</h2>
             
-            <p style={{ color: '#9ca3af', fontSize: 14, marginBottom: 12 }}>
+            {/* Texto */}
+            <p className="text-gray-400 text-sm mb-3">
               Para receber alertas importantes como:
             </p>
             
-            <ul style={{ textAlign: 'left', color: '#d1d5db', fontSize: 14, marginBottom: 24, paddingLeft: 8, lineHeight: 1.8 }}>
+            {/* Lista */}
+            <ul className="text-left text-gray-300 text-sm space-y-1 mb-6 pl-2">
               <li>• "Motorista a caminho"</li>
               <li>• "Estou chegando!"</li>
               <li>• "Corrida confirmada"</li>
@@ -64,18 +50,18 @@ export default function PermissionNotification() {
               <li>• "Avalie sua corrida"</li>
             </ul>
             
+            {/* Botão Amarelo */}
             <button
               onClick={handleAllow}
-              style={{ width: '100%', padding: '14px 0', background: '#eab308', color: '#000', fontWeight: 'bold', borderRadius: 12, fontSize: 16, border: 'none', cursor: 'pointer', marginBottom: 12 }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#d97706'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#eab308'}
+              className="w-full py-3.5 bg-yellow-500 text-black font-bold rounded-xl text-base mb-3 hover:bg-yellow-400 transition"
             >
               PERMITIR
             </button>
             
+            {/* Botão Transparente */}
             <button
               onClick={() => navigate('/login')}
-              style={{ width: '100%', padding: '12px 0', background: 'transparent', color: '#6b7280', fontWeight: 500, fontSize: 14, border: 'none', cursor: 'pointer' }}
+              className="w-full py-3 text-gray-500 font-medium text-sm hover:text-gray-400 transition"
             >
               Agora não
             </button>
@@ -84,4 +70,6 @@ export default function PermissionNotification() {
       </div>
     </div>
   );
-}
+};
+
+export default PermissionNotification;

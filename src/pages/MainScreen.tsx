@@ -1,25 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import RealMap from '../components/RealMap';
 import { 
   MapPin, Navigation, Car, User, LogOut, Search,
   ZoomIn, ZoomOut, Crosshair, Flame, Shield, Star, Info,
-  CheckCircle, Edit3
 } from 'lucide-react';
 
-// ==============================================
-// CORES DO TEMA OBALEVÁ
-// ==============================================
 const COLORS = {
   amarelo: '#facc15',
-  amareloEscuro: '#eab308',
   roxo: '#8b5cf6',
-  roxoEscuro: '#7c3aed',
   vinho: '#800020',
-  vinhoClaro: '#b91c1c',
   vermelho: '#ef4444',
-  vermelhoEscuro: '#dc2626',
   verde: '#22c55e',
-  verdeEscuro: '#16a34a',
   fundo: '#0f0f0f',
   card: '#1a1a2e',
   texto: '#ffffff',
@@ -31,17 +23,36 @@ const MainScreen = () => {
   const [destination, setDestination] = useState('');
   const [origin, setOrigin] = useState('Rua Santo Antônio, 1095 - Centro, SP');
   const [isRequesting, setIsRequesting] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  // Sugestões de endereços (simulação do Google Autocomplete)
+  // Pegar localização do usuário
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (!isLoggedIn) navigate('/login');
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const loc = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(loc);
+          if (map) map.setCenter(loc);
+        },
+        () => {}
+      );
+    }
+  }, [map, navigate]);
+
   const suggestions = [
-    { name: 'Av. Paulista, 1000 - Bela Vista, SP' },
-    { name: 'Rua Augusta, 500 - Consolação, SP' },
-    { name: 'Praça da Sé, s/n - Sé, SP' },
-    { name: 'Parque Ibirapuera, portão 3 - SP' },
-    { name: 'Shopping Center Norte, SP' },
+    'Av. Paulista, 1000 - Bela Vista, SP',
+    'Rua Augusta, 500 - Consolação, SP',
+    'Praça da Sé, s/n - Sé, SP',
+    'Parque Ibirapuera, portão 3 - SP',
+    'Shopping Center Norte, SP',
   ];
 
   const handleRequestRide = () => {
@@ -61,19 +72,23 @@ const MainScreen = () => {
     navigate('/login');
   };
 
-  const handleEditOrigin = () => {
-    const newOrigin = prompt('Editar endereço de origem:', origin);
-    if (newOrigin) setOrigin(newOrigin);
+  const handleCenterLocation = () => {
+    if (userLocation && map) {
+      map.setCenter(userLocation);
+      map.setZoom(15);
+    }
   };
 
-  const handleConfirmOrigin = () => {
-    alert('Origem confirmada!');
+  const handleZoomIn = () => {
+    if (map) {
+      map.setZoom((map.getZoom() || 14) + 1);
+    }
   };
 
-  const handleSelectSuggestion = (suggestion: string) => {
-    setDestination(suggestion);
-    setShowSuggestions(false);
-    alert(`Destino selecionado: ${suggestion}`);
+  const handleZoomOut = () => {
+    if (map) {
+      map.setZoom((map.getZoom() || 14) - 1);
+    }
   };
 
   return (
@@ -86,9 +101,7 @@ const MainScreen = () => {
       overflow: 'hidden'
     }}>
       
-      {/* ========================================== */}
-      {/* TOP BAR COM LOGO E BOTÕES */}
-      {/* ========================================== */}
+      {/* TOP BAR */}
       <div style={{
         flexShrink: 0,
         backgroundColor: COLORS.fundo,
@@ -96,9 +109,7 @@ const MainScreen = () => {
         padding: '8px 16px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Logo e título */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {/* Espaço para o logo */}
             <div style={{
               width: '48px',
               height: '48px',
@@ -115,7 +126,6 @@ const MainScreen = () => {
             </span>
           </div>
           
-          {/* Botões de ação */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button
               onClick={() => navigate('/profile')}
@@ -123,15 +133,12 @@ const MainScreen = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                backgroundColor: 'transparent',
+                background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 padding: '6px 10px',
                 borderRadius: '8px',
-                transition: 'all 0.2s',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = COLORS.roxo + '20'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <User size={18} color={COLORS.roxo} />
               <span style={{ color: COLORS.roxo, fontSize: '13px' }}>Perfil</span>
@@ -143,15 +150,12 @@ const MainScreen = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                backgroundColor: 'transparent',
+                background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 padding: '6px 10px',
                 borderRadius: '8px',
-                transition: 'all 0.2s',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = COLORS.vermelho + '20'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <LogOut size={18} color={COLORS.vermelho} />
               <span style={{ color: COLORS.vermelho, fontSize: '13px' }}>Sair</span>
@@ -160,45 +164,27 @@ const MainScreen = () => {
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* MAPA AO VIVO (OCUPA MÁXIMO ESPAÇO) */}
-      {/* ========================================== */}
-      <div style={{
-        flex: 1,
-        position: 'relative',
-        backgroundColor: '#1a1a2e',
-        margin: '0px',
-        overflow: 'hidden',
-      }}>
-        {/* Simulação do mapa (substituir pelo componente real do Google Maps) */}
+      {/* MAPA REAL - OCUPA MÁXIMO ESPAÇO */}
+      <div style={{ flex: 1, position: 'relative' }}>
+        <RealMap 
+          center={userLocation || undefined}
+          zoom={14}
+          onLoad={(mapInstance) => setMap(mapInstance)}
+        />
+        
+        {/* Botões do mapa (canto inferior direito) */}
         <div style={{
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#2a2a3e',
+          position: 'absolute',
+          bottom: '16px',
+          right: '16px',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
+          gap: '8px',
+          zIndex: 10,
         }}>
-          {/* Texto do mapa */}
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', marginBottom: '8px' }}>🗺️</div>
-            <p style={{ color: COLORS.textoCinza, fontSize: '14px' }}>Mapa ao vivo</p>
-            <p style={{ color: '#555', fontSize: '10px' }}>📍 -23.5505, -46.6333</p>
-          </div>
-          
-          {/* Botões de zoom e localização (canto inferior direito) */}
-          <div style={{
-            position: 'absolute',
-            bottom: '16px',
-            right: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            zIndex: 10,
-          }}>
-            <button style={{
+          <button
+            onClick={handleZoomIn}
+            style={{
               width: '40px',
               height: '40px',
               backgroundColor: COLORS.amarelo,
@@ -209,10 +195,13 @@ const MainScreen = () => {
               border: 'none',
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-            }}>
-              <ZoomIn size={20} color={COLORS.fundo} />
-            </button>
-            <button style={{
+            }}
+          >
+            <ZoomIn size={20} color={COLORS.fundo} />
+          </button>
+          <button
+            onClick={handleZoomOut}
+            style={{
               width: '40px',
               height: '40px',
               backgroundColor: COLORS.amarelo,
@@ -223,10 +212,13 @@ const MainScreen = () => {
               border: 'none',
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-            }}>
-              <ZoomOut size={20} color={COLORS.fundo} />
-            </button>
-            <button style={{
+            }}
+          >
+            <ZoomOut size={20} color={COLORS.fundo} />
+          </button>
+          <button
+            onClick={handleCenterLocation}
+            style={{
               width: '40px',
               height: '40px',
               backgroundColor: COLORS.verde,
@@ -237,16 +229,14 @@ const MainScreen = () => {
               border: 'none',
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-            }}>
-              <Crosshair size={20} color={COLORS.fundo} />
-            </button>
-          </div>
+            }}
+          >
+            <Crosshair size={20} color={COLORS.fundo} />
+          </button>
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* ORIGEM E DESTINO (ESPAÇOS REDUZIDOS) */}
-      {/* ========================================== */}
+      {/* ORIGEM E DESTINO */}
       <div style={{
         flexShrink: 0,
         backgroundColor: COLORS.card,
@@ -272,14 +262,14 @@ const MainScreen = () => {
             padding: '8px 12px',
             border: `1px solid ${COLORS.roxo}40`,
           }}>
-            <span style={{ fontSize: '13px', color: COLORS.texto, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span style={{ fontSize: '13px', color: COLORS.texto, flex: 1 }}>
               {origin}
             </span>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={handleEditOrigin} style={{ color: COLORS.amarelo, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button style={{ color: COLORS.amarelo, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>
                 [Editar]
               </button>
-              <button onClick={handleConfirmOrigin} style={{ color: COLORS.verde, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button style={{ color: COLORS.verde, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>
                 [✅]
               </button>
             </div>
@@ -304,7 +294,6 @@ const MainScreen = () => {
             border: `1px solid ${COLORS.roxo}40`,
           }}>
             <input
-              ref={inputRef}
               type="text"
               value={destination}
               onChange={(e) => {
@@ -323,19 +312,10 @@ const MainScreen = () => {
               }}
             />
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button 
-                onClick={() => inputRef.current?.focus()}
-                style={{ color: COLORS.amarelo, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
+              <button style={{ color: COLORS.amarelo, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>
                 [Editar]
               </button>
-              <button 
-                onClick={() => {
-                  if (destination) alert(`Destino confirmado: ${destination}`);
-                  else alert('Digite um destino primeiro');
-                }}
-                style={{ color: COLORS.verde, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
+              <button style={{ color: COLORS.verde, fontSize: '11px', background: 'none', border: 'none', cursor: 'pointer' }}>
                 [✅]
               </button>
             </div>
@@ -349,15 +329,16 @@ const MainScreen = () => {
               borderRadius: '12px',
               border: `1px solid ${COLORS.roxo}40`,
               overflow: 'hidden',
-              maxHeight: '150px',
-              overflowY: 'auto',
             }}>
               {suggestions.filter(s => 
-                s.name.toLowerCase().includes(destination.toLowerCase())
+                s.toLowerCase().includes(destination.toLowerCase())
               ).map((suggestion, index) => (
                 <button
                   key={index}
-                  onClick={() => handleSelectSuggestion(suggestion.name)}
+                  onClick={() => {
+                    setDestination(suggestion);
+                    setShowSuggestions(false);
+                  }}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -368,20 +349,17 @@ const MainScreen = () => {
                     cursor: 'pointer',
                     color: COLORS.textoCinza,
                     fontSize: '12px',
-                    transition: 'all 0.2s',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = COLORS.roxo + '20'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <Search size={12} style={{ display: 'inline', marginRight: '8px', color: COLORS.amarelo }} />
-                  {suggestion.name}
+                  {suggestion}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* BOTÃO CHAMAR OBALEVÁ - VERDE */}
+        {/* BOTÃO CHAMAR */}
         <button
           onClick={handleRequestRide}
           disabled={isRequesting}
@@ -389,13 +367,12 @@ const MainScreen = () => {
             width: '100%',
             padding: '12px',
             backgroundColor: isRequesting ? COLORS.textoCinza : COLORS.verde,
-            color: isRequesting ? COLORS.fundo : COLORS.fundo,
+            color: COLORS.fundo,
             border: 'none',
             borderRadius: '12px',
             fontSize: '14px',
             fontWeight: 'bold',
             cursor: isRequesting ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s',
             marginTop: '8px',
           }}
         >
@@ -403,21 +380,14 @@ const MainScreen = () => {
         </button>
       </div>
 
-      {/* ========================================== */}
-      {/* CONTAINER DE PROPAGANDA (MENOR) */}
-      {/* ========================================== */}
+      {/* PROPAGANDA */}
       <div style={{
         flexShrink: 0,
         backgroundColor: COLORS.roxo + '15',
         padding: '6px 16px',
         borderBottom: `1px solid ${COLORS.roxo}20`,
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <Flame size={14} color={COLORS.amarelo} />
           <span style={{ fontSize: '11px', color: COLORS.textoCinza }}>
             <strong style={{ color: COLORS.amarelo }}>20% OFF</strong> na 1ª corrida • 
@@ -426,9 +396,7 @@ const MainScreen = () => {
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* BOTÕES DE INFORMAÇÕES (4 BOTÕES MENORES) */}
-      {/* ========================================== */}
+      {/* BOTÕES INFO */}
       <div style={{
         flexShrink: 0,
         padding: '8px 16px',
@@ -436,115 +404,33 @@ const MainScreen = () => {
         justifyContent: 'space-between',
         gap: '12px',
       }}>
-        <button style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '4px',
-          padding: '6px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-        }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: COLORS.roxo + '20',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+          <div style={{ width: '32px', height: '32px', backgroundColor: COLORS.roxo + '20', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ fontSize: '16px' }}>📞</span>
           </div>
           <span style={{ fontSize: '9px', color: COLORS.roxo }}>Suporte 24h</span>
         </button>
-
-        <button style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '4px',
-          padding: '6px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-        }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: COLORS.roxo + '20',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+          <div style={{ width: '32px', height: '32px', backgroundColor: COLORS.roxo + '20', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Shield size={16} color={COLORS.roxo} />
           </div>
           <span style={{ fontSize: '9px', color: COLORS.roxo }}>Segurança</span>
         </button>
-
-        <button style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '4px',
-          padding: '6px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-        }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: COLORS.roxo + '20',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+          <div style={{ width: '32px', height: '32px', backgroundColor: COLORS.roxo + '20', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Star size={16} color={COLORS.roxo} />
           </div>
           <span style={{ fontSize: '9px', color: COLORS.roxo }}>Avaliar</span>
         </button>
-
-        <button style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '4px',
-          padding: '6px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-        }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: COLORS.roxo + '20',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+          <div style={{ width: '32px', height: '32px', backgroundColor: COLORS.roxo + '20', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Info size={16} color={COLORS.roxo} />
           </div>
           <span style={{ fontSize: '9px', color: COLORS.roxo }}>Sobre</span>
         </button>
       </div>
 
-      {/* ========================================== */}
-      {/* RODAPÉ (FONTE PEQUENA - COR VINHO) */}
-      {/* ========================================== */}
+      {/* RODAPÉ */}
       <div style={{
         flexShrink: 0,
         padding: '6px 16px',
