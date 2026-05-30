@@ -1,70 +1,65 @@
-import React from 'react';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+"use client";
 
-// ============================================
-// COMPONENTE MAP BACKGROUND - OBALEVÁ
-// ============================================
-// EXPORTAÇÃO COM NOME (NAMED EXPORT)
-// Isso resolve o erro do import { MapBackground }
-// ============================================
+import { useEffect, useRef } from 'react';
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '100%',
-};
+export function MapBackground({ center = { lat: -23.5505, lng: -46.6333 }, zoom = 14 }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-const defaultCenter = {
-  lat: -23.5505,
-  lng: -46.6333, // São Paulo
-};
+  useEffect(() => {
+    if (!apiKey || !mapRef.current) return;
 
-interface MapBackgroundProps {
-  center?: { lat: number; lng: number };
-  zoom?: number;
-}
+    const initMap = () => {
+      if (!window.google?.maps) return;
+      
+      const map = new window.google.maps.Map(mapRef.current!, {
+        center,
+        zoom,
+        disableDefaultUI: true,
+        zoomControl: false,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        styles: [
+          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+          { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+        ],
+      });
+    };
 
-export const MapBackground: React.FC<MapBackgroundProps> = ({ 
-  center = defaultCenter, 
-  zoom = 14 
-}) => {
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-  });
+    if (window.google?.maps) {
+      initMap();
+      return;
+    }
 
-  if (loadError) {
+    if (document.querySelector('#gmaps-bg-script')) {
+      const check = setInterval(() => {
+        if (window.google?.maps) {
+          clearInterval(check);
+          initMap();
+        }
+      }, 200);
+      return () => clearInterval(check);
+    }
+
+    const script = document.createElement('script');
+    script.id = 'gmaps-bg-script';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapBg&v=weekly`;
+    script.async = true;
+    (window as any).initMapBg = initMap;
+    document.head.appendChild(script);
+  }, [apiKey, center.lat, center.lng, zoom]);
+
+  if (!apiKey) {
     return (
-      <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-        <p className="text-red-400">Erro ao carregar o mapa</p>
-      </div>
-    );
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+      <div className="w-full h-full bg-gradient-to-br from-[#1a0a2e] to-[#0F0B1A] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-          <p className="text-gray-400">Carregando mapa...</p>
+          <div className="text-6xl mb-3">🗺️</div>
+          <p className="text-yellow-400 text-sm">Configure a chave VITE_GOOGLE_MAPS_API_KEY</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <GoogleMap
-      mapContainerStyle={mapContainerStyle}
-      center={center}
-      zoom={zoom}
-      options={{
-        disableDefaultUI: true,
-        zoomControl: true,
-        streetViewControl: false,
-        mapTypeControl: false,
-        fullscreenControl: false,
-      }}
-    />
-  );
-};
-
-// Também exporta como default para compatibilidade
-export default MapBackground;
+  return <div ref={mapRef} className="w-full h-full" />;
+}

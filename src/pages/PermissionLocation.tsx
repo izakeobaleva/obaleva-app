@@ -1,83 +1,107 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+"use client";
 
-const PermissionLocation = () => {
+import { useNavigate } from 'react-router-dom';
+import { MapBackground } from '../components/MapBackground';
+
+export default function PermissionLocation() {
   const navigate = useNavigate();
 
-  const handleAllow = () => {
+  const handleAllowLocation = () => {
     navigator.geolocation.getCurrentPosition(
       () => navigate('/permission-notification'),
       () => navigate('/permission-notification')
     );
   };
 
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  const handleAllowNotifications = () => {
+    if ('Notification' in window) Notification.requestPermission();
+    navigate('/login');
+  };
+
+  const handleEmailLogin = () => {
+    navigate('/login');
+  };
+
+  const handleGoogleLogin = () => {
+    localStorage.setItem('isLoggedIn', 'true');
+    navigate('/');
+  };
+
+  const handleLater = () => {
+    navigate('/');
+  };
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-black">
       
-      {/* MAPA NO FUNDO - IFRAME DIRETO */}
-      {apiKey ? (
-        <iframe
-          title="Mapa"
-          className="absolute inset-0 w-full h-full"
-          style={{ border: 0, filter: 'brightness(0.6)' }}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          src={`https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=-23.5505,-46.6333&zoom=14&maptype=roadmap`}
-          allowFullScreen
-        />
-      ) : (
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-6xl mb-4">🗺️</div>
-            <p className="text-gray-500 text-sm">Mapa indisponível</p>
-            <p className="text-gray-800 text-xs mt-1">Configure a chave da API</p>
-          </div>
-        </div>
-      )}
-
-      {/* ESCUREÇO */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
-
-      {/* CARD CENTRALIZADO - MENOR */}
-      <div className="absolute inset-0 flex items-center justify-center px-8">
-        <div className="bg-[#1a1a1a] rounded-3xl p-6 max-w-[280px] w-full border border-gray-800 shadow-2xl">
+      {/* MAPA NO FUNDO - TELA INTEIRA */}
+      <div className="absolute inset-0 w-full h-full">
+        <MapBackground zoom={14} center={{ lat: -23.5505, lng: -46.6333 }} />
+      </div>
+      
+      {/* ESCUREÇO O FUNDO PARA DESTACAR O CONTAINER */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
+      
+      {/* CONTAINER CENTRAL - CORES VIVAS */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="bg-[#1a0a2e] rounded-3xl p-6 w-full max-w-[340px] border-2 border-yellow-500/80 shadow-2xl shadow-yellow-500/10">
           
-          <div className="text-center">
-            {/* Ícone */}
-            <div className="w-14 h-14 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">📍</span>
-            </div>
-            
-            {/* Título */}
-            <h2 className="text-xl font-bold text-white mb-2">ObaLeva</h2>
-            
-            {/* Texto */}
-            <p className="text-gray-400 text-xs mb-6 leading-relaxed">
-              Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.
-            </p>
-            
-            {/* Botão Amarelo */}
-            <button
-              onClick={handleAllow}
-              className="w-full py-3 bg-yellow-500 text-black font-bold rounded-xl text-sm mb-3 hover:bg-yellow-400 transition-all active:scale-[0.98]"
-            >
-              SEMPRE PERMITIR
-            </button>
-            
-            {/* Botão Transparente */}
-            <button
-              onClick={() => navigate('/permission-notification')}
-              className="w-full py-2.5 text-gray-500 font-medium text-xs hover:text-gray-300 transition"
-            >
-              Agora não
-            </button>
+          {/* LOGO */}
+          <div className="text-center mb-4">
+            <div className="text-5xl mb-2">🚗</div>
+            <h1 className="text-3xl font-bold text-yellow-400" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ObaLeva</h1>
+            <p className="text-gray-300 text-xs mt-1">Sua corrida, do seu jeito</p>
           </div>
+
+          {/* TEXTO DE DESCRIÇÃO */}
+          <p className="text-white text-sm text-center mb-6 leading-relaxed">
+            Para o app funcionar bem, precisamos saber onde você está para encontrar motoristas perto de você.
+          </p>
+
+          {/* BOTÃO ROXO - PERMITIR LOCALIZAÇÃO */}
+          <button
+            onClick={handleAllowLocation}
+            className="w-full py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl mb-3 flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-600/20 active:scale-[0.98]"
+          >
+            <span>📍</span> PERMITIR LOCALIZAÇÃO
+          </button>
+
+          {/* BOTÃO AMARELO - PERMITIR NOTIFICAÇÕES */}
+          <button
+            onClick={handleAllowNotifications}
+            className="w-full py-3.5 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl mb-3 flex items-center justify-center gap-2 transition-all shadow-lg shadow-yellow-500/20 active:scale-[0.98]"
+          >
+            <span>🔔</span> PERMITIR NOTIFICAÇÕES
+          </button>
+
+          {/* BOTÃO VERDE - ENTRAR COM EMAIL */}
+          <button
+            onClick={handleEmailLogin}
+            className="w-full py-3.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl mb-3 flex items-center justify-center gap-2 transition-all shadow-lg shadow-green-600/20 active:scale-[0.98]"
+          >
+            <span>📧</span> ENTRAR COM EMAIL
+          </button>
+
+          {/* BOTÃO VERMELHO - ENTRAR COM GOOGLE */}
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl mb-3 flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-600/20 active:scale-[0.98]"
+          >
+            <span>🔗</span> ENTRAR COM GOOGLE
+          </button>
+
+          {/* BOTÃO VINHO - AGORA NÃO */}
+          <button
+            onClick={handleLater}
+            className="w-full py-3.5 bg-[#800020] hover:bg-[#a00030] text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#800020]/20 active:scale-[0.98]"
+          >
+            <span>⏰</span> AGORA NÃO
+          </button>
+
+          {/* RODAPÉ */}
+          <p className="text-center text-gray-500 text-[10px] mt-4">obaleva.com.br</p>
         </div>
       </div>
     </div>
   );
-};
-
-export default PermissionLocation;
+}
