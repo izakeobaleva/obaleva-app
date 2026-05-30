@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, User, Mail, Phone, Camera, Upload, 
   Briefcase, History, CreditCard, Settings, LogOut,
   Calendar, MapPin, FileText, Shield, Smartphone,
-  Edit2, Users, AlertCircle, Save, X
+  Edit2, Users, Save
 } from 'lucide-react';
 
 const COLORS = {
@@ -23,9 +23,9 @@ const ProfileScreen = () => {
   const navigate = useNavigate();
   
   // ==============================================
-  // ESTADOS DO USUÁRIO (PERSISTIDOS NO LOCALSTORAGE)
+  // ESTADOS DO USUÁRIO
   // ==============================================
-  const [profileImage, setProfileImage] = useState(() => {
+  const [profileImage, setProfileImage] = useState<string | null>(() => {
     return localStorage.getItem('profileImage') || null;
   });
   
@@ -52,6 +52,7 @@ const ProfileScreen = () => {
   const [editingSection, setEditingSection] = useState(false);
   const [editFormData, setEditFormData] = useState(userData);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   
   // ==============================================
   // SALVAR DADOS NO LOCALSTORAGE
@@ -62,12 +63,17 @@ const ProfileScreen = () => {
   
   useEffect(() => {
     if (profileImage) {
-      localStorage.setItem('profileImage', profileImage);
+      try {
+        localStorage.setItem('profileImage', profileImage);
+      } catch (error) {
+        console.error('Erro ao salvar imagem no localStorage:', error);
+        setSaveError('Não foi possível salvar a imagem. Tente uma foto menor.');
+      }
     }
   }, [profileImage]);
   
   // ==============================================
-  // FUNÇÃO PARA COMPRIMIR IMAGEM (EVITA ERRO DE MEMÓRIA)
+  // FUNÇÃO PARA COMPRIMIR IMAGEM (VERSÃO SUPER OTIMIZADA)
   // ==============================================
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -77,12 +83,13 @@ const ProfileScreen = () => {
         const img = new Image();
         img.src = event.target?.result as string;
         img.onload = () => {
+          // Tamanho MUITO menor: 100x100 pixels
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
           
-          // Reduz a imagem para no máximo 300x300
-          const maxSize = 300;
+          // Reduz para no máximo 100x100
+          const maxSize = 100;
           if (width > height && width > maxSize) {
             height = (height * maxSize) / width;
             width = maxSize;
@@ -96,74 +103,79 @@ const ProfileScreen = () => {
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
           
-          // Qualidade 0.7 para reduzir ainda mais o tamanho
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-          resolve(compressedDataUrl);
+          // Qualidade mais baixa (0.5) para reduzir tamanho
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
+          
+          // Verifica o tamanho da string
+          const sizeInMB = compressedDataUrl.length / (1024 * 1024);
+          console.log(`Tamanho da imagem comprimida: ${sizeInMB.toFixed(2)} MB`);
+          
+          if (sizeInMB > 4) {
+            reject(new Error('Imagem ainda muito grande. Tente outra foto.'));
+          } else {
+            resolve(compressedDataUrl);
+          }
         };
-        img.onerror = reject;
+        img.onerror = () => reject(new Error('Erro ao carregar imagem'));
       };
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
     });
   };
   
   // ==============================================
-  // FUNÇÃO PARA ABRIR CÂMARA (COM COMPRESSÃO)
+  // FUNÇÃO PARA SALVAR FOTO (COM TRY-CATCH)
   // ==============================================
-  const handleOpenCamera = async () => {
+  const savePhoto = async (file: File) => {
+    setIsSaving(true);
+    setSaveError(null);
+    
+    try {
+      // Verifica tamanho do arquivo antes de processar
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error('Arquivo muito grande! Máximo 2MB');
+      }
+      
+      const compressedImage = await compressImage(file);
+      setProfileImage(compressedImage);
+      setShowPhotoOptions(false);
+      alert('✅ Foto salva com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao salvar foto:', error);
+      setSaveError(error.message || 'Erro ao processar a imagem. Tente outra foto.');
+      alert(error.message || 'Erro ao processar a imagem. Tente outra foto.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // ==============================================
+  // FUNÇÃO PARA ABRIR CÂMARA
+  // ==============================================
+  const handleOpenCamera = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.capture = cameraMode === 'user' ? 'user' : 'environment';
-    input.onchange = async (e) => {
+    input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        setIsSaving(true);
-        try {
-          if (file.size > 5 * 1024 * 1024) {
-            alert('Arquivo muito grande! Máximo 5MB');
-            setIsSaving(false);
-            return;
-          }
-          const compressedImage = await compressImage(file);
-          setProfileImage(compressedImage);
-          setShowPhotoOptions(false);
-          alert('✅ Foto salva com sucesso!');
-        } catch (error) {
-          alert('Erro ao processar a imagem. Tente outra foto.');
-        } finally {
-          setIsSaving(false);
-        }
+        savePhoto(file);
       }
     };
     input.click();
   };
   
   // ==============================================
-  // FUNÇÃO PARA ANEXAR DA GALERIA (COM COMPRESSÃO)
+  // FUNÇÃO PARA ANEXAR DA GALERIA
   // ==============================================
-  const handleOpenGallery = async () => {
+  const handleOpenGallery = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = async (e) => {
+    input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        setIsSaving(true);
-        try {
-          if (file.size > 5 * 1024 * 1024) {
-            alert('Arquivo muito grande! Máximo 5MB');
-            setIsSaving(false);
-            return;
-          }
-          const compressedImage = await compressImage(file);
-          setProfileImage(compressedImage);
-          setShowPhotoOptions(false);
-          alert('✅ Foto anexada com sucesso!');
-        } catch (error) {
-          alert('Erro ao processar a imagem. Tente outra foto.');
-        } finally {
-          setIsSaving(false);
-        }
+        savePhoto(file);
       }
     };
     input.click();
@@ -209,7 +221,7 @@ const ProfileScreen = () => {
   };
   
   // ==============================================
-  // TELA DE EDIÇÃO DE INFORMAÇÕES
+  // TELA DE EDIÇÃO
   // ==============================================
   if (editingSection) {
     return (
@@ -221,7 +233,6 @@ const ProfileScreen = () => {
         flexDirection: 'column',
         overflow: 'auto',
       }}>
-        {/* TOP BAR */}
         <div style={{
           flexShrink: 0,
           backgroundColor: COLORS.card,
@@ -239,7 +250,6 @@ const ProfileScreen = () => {
           </span>
         </div>
         
-        {/* FORMULÁRIO */}
         <div style={{ flex: 1, padding: '20px' }}>
           <div style={{
             backgroundColor: COLORS.card,
@@ -468,7 +478,7 @@ const ProfileScreen = () => {
         </span>
       </div>
 
-      {/* FOTO DO PERFIL COM BOTÃO INTERATIVO */}
+      {/* FOTO DO PERFIL */}
       <div style={{
         flexShrink: 0,
         padding: '20px',
@@ -498,9 +508,10 @@ const ProfileScreen = () => {
             )}
           </div>
           
-          {/* Botão interativo para alterar foto */}
+          {/* Botão para alterar foto */}
           <button
             onClick={() => setShowPhotoOptions(!showPhotoOptions)}
+            disabled={isSaving}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -510,17 +521,18 @@ const ProfileScreen = () => {
               backgroundColor: COLORS.card,
               border: `1px solid ${COLORS.roxo}40`,
               borderRadius: '20px',
-              cursor: 'pointer',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
               margin: '0 auto',
+              opacity: isSaving ? 0.6 : 1,
             }}
           >
             <Camera size={14} color={COLORS.amarelo} />
             <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>
-              {isSaving ? 'Salvando...' : 'ALTERAR FOTO'}
+              {isSaving ? 'SALVANDO...' : 'ALTERAR FOTO'}
             </span>
           </button>
           
-          {/* MODAL DE OPÇÕES DA FOTO */}
+          {/* MODAL DE OPÇÕES */}
           {showPhotoOptions && (
             <div style={{
               position: 'fixed',
@@ -528,7 +540,7 @@ const ProfileScreen = () => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.8)',
+              backgroundColor: 'rgba(0,0,0,0.9)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -537,11 +549,11 @@ const ProfileScreen = () => {
               <div style={{
                 backgroundColor: COLORS.card,
                 borderRadius: '20px',
-                padding: '20px',
+                padding: '24px',
                 width: '280px',
                 border: `1px solid ${COLORS.roxo}40`,
               }}>
-                <h3 style={{ color: COLORS.texto, fontSize: '16px', marginBottom: '16px', textAlign: 'center' }}>
+                <h3 style={{ color: COLORS.texto, fontSize: '16px', marginBottom: '20px', textAlign: 'center' }}>
                   Escolha uma opção
                 </h3>
                 
@@ -555,7 +567,7 @@ const ProfileScreen = () => {
                     border: 'none',
                     borderRadius: '12px',
                     marginBottom: '10px',
-                    cursor: 'pointer',
+                    cursor: isSaving ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -578,7 +590,7 @@ const ProfileScreen = () => {
                     border: 'none',
                     borderRadius: '12px',
                     marginBottom: '10px',
-                    cursor: 'pointer',
+                    cursor: isSaving ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -588,7 +600,7 @@ const ProfileScreen = () => {
                     color: COLORS.fundo,
                   }}
                 >
-                  <Upload size={16} /> ANEXAR DA GALERIA
+                  <Upload size={16} /> ANEXAR FOTO
                 </button>
                 
                 <button
@@ -625,6 +637,13 @@ const ProfileScreen = () => {
                 </button>
               </div>
             </div>
+          )}
+          
+          {/* Mensagem de erro */}
+          {saveError && (
+            <p style={{ color: COLORS.vermelho, fontSize: '11px', marginTop: '8px' }}>
+              {saveError}
+            </p>
           )}
         </div>
       </div>
@@ -669,7 +688,6 @@ const ProfileScreen = () => {
           </button>
         </div>
         
-        {/* APENAS RESUMO DAS INFORMAÇÕES */}
         <div style={{ padding: '12px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
             <User size={14} color={COLORS.roxo} />
