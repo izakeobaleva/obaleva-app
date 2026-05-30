@@ -1,15 +1,19 @@
-"use client";
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapBackground } from '../components/MapBackground';
+import { GoogleMap, useLoadScript } from '@react-google-maps/api';
 import { Toaster, toast } from 'sonner';
 
-const MainScreen = () => {
+const containerStyle = { width: '100%', height: '100%' };
+
+export default function MainScreen() {
   const navigate = useNavigate();
   const [destination, setDestination] = useState('');
   const [isRequesting, setIsRequesting] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  });
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
@@ -17,18 +21,10 @@ const MainScreen = () => {
       navigate('/login');
     }
 
-    // Pegar localização do usuário
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        () => {
-          setUserLocation({ lat: -23.5505, lng: -46.6333 }); // Fallback São Paulo
-        }
+        (position) => setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude }),
+        () => setUserLocation({ lat: -23.5505, lng: -46.6333 })
       );
     } else {
       setUserLocation({ lat: -23.5505, lng: -46.6333 });
@@ -36,32 +32,35 @@ const MainScreen = () => {
   }, [navigate]);
 
   const handleRequestRide = () => {
-    if (!destination) {
-      toast.error('Digite um destino');
-      return;
-    }
+    if (!destination) { toast.error('Digite um destino'); return; }
     setIsRequesting(true);
-    setTimeout(() => {
-      toast.success('Procurando motorista... 🚗');
-      setIsRequesting(false);
-    }, 2000);
+    setTimeout(() => { toast.success('Procurando motorista... 🚗'); setIsRequesting(false); }, 2000);
   };
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <Toaster position="top-center" richColors />
       
-      {/* MAPA AO VIVO - TELA INTEIRA */}
+      {/* MAPA REAL DO GOOGLE - TELA INTEIRA */}
       <div className="absolute inset-0 w-full h-full">
-        {userLocation ? (
-          <MapBackground 
+        {isLoaded && userLocation ? (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
             center={userLocation}
             zoom={15}
+            options={{
+              disableDefaultUI: true,
+              zoomControl: true,
+              zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: false,
+            }}
           />
         ) : (
-          <div className="w-full h-full bg-[#1a1a1a] flex flex-col items-center justify-center">
+          <div className="w-full h-full bg-gray-900 flex items-center justify-center">
             <div className="text-center">
-              <div className="text-5xl mb-3">🗺️</div>
+              <div className="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
               <p className="text-gray-400">Carregando mapa...</p>
               <p className="text-gray-600 text-xs mt-2">📍 Aguardando localização</p>
             </div>
@@ -83,10 +82,8 @@ const MainScreen = () => {
             </div>
             <span className="text-xl font-bold text-yellow-400">ObaLeva</span>
           </div>
-          <button 
-            onClick={() => { localStorage.removeItem('isLoggedIn'); navigate('/login'); }}
-            className="text-sm text-gray-300 hover:text-white"
-          >
+          <button onClick={() => { localStorage.removeItem('isLoggedIn'); navigate('/login'); }}
+            className="text-sm text-gray-300 hover:text-white">
             Sair
           </button>
         </div>
@@ -133,12 +130,11 @@ const MainScreen = () => {
           <button
             onClick={handleRequestRide}
             disabled={isRequesting}
-            className={`
-              w-full py-3 rounded-xl font-bold text-base transition-all
-              ${!isRequesting 
+            className={`w-full py-3 rounded-xl font-bold text-base transition-all ${
+              !isRequesting 
                 ? 'bg-yellow-500 text-black hover:bg-yellow-400' 
-                : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
-            `}
+                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+            }`}
           >
             {isRequesting ? 'Procurando motorista...' : '🚗 Chamar ObaLeva'}
           </button>
@@ -161,6 +157,4 @@ const MainScreen = () => {
       </div>
     </div>
   );
-};
-
-export default MainScreen;
+}

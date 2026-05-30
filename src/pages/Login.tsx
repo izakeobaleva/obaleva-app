@@ -1,13 +1,15 @@
-"use client";
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapBackground } from '../components/MapBackground';
+import { GoogleMap, useLoadScript } from '@react-google-maps/api';
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,19 +23,39 @@ export default function Login() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-black">
+    <div className="relative h-screen w-full overflow-hidden">
       
-      {/* MAPA AO VIVO - TELA INTEIRA */}
+      {/* MAPA REAL DO GOOGLE - TELA INTEIRA */}
       <div className="absolute inset-0 w-full h-full">
-        <MapBackground zoom={14} center={{ lat: -23.5505, lng: -46.6333 }} />
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={{ width: '100%', height: '100%' }}
+            center={{ lat: -23.5505, lng: -46.6333 }}
+            zoom={14}
+            options={{
+              disableDefaultUI: true,
+              zoomControl: false,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: false,
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+              <p className="text-gray-400">Carregando mapa...</p>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* ESCUREÇO O FUNDO */}
       <div className="absolute inset-0 bg-black/60" />
       
-      {/* CARD CENTRAL */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-        <div className="bg-[#1a1a1a] rounded-3xl p-6 w-full max-w-[320px] border border-gray-800">
+      {/* CONTAINER CENTRALIZADO */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
+        <div className="bg-[#1a1a1a] rounded-3xl p-6 w-full max-w-[320px] border border-gray-700 shadow-2xl">
           
           {/* LOGO */}
           <div className="text-center mb-6">
@@ -64,7 +86,7 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-yellow-500 text-black font-bold rounded-xl flex items-center justify-center gap-2"
+              className="w-full py-3 bg-yellow-500 text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-yellow-400 transition"
             >
               <span>🔒</span> Entrar
             </button>
@@ -83,7 +105,7 @@ export default function Login() {
           {/* GOOGLE LOGIN */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full py-3 bg-[#2a2a2a] border border-gray-700 rounded-xl text-white font-medium flex items-center justify-center gap-2"
+            className="w-full py-3 bg-[#2a2a2a] border border-gray-700 rounded-xl text-white font-medium flex items-center justify-center gap-2 hover:bg-[#333] transition"
           >
             <span>🔗</span> Entrar com Google
           </button>
@@ -97,7 +119,7 @@ export default function Login() {
           </div>
         </div>
         
-        {/* RODAPÉ FORA DO CARD */}
+        {/* RODAPÉ */}
         <p className="text-gray-600 text-xs mt-4">obaleva.com.br/login</p>
       </div>
     </div>
