@@ -1,38 +1,19 @@
-/* RESET COMPLETO - FORÇA CORES E ESTILOS */
-* {
+/* RESET */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* FORÇA ESCALA CORRETA - IGNORA QUALQUER COISA */
 html, body, #root {
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  background-color: #111827 !important;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #000;
 }
 
 body {
-  transform: none !important;
-  zoom: 1 !important;
-  -webkit-transform: none !important;
-}
-
-/* GARANTE QUE NADA ESTÁ REDIMENSIONANDO */
-* {
-  transform: none !important;
-  zoom: 1 !important;
-  -webkit-transform: none !important;
-}
-
-/* REMOVE TODAS AS BARRAS DE ROLAGEM */
-::-webkit-scrollbar {
-  display: none;
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }

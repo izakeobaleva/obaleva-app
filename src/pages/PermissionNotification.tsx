@@ -9,17 +9,14 @@ export default function PermissionNotification() {
   });
 
   const handleAllow = () => {
-    if ('Notification' in window) {
-      Notification.requestPermission();
-    }
+    if ('Notification' in window) Notification.requestPermission();
     navigate('/login');
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', overflow: 'hidden' }}>
       
-      {/* MAPA REAL DO GOOGLE - TELA INTEIRA */}
-      <div className="absolute inset-0 w-full h-full">
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={{ width: '100%', height: '100%' }}
@@ -34,34 +31,32 @@ export default function PermissionNotification() {
             }}
           />
         ) : (
-          <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+          <div style={{ width: '100%', height: '100%', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="text-center">
-              <div className="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              <p className="text-gray-400">Carregando mapa...</p>
+              <div style={{ width: 32, height: 32, border: '4px solid #eab308', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 8px' }} />
+              <p style={{ color: '#9ca3af' }}>Carregando mapa...</p>
             </div>
           </div>
         )}
       </div>
       
-      {/* ESCUREÇO O FUNDO */}
-      <div className="absolute inset-0 bg-black/60" />
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.6)' }} />
       
-      {/* CONTAINER CENTRALIZADO */}
-      <div className="absolute inset-0 flex items-center justify-center p-5">
-        <div className="bg-[#1a1a1a] rounded-3xl p-6 w-full max-w-[320px] border border-gray-700 shadow-2xl">
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <div style={{ background: '#1a1a1a', borderRadius: 24, padding: 24, width: '100%', maxWidth: 320, border: '1px solid #374151', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
           
           <div className="text-center">
-            <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🔔</span>
+            <div style={{ width: 64, height: 64, background: 'rgba(234,179,8,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <span style={{ fontSize: 28 }}>🔔</span>
             </div>
             
-            <h2 className="text-xl font-bold text-white mb-3">Permitir notificações?</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 12 }}>Permitir notificações?</h2>
             
-            <p className="text-gray-400 text-sm mb-3">
+            <p style={{ color: '#9ca3af', fontSize: 14, marginBottom: 12 }}>
               Para receber alertas importantes como:
             </p>
             
-            <ul className="text-left text-gray-300 text-sm space-y-1 mb-6 pl-2">
+            <ul style={{ textAlign: 'left', color: '#d1d5db', fontSize: 14, marginBottom: 24, paddingLeft: 8, lineHeight: 1.8 }}>
               <li>• "Motorista a caminho"</li>
               <li>• "Estou chegando!"</li>
               <li>• "Corrida confirmada"</li>
@@ -71,14 +66,16 @@ export default function PermissionNotification() {
             
             <button
               onClick={handleAllow}
-              className="w-full py-3.5 bg-yellow-500 text-black font-bold rounded-xl text-base mb-3 hover:bg-yellow-400 transition"
+              style={{ width: '100%', padding: '14px 0', background: '#eab308', color: '#000', fontWeight: 'bold', borderRadius: 12, fontSize: 16, border: 'none', cursor: 'pointer', marginBottom: 12 }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#d97706'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#eab308'}
             >
               PERMITIR
             </button>
             
             <button
               onClick={() => navigate('/login')}
-              className="w-full py-3 text-gray-500 font-medium text-sm hover:text-gray-400 transition"
+              style={{ width: '100%', padding: '12px 0', background: 'transparent', color: '#6b7280', fontWeight: 500, fontSize: 14, border: 'none', cursor: 'pointer' }}
             >
               Agora não
             </button>

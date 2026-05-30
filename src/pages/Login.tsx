@@ -23,10 +23,9 @@ export default function Login() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', overflow: 'hidden' }}>
       
-      {/* MAPA REAL DO GOOGLE - TELA INTEIRA */}
-      <div className="absolute inset-0 w-full h-full">
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={{ width: '100%', height: '100%' }}
@@ -41,39 +40,35 @@ export default function Login() {
             }}
           />
         ) : (
-          <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+          <div style={{ width: '100%', height: '100%', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="text-center">
-              <div className="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              <p className="text-gray-400">Carregando mapa...</p>
+              <div style={{ width: 32, height: 32, border: '4px solid #eab308', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 8px' }} />
+              <p style={{ color: '#9ca3af' }}>Carregando mapa...</p>
             </div>
           </div>
         )}
       </div>
       
-      {/* ESCUREÇO O FUNDO */}
-      <div className="absolute inset-0 bg-black/60" />
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.6)' }} />
       
-      {/* CONTAINER CENTRALIZADO */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
-        <div className="bg-[#1a1a1a] rounded-3xl p-6 w-full max-w-[320px] border border-gray-700 shadow-2xl">
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <div style={{ background: '#1a1a1a', borderRadius: 24, padding: 24, width: '100%', maxWidth: 320, border: '1px solid #374151', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
           
-          {/* LOGO */}
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <span className="text-3xl">🚗</span>
+          <div className="text-center" style={{ marginBottom: 24 }}>
+            <div style={{ width: 64, height: 64, background: '#eab308', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+              <span style={{ fontSize: 28 }}>🚗</span>
             </div>
-            <h1 className="text-2xl font-bold text-white">ObaLeva</h1>
-            <p className="text-gray-500 text-xs mt-1">Sua corrida, do seu jeito</p>
+            <h1 style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>ObaLeva</h1>
+            <p style={{ color: '#6b7280', fontSize: 12, marginTop: 4 }}>Sua corrida, do seu jeito</p>
           </div>
 
-          {/* FORMULÁRIO */}
-          <form onSubmit={handleLogin} className="space-y-3">
+          <form style={{ display: 'flex', flexDirection: 'column', gap: 12 }} onSubmit={handleLogin}>
             <input
               type="email"
               placeholder="E-mail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-[#2a2a2a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500"
+              style={{ width: '100%', padding: '12px 16px', background: '#2a2a2a', border: '1px solid #374151', borderRadius: 12, color: '#fff', outline: 'none', fontSize: 14 }}
             />
             
             <input
@@ -81,46 +76,39 @@ export default function Login() {
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-[#2a2a2a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500"
+              style={{ width: '100%', padding: '12px 16px', background: '#2a2a2a', border: '1px solid #374151', borderRadius: 12, color: '#fff', outline: 'none', fontSize: 14 }}
             />
 
             <button
               type="submit"
-              className="w-full py-3 bg-yellow-500 text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-yellow-400 transition"
+              style={{ width: '100%', padding: '12px 0', background: '#eab308', color: '#000', fontWeight: 'bold', borderRadius: 12, fontSize: 16, border: 'none', cursor: 'pointer' }}
             >
-              <span>🔒</span> Entrar
+              🔒 Entrar
             </button>
           </form>
 
-          {/* DIVISOR */}
-          <div className="relative my-5">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-[#1a1a1a] text-gray-500">ou</span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: 12 }}>
+            <div style={{ flex: 1, height: 1, background: '#374151' }} />
+            <span style={{ color: '#6b7280', fontSize: 14 }}>ou</span>
+            <div style={{ flex: 1, height: 1, background: '#374151' }} />
           </div>
 
-          {/* GOOGLE LOGIN */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full py-3 bg-[#2a2a2a] border border-gray-700 rounded-xl text-white font-medium flex items-center justify-center gap-2 hover:bg-[#333] transition"
+            style={{ width: '100%', padding: '12px 0', background: '#2a2a2a', border: '1px solid #374151', borderRadius: 12, color: '#fff', fontWeight: 500, cursor: 'pointer' }}
           >
-            <span>🔗</span> Entrar com Google
+            🔗 Entrar com Google
           </button>
 
-          {/* LINKS */}
-          <div className="mt-5 text-center">
-            <p className="text-gray-400 text-sm">
-              Não tem conta? <button className="text-yellow-500 font-medium">Cadastre-se</button>
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
+            <p style={{ color: '#9ca3af', fontSize: 14 }}>
+              Não tem conta? <button style={{ color: '#eab308', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>Cadastre-se</button>
             </p>
-            <button className="text-gray-600 text-xs mt-2">Esqueci minha senha</button>
+            <button style={{ color: '#6b7280', fontSize: 12, marginTop: 8, background: 'none', border: 'none', cursor: 'pointer' }}>Esqueci minha senha</button>
           </div>
         </div>
         
-        {/* RODAPÉ */}
-        <p className="text-gray-600 text-xs mt-4">obaleva.com.br/login</p>
+        <p style={{ color: '#6b7280', fontSize: 12, marginTop: 16 }}>obaleva.com.br/login</p>
       </div>
     </div>
   );
