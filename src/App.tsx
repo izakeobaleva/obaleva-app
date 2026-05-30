@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PermissionLocation from './pages/PermissionLocation';
 import PermissionNotification from './pages/PermissionNotification';
 import Login from './pages/Login';
@@ -9,13 +9,16 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* REDIRECIONA A ROTA PRINCIPAL PARA PERMISSÃO DE LOCALIZAÇÃO */}
+        <Route path="/" element={<Navigate to="/permission-location" replace />} />
+        
         {/* FLUXO DE PERMISSÕES E LOGIN */}
         <Route path="/permission-location" element={<PermissionLocation />} />
         <Route path="/permission-notification" element={<PermissionNotification />} />
         <Route path="/login" element={<Login />} />
         
-        {/* TELAS PRINCIPAIS */}
-        <Route path="/" element={<MainScreen />} />
+        {/* TELAS PRINCIPAIS APÓS LOGIN */}
+        <Route path="/home" element={<MainScreen />} />
         <Route path="/profile" element={<ProfileScreen />} />
       </Routes>
     </BrowserRouter>
