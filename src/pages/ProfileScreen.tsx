@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   ArrowLeft, User, Mail, Phone, Camera, Upload, 
   Briefcase, History, CreditCard, Settings, LogOut,
   Calendar, MapPin, FileText, Shield, Smartphone,
-  Edit2, Users, Save
+  Edit2, Users, Save, Loader2, CheckCircle, XCircle
 } from 'lucide-react';
 
 const COLORS = {
@@ -21,61 +23,95 @@ const COLORS = {
 
 const ProfileScreen = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // ==============================================
-  // ESTADOS DO USUÁRIO
+  // ESTADOS
   // ==============================================
-  const [profileImage, setProfileImage] = useState<string | null>(() => {
-    return localStorage.getItem('profileImage') || null;
-  });
-  
-  const [userData, setUserData] = useState(() => {
-    const saved = localStorage.getItem('userData');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return {
-      nome: 'João Silva',
-      email: 'joao@email.com',
-      cpf: '123.456.789-00',
-      telefone: '(11) 99999-9999',
-      dataNascimento: '15/05/1990',
-      endereco: 'Rua Santo Antônio, 1095 - Centro, São Paulo - SP'
-    };
-  });
-  
-  // ==============================================
-  // ESTADOS DA INTERFACE
-  // ==============================================
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
   const [cameraMode, setCameraMode] = useState<'user' | 'environment'>('environment');
   const [editingSection, setEditingSection] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  const [userData, setUserData] = useState({
+    nome: '',
+    email: '',
+    cpf: '',
+    telefone: '',
+    dataNascimento: '',
+    endereco: ''
+  });
   const [editFormData, setEditFormData] = useState(userData);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  
+
   // ==============================================
-  // SALVAR DADOS NO LOCALSTORAGE
+  // CARREGAR DADOS DO USUÁRIO
   // ==============================================
   useEffect(() => {
-    localStorage.setItem('userData', JSON.stringify(userData));
-  }, [userData]);
-  
-  useEffect(() => {
-    if (profileImage) {
-      try {
-        localStorage.setItem('profileImage', profileImage);
-      } catch (error) {
-        console.error('Erro ao salvar imagem no localStorage:', error);
-        setSaveError('Não foi possível salvar a imagem. Tente uma foto menor.');
-      }
+    if (user) {
+      loadUserData();
+      loadProfileImage();
     }
-  }, [profileImage]);
-  
+  }, [user]);
+
+  const loadUserData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
+      
+      if (data && !error) {
+        setUserData({
+          nome: data.nome || user?.user_metadata?.name || 'Passageiro',
+          email: data.email || user?.email || '',
+          cpf: data.cpf || '',
+          telefone: data.telefone || '',
+          dataNascimento: data.data_nascimento || '',
+          endereco: data.endereco || ''
+        });
+      } else {
+        setUserData({
+          nome: user?.user_metadata?.name || 'Passageiro',
+          email: user?.email || '',
+          cpf: '',
+          telefone: '',
+          dataNascimento: '',
+          endereco: ''
+        });
+      }
+    } catch (error) {
+      console.log('Erro ao carregar dados');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProfileImage = async () => {
+    try {
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(`usuarios/${user?.id}/profile.jpg`);
+      
+      if (data?.publicUrl) {
+        const response = await fetch(data.publicUrl, { method: 'HEAD' });
+        if (response.ok) {
+          setProfileImageUrl(data.publicUrl);
+        }
+      }
+    } catch (error) {
+      console.log('Nenhuma foto encontrada');
+    }
+  };
+
   // ==============================================
-  // FUNÇÃO PARA COMPRIMIR IMAGEM (VERSÃO SUPER OTIMIZADA)
+  // FUNÇÃO PARA COMPRIMIR IMAGEM (TAMANHO PEQUENO)
   // ==============================================
-  const compressImage = (file: File): Promise<string> => {
+  const compressImage = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -83,13 +119,11 @@ const ProfileScreen = () => {
         const img = new Image();
         img.src = event.target?.result as string;
         img.onload = () => {
-          // Tamanho MUITO menor: 100x100 pixels
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
+          const maxSize = 150;
           
-          // Reduz para no máximo 100x100
-          const maxSize = 100;
           if (width > height && width > maxSize) {
             height = (height * maxSize) / width;
             width = maxSize;
@@ -103,53 +137,105 @@ const ProfileScreen = () => {
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
           
-          // Qualidade mais baixa (0.5) para reduzir tamanho
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
-          
-          // Verifica o tamanho da string
-          const sizeInMB = compressedDataUrl.length / (1024 * 1024);
-          console.log(`Tamanho da imagem comprimida: ${sizeInMB.toFixed(2)} MB`);
-          
-          if (sizeInMB > 4) {
-            reject(new Error('Imagem ainda muito grande. Tente outra foto.'));
-          } else {
-            resolve(compressedDataUrl);
-          }
+          canvas.toBlob((blob) => {
+            if (blob) {
+              console.log(`Tamanho da imagem: ${(blob.size / 1024).toFixed(2)} KB`);
+              resolve(blob);
+            } else {
+              reject(new Error('Erro ao comprimir imagem'));
+            }
+          }, 'image/jpeg', 0.6);
         };
-        img.onerror = () => reject(new Error('Erro ao carregar imagem'));
+        img.onerror = reject;
       };
-      reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+      reader.onerror = reject;
     });
   };
-  
+
   // ==============================================
-  // FUNÇÃO PARA SALVAR FOTO (COM TRY-CATCH)
+  // FUNÇÃO PARA SALVAR FOTO NO SUPABASE
   // ==============================================
-  const savePhoto = async (file: File) => {
-    setIsSaving(true);
-    setSaveError(null);
+  const savePhotoToSupabase = async (file: File) => {
+    if (!user) {
+      setUploadMessage({ type: 'error', text: 'Usuário não autenticado' });
+      return;
+    }
+    
+    setIsUploading(true);
+    setUploadProgress(0);
+    setUploadMessage(null);
     
     try {
-      // Verifica tamanho do arquivo antes de processar
-      if (file.size > 2 * 1024 * 1024) {
-        throw new Error('Arquivo muito grande! Máximo 2MB');
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Arquivo muito grande! Máximo 5MB');
       }
       
-      const compressedImage = await compressImage(file);
-      setProfileImage(compressedImage);
+      setUploadProgress(20);
+      const compressedBlob = await compressImage(file);
+      setUploadProgress(50);
+      
+      const filePath = `usuarios/${user.id}/profile.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, compressedBlob, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      setUploadProgress(80);
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      
+      setUploadProgress(100);
+      setProfileImageUrl(urlData.publicUrl);
       setShowPhotoOptions(false);
-      alert('✅ Foto salva com sucesso!');
+      setUploadMessage({ type: 'success', text: '✅ Foto salva com sucesso!' });
+      
+      setTimeout(() => setUploadMessage(null), 3000);
+      
     } catch (error: any) {
       console.error('Erro ao salvar foto:', error);
-      setSaveError(error.message || 'Erro ao processar a imagem. Tente outra foto.');
-      alert(error.message || 'Erro ao processar a imagem. Tente outra foto.');
+      setUploadMessage({ type: 'error', text: error.message || 'Erro ao processar a imagem' });
+      setTimeout(() => setUploadMessage(null), 3000);
     } finally {
-      setIsSaving(false);
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
-  
+
   // ==============================================
-  // FUNÇÃO PARA ABRIR CÂMARA
+  // FUNÇÃO PARA SALVAR DADOS DO USUÁRIO
+  // ==============================================
+  const saveUserDataToSupabase = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('usuarios')
+        .upsert({
+          id: user.id,
+          nome: editFormData.nome,
+          email: editFormData.email,
+          cpf: editFormData.cpf,
+          telefone: editFormData.telefone,
+          data_nascimento: editFormData.dataNascimento,
+          endereco: editFormData.endereco,
+          updated_at: new Date()
+        });
+      
+      if (error) throw error;
+      
+      setUserData(editFormData);
+      setEditingSection(false);
+      setUploadMessage({ type: 'success', text: '✅ Informações salvas com sucesso!' });
+      setTimeout(() => setUploadMessage(null), 3000);
+      
+    } catch (error) {
+      setUploadMessage({ type: 'error', text: 'Erro ao salvar informações' });
+      setTimeout(() => setUploadMessage(null), 3000);
+    }
+  };
+
+  // ==============================================
+  // FUNÇÕES DE CÂMERA E GALERIA
   // ==============================================
   const handleOpenCamera = () => {
     const input = document.createElement('input');
@@ -158,38 +244,22 @@ const ProfileScreen = () => {
     input.capture = cameraMode === 'user' ? 'user' : 'environment';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        savePhoto(file);
-      }
+      if (file) savePhotoToSupabase(file);
     };
     input.click();
   };
-  
-  // ==============================================
-  // FUNÇÃO PARA ANEXAR DA GALERIA
-  // ==============================================
+
   const handleOpenGallery = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        savePhoto(file);
-      }
+      if (file) savePhotoToSupabase(file);
     };
     input.click();
   };
-  
-  // ==============================================
-  // FUNÇÃO PARA SALVAR EDIÇÃO
-  // ==============================================
-  const handleSaveEdit = () => {
-    setUserData(editFormData);
-    setEditingSection(false);
-    alert('✅ Informações salvas com sucesso!');
-  };
-  
+
   // ==============================================
   // FUNÇÕES DE FORMATAÇÃO
   // ==============================================
@@ -200,63 +270,52 @@ const ProfileScreen = () => {
     if (numbers.length <= 9) return numbers.replace(/(\d{3})(\d{3})(\d{1,})/, '$1.$2.$3');
     return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{1,})/, '$1.$2.$3-$4');
   };
-  
+
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     if (numbers.length <= 2) return `(${numbers}`;
     if (numbers.length <= 7) return `(${numbers.slice(0,2)}) ${numbers.slice(2)}`;
     return `(${numbers.slice(0,2)}) ${numbers.slice(2,7)}-${numbers.slice(7,11)}`;
   };
-  
+
   const formatDate = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 4) return `${numbers.slice(0,2)}/${numbers.slice(2)}`;
     return `${numbers.slice(0,2)}/${numbers.slice(2,4)}/${numbers.slice(4,8)}`;
   };
-  
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/login');
   };
-  
+
+  // ==============================================
+  // LOADING
+  // ==============================================
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', width: '100%', backgroundColor: COLORS.fundo, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   // ==============================================
   // TELA DE EDIÇÃO
   // ==============================================
   if (editingSection) {
     return (
-      <div style={{
-        height: '100vh',
-        width: '100%',
-        backgroundColor: COLORS.fundo,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'auto',
-      }}>
-        <div style={{
-          flexShrink: 0,
-          backgroundColor: COLORS.card,
-          padding: '12px 16px',
-          borderBottom: `1px solid ${COLORS.roxo}40`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-        }}>
+      <div style={{ height: '100vh', width: '100%', backgroundColor: COLORS.fundo, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+        <div style={{ flexShrink: 0, backgroundColor: COLORS.card, padding: '12px 16px', borderBottom: `1px solid ${COLORS.roxo}40`, display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button onClick={() => setEditingSection(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
             <ArrowLeft size={20} color={COLORS.verde} />
           </button>
-          <span style={{ fontSize: '18px', fontWeight: 'bold', color: COLORS.amarelo }}>
-            ✏️ EDITAR PERFIL
-          </span>
+          <span style={{ fontSize: '18px', fontWeight: 'bold', color: COLORS.amarelo }}>✏️ EDITAR PERFIL</span>
         </div>
         
         <div style={{ flex: 1, padding: '20px' }}>
-          <div style={{
-            backgroundColor: COLORS.card,
-            borderRadius: '20px',
-            padding: '20px',
-            border: `1px solid ${COLORS.roxo}40`,
-          }}>
+          <div style={{ backgroundColor: COLORS.card, borderRadius: '20px', padding: '20px', border: `1px solid ${COLORS.roxo}40` }}>
             
             <div style={{ marginBottom: '16px' }}>
               <label style={{ color: COLORS.textoCinza, fontSize: '12px', marginBottom: '4px', display: 'block' }}>
@@ -266,15 +325,7 @@ const ProfileScreen = () => {
                 type="text"
                 value={editFormData.nome}
                 onChange={(e) => setEditFormData({ ...editFormData, nome: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: COLORS.fundo,
-                  border: `1px solid ${COLORS.roxo}40`,
-                  borderRadius: '12px',
-                  color: COLORS.texto,
-                  fontSize: '14px',
-                }}
+                style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto, fontSize: '14px' }}
               />
             </div>
             
@@ -286,15 +337,7 @@ const ProfileScreen = () => {
                 type="email"
                 value={editFormData.email}
                 onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: COLORS.fundo,
-                  border: `1px solid ${COLORS.roxo}40`,
-                  borderRadius: '12px',
-                  color: COLORS.texto,
-                  fontSize: '14px',
-                }}
+                style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto, fontSize: '14px' }}
               />
             </div>
             
@@ -308,15 +351,7 @@ const ProfileScreen = () => {
                 onChange={(e) => setEditFormData({ ...editFormData, cpf: formatCPF(e.target.value) })}
                 maxLength={14}
                 placeholder="000.000.000-00"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: COLORS.fundo,
-                  border: `1px solid ${COLORS.roxo}40`,
-                  borderRadius: '12px',
-                  color: COLORS.texto,
-                  fontSize: '14px',
-                }}
+                style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto, fontSize: '14px' }}
               />
             </div>
             
@@ -330,15 +365,7 @@ const ProfileScreen = () => {
                 onChange={(e) => setEditFormData({ ...editFormData, telefone: formatPhone(e.target.value) })}
                 maxLength={15}
                 placeholder="(11) 99999-9999"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: COLORS.fundo,
-                  border: `1px solid ${COLORS.roxo}40`,
-                  borderRadius: '12px',
-                  color: COLORS.texto,
-                  fontSize: '14px',
-                }}
+                style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto, fontSize: '14px' }}
               />
             </div>
             
@@ -352,15 +379,7 @@ const ProfileScreen = () => {
                 onChange={(e) => setEditFormData({ ...editFormData, dataNascimento: formatDate(e.target.value) })}
                 maxLength={10}
                 placeholder="DD/MM/AAAA"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: COLORS.fundo,
-                  border: `1px solid ${COLORS.roxo}40`,
-                  borderRadius: '12px',
-                  color: COLORS.texto,
-                  fontSize: '14px',
-                }}
+                style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto, fontSize: '14px' }}
               />
             </div>
             
@@ -372,33 +391,13 @@ const ProfileScreen = () => {
                 value={editFormData.endereco}
                 onChange={(e) => setEditFormData({ ...editFormData, endereco: e.target.value })}
                 rows={2}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: COLORS.fundo,
-                  border: `1px solid ${COLORS.roxo}40`,
-                  borderRadius: '12px',
-                  color: COLORS.texto,
-                  fontSize: '14px',
-                  resize: 'vertical',
-                }}
+                style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto, fontSize: '14px', resize: 'vertical' }}
               />
             </div>
             
             <button
-              onClick={handleSaveEdit}
-              style={{
-                width: '100%',
-                padding: '14px',
-                backgroundColor: COLORS.verde,
-                color: COLORS.fundo,
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                marginBottom: '12px',
-              }}
+              onClick={saveUserDataToSupabase}
+              style={{ width: '100%', padding: '14px', backgroundColor: COLORS.verde, color: COLORS.fundo, border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '12px' }}
             >
               <Save size={16} style={{ display: 'inline', marginRight: '8px' }} />
               SALVAR ALTERAÇÕES
@@ -406,15 +405,7 @@ const ProfileScreen = () => {
             
             <button
               onClick={() => setEditingSection(false)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                backgroundColor: 'transparent',
-                color: COLORS.textoCinza,
-                border: 'none',
-                fontSize: '14px',
-                cursor: 'pointer',
-              }}
+              style={{ width: '100%', padding: '12px', backgroundColor: 'transparent', color: COLORS.textoCinza, border: 'none', fontSize: '14px', cursor: 'pointer' }}
             >
               Cancelar
             </button>
@@ -423,424 +414,151 @@ const ProfileScreen = () => {
       </div>
     );
   }
-  
+
   // ==============================================
   // TELA PRINCIPAL DO PERFIL
   // ==============================================
   return (
-    <div style={{
-      height: '100vh',
-      width: '100%',
-      backgroundColor: COLORS.fundo,
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'auto',
-    }}>
+    <div style={{ height: '100vh', width: '100%', backgroundColor: COLORS.fundo, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
       
       {/* TOP BAR */}
-      <div style={{
-        flexShrink: 0,
-        backgroundColor: COLORS.card,
-        padding: '12px 16px',
-        borderBottom: `1px solid ${COLORS.roxo}40`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <button
-          onClick={() => navigate('/home')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
+      <div style={{ flexShrink: 0, backgroundColor: COLORS.card, padding: '12px 16px', borderBottom: `1px solid ${COLORS.roxo}40`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <button onClick={() => navigate('/home')} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
           <ArrowLeft size={20} color={COLORS.verde} />
           <span style={{ color: COLORS.verde, fontSize: '14px' }}>Voltar</span>
         </button>
-        <span style={{ fontSize: '18px', fontWeight: 'bold', color: COLORS.amarelo }}>
-          👤 PERFIL
-        </span>
+        <span style={{ fontSize: '18px', fontWeight: 'bold', color: COLORS.amarelo }}>👤 PERFIL</span>
         <div style={{ width: '60px' }} />
       </div>
 
       {/* BEM-VINDO */}
-      <div style={{
-        flexShrink: 0,
-        padding: '16px 20px 0 20px',
-        textAlign: 'center',
-      }}>
-        <span style={{ fontSize: '18px', color: COLORS.amarelo }}>
-          Bem-vindo, {userData.nome.split(' ')[0]}! 👋
-        </span>
+      <div style={{ flexShrink: 0, padding: '16px 20px 0 20px', textAlign: 'center' }}>
+        <span style={{ fontSize: '18px', color: COLORS.amarelo }}>Bem-vindo, {userData.nome.split(' ')[0]}! 👋</span>
       </div>
 
       {/* FOTO DO PERFIL */}
-      <div style={{
-        flexShrink: 0,
-        padding: '20px',
-        display: 'flex',
-        justifyContent: 'center',
-      }}>
+      <div style={{ flexShrink: 0, padding: '20px', display: 'flex', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          {/* Círculo da foto */}
-          <div
-            style={{
-              width: '100px',
-              height: '100px',
-              backgroundColor: COLORS.roxo + '30',
-              borderRadius: '50px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-              border: `3px solid ${COLORS.amarelo}`,
-              margin: '0 auto 12px',
-            }}
-          >
-            {profileImage ? (
-              <img src={profileImage} alt="Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{ width: '100px', height: '100px', backgroundColor: COLORS.roxo + '30', borderRadius: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: `3px solid ${COLORS.amarelo}`, margin: '0 auto 12px' }}>
+            {profileImageUrl ? (
+              <img src={profileImageUrl} alt="Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               <User size={48} color={COLORS.roxo} />
             )}
           </div>
           
-          {/* Botão para alterar foto */}
           <button
             onClick={() => setShowPhotoOptions(!showPhotoOptions)}
-            disabled={isSaving}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '8px 16px',
-              backgroundColor: COLORS.card,
-              border: `1px solid ${COLORS.roxo}40`,
-              borderRadius: '20px',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
-              margin: '0 auto',
-              opacity: isSaving ? 0.6 : 1,
-            }}
+            disabled={isUploading}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '8px 16px', backgroundColor: COLORS.card, border: `1px solid ${COLORS.roxo}40`, borderRadius: '20px', cursor: isUploading ? 'not-allowed' : 'pointer', margin: '0 auto', opacity: isUploading ? 0.6 : 1 }}
           >
-            <Camera size={14} color={COLORS.amarelo} />
-            <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>
-              {isSaving ? 'SALVANDO...' : 'ALTERAR FOTO'}
-            </span>
+            {isUploading ? (
+              <>
+                <Loader2 size={14} className="animate-spin" color={COLORS.amarelo} />
+                <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>ENVIANDO... {uploadProgress}%</span>
+              </>
+            ) : (
+              <>
+                <Camera size={14} color={COLORS.amarelo} />
+                <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>ALTERAR FOTO</span>
+              </>
+            )}
           </button>
           
-          {/* MODAL DE OPÇÕES */}
-          {showPhotoOptions && (
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.9)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000,
-            }}>
-              <div style={{
-                backgroundColor: COLORS.card,
-                borderRadius: '20px',
-                padding: '24px',
-                width: '280px',
-                border: `1px solid ${COLORS.roxo}40`,
-              }}>
-                <h3 style={{ color: COLORS.texto, fontSize: '16px', marginBottom: '20px', textAlign: 'center' }}>
-                  Escolha uma opção
-                </h3>
-                
-                <button
-                  onClick={handleOpenCamera}
-                  disabled={isSaving}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: COLORS.verde,
-                    border: 'none',
-                    borderRadius: '12px',
-                    marginBottom: '10px',
-                    cursor: isSaving ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    color: COLORS.fundo,
-                  }}
-                >
+          {showPhotoOptions && !isUploading && (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+              <div style={{ backgroundColor: COLORS.card, borderRadius: '20px', padding: '24px', width: '280px', border: `1px solid ${COLORS.roxo}40` }}>
+                <h3 style={{ color: COLORS.texto, fontSize: '16px', marginBottom: '20px', textAlign: 'center' }}>Escolha uma opção</h3>
+                <button onClick={handleOpenCamera} style={{ width: '100%', padding: '12px', backgroundColor: COLORS.verde, border: 'none', borderRadius: '12px', marginBottom: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', color: COLORS.fundo }}>
                   <Camera size={16} /> TIRAR FOTO
                 </button>
-                
-                <button
-                  onClick={handleOpenGallery}
-                  disabled={isSaving}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: COLORS.amarelo,
-                    border: 'none',
-                    borderRadius: '12px',
-                    marginBottom: '10px',
-                    cursor: isSaving ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    color: COLORS.fundo,
-                  }}
-                >
+                <button onClick={handleOpenGallery} style={{ width: '100%', padding: '12px', backgroundColor: COLORS.amarelo, border: 'none', borderRadius: '12px', marginBottom: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', color: COLORS.fundo }}>
                   <Upload size={16} /> ANEXAR FOTO
                 </button>
-                
-                <button
-                  onClick={() => setCameraMode(cameraMode === 'user' ? 'environment' : 'user')}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    backgroundColor: 'transparent',
-                    border: `1px solid ${COLORS.roxo}40`,
-                    borderRadius: '12px',
-                    marginBottom: '10px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    color: COLORS.amarelo,
-                  }}
-                >
+                <button onClick={() => setCameraMode(cameraMode === 'user' ? 'environment' : 'user')} style={{ width: '100%', padding: '10px', backgroundColor: 'transparent', border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', marginBottom: '10px', cursor: 'pointer', fontSize: '12px', color: COLORS.amarelo }}>
                   🔄 Alternar câmera ({cameraMode === 'user' ? 'FRONTAL' : 'TRASEIRA'})
                 </button>
-                
-                <button
-                  onClick={() => setShowPhotoOptions(false)}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    color: COLORS.textoCinza,
-                  }}
-                >
+                <button onClick={() => setShowPhotoOptions(false)} style={{ width: '100%', padding: '10px', backgroundColor: 'transparent', border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', color: COLORS.textoCinza }}>
                   Cancelar
                 </button>
               </div>
             </div>
           )}
           
-          {/* Mensagem de erro */}
-          {saveError && (
-            <p style={{ color: COLORS.vermelho, fontSize: '11px', marginTop: '8px' }}>
-              {saveError}
-            </p>
+          {uploadMessage && (
+            <div style={{ marginTop: '12px', padding: '8px 12px', backgroundColor: uploadMessage.type === 'success' ? COLORS.verde + '20' : COLORS.vermelho + '20', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              {uploadMessage.type === 'success' ? <CheckCircle size={14} color={COLORS.verde} /> : <XCircle size={14} color={COLORS.vermelho} />}
+              <span style={{ color: uploadMessage.type === 'success' ? COLORS.verde : COLORS.vermelho, fontSize: '11px' }}>{uploadMessage.text}</span>
+            </div>
           )}
         </div>
       </div>
 
       {/* INFORMAÇÕES PESSOAIS (MINIMIZADO) */}
-      <div style={{
-        flexShrink: 0,
-        backgroundColor: COLORS.card,
-        margin: '12px 16px',
-        borderRadius: '16px',
-        border: `1px solid ${COLORS.roxo}40`,
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 16px',
-          backgroundColor: COLORS.roxo + '15',
-          borderBottom: `1px solid ${COLORS.roxo}40`,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileText size={16} color={COLORS.amarelo} />
-            <span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>📝 INFORMAÇÕES PESSOAIS</span>
-          </div>
-          <button
-            onClick={() => {
-              setEditFormData(userData);
-              setEditingSection(true);
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <Edit2 size={12} color={COLORS.amarelo} />
-            <span style={{ color: COLORS.amarelo, fontSize: '11px' }}>Editar</span>
+      <div style={{ flexShrink: 0, backgroundColor: COLORS.card, margin: '12px 16px', borderRadius: '16px', border: `1px solid ${COLORS.roxo}40`, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: COLORS.roxo + '15', borderBottom: `1px solid ${COLORS.roxo}40` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={16} color={COLORS.amarelo} /><span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>📝 INFORMAÇÕES PESSOAIS</span></div>
+          <button onClick={() => { setEditFormData(userData); setEditingSection(true); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}>
+            <Edit2 size={12} color={COLORS.amarelo} /><span style={{ color: COLORS.amarelo, fontSize: '11px' }}>Editar</span>
           </button>
         </div>
-        
         <div style={{ padding: '12px 16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <User size={14} color={COLORS.roxo} />
-            <span style={{ color: COLORS.texto, fontSize: '13px' }}>{userData.nome}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <Mail size={14} color={COLORS.roxo} />
-            <span style={{ color: COLORS.texto, fontSize: '13px' }}>{userData.email}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Phone size={14} color={COLORS.roxo} />
-            <span style={{ color: COLORS.texto, fontSize: '13px' }}>{userData.telefone}</span>
-          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}><User size={14} color={COLORS.roxo} /><span style={{ color: COLORS.texto, fontSize: '13px' }}>{userData.nome || 'Não informado'}</span></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}><Mail size={14} color={COLORS.roxo} /><span style={{ color: COLORS.texto, fontSize: '13px' }}>{userData.email || 'Não informado'}</span></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Phone size={14} color={COLORS.roxo} /><span style={{ color: COLORS.texto, fontSize: '13px' }}>{userData.telefone || 'Não informado'}</span></div>
         </div>
       </div>
 
       {/* INFORMAÇÕES DO APLICATIVO */}
-      <div style={{
-        flexShrink: 0,
-        backgroundColor: COLORS.card,
-        margin: '0 16px 12px 16px',
-        borderRadius: '16px',
-        border: `1px solid ${COLORS.roxo}40`,
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          padding: '12px 16px',
-          backgroundColor: COLORS.roxo + '15',
-          borderBottom: `1px solid ${COLORS.roxo}40`,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Smartphone size={16} color={COLORS.amarelo} />
-            <span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>📌 INFORMAÇÕES DO APLICATIVO</span>
-          </div>
+      <div style={{ flexShrink: 0, backgroundColor: COLORS.card, margin: '0 16px 12px 16px', borderRadius: '16px', border: `1px solid ${COLORS.roxo}40`, overflow: 'hidden' }}>
+        <div style={{ padding: '12px 16px', backgroundColor: COLORS.roxo + '15', borderBottom: `1px solid ${COLORS.roxo}40` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Smartphone size={16} color={COLORS.amarelo} /><span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>📌 INFORMAÇÕES DO APLICATIVO</span></div>
         </div>
-        
         <div style={{ padding: '8px 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${COLORS.roxo}20` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Users size={16} color={COLORS.roxo} />
-              <span style={{ color: COLORS.texto, fontSize: '13px' }}>👤 Mudar passageiro</span>
-            </div>
-            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
-              Selecionar →
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={16} color={COLORS.roxo} /><span style={{ color: COLORS.texto, fontSize: '13px' }}>👤 Mudar passageiro</span></div>
+            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>Selecionar →</button>
           </div>
-          
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${COLORS.roxo}20` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Briefcase size={16} color={COLORS.verde} />
-              <span style={{ color: COLORS.texto, fontSize: '13px' }}>🚗 Seja Parceiro</span>
-            </div>
-            <button style={{ color: COLORS.verde, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
-              Cadastrar →
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Briefcase size={16} color={COLORS.verde} /><span style={{ color: COLORS.texto, fontSize: '13px' }}>🚗 Seja Parceiro</span></div>
+            <button style={{ color: COLORS.verde, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>Cadastrar →</button>
           </div>
-          
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${COLORS.roxo}20` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <History size={16} color={COLORS.roxo} />
-              <span style={{ color: COLORS.texto, fontSize: '13px' }}>📜 Histórico de viagens</span>
-            </div>
-            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
-              Ver →
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><History size={16} color={COLORS.roxo} /><span style={{ color: COLORS.texto, fontSize: '13px' }}>📜 Histórico de viagens</span></div>
+            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>Ver →</button>
           </div>
-          
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${COLORS.roxo}20` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <CreditCard size={16} color={COLORS.roxo} />
-              <span style={{ color: COLORS.texto, fontSize: '13px' }}>💳 Formas de pagamento</span>
-            </div>
-            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
-              Ver →
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CreditCard size={16} color={COLORS.roxo} /><span style={{ color: COLORS.texto, fontSize: '13px' }}>💳 Formas de pagamento</span></div>
+            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>Ver →</button>
           </div>
-          
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Settings size={16} color={COLORS.roxo} />
-              <span style={{ color: COLORS.texto, fontSize: '13px' }}>⚙️ Configurações</span>
-            </div>
-            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
-              Abrir →
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Settings size={16} color={COLORS.roxo} /><span style={{ color: COLORS.texto, fontSize: '13px' }}>⚙️ Configurações</span></div>
+            <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>Abrir →</button>
           </div>
         </div>
       </div>
 
       {/* SOBRE */}
-      <div style={{
-        flexShrink: 0,
-        backgroundColor: COLORS.card,
-        margin: '0 16px 12px 16px',
-        borderRadius: '16px',
-        border: `1px solid ${COLORS.roxo}40`,
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          padding: '12px 16px',
-          backgroundColor: COLORS.roxo + '15',
-          borderBottom: `1px solid ${COLORS.roxo}40`,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Shield size={16} color={COLORS.amarelo} />
-            <span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>ℹ️ SOBRE</span>
-          </div>
+      <div style={{ flexShrink: 0, backgroundColor: COLORS.card, margin: '0 16px 12px 16px', borderRadius: '16px', border: `1px solid ${COLORS.roxo}40`, overflow: 'hidden' }}>
+        <div style={{ padding: '12px 16px', backgroundColor: COLORS.roxo + '15', borderBottom: `1px solid ${COLORS.roxo}40` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Shield size={16} color={COLORS.amarelo} /><span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>ℹ️ SOBRE</span></div>
         </div>
-        
         <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>Versão 1.0.0</span>
-          <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
-            Termos de uso →
-          </button>
+          <button style={{ color: COLORS.amarelo, fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>Termos de uso →</button>
         </div>
       </div>
 
       {/* BOTÃO SAIR */}
-      <div style={{
-        flexShrink: 0,
-        margin: '0 16px 16px 16px',
-      }}>
-        <button
-          onClick={handleLogout}
-          style={{
-            width: '100%',
-            padding: '14px',
-            backgroundColor: COLORS.vermelho,
-            color: COLORS.texto,
-            border: 'none',
-            borderRadius: '14px',
-            fontSize: '15px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-          }}
-        >
+      <div style={{ flexShrink: 0, margin: '0 16px 16px 16px' }}>
+        <button onClick={handleLogout} style={{ width: '100%', padding: '14px', backgroundColor: COLORS.vermelho, color: COLORS.texto, border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           <LogOut size={18} /> SAIR DA CONTA
         </button>
       </div>
 
       {/* RODAPÉ */}
-      <div style={{
-        flexShrink: 0,
-        padding: '0 16px 20px 16px',
-        textAlign: 'center',
-      }}>
-        <span style={{ fontSize: '9px', color: COLORS.vinho }}>
-          obaleva.com.br/profile
-        </span>
+      <div style={{ flexShrink: 0, padding: '0 16px 20px 16px', textAlign: 'center' }}>
+        <span style={{ fontSize: '9px', color: COLORS.vinho }}>obaleva.com.br/profile</span>
       </div>
 
     </div>
