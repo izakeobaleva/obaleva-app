@@ -41,15 +41,28 @@ const ProfileScreen = () => {
     setUploading(false);
   };
 
+  // VERSÃO CORRIGIDA PARA CÂMERA
   const abrirCamera = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = cameraMode === 'user' ? 'user' : 'environment';
+    
+    // Tenta forçar a câmera
+    try {
+      if (cameraMode === 'user') {
+        input.setAttribute('capture', 'user');
+      } else {
+        input.setAttribute('capture', 'environment');
+      }
+    } catch (e) {
+      console.log('capture não suportado');
+    }
+    
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) upload(file);
     };
+    
     input.click();
   };
 
@@ -57,6 +70,7 @@ const ProfileScreen = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
+    input.removeAttribute('capture');
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) upload(file);
@@ -125,7 +139,7 @@ const ProfileScreen = () => {
           </button>
         </div>
 
-        {/* Alternar câmera (selfie/traseira) */}
+        {/* Alternar câmera */}
         <button
           onClick={() => setCameraMode(cameraMode === 'user' ? 'environment' : 'user')}
           style={{
