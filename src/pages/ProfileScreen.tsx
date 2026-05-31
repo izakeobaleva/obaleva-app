@@ -5,8 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { 
   ArrowLeft, User, Mail, Phone, Camera, Upload, 
   Briefcase, History, CreditCard, Settings, LogOut,
-  FileText, Shield, Smartphone, Edit2, Users,
-  X, CheckCircle, Loader2
+  FileText, Shield, Smartphone, Edit2, Users, Save, Loader2
 } from 'lucide-react';
 
 const COLORS = {
@@ -24,12 +23,12 @@ const COLORS = {
 const ProfileScreen = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [cameraMode, setCameraMode] = useState<'user' | 'environment'>('environment');
   const [editingSection, setEditingSection] = useState(false);
-  const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
   const [userData, setUserData] = useState({
     nome: user?.user_metadata?.name || 'Passageiro',
@@ -41,93 +40,61 @@ const ProfileScreen = () => {
   });
   const [editFormData, setEditFormData] = useState(userData);
 
+  // Carregar foto existente
   useEffect(() => {
     if (user) {
-      loadUserData();
-      checkProfileImage();
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(`usuarios/${user.id}/profile.jpg`);
+      
+      fetch(data.publicUrl, { method: 'HEAD' })
+        .then(res => {
+          if (res.ok) setProfileImageUrl(data.publicUrl);
+        })
+        .catch(() => console.log('Sem foto'));
     }
   }, [user]);
 
-  const loadUserData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('*')
-        .eq('id', user?.id)
-        .single();
-      
-      if (data && !error) {
-        setUserData({
-          nome: data.nome_completo || user?.user_metadata?.name || 'Passageiro',
-          email: data.email || user?.email || '',
-          cpf: data.cpf || '',
-          telefone: data.telefone || '',
-          dataNascimento: data.data_nascimento || '',
-          endereco: data.endereco || ''
-        });
-      }
-    } catch (error) {
-      console.log('Erro ao carregar dados');
-    }
-  };
-
-  const checkProfileImage = async () => {
-    try {
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(`usuarios/${user?.id}/profile.jpg`);
-      
-      if (data?.publicUrl) {
-        const response = await fetch(data.publicUrl, { method: 'HEAD' });
-        if (response.ok) {
-          setProfileImageUrl(data.publicUrl);
-        }
-      }
-    } catch (error) {
-      console.log('Nenhuma foto encontrada');
-    }
-  };
-
+  // Upload da foto
   const uploadPhoto = async (file: File) => {
     if (!user) {
-      setFeedbackMessage({ type: 'error', text: 'Usuário não autenticado' });
+      alert('Usuário não autenticado');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setFeedbackMessage({ type: 'error', text: 'Arquivo muito grande! Máximo 5MB' });
-      return;
-    }
-
-    setUploading(true);
-    setFeedbackMessage(null);
+    setIsUploading(true);
+    setUploadMessage(null);
 
     try {
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Arquivo muito grande! Máximo 5MB');
+      }
+
       const filePath = `usuarios/${user.id}/profile.jpg`;
-      
+
       const { error } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, { upsert: true });
 
       if (error) throw error;
-      
-      const { data: urlData } = supabase.storage
+
+      const { data } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
-      
-      setProfileImageUrl(urlData.publicUrl);
-      setShowPhotoOptions(false);
-      setFeedbackMessage({ type: 'success', text: 'Foto salva com sucesso!' });
-      setTimeout(() => setFeedbackMessage(null), 3000);
+
+      setProfileImageUrl(data.publicUrl);
+      setUploadMessage({ type: 'success', text: '✅ Foto salva com sucesso!' });
+      setTimeout(() => setUploadMessage(null), 3000);
       
     } catch (error: any) {
-      setFeedbackMessage({ type: 'error', text: error.message || 'Erro ao salvar foto' });
-      setTimeout(() => setFeedbackMessage(null), 3000);
+      setUploadMessage({ type: 'error', text: error.message || 'Erro ao salvar foto' });
+      setTimeout(() => setUploadMessage(null), 3000);
     } finally {
-      setUploading(false);
+      setIsUploading(false);
     }
   };
 
+  // TIRAR FOTO (câmera)
   const handleOpenCamera = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -140,6 +107,7 @@ const ProfileScreen = () => {
     input.click();
   };
 
+  // ANEXAR FOTO (galeria)
   const handleOpenGallery = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -151,8 +119,8 @@ const ProfileScreen = () => {
     input.click();
   };
 
+  // Salvar dados
   const saveUserData = async () => {
-    if (!user) return;
     try {
       const { error } = await supabase
         .from('usuarios')
@@ -164,17 +132,18 @@ const ProfileScreen = () => {
           endereco: editFormData.endereco,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id);
-
+        .eq('id', user?.id);
+      
       if (error) throw error;
       
       setUserData(editFormData);
       setEditingSection(false);
-      setFeedbackMessage({ type: 'success', text: 'Informações salvas!' });
-      setTimeout(() => setFeedbackMessage(null), 3000);
-    } catch (error: any) {
-      setFeedbackMessage({ type: 'error', text: error.message || 'Erro ao salvar' });
-      setTimeout(() => setFeedbackMessage(null), 3000);
+      setUploadMessage({ type: 'success', text: '✅ Informações salvas!' });
+      setTimeout(() => setUploadMessage(null), 3000);
+      
+    } catch (error) {
+      setUploadMessage({ type: 'error', text: 'Erro ao salvar informações' });
+      setTimeout(() => setUploadMessage(null), 3000);
     }
   };
 
@@ -193,6 +162,13 @@ const ProfileScreen = () => {
     return `(${numbers.slice(0,2)}) ${numbers.slice(2,7)}-${numbers.slice(7,11)}`;
   };
 
+  const formatDate = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 4) return `${numbers.slice(0,2)}/${numbers.slice(2)}`;
+    return `${numbers.slice(0,2)}/${numbers.slice(2,4)}/${numbers.slice(4,8)}`;
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/login');
@@ -208,42 +184,35 @@ const ProfileScreen = () => {
           </button>
           <span style={{ fontSize: '18px', fontWeight: 'bold', color: COLORS.amarelo }}>✏️ EDITAR PERFIL</span>
         </div>
-
-        {feedbackMessage && (
-          <div style={{ padding: '10px 16px', backgroundColor: feedbackMessage.type === 'success' ? COLORS.verde + '20' : COLORS.vermelho + '20', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {feedbackMessage.type === 'success' ? <CheckCircle size={16} color={COLORS.verde} /> : <X size={16} color={COLORS.vermelho} />}
-            <span style={{ color: feedbackMessage.type === 'success' ? COLORS.verde : COLORS.vermelho, fontSize: '13px' }}>{feedbackMessage.text}</span>
-          </div>
-        )}
-
+        
         <div style={{ flex: 1, padding: '20px', overflow: 'auto' }}>
           <div style={{ backgroundColor: COLORS.card, borderRadius: '20px', padding: '20px', border: `1px solid ${COLORS.roxo}40` }}>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ color: COLORS.textoCinza, fontSize: '12px' }}>Nome completo</label>
-              <input type="text" value={editFormData.nome} onChange={(e) => setEditFormData({ ...editFormData, nome: e.target.value })} style={{ width: '100%', padding: '12px', marginTop: '4px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
+              <input type="text" value={editFormData.nome} onChange={(e) => setEditFormData({ ...editFormData, nome: e.target.value })} style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
             </div>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ color: COLORS.textoCinza, fontSize: '12px' }}>E-mail</label>
-              <input type="email" value={editFormData.email} onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })} style={{ width: '100%', padding: '12px', marginTop: '4px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
+              <input type="email" value={editFormData.email} onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })} style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
             </div>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ color: COLORS.textoCinza, fontSize: '12px' }}>CPF</label>
-              <input type="text" value={editFormData.cpf} onChange={(e) => setEditFormData({ ...editFormData, cpf: formatCPF(e.target.value) })} maxLength={14} placeholder="000.000.000-00" style={{ width: '100%', padding: '12px', marginTop: '4px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
+              <input type="text" value={editFormData.cpf} onChange={(e) => setEditFormData({ ...editFormData, cpf: formatCPF(e.target.value) })} maxLength={14} placeholder="000.000.000-00" style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
             </div>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ color: COLORS.textoCinza, fontSize: '12px' }}>Telefone</label>
-              <input type="tel" value={editFormData.telefone} onChange={(e) => setEditFormData({ ...editFormData, telefone: formatPhone(e.target.value) })} maxLength={15} placeholder="(11) 99999-9999" style={{ width: '100%', padding: '12px', marginTop: '4px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
+              <input type="tel" value={editFormData.telefone} onChange={(e) => setEditFormData({ ...editFormData, telefone: formatPhone(e.target.value) })} maxLength={15} placeholder="(11) 99999-9999" style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
             </div>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ color: COLORS.textoCinza, fontSize: '12px' }}>Data de nascimento</label>
-              <input type="text" value={editFormData.dataNascimento} onChange={(e) => setEditFormData({ ...editFormData, dataNascimento: e.target.value })} placeholder="DD/MM/AAAA" style={{ width: '100%', padding: '12px', marginTop: '4px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
+              <input type="text" value={editFormData.dataNascimento} onChange={(e) => setEditFormData({ ...editFormData, dataNascimento: formatDate(e.target.value) })} maxLength={10} placeholder="DD/MM/AAAA" style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
             </div>
             <div style={{ marginBottom: '24px' }}>
               <label style={{ color: COLORS.textoCinza, fontSize: '12px' }}>Endereço</label>
-              <textarea value={editFormData.endereco} onChange={(e) => setEditFormData({ ...editFormData, endereco: e.target.value })} rows={2} style={{ width: '100%', padding: '12px', marginTop: '4px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
+              <textarea value={editFormData.endereco} onChange={(e) => setEditFormData({ ...editFormData, endereco: e.target.value })} rows={2} style={{ width: '100%', padding: '12px', backgroundColor: COLORS.fundo, border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', color: COLORS.texto }} />
             </div>
             <button onClick={saveUserData} style={{ width: '100%', padding: '14px', backgroundColor: COLORS.verde, color: COLORS.fundo, border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '12px' }}>
-              💾 SALVAR ALTERAÇÕES
+              <Save size={16} style={{ display: 'inline', marginRight: '8px' }} /> SALVAR ALTERAÇÕES
             </button>
             <button onClick={() => setEditingSection(false)} style={{ width: '100%', padding: '12px', background: 'transparent', color: COLORS.textoCinza, border: 'none', cursor: 'pointer' }}>
               Cancelar
@@ -254,7 +223,7 @@ const ProfileScreen = () => {
     );
   }
 
-  // Tela principal
+  // Tela principal do perfil
   return (
     <div style={{ height: '100vh', width: '100%', backgroundColor: COLORS.fundo, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
       
@@ -267,14 +236,6 @@ const ProfileScreen = () => {
         <span style={{ fontSize: '18px', fontWeight: 'bold', color: COLORS.amarelo }}>👤 PERFIL</span>
         <div style={{ width: '60px' }} />
       </div>
-
-      {/* FEEDBACK */}
-      {feedbackMessage && (
-        <div style={{ padding: '10px 16px', backgroundColor: feedbackMessage.type === 'success' ? COLORS.verde + '20' : COLORS.vermelho + '20', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {feedbackMessage.type === 'success' ? <CheckCircle size={16} color={COLORS.verde} /> : <X size={16} color={COLORS.vermelho} />}
-          <span style={{ color: feedbackMessage.type === 'success' ? COLORS.verde : COLORS.vermelho, fontSize: '13px' }}>{feedbackMessage.text}</span>
-        </div>
-      )}
 
       {/* BEM-VINDO */}
       <div style={{ flexShrink: 0, padding: '16px 20px 0 20px', textAlign: 'center' }}>
@@ -290,43 +251,36 @@ const ProfileScreen = () => {
             ) : (
               <User size={48} color={COLORS.roxo} />
             )}
-            {uploading && (
-              <div style={{ position: 'absolute', width: '100px', height: '100px', borderRadius: '50px', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Loader2 size={24} className="animate-spin" color={COLORS.amarelo} />
-              </div>
-            )}
           </div>
           
-          <button
-            onClick={() => setShowPhotoOptions(!showPhotoOptions)}
-            disabled={uploading}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', backgroundColor: COLORS.card, border: `1px solid ${COLORS.roxo}40`, borderRadius: '20px', cursor: uploading ? 'not-allowed' : 'pointer', opacity: uploading ? 0.6 : 1 }}
-          >
-            {uploading ? (
-              <><Loader2 size={14} className="animate-spin" color={COLORS.amarelo} /><span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>ENVIANDO...</span></>
-            ) : (
-              <><Camera size={14} color={COLORS.amarelo} /><span style={{ color: COLORS.textoCinza, fontSize: '12px' }}>ALTERAR FOTO</span></>
-            )}
+          {/* BOTÕES DE FOTO */}
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '8px' }}>
+            <button onClick={handleOpenCamera} disabled={isUploading} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', backgroundColor: COLORS.verde, border: 'none', borderRadius: '20px', cursor: isUploading ? 'not-allowed' : 'pointer', opacity: isUploading ? 0.6 : 1 }}>
+              <Camera size={14} color={COLORS.fundo} />
+              <span style={{ color: COLORS.fundo, fontSize: '12px', fontWeight: 'bold' }}>TIRAR FOTO</span>
+            </button>
+            <button onClick={handleOpenGallery} disabled={isUploading} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', backgroundColor: COLORS.amarelo, border: 'none', borderRadius: '20px', cursor: isUploading ? 'not-allowed' : 'pointer', opacity: isUploading ? 0.6 : 1 }}>
+              <Upload size={14} color={COLORS.fundo} />
+              <span style={{ color: COLORS.fundo, fontSize: '12px', fontWeight: 'bold' }}>ANEXAR FOTO</span>
+            </button>
+          </div>
+          
+          <button onClick={() => setCameraMode(cameraMode === 'user' ? 'environment' : 'user')} style={{ fontSize: '10px', color: COLORS.amarelo, background: 'transparent', border: 'none', cursor: 'pointer', marginTop: '4px' }}>
+            🔄 Usar câmera {cameraMode === 'user' ? 'TRASEIRA' : 'FRONTAL (SELFIE)'}
           </button>
           
-          {/* MODAL DE OPÇÕES */}
-          {showPhotoOptions && !uploading && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-              <div style={{ backgroundColor: COLORS.card, borderRadius: '20px', padding: '24px', width: '280px', border: `1px solid ${COLORS.roxo}40` }}>
-                <h3 style={{ color: COLORS.texto, fontSize: '16px', marginBottom: '20px', textAlign: 'center' }}>Escolha uma opção</h3>
-                <button onClick={handleOpenCamera} style={{ width: '100%', padding: '14px', backgroundColor: COLORS.verde, border: 'none', borderRadius: '12px', marginBottom: '10px', cursor: 'pointer', fontWeight: 'bold', color: COLORS.fundo, fontSize: '14px' }}>
-                  📸 TIRAR FOTO
-                </button>
-                <button onClick={handleOpenGallery} style={{ width: '100%', padding: '14px', backgroundColor: COLORS.amarelo, border: 'none', borderRadius: '12px', marginBottom: '10px', cursor: 'pointer', fontWeight: 'bold', color: COLORS.fundo, fontSize: '14px' }}>
-                  🖼️ ANEXAR FOTO
-                </button>
-                <button onClick={() => setCameraMode(cameraMode === 'user' ? 'environment' : 'user')} style={{ width: '100%', padding: '10px', background: 'transparent', border: `1px solid ${COLORS.roxo}40`, borderRadius: '12px', marginBottom: '10px', cursor: 'pointer', fontSize: '12px', color: COLORS.amarelo }}>
-                  🔄 Alternar câmera ({cameraMode === 'user' ? 'FRONTAL' : 'TRASEIRA'})
-                </button>
-                <button onClick={() => setShowPhotoOptions(false)} style={{ width: '100%', padding: '10px', background: 'transparent', border: 'none', borderRadius: '12px', cursor: 'pointer', color: COLORS.textoCinza, fontSize: '13px' }}>
-                  Cancelar
-                </button>
-              </div>
+          {uploadMessage && (
+            <div style={{ marginTop: '12px', padding: '8px 12px', backgroundColor: uploadMessage.type === 'success' ? COLORS.verde + '20' : COLORS.vermelho + '20', borderRadius: '12px' }}>
+              <span style={{ color: uploadMessage.type === 'success' ? COLORS.verde : COLORS.vermelho, fontSize: '12px' }}>
+                {uploadMessage.text}
+              </span>
+            </div>
+          )}
+          
+          {isUploading && (
+            <div style={{ marginTop: '8px' }}>
+              <Loader2 size={20} color={COLORS.amarelo} className="animate-spin" style={{ margin: '0 auto' }} />
+              <p style={{ color: COLORS.textoCinza, fontSize: '10px' }}>Enviando foto...</p>
             </div>
           )}
         </div>
@@ -334,7 +288,7 @@ const ProfileScreen = () => {
 
       {/* INFORMAÇÕES PESSOAIS */}
       <div style={{ flexShrink: 0, backgroundColor: COLORS.card, margin: '12px 16px', borderRadius: '16px', border: `1px solid ${COLORS.roxo}40`, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: COLORS.roxo + '15', borderBottom: `1px solid ${COLORS.roxo}40` }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: COLORS.roxo + '15' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={16} color={COLORS.amarelo} /><span style={{ color: COLORS.texto, fontWeight: 'bold' }}>📝 INFORMAÇÕES PESSOAIS</span></div>
           <button onClick={() => { setEditFormData(userData); setEditingSection(true); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
             <Edit2 size={12} color={COLORS.amarelo} /><span style={{ color: COLORS.amarelo, fontSize: '11px' }}>Editar</span>
@@ -388,7 +342,7 @@ const ProfileScreen = () => {
 
 function AppMenuItem({ icon, label, action, actionColor = '#facc15' }: any) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #8b5cf620' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${COLORS.roxo}20` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {icon}
         <span style={{ color: '#ffffff' }}>{label}</span>
