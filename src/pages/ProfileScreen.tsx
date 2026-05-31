@@ -7,10 +7,7 @@ const ProfileScreen = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState('');
 
-  // Carregar foto existente
   useEffect(() => {
     if (user) {
       const { data } = supabase.storage
@@ -20,39 +17,42 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  // Função de upload (VERSÃO MAIS SIMPLES POSSÍVEL)
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    
+    // ALERTA 1
+    alert('1. Arquivo selecionado: ' + (file ? file.name : 'nenhum'));
+    
     if (!file) return;
     if (!user) {
-      setMessage('Usuário não logado');
+      alert('ERRO: Usuário não autenticado');
       return;
     }
 
-    setUploading(true);
-    setMessage('Enviando...');
+    alert('2. User ID: ' + user.id);
+    alert('3. Tamanho do arquivo: ' + (file.size / 1024).toFixed(2) + ' KB');
 
     try {
       const filePath = `usuarios/${user.id}/profile.jpg`;
-      
-      const { error } = await supabase.storage
+      alert('4. Caminho: ' + filePath);
+
+      const { data, error } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, { upsert: true });
 
       if (error) {
-        setMessage('Erro: ' + error.message);
+        alert('5. ERRO DO SUPABASE: ' + error.message + ' - Código: ' + error.statusCode);
         return;
       }
 
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      setImageUrl(data.publicUrl);
-      setMessage('✅ Foto salva com sucesso!');
+      alert('6. SUCESSO! Arquivo enviado: ' + data?.path);
+      
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      setImageUrl(urlData.publicUrl);
+      alert('7. URL da imagem: ' + urlData.publicUrl);
       
     } catch (err: any) {
-      setMessage('Erro: ' + err.message);
-    } finally {
-      setUploading(false);
-      setTimeout(() => setMessage(''), 3000);
+      alert('8. ERRO GERAL: ' + err.message);
     }
   };
 
@@ -62,10 +62,9 @@ const ProfileScreen = () => {
         ← Voltar
       </button>
       
-      <h1 style={{ color: '#facc15', textAlign: 'center' }}>Perfil</h1>
+      <h1 style={{ color: '#facc15', textAlign: 'center' }}>Perfil - Teste</h1>
       
       <div style={{ textAlign: 'center', marginTop: 30 }}>
-        {/* Foto */}
         <div style={{
           width: 120,
           height: 120,
@@ -85,7 +84,6 @@ const ProfileScreen = () => {
           )}
         </div>
 
-        {/* Botão de upload */}
         <label style={{
           display: 'inline-block',
           padding: '12px 24px',
@@ -95,30 +93,22 @@ const ProfileScreen = () => {
           fontWeight: 'bold',
           cursor: 'pointer'
         }}>
-          {uploading ? 'ENVIANDO...' : '📸 SELECIONAR FOTO'}
+          📸 SELECIONAR FOTO
           <input
             type="file"
             accept="image/*"
+            capture="environment"
             onChange={handleUpload}
             style={{ display: 'none' }}
-            disabled={uploading}
           />
         </label>
 
-        {/* Mensagem */}
-        {message && (
-          <p style={{ color: message.includes('✅') ? '#22c55e' : '#ef4444', marginTop: 20 }}>
-            {message}
-          </p>
-        )}
-
-        {/* Info do usuário */}
         <div style={{ marginTop: 40, padding: 16, backgroundColor: '#1a1a2e', borderRadius: 16 }}>
-          <p style={{ color: '#fff' }}><strong>Nome:</strong> {user?.user_metadata?.name || 'Passageiro'}</p>
+          <p style={{ color: '#fff' }}><strong>User ID:</strong></p>
+          <p style={{ color: '#888', fontSize: 10, wordBreak: 'break-all' }}>{user?.id}</p>
           <p style={{ color: '#fff', marginTop: 8 }}><strong>Email:</strong> {user?.email}</p>
         </div>
 
-        {/* Botão sair */}
         <button
           onClick={async () => {
             await supabase.auth.signOut();
