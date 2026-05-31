@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import React from 'react';
+import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
 
 const mapContainerStyle = {
   width: '100%',
@@ -27,64 +27,6 @@ const RealMap: React.FC<RealMapProps> = ({
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
   });
-
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const circleRef = useRef<google.maps.Circle | null>(null);
-
-  const handleMapLoad = (map: google.maps.Map) => {
-    mapRef.current = map;
-    if (onLoad) onLoad(map);
-  };
-
-  // Adicionar círculo pulsante na localização atual
-  useEffect(() => {
-    if (isLoaded && mapRef.current && showUserLocation && center !== defaultCenter) {
-      // Remove círculo anterior se existir
-      if (circleRef.current) {
-        circleRef.current.setMap(null);
-      }
-
-      // Cria círculo pulsante amarelo translúcido
-      const circle = new google.maps.Circle({
-        map: mapRef.current,
-        center: center,
-        radius: 50,
-        fillColor: '#facc15',
-        fillOpacity: 0.2,
-        strokeColor: '#facc15',
-        strokeOpacity: 0.5,
-        strokeWeight: 2,
-      });
-      
-      circleRef.current = circle;
-
-      // Animação de pulso (aumenta e diminui o raio)
-      let growing = true;
-      const interval = setInterval(() => {
-        if (circleRef.current) {
-          const currentRadius = circleRef.current.getRadius();
-          if (growing) {
-            if (currentRadius < 100) {
-              circleRef.current.setRadius(currentRadius + 2);
-            } else {
-              growing = false;
-            }
-          } else {
-            if (currentRadius > 50) {
-              circleRef.current.setRadius(currentRadius - 2);
-            } else {
-              growing = true;
-            }
-          }
-        }
-      }, 50);
-
-      return () => {
-        clearInterval(interval);
-        if (circleRef.current) circleRef.current.setMap(null);
-      };
-    }
-  }, [isLoaded, showUserLocation, center]);
 
   if (loadError) {
     return (
@@ -116,13 +58,18 @@ const RealMap: React.FC<RealMapProps> = ({
       zoom={zoom}
       options={{
         disableDefaultUI: true,
-        zoomControl: false,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_BOTTOM,
+        },
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
       }}
-      onLoad={handleMapLoad}
-    />
+      onLoad={onLoad}
+    >
+      {showUserLocation && <Marker position={center} />}
+    </GoogleMap>
   );
 };
 

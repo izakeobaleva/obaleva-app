@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* RESET COMPLETO */
 * {
   margin: 0;
   padding: 0;
@@ -15,7 +14,6 @@ html, body, #root {
   overflow: hidden;
 }
 
-/* REMOVE BARRAS DE ROLAGEM */
 ::-webkit-scrollbar {
   display: none;
 }
@@ -25,29 +23,12 @@ html, body, #root {
   scrollbar-width: none;
 }
 
-/* ESTILOS GLOBAIS */
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #0f0f0f;
-  color: #ffffff;
-}
-
-/* ANIMAÇÕES */
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.3;
+/* Animação do spinner do Google Maps */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
-
-.animate-pulse-circle {
-  animation: pulse 2s ease-in-out infinite;
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
