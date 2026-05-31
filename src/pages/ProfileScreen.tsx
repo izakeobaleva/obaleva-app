@@ -109,7 +109,7 @@ const ProfileScreen = () => {
   };
 
   // ==============================================
-  // FUNÇÃO PARA COMPRIMIR IMAGEM (TAMANHO PEQUENO)
+  // FUNÇÃO PARA COMPRIMIR IMAGEM
   // ==============================================
   const compressImage = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -139,7 +139,7 @@ const ProfileScreen = () => {
           
           canvas.toBlob((blob) => {
             if (blob) {
-              console.log(`Tamanho da imagem: ${(blob.size / 1024).toFixed(2)} KB`);
+              console.log(`✅ Tamanho da imagem comprimida: ${(blob.size / 1024).toFixed(2)} KB`);
               resolve(blob);
             } else {
               reject(new Error('Erro ao comprimir imagem'));
@@ -156,43 +156,79 @@ const ProfileScreen = () => {
   // FUNÇÃO PARA SALVAR FOTO NO SUPABASE
   // ==============================================
   const savePhotoToSupabase = async (file: File) => {
+    console.log('1️⃣ Iniciando upload...');
+    console.log('   Arquivo:', file.name, file.size, file.type);
+    
     if (!user) {
+      console.log('❌ Erro: Usuário não autenticado');
       setUploadMessage({ type: 'error', text: 'Usuário não autenticado' });
       return;
     }
+    
+    console.log('   Usuário ID:', user.id);
     
     setIsUploading(true);
     setUploadProgress(0);
     setUploadMessage(null);
     
     try {
+      // PASSO 1: Verificar tamanho
+      console.log('2️⃣ Verificando tamanho...');
       if (file.size > 5 * 1024 * 1024) {
         throw new Error('Arquivo muito grande! Máximo 5MB');
       }
       
+      // PASSO 2: Comprimir imagem
+      console.log('3️⃣ Comprimindo imagem...');
+      console.log('   Tamanho original:', file.size);
       setUploadProgress(20);
       const compressedBlob = await compressImage(file);
+      console.log('4️⃣ Imagem comprimida!');
+      console.log('   Tamanho comprimido:', compressedBlob.size);
       setUploadProgress(50);
       
+      // PASSO 3: Tentar fazer upload para Supabase
+      console.log('5️⃣ Enviando para Supabase...');
+      console.log('   Bucket: avatars');
+      console.log('   Path:', `usuarios/${user.id}/profile.jpg`);
+      
       const filePath = `usuarios/${user.id}/profile.jpg`;
-      const { error: uploadError } = await supabase.storage
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, compressedBlob, { upsert: true });
+        .upload(filePath, compressedBlob, { 
+          upsert: true,
+          contentType: 'image/jpeg'
+        });
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.log('❌ Erro no upload:', uploadError);
+        throw uploadError;
+      }
       
+      console.log('6️⃣ Upload concluído!');
+      console.log('   Dados:', uploadData);
       setUploadProgress(80);
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
       
+      // PASSO 4: Pegar URL pública
+      console.log('7️⃣ Obtendo URL pública...');
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+      
+      console.log('8️⃣ URL pública:', urlData.publicUrl);
       setUploadProgress(100);
       setProfileImageUrl(urlData.publicUrl);
       setShowPhotoOptions(false);
       setUploadMessage({ type: 'success', text: '✅ Foto salva com sucesso!' });
       
+      console.log('🎉 Upload finalizado com sucesso!');
       setTimeout(() => setUploadMessage(null), 3000);
       
     } catch (error: any) {
-      console.error('Erro ao salvar foto:', error);
+      console.error('❌ Erro detalhado:', error);
+      console.error('   Mensagem:', error.message);
+      console.error('   Código:', error.code);
       setUploadMessage({ type: 'error', text: error.message || 'Erro ao processar a imagem' });
       setTimeout(() => setUploadMessage(null), 3000);
     } finally {
@@ -202,60 +238,35 @@ const ProfileScreen = () => {
   };
 
   // ==============================================
-  // FUNÇÃO PARA SALVAR DADOS DO USUÁRIO
-  // ==============================================
-  const saveUserDataToSupabase = async () => {
-    if (!user) return;
-    
-    try {
-      const { error } = await supabase
-        .from('usuarios')
-        .upsert({
-          id: user.id,
-          nome: editFormData.nome,
-          email: editFormData.email,
-          cpf: editFormData.cpf,
-          telefone: editFormData.telefone,
-          data_nascimento: editFormData.dataNascimento,
-          endereco: editFormData.endereco,
-          updated_at: new Date()
-        });
-      
-      if (error) throw error;
-      
-      setUserData(editFormData);
-      setEditingSection(false);
-      setUploadMessage({ type: 'success', text: '✅ Informações salvas com sucesso!' });
-      setTimeout(() => setUploadMessage(null), 3000);
-      
-    } catch (error) {
-      setUploadMessage({ type: 'error', text: 'Erro ao salvar informações' });
-      setTimeout(() => setUploadMessage(null), 3000);
-    }
-  };
-
-  // ==============================================
   // FUNÇÕES DE CÂMERA E GALERIA
   // ==============================================
   const handleOpenCamera = () => {
+    console.log('📸 Abrindo câmera...');
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.capture = cameraMode === 'user' ? 'user' : 'environment';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) savePhotoToSupabase(file);
+      if (file) {
+        console.log('📸 Arquivo selecionado pela câmera:', file.name, file.size);
+        savePhotoToSupabase(file);
+      }
     };
     input.click();
   };
 
   const handleOpenGallery = () => {
+    console.log('🖼️ Abrindo galeria...');
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) savePhotoToSupabase(file);
+      if (file) {
+        console.log('🖼️ Arquivo selecionado da galeria:', file.name, file.size);
+        savePhotoToSupabase(file);
+      }
     };
     input.click();
   };
@@ -494,7 +505,7 @@ const ProfileScreen = () => {
         </div>
       </div>
 
-      {/* INFORMAÇÕES PESSOAIS (MINIMIZADO) */}
+      {/* INFORMAÇÕES PESSOAIS */}
       <div style={{ flexShrink: 0, backgroundColor: COLORS.card, margin: '12px 16px', borderRadius: '16px', border: `1px solid ${COLORS.roxo}40`, overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: COLORS.roxo + '15', borderBottom: `1px solid ${COLORS.roxo}40` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={16} color={COLORS.amarelo} /><span style={{ color: COLORS.texto, fontSize: '14px', fontWeight: 'bold' }}>📝 INFORMAÇÕES PESSOAIS</span></div>
