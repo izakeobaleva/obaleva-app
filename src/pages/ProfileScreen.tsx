@@ -36,6 +36,7 @@ const ProfileScreen = () => {
   const [cameraMode, setCameraMode] = useState<'user' | 'environment'>('environment');
   const [editingSection, setEditingSection] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [savingData, setSavingData] = useState(false);
   
   const [userData, setUserData] = useState({
     nome: '',
@@ -67,7 +68,7 @@ const ProfileScreen = () => {
       
       if (data && !error) {
         setUserData({
-          nome: data.nome || user?.user_metadata?.name || 'Passageiro',
+          nome: data.nome_completo || user?.user_metadata?.name || 'Passageiro',
           email: data.email || user?.email || '',
           cpf: data.cpf || '',
           telefone: data.telefone || '',
@@ -235,6 +236,42 @@ const ProfileScreen = () => {
       setIsUploading(false);
       setUploadProgress(0);
     }
+  };
+
+  // ==============================================
+  // FUNÇÃO PARA SALVAR DADOS DO USUÁRIO
+  // ==============================================
+  const saveUserDataToSupabase = async () => {
+    if (!user) return;
+    
+    setSavingData(true);
+    try {
+      const { error } = await supabase
+        .from('usuarios')
+        .update({
+          nome_completo: editFormData.nome,
+          email: editFormData.email,
+          cpf: editFormData.cpf,
+          telefone: editFormData.telefone,
+          data_nascimento: editFormData.dataNascimento,
+          endereco: editFormData.endereco,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Atualiza os dados locais
+      setUserData(editFormData);
+      setEditingSection(false);
+      setUploadMessage({ type: 'success', text: '✅ Dados salvos com sucesso!' });
+      setTimeout(() => setUploadMessage(null), 3000);
+    } catch (error: any) {
+      console.error('Erro ao salvar dados:', error);
+      setUploadMessage({ type: 'error', text: error.message || 'Erro ao salvar dados' });
+      setTimeout(() => setUploadMessage(null), 3000);
+    }
+    setSavingData(false);
   };
 
   // ==============================================
@@ -408,10 +445,17 @@ const ProfileScreen = () => {
             
             <button
               onClick={saveUserDataToSupabase}
-              style={{ width: '100%', padding: '14px', backgroundColor: COLORS.verde, color: COLORS.fundo, border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '12px' }}
+              disabled={savingData}
+              style={{ 
+                width: '100%', padding: '14px', 
+                backgroundColor: savingData ? COLORS.textoCinza : COLORS.verde, 
+                color: COLORS.fundo, border: 'none', borderRadius: '12px', 
+                fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '12px',
+                opacity: savingData ? 0.6 : 1 
+              }}
             >
               <Save size={16} style={{ display: 'inline', marginRight: '8px' }} />
-              SALVAR ALTERAÇÕES
+              {savingData ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES'}
             </button>
             
             <button
