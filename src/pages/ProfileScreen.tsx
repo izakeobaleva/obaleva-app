@@ -10,12 +10,14 @@ const ProfileScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Carregar foto existente
+  // ============================================
+  // CARREGAR FOTO EXISTENTE
+  // ============================================
   useEffect(() => {
     if (user) {
       const { data } = supabase.storage
         .from('avatars')
-        .getPublicUrl(`user_${user.id}.jpg`);
+        .getPublicUrl(`perfil/${user.id}.jpg`);
       
       fetch(data.publicUrl, { method: 'HEAD' })
         .then(res => {
@@ -25,39 +27,102 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  // Upload universal - mesmo código para câmera e galeria
+  // ============================================
+  // FUNÇÃO PARA REDIMENSIONAR E COMPRIMIR (TAMANHO CONTROLADO)
+  // ============================================
+  const processarImagem = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target?.result as string;
+        img.onload = () => {
+          // Define o tamanho MÁXIMO da imagem
+          const TAMANHO_MAXIMO = 500; // 500x500 pixels (foto leve)
+          
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Redimensiona mantendo proporção
+          if (width > height && width > TAMANHO_MAXIMO) {
+            height = (height * TAMANHO_MAXIMO) / width;
+            width = TAMANHO_MAXIMO;
+          } else if (height > TAMANHO_MAXIMO) {
+            width = (width * TAMANHO_MAXIMO) / height;
+            height = TAMANHO_MAXIMO;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Converte para JPEG com qualidade 70%
+          canvas.toBlob((blob) => {
+            if (blob) {
+              console.log(`📸 Tamanho original: ${(file.size / 1024).toFixed(2)} KB`);
+              console.log(`📸 Tamanho comprimido: ${(blob.size / 1024).toFixed(2)} KB`);
+              resolve(blob);
+            } else {
+              reject(new Error('Erro ao comprimir imagem'));
+            }
+          }, 'image/jpeg', 0.7);
+        };
+        img.onerror = () => reject(new Error('Erro ao carregar imagem'));
+      };
+      reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+    });
+  };
+
+  // ============================================
+  // FUNÇÃO PRINCIPAL DE UPLOAD (FUNCIONA PARA TUDO)
+  // ============================================
   const fazerUpload = async (file: File) => {
     if (!user) {
       setMessage('❌ Usuário não logado');
-      setTimeout(() => setMessage(''), 3000);
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setMessage('❌ Foto muito grande! Máximo 10MB');
+    // Verifica tamanho do arquivo original
+    if (file.size > 20 * 1024 * 1024) {
+      setMessage('❌ Foto muito grande! Máximo 20MB');
       setTimeout(() => setMessage(''), 3000);
       return;
     }
 
     setUploading(true);
-    setMessage('📤 Enviando foto...');
+    setMessage('📸 Processando imagem...');
 
     try {
-      // Upload direto - sem processamento (já funciona para galeria)
-      const filePath = `user_${user.id}.jpg`;
+      // Processa a imagem (redimensiona e comprime)
+      const imagemProcessada = await processarImagem(file);
       
-      const { error } = await supabase.storage
+      setMessage('📤 Enviando para o servidor...');
+      
+      // Caminho fixo para a foto do perfil
+      const caminho = `perfil/${user.id}.jpg`;
+      
+      // Upload para o Supabase
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { 
+        .upload(caminho, imagemProcessada, {
           upsert: true,
-          contentType: file.type || 'image/jpeg'
+          contentType: 'image/jpeg'
         });
 
-      if (error) throw error;
+      if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      setImageUrl(data.publicUrl);
+      // Pega a URL pública
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(caminho);
+
+      setImageUrl(urlData.publicUrl);
       setMessage('✅ Foto salva com sucesso!');
+      
       setTimeout(() => setMessage(''), 3000);
       
     } catch (err: any) {
@@ -69,35 +134,70 @@ const ProfileScreen = () => {
     }
   };
 
-  // Função única para abrir seletor (câmera ou galeria)
-  const abrirSeletor = (usarCamera: boolean) => {
+  // ============================================
+  // ABRIR CÂMERA
+  // ============================================
+  const abrirCamera = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    
-    if (usarCamera) {
-      input.setAttribute('capture', 'environment');
-    }
-    
-    input.onchange = async (e) => {
+    input.setAttribute('capture', 'environment');
+    input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        await fazerUpload(file);
-      }
+      if (file) fazerUpload(file);
     };
     input.click();
   };
 
+  // ============================================
+  // ABRIR GALERIA
+  // ============================================
+  const abrirGaleria = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) fazerUpload(file);
+    };
+    input.click();
+  };
+
+  // ============================================
+  // SAIR
+  // ============================================
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
+
+  // ============================================
+  // TELA
+  // ============================================
   return (
     <div style={{ padding: 20, background: '#000', minHeight: '100vh' }}>
-      <button onClick={() => navigate('/home')} style={{ color: '#22c55e', marginBottom: 20, background: 'none', border: 'none', fontSize: 16, cursor: 'pointer' }}>
+      {/* Botão voltar */}
+      <button 
+        onClick={() => navigate('/home')} 
+        style={{ 
+          color: '#22c55e', 
+          marginBottom: 20, 
+          background: 'none', 
+          border: 'none', 
+          fontSize: 16, 
+          cursor: 'pointer' 
+        }}
+      >
         ← Voltar
       </button>
       
+      {/* Título */}
       <h1 style={{ color: '#facc15', textAlign: 'center' }}>Meu Perfil</h1>
       
+      {/* Conteúdo central */}
       <div style={{ textAlign: 'center', marginTop: 30 }}>
-        {/* Foto */}
+        
+        {/* Círculo da foto */}
         <div style={{
           width: 120,
           height: 120,
@@ -111,21 +211,23 @@ const ProfileScreen = () => {
           border: '3px solid #facc15'
         }}>
           {imageUrl ? (
-            <img src={imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Perfil" />
+            <img 
+              src={imageUrl} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              alt="Perfil" 
+            />
           ) : (
             <span style={{ fontSize: 50 }}>👤</span>
           )}
         </div>
 
-        {/* Botão único - funciona para câmera E galeria */}
-        <div style={{ marginTop: 30 }}>
+        {/* Botões */}
+        <div style={{ marginTop: 30, display: 'flex', gap: 15, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button
-            onClick={() => abrirSeletor(true)}
+            onClick={abrirCamera}
             disabled={uploading}
             style={{
-              width: '80%',
-              maxWidth: 280,
-              padding: '14px 24px',
+              padding: '12px 24px',
               background: '#22c55e',
               color: '#000',
               border: 'none',
@@ -133,16 +235,29 @@ const ProfileScreen = () => {
               fontWeight: 'bold',
               fontSize: 16,
               cursor: uploading ? 'not-allowed' : 'pointer',
-              opacity: uploading ? 0.6 : 1,
-              marginBottom: 12
+              opacity: uploading ? 0.6 : 1
             }}
           >
-            📸 TIRAR FOTO OU ESCOLHER
+            📸 TIRAR FOTO
           </button>
 
-          <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 8 }}>
-            {uploading ? '⏳ Enviando...' : '📍 Abre câmera ou galeria'}
-          </div>
+          <button
+            onClick={abrirGaleria}
+            disabled={uploading}
+            style={{
+              padding: '12px 24px',
+              background: '#facc15',
+              color: '#000',
+              border: 'none',
+              borderRadius: 30,
+              fontWeight: 'bold',
+              fontSize: 16,
+              cursor: uploading ? 'not-allowed' : 'pointer',
+              opacity: uploading ? 0.6 : 1
+            }}
+          >
+            🖼️ ESCOLHER FOTO
+          </button>
         </div>
 
         {/* Mensagem de status */}
@@ -175,17 +290,24 @@ const ProfileScreen = () => {
         )}
 
         {/* Informações do usuário */}
-        <div style={{ marginTop: 40, padding: 16, background: '#1a1a2e', borderRadius: 16 }}>
-          <p style={{ color: '#fff', margin: 0 }}><strong>Nome:</strong> {user?.user_metadata?.name || 'Passageiro'}</p>
-          <p style={{ color: '#fff', marginTop: 8, marginBottom: 0 }}><strong>Email:</strong> {user?.email}</p>
+        <div style={{ 
+          marginTop: 40, 
+          padding: 16, 
+          background: '#1a1a2e', 
+          borderRadius: 16,
+          textAlign: 'left'
+        }}>
+          <p style={{ color: '#fff', margin: 0 }}>
+            <strong>👤 Nome:</strong> {user?.user_metadata?.name || 'Passageiro'}
+          </p>
+          <p style={{ color: '#fff', marginTop: 8, marginBottom: 0 }}>
+            <strong>📧 Email:</strong> {user?.email}
+          </p>
         </div>
 
         {/* Botão sair */}
         <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-            navigate('/login');
-          }}
+          onClick={handleLogout}
           style={{
             width: '100%',
             padding: 12,
@@ -203,6 +325,7 @@ const ProfileScreen = () => {
         </button>
       </div>
 
+      {/* Animação CSS */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
