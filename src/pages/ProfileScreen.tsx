@@ -10,30 +10,24 @@ const ProfileScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
+  // Carregar foto existente
   useEffect(() => {
     if (user) {
-      carregarFoto();
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(`user_${user.id}.jpg`);
+      
+      // Verificar se a imagem existe
+      fetch(data.publicUrl, { method: 'HEAD' })
+        .then(res => {
+          if (res.ok) setImageUrl(data.publicUrl);
+        })
+        .catch(() => console.log('Sem foto'));
     }
   }, [user]);
 
-  const carregarFoto = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profile_photos')
-        .select('photo_url')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (data && !error && data.photo_url) {
-        setImageUrl(data.photo_url);
-      }
-    } catch (err) {
-      console.log('Nenhuma foto encontrada');
-    }
-  };
-
-  // Função de compressão de imagem
-  const comprimirImagem = (file: File): Promise<string> => {
+  // Função para processar imagem da câmera
+  const processarImagemCamera = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -45,8 +39,8 @@ const ProfileScreen = () => {
           let width = img.width;
           let height = img.height;
           
-          // Reduz para 500px (bem pequeno)
-          const maxSize = 500;
+          // Reduz para 800px (tamanho bom para perfil)
+          const maxSize = 800;
           if (width > height && width > maxSize) {
             height = (height * maxSize) / width;
             width = maxSize;
@@ -60,9 +54,11 @@ const ProfileScreen = () => {
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
           
-          // Qualidade 0.6 (60%)
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-          resolve(dataUrl);
+          // Converter para JPEG com qualidade 0.8
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Erro ao processar imagem'));
+          }, 'image/jpeg', 0.8);
         };
         img.onerror = reject;
       };
@@ -70,86 +66,86 @@ const ProfileScreen = () => {
     });
   };
 
-  // Função principal de upload
-  const fazerUpload = async (file: File) => {
-    if (!user) {
-      setMessage('❌ Usuário não logado');
-      return;
-    }
+  // Upload da foto
+  const fazerUpload = async (file: File, origem: 'camera' | 'galeria') => {
+    if (!user) return;
 
     setUploading(true);
-    setMessage('📤 Comprimindo imagem...');
+    setMessage(origem === 'camera' ? '📸 Processando selfie...' : '📤 Enviando foto...');
 
     try {
-      // Comprimir imagem
-      const imagemComprimida = await comprimirImagem(file);
-      setMessage('📤 Enviando para o servidor...');
-
-      // Converter base64 para blob
-      const blob = await fetch(imagemComprimida).then(res => res.blob());
+      let blobParaUpload: Blob;
       
-      // Nome único
-      const nomeUnico = `${user.id}_${Date.now()}.jpg`;
-      const caminho = `fotos/${nomeUnico}`;
+      if (origem === 'camera') {
+        // Processa imagem da câmera
+        blobParaUpload = await processarImagemCamera(file);
+      } else {
+        // Usa arquivo da galeria diretamente (já está ok)
+        blobParaUpload = file;
+      }
 
-      // Upload para Supabase
-      const { error: uploadError, data } = await supabase.storage
+      setMessage('📤 Salvando no servidor...');
+
+      const filePath = `user_${user.id}.jpg`;
+      
+      const { error } = await supabase.storage
         .from('avatars')
-        .upload(caminho, blob, {
-          contentType: 'image/jpeg',
-          upsert: true
+        .upload(filePath, blobParaUpload, { 
+          upsert: true,
+          contentType: 'image/jpeg'
         });
 
-      if (uploadError) throw uploadError;
+      if (error) throw error;
 
-      // Pegar URL pública
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(caminho);
-
-      // Salvar no banco
-      const { error: dbError } = await supabase
-        .from('profile_photos')
-        .upsert({
-          user_id: user.id,
-          photo_url: urlData.publicUrl,
-          updated_at: new Date()
-        });
-
-      if (dbError) throw dbError;
-
-      setImageUrl(urlData.publicUrl);
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      setImageUrl(data.publicUrl);
       setMessage('✅ Foto salva com sucesso!');
       
       setTimeout(() => setMessage(''), 3000);
       
     } catch (err: any) {
       console.error('Erro:', err);
-      setMessage('❌ Erro: ' + (err.message || 'Tente novamente'));
+      setMessage('❌ ' + (err.message || 'Erro ao salvar foto'));
       setTimeout(() => setMessage(''), 4000);
     } finally {
       setUploading(false);
     }
   };
 
-  // Selecionar arquivo (funciona para câmera E galeria)
-  const selecionarArquivo = (accept: string, capture?: string) => {
+  // Abrir câmera
+  const abrirCamera = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = accept;
-    if (capture) {
-      input.setAttribute('capture', capture);
-    }
+    input.accept = 'image/*';
+    input.setAttribute('capture', 'environment');
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        // Verificar tamanho
+        if (file.size > 15 * 1024 * 1024) {
+          setMessage('❌ Foto muito grande! Máximo 15MB');
+          setTimeout(() => setMessage(''), 3000);
+          return;
+        }
+        await fazerUpload(file, 'camera');
+      }
+    };
+    input.click();
+  };
+
+  // Abrir galeria
+  const abrirGaleria = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
         if (file.size > 10 * 1024 * 1024) {
           setMessage('❌ Foto muito grande! Máximo 10MB');
           setTimeout(() => setMessage(''), 3000);
           return;
         }
-        await fazerUpload(file);
+        await fazerUpload(file, 'galeria');
       }
     };
     input.click();
@@ -157,11 +153,11 @@ const ProfileScreen = () => {
 
   return (
     <div style={{ padding: 20, background: '#000', minHeight: '100vh' }}>
-      <button onClick={() => navigate('/home')} style={{ color: '#22c55e', marginBottom: 20, background: 'none', border: 'none', fontSize: 16 }}>
+      <button onClick={() => navigate('/home')} style={{ color: '#22c55e', marginBottom: 20, background: 'none', border: 'none', fontSize: 16, cursor: 'pointer' }}>
         ← Voltar
       </button>
       
-      <h1 style={{ color: '#facc15', textAlign: 'center' }}>Meu Perfil</h1>
+      <h1 style={{ color: '#facc15', textAlign: 'center' }}>Perfil</h1>
       
       <div style={{ textAlign: 'center', marginTop: 30 }}>
         {/* Foto */}
@@ -187,7 +183,7 @@ const ProfileScreen = () => {
         {/* Botões */}
         <div style={{ marginTop: 30, display: 'flex', gap: 15, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button
-            onClick={() => selecionarArquivo('image/*', 'environment')}
+            onClick={abrirCamera}
             disabled={uploading}
             style={{
               padding: '12px 24px',
@@ -205,7 +201,7 @@ const ProfileScreen = () => {
           </button>
 
           <button
-            onClick={() => selecionarArquivo('image/*')}
+            onClick={abrirGaleria}
             disabled={uploading}
             style={{
               padding: '12px 24px',
@@ -223,7 +219,7 @@ const ProfileScreen = () => {
           </button>
         </div>
 
-        {/* Status */}
+        {/* Mensagem de status */}
         {message && (
           <div style={{
             marginTop: 20,
@@ -237,20 +233,22 @@ const ProfileScreen = () => {
           </div>
         )}
 
+        {/* Indicador de upload */}
         {uploading && (
           <div style={{ marginTop: 20 }}>
             <div style={{
-              width: '50%',
-              height: 3,
-              background: '#facc15',
+              width: 40,
+              height: 40,
+              border: '3px solid #facc15',
+              borderTop: '3px solid transparent',
+              borderRadius: '50%',
               margin: '0 auto',
-              borderRadius: 2,
-              animation: 'pulse 1s ease-in-out infinite'
+              animation: 'spin 1s linear infinite'
             }} />
           </div>
         )}
 
-        {/* Info do usuário */}
+        {/* Informações do usuário */}
         <div style={{ marginTop: 40, padding: 16, background: '#1a1a2e', borderRadius: 16 }}>
           <p style={{ color: '#fff', margin: 0 }}><strong>Nome:</strong> {user?.user_metadata?.name || 'Passageiro'}</p>
           <p style={{ color: '#fff', marginTop: 8, marginBottom: 0 }}><strong>Email:</strong> {user?.email}</p>
@@ -280,9 +278,9 @@ const ProfileScreen = () => {
       </div>
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; width: 50%; }
-          50% { opacity: 0.5; width: 30%; }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
