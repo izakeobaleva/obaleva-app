@@ -7,125 +7,192 @@ const ProfileScreen = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [imageUrl, setImageUrl] = useState('');
-  const [status, setStatus] = useState('');
-  const [cameraMode, setCameraMode] = useState<'user' | 'environment'>('environment');
   const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState('');
 
+  // Carregar foto do perfil
   useEffect(() => {
     if (user) {
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(`user_${user.id}.jpg`);
-      setImageUrl(data.publicUrl);
+      carregarFoto();
     }
   }, [user]);
 
-  const upload = async (file: File) => {
-    if (!file || !user) return;
+  const carregarFoto = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profile_photos')
+        .select('photo_url')
+        .eq('user_id', user?.id)
+        .single();
 
+      if (data && !error) {
+        setImageUrl(data.photo_url);
+      }
+    } catch (err) {
+      console.log('Nenhuma foto encontrada');
+    }
+  };
+
+  // Função para fazer upload da foto
+  const fazerUpload = async (file: File) => {
+    if (!user) return;
+    
     setUploading(true);
-    setStatus('📤 Enviando... (pode levar alguns segundos)');
-
-    // Timeout de 30 segundos
-    const timeoutId = setTimeout(() => {
-      setStatus('⏰ O upload está demorando. Tente uma foto menor.');
-      setUploading(false);
-    }, 30000);
+    setMessage('📤 Enviando foto...');
 
     try {
-      console.log('1. Arquivo:', file.name, file.size, file.type);
-      console.log('2. User ID:', user.id);
+      // 1. Comprimir a imagem (reduzir tamanho)
+      const imagemComprimida = await comprimirImagem(file);
       
-      const filePath = `user_${user.id}.jpg`;
-      console.log('3. Caminho:', filePath);
-
-      const { error, data } = await supabase.storage
+      // 2. Gerar nome único
+      const nomeUnico = `${Date.now()}_${file.name}`;
+      const caminho = `public/${user.id}/${nomeUnico}`;
+      
+      // 3. Upload para o Storage
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(caminho, imagemComprimida, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      clearTimeout(timeoutId);
+      if (uploadError) throw uploadError;
 
-      if (error) {
-        console.error('4. Erro:', error);
-        setStatus('❌ Erro: ' + error.message);
-      } else {
-        console.log('5. Sucesso:', data);
-        setStatus('✅ Foto salva!');
-        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-        setImageUrl(urlData.publicUrl);
-        setTimeout(() => setStatus(''), 2000);
-      }
+      // 4. Pegar URL pública
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(caminho);
+
+      // 5. Salvar URL na tabela
+      const { error: dbError } = await supabase
+        .from('profile_photos')
+        .upsert({
+          user_id: user.id,
+          photo_url: urlData.publicUrl,
+          updated_at: new Date()
+        });
+
+      if (dbError) throw dbError;
+
+      setImageUrl(urlData.publicUrl);
+      setMessage('✅ Foto salva com sucesso!');
+      
+      setTimeout(() => setMessage(''), 3000);
+      
     } catch (err: any) {
-      clearTimeout(timeoutId);
-      console.error('Erro geral:', err);
-      setStatus('❌ Erro: ' + err.message);
+      setMessage('❌ Erro: ' + err.message);
+      setTimeout(() => setMessage(''), 3000);
     } finally {
       setUploading(false);
     }
   };
 
+  // Função para comprimir imagem (reduz tamanho para upload rápido)
+  const comprimirImagem = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Reduz para no máximo 800px
+          const maxSize = 800;
+          if (width > height && width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          } else if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Erro ao comprimir imagem'));
+          }, 'image/jpeg', 0.7);
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
+    });
+  };
+
+  // Abrir câmera
   const abrirCamera = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = cameraMode === 'user' ? 'user' : 'environment';
+    input.capture = 'environment';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) upload(file);
+      if (file) fazerUpload(file);
     };
     input.click();
   };
 
+  // Abrir galeria
   const abrirGaleria = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.removeAttribute('capture');
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) upload(file);
+      if (file) fazerUpload(file);
     };
     input.click();
   };
 
   return (
     <div style={{ padding: 20, background: '#000', minHeight: '100vh' }}>
-      <button onClick={() => navigate('/home')} style={{ color: '#22c55e', marginBottom: 20 }}>← Voltar</button>
+      <button onClick={() => navigate('/home')} style={{ color: '#22c55e', marginBottom: 20 }}>
+        ← Voltar
+      </button>
+      
       <h1 style={{ color: '#facc15', textAlign: 'center' }}>Perfil</h1>
       
       <div style={{ textAlign: 'center', marginTop: 30 }}>
         {/* Foto */}
         <div style={{
-          width: 100,
-          height: 100,
-          borderRadius: 50,
+          width: 120,
+          height: 120,
+          borderRadius: 60,
           background: '#333',
           margin: '0 auto',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
-          border: '2px solid #facc15'
+          border: '3px solid #facc15'
         }}>
           {imageUrl ? (
             <img src={imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <span style={{ fontSize: 40 }}>👤</span>
+            <span style={{ fontSize: 50 }}>👤</span>
           )}
         </div>
 
         {/* Botões */}
-        <div style={{ marginTop: 20, display: 'flex', gap: 10, justifyContent: 'center' }}>
+        <div style={{ marginTop: 20, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button
             onClick={abrirCamera}
             disabled={uploading}
             style={{
-              padding: '10px 20px',
+              padding: '12px 24px',
               background: '#22c55e',
               color: '#000',
               border: 'none',
-              borderRadius: 25,
+              borderRadius: 30,
               fontWeight: 'bold',
+              fontSize: '16px',
               cursor: uploading ? 'not-allowed' : 'pointer',
               opacity: uploading ? 0.6 : 1
             }}
@@ -137,73 +204,91 @@ const ProfileScreen = () => {
             onClick={abrirGaleria}
             disabled={uploading}
             style={{
-              padding: '10px 20px',
+              padding: '12px 24px',
               background: '#facc15',
               color: '#000',
               border: 'none',
-              borderRadius: 25,
+              borderRadius: 30,
               fontWeight: 'bold',
+              fontSize: '16px',
               cursor: uploading ? 'not-allowed' : 'pointer',
               opacity: uploading ? 0.6 : 1
             }}
           >
-            🖼️ ANEXAR
+            🖼️ ESCOLHER FOTO
           </button>
         </div>
 
-        {/* Alternar câmera */}
-        <button
-          onClick={() => setCameraMode(cameraMode === 'user' ? 'environment' : 'user')}
-          style={{
-            marginTop: 10,
-            background: 'none',
-            border: 'none',
-            color: '#facc15',
-            fontSize: 12,
-            cursor: 'pointer'
-          }}
-        >
-          🔄 {cameraMode === 'user' ? 'Usar câmera TRASEIRA' : 'Usar câmera FRONTAL (SELFIE)'}
-        </button>
-
         {/* Status */}
-        {status && (
-          <div style={{ 
-            marginTop: 15, 
+        {message && (
+          <div style={{
+            marginTop: 20,
             padding: 10,
             borderRadius: 10,
-            background: status.includes('✅') ? '#22c55e20' : status.includes('❌') ? '#ef444420' : '#facc1520',
-            color: status.includes('✅') ? '#22c55e' : status.includes('❌') ? '#ef4444' : '#facc15'
+            background: message.includes('✅') ? '#22c55e20' : '#ef444420',
+            color: message.includes('✅') ? '#22c55e' : '#ef4444'
           }}>
-            {status}
+            {message}
           </div>
         )}
 
-        {/* Info */}
+        {uploading && (
+          <div style={{ marginTop: 20 }}>
+            <div style={{
+              width: '100%',
+              height: 4,
+              background: '#333',
+              borderRadius: 2,
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: '50%',
+                height: '100%',
+                background: '#facc15',
+                borderRadius: 2,
+                animation: 'progress 1s infinite'
+              }} />
+            </div>
+            <p style={{ color: '#facc15', fontSize: 12, marginTop: 8 }}>Enviando foto...</p>
+          </div>
+        )}
+
+        {/* Info usuário */}
         <div style={{ marginTop: 30, padding: 16, background: '#1a1a2e', borderRadius: 16 }}>
-          <p style={{ color: '#fff', fontSize: 10, wordBreak: 'break-all' }}>
-            <strong>User ID:</strong> {user?.id}
-          </p>
-          <p style={{ color: '#fff', fontSize: 10, marginTop: 8 }}>
-            <strong>Status:</strong> {uploading ? 'Enviando...' : 'Pronto'}
-          </p>
+          <p style={{ color: '#fff' }}><strong>Nome:</strong> {user?.user_metadata?.name || 'Passageiro'}</p>
+          <p style={{ color: '#fff', marginTop: 8 }}><strong>Email:</strong> {user?.email}</p>
         </div>
 
         {/* Sair */}
-        <button onClick={async () => { await supabase.auth.signOut(); navigate('/login'); }} style={{
-          width: '100%',
-          padding: 12,
-          background: '#ef4444',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 12,
-          fontWeight: 'bold',
-          marginTop: 20,
-          cursor: 'pointer'
-        }}>
-          SAIR
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut();
+            navigate('/login');
+          }}
+          style={{
+            width: '100%',
+            padding: 12,
+            background: '#ef4444',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 12,
+            fontWeight: 'bold',
+            fontSize: '16px',
+            cursor: 'pointer',
+            marginTop: 20
+          }}
+        >
+          SAIR DA CONTA
         </button>
       </div>
+
+      {/* Animação CSS */}
+      <style>{`
+        @keyframes progress {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+      `}</style>
     </div>
   );
 };
