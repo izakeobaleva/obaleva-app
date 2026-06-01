@@ -10,14 +10,13 @@ const ProfileScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // ✅ Carregar foto usando o padrão que deu certo
+  // ✅ Carregar foto (padrão que funciona)
   useEffect(() => {
     if (user) {
       const { data } = supabase.storage
         .from('avatars')
         .getPublicUrl(`user_${user.id}.jpg`);
 
-      // testa se a imagem realmente existe
       fetch(data.publicUrl, { method: 'HEAD' })
         .then(res => {
           if (res.ok) setImageUrl(data.publicUrl);
@@ -26,7 +25,7 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  // ✅ Função que VAI FUNCIONAR (sem firula: só sobe o arquivo direto)
+  // ✅ UPLOAD SIMPLES – IGUAL AO QUE FUNCIONOU (sem compressão pesada)
   const fazerUpload = async (file: File) => {
     if (!user) return;
 
@@ -57,7 +56,7 @@ const ProfileScreen = () => {
     }
   };
 
-  // 📸 SELFIE (câmera frontal)
+  // 🤳 SELFIE (câmera frontal)
   const tirarSelfie = () => {
     const input = document.createElement('input');
     input.type = 'file';
