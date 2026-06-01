@@ -10,12 +10,13 @@ const ProfileScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Carregar foto existente
+  const getCaminhoFoto = () => `user_${user?.id}.jpg`;
+
+  // Carregar foto existente (agora com caminho único)
   useEffect(() => {
     if (user) {
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(`user_${user.id}.jpg`);
+      const caminho = getCaminhoFoto();
+      const { data } = supabase.storage.from('avatars').getPublicUrl(caminho);
 
       fetch(data.publicUrl, { method: 'HEAD' })
         .then(res => {
@@ -25,77 +26,21 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  // ============================================
-  // COMPRESSÃO LEVE (só para fotos da câmera)
-  // ============================================
-  const comprimirFotoCamera = (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (e) => {
-        const img = new Image();
-        img.src = e.target?.result as string;
-        img.onload = () => {
-          const TAMANHO_MAXIMO = 1024;
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height && width > TAMANHO_MAXIMO) {
-            height = (height * TAMANHO_MAXIMO) / width;
-            width = TAMANHO_MAXIMO;
-          } else if (height > TAMANHO_MAXIMO) {
-            width = (width * TAMANHO_MAXIMO) / height;
-            height = TAMANHO_MAXIMO;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-
-          canvas.toBlob((blob) => {
-            if (blob) {
-              console.log(`📸 Original: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
-              console.log(`📸 Comprimido: ${(blob.size / 1024 / 1024).toFixed(2)} MB`);
-              resolve(blob);
-            } else {
-              reject(new Error('Erro ao comprimir'));
-            }
-          }, 'image/jpeg', 0.85);
-        };
-        img.onerror = reject;
-      };
-      reader.onerror = reject;
-    });
-  };
-
-  // ============================================
-  // UPLOAD (usa compressão para câmera)
-  // ============================================
-  const fazerUpload = async (file: File, origem: 'camera' | 'galeria') => {
+  // UPLOAD SEM COMPRESSÃO (igual ao anexo que funcionou)
+  const fazerUpload = async (file: File) => {
     if (!user) return;
 
     setUploading(true);
-    setMessage(origem === 'camera' ? '📸 Processando selfie...' : '📤 Enviando...');
+    setMessage('📤 Enviando...');
 
     try {
-      let arquivoParaUpload: Blob = file;
-
-      // Só comprime se for da câmera (selfie ou câmera traseira)
-      if (origem === 'camera') {
-        if (file.size > 2 * 1024 * 1024) {
-          arquivoParaUpload = await comprimirFotoCamera(file);
-        }
-      }
-
-      const caminho = `user_${user.id}.jpg`;
+      const caminho = getCaminhoFoto();
 
       const { error } = await supabase.storage
         .from('avatars')
-        .upload(caminho, arquivoParaUpload, {
+        .upload(caminho, file, {
           upsert: true,
-          contentType: 'image/jpeg'
+          contentType: file.type
         });
 
       if (error) throw error;
@@ -112,7 +57,7 @@ const ProfileScreen = () => {
     }
   };
 
-  // 🤳 SELFIE (câmera frontal)
+  // 🤳 SELFIE
   const tirarSelfie = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -120,7 +65,7 @@ const ProfileScreen = () => {
     input.setAttribute('capture', 'user');
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) fazerUpload(file, 'camera');
+      if (file) fazerUpload(file);
     };
     input.click();
   };
@@ -133,12 +78,12 @@ const ProfileScreen = () => {
     input.setAttribute('capture', 'environment');
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) fazerUpload(file, 'camera');
+      if (file) fazerUpload(file);
     };
     input.click();
   };
 
-  // 🖼️ ANEXAR (galeria)
+  // 🖼️ ANEXAR
   const anexarFoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -146,7 +91,7 @@ const ProfileScreen = () => {
     input.removeAttribute('capture');
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) fazerUpload(file, 'galeria');
+      if (file) fazerUpload(file);
     };
     input.click();
   };
