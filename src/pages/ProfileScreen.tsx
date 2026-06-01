@@ -17,7 +17,6 @@ const ProfileScreen = () => {
         .from('avatars')
         .getPublicUrl(`user_${user.id}.jpg`);
       
-      // Verificar se a imagem existe
       fetch(data.publicUrl, { method: 'HEAD' })
         .then(res => {
           if (res.ok) setImageUrl(data.publicUrl);
@@ -26,73 +25,32 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  // Função para processar imagem da câmera
-  const processarImagemCamera = (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (e) => {
-        const img = new Image();
-        img.src = e.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          
-          // Reduz para 800px (tamanho bom para perfil)
-          const maxSize = 800;
-          if (width > height && width > maxSize) {
-            height = (height * maxSize) / width;
-            width = maxSize;
-          } else if (height > maxSize) {
-            width = (width * maxSize) / height;
-            height = maxSize;
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          // Converter para JPEG com qualidade 0.8
-          canvas.toBlob((blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error('Erro ao processar imagem'));
-          }, 'image/jpeg', 0.8);
-        };
-        img.onerror = reject;
-      };
-      reader.onerror = reject;
-    });
-  };
+  // Upload universal - mesmo código para câmera e galeria
+  const fazerUpload = async (file: File) => {
+    if (!user) {
+      setMessage('❌ Usuário não logado');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
 
-  // Upload da foto
-  const fazerUpload = async (file: File, origem: 'camera' | 'galeria') => {
-    if (!user) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage('❌ Foto muito grande! Máximo 10MB');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
 
     setUploading(true);
-    setMessage(origem === 'camera' ? '📸 Processando selfie...' : '📤 Enviando foto...');
+    setMessage('📤 Enviando foto...');
 
     try {
-      let blobParaUpload: Blob;
-      
-      if (origem === 'camera') {
-        // Processa imagem da câmera
-        blobParaUpload = await processarImagemCamera(file);
-      } else {
-        // Usa arquivo da galeria diretamente (já está ok)
-        blobParaUpload = file;
-      }
-
-      setMessage('📤 Salvando no servidor...');
-
+      // Upload direto - sem processamento (já funciona para galeria)
       const filePath = `user_${user.id}.jpg`;
       
       const { error } = await supabase.storage
         .from('avatars')
-        .upload(filePath, blobParaUpload, { 
+        .upload(filePath, file, { 
           upsert: true,
-          contentType: 'image/jpeg'
+          contentType: file.type || 'image/jpeg'
         });
 
       if (error) throw error;
@@ -100,7 +58,6 @@ const ProfileScreen = () => {
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       setImageUrl(data.publicUrl);
       setMessage('✅ Foto salva com sucesso!');
-      
       setTimeout(() => setMessage(''), 3000);
       
     } catch (err: any) {
@@ -112,40 +69,20 @@ const ProfileScreen = () => {
     }
   };
 
-  // Abrir câmera
-  const abrirCamera = () => {
+  // Função única para abrir seletor (câmera ou galeria)
+  const abrirSeletor = (usarCamera: boolean) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.setAttribute('capture', 'environment');
+    
+    if (usarCamera) {
+      input.setAttribute('capture', 'environment');
+    }
+    
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        if (file.size > 15 * 1024 * 1024) {
-          setMessage('❌ Foto muito grande! Máximo 15MB');
-          setTimeout(() => setMessage(''), 3000);
-          return;
-        }
-        await fazerUpload(file, 'camera');
-      }
-    };
-    input.click();
-  };
-
-  // Abrir galeria
-  const abrirGaleria = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        if (file.size > 10 * 1024 * 1024) {
-          setMessage('❌ Foto muito grande! Máximo 10MB');
-          setTimeout(() => setMessage(''), 3000);
-          return;
-        }
-        await fazerUpload(file, 'galeria');
+        await fazerUpload(file);
       }
     };
     input.click();
@@ -157,7 +94,7 @@ const ProfileScreen = () => {
         ← Voltar
       </button>
       
-      <h1 style={{ color: '#facc15', textAlign: 'center' }}>Perfil</h1>
+      <h1 style={{ color: '#facc15', textAlign: 'center' }}>Meu Perfil</h1>
       
       <div style={{ textAlign: 'center', marginTop: 30 }}>
         {/* Foto */}
@@ -180,13 +117,15 @@ const ProfileScreen = () => {
           )}
         </div>
 
-        {/* Botões */}
-        <div style={{ marginTop: 30, display: 'flex', gap: 15, justifyContent: 'center', flexWrap: 'wrap' }}>
+        {/* Botão único - funciona para câmera E galeria */}
+        <div style={{ marginTop: 30 }}>
           <button
-            onClick={abrirCamera}
+            onClick={() => abrirSeletor(true)}
             disabled={uploading}
             style={{
-              padding: '12px 24px',
+              width: '80%',
+              maxWidth: 280,
+              padding: '14px 24px',
               background: '#22c55e',
               color: '#000',
               border: 'none',
@@ -194,29 +133,16 @@ const ProfileScreen = () => {
               fontWeight: 'bold',
               fontSize: 16,
               cursor: uploading ? 'not-allowed' : 'pointer',
-              opacity: uploading ? 0.6 : 1
+              opacity: uploading ? 0.6 : 1,
+              marginBottom: 12
             }}
           >
-            📸 TIRAR FOTO
+            📸 TIRAR FOTO OU ESCOLHER
           </button>
 
-          <button
-            onClick={abrirGaleria}
-            disabled={uploading}
-            style={{
-              padding: '12px 24px',
-              background: '#facc15',
-              color: '#000',
-              border: 'none',
-              borderRadius: 30,
-              fontWeight: 'bold',
-              fontSize: 16,
-              cursor: uploading ? 'not-allowed' : 'pointer',
-              opacity: uploading ? 0.6 : 1
-            }}
-          >
-            🖼️ ESCOLHER FOTO
-          </button>
+          <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 8 }}>
+            {uploading ? '⏳ Enviando...' : '📍 Abre câmera ou galeria'}
+          </div>
         </div>
 
         {/* Mensagem de status */}
