@@ -10,9 +10,10 @@ const ProfileScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
+  // Caminho único (igual ao que funcionou no anexo)
   const getCaminhoFoto = () => `user_${user?.id}.jpg`;
 
-  // Carregar foto existente (agora com caminho único)
+  // Carregar foto existente
   useEffect(() => {
     if (user) {
       const caminho = getCaminhoFoto();
@@ -26,21 +27,28 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  // UPLOAD SEM COMPRESSÃO (igual ao anexo que funcionou)
-  const fazerUpload = async (file: File) => {
+  // 🔧 Função de upload (com ou sem compressão leve)
+  const fazerUpload = async (file: File, precisaComprimir = false) => {
     if (!user) return;
 
     setUploading(true);
     setMessage('📤 Enviando...');
 
     try {
+      let arquivoFinal: Blob = file;
+
+      // Se for da câmera e for muito grande (> 3MB), comprime levemente
+      if (precisaComprimir && file.size > 3 * 1024 * 1024) {
+        arquivoFinal = await comprimirImagem(file);
+      }
+
       const caminho = getCaminhoFoto();
 
       const { error } = await supabase.storage
         .from('avatars')
-        .upload(caminho, file, {
+        .upload(caminho, arquivoFinal, {
           upsert: true,
-          contentType: file.type
+          contentType: 'image/jpeg'
         });
 
       if (error) throw error;
@@ -57,33 +65,51 @@ const ProfileScreen = () => {
     }
   };
 
-  // 🤳 SELFIE
-  const tirarSelfie = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.setAttribute('capture', 'user');
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) fazerUpload(file);
-    };
-    input.click();
+  // Compressão leve (apenas para fotos grandes da câmera)
+  const comprimirImagem = (file: File): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX = 1024;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > MAX) {
+            height = (height * MAX) / width;
+            width = MAX;
+          } else if (height > MAX) {
+            width = (width * MAX) / height;
+            height = MAX;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d')?.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(blob => resolve(blob as Blob), 'image/jpeg', 0.85);
+        };
+      };
+    });
   };
 
-  // 📸 CÂMERA TRASEIRA
-  const tirarFoto = () => {
+  // 📸 CÂMERA (selfie ou traseira)
+  const abrirCamera = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.setAttribute('capture', 'environment');
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) fazerUpload(file);
+      if (file) fazerUpload(file, true);
     };
     input.click();
   };
 
-  // 🖼️ ANEXAR
+  // 🖼️ ANEXAR (galeria)
   const anexarFoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -91,7 +117,7 @@ const ProfileScreen = () => {
     input.removeAttribute('capture');
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) fazerUpload(file);
+      if (file) fazerUpload(file, false);
     };
     input.click();
   };
@@ -131,36 +157,18 @@ const ProfileScreen = () => {
         </div>
 
         {/* Botões */}
-        <div style={{ marginTop: 30, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ marginTop: 30, display: 'flex', gap: 15, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button
-            onClick={tirarSelfie}
+            onClick={abrirCamera}
             disabled={uploading}
             style={{
-              padding: '12px 18px',
+              padding: '12px 24px',
               background: '#22c55e',
               color: '#000',
               border: 'none',
               borderRadius: 30,
               fontWeight: 'bold',
-              fontSize: 14,
-              cursor: uploading ? 'not-allowed' : 'pointer',
-              opacity: uploading ? 0.6 : 1
-            }}
-          >
-            🤳 SELFIE
-          </button>
-
-          <button
-            onClick={tirarFoto}
-            disabled={uploading}
-            style={{
-              padding: '12px 18px',
-              background: '#3b82f6',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 30,
-              fontWeight: 'bold',
-              fontSize: 14,
+              fontSize: 16,
               cursor: uploading ? 'not-allowed' : 'pointer',
               opacity: uploading ? 0.6 : 1
             }}
@@ -172,13 +180,13 @@ const ProfileScreen = () => {
             onClick={anexarFoto}
             disabled={uploading}
             style={{
-              padding: '12px 18px',
+              padding: '12px 24px',
               background: '#facc15',
               color: '#000',
               border: 'none',
               borderRadius: 30,
               fontWeight: 'bold',
-              fontSize: 14,
+              fontSize: 16,
               cursor: uploading ? 'not-allowed' : 'pointer',
               opacity: uploading ? 0.6 : 1
             }}
