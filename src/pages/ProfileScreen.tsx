@@ -21,7 +21,7 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  // Upload (funciona para qualquer foto da galeria)
+  // Upload (já funciona)
   const fazerUpload = async (file: File) => {
     if (!user) return;
 
@@ -52,7 +52,7 @@ const ProfileScreen = () => {
     }
   };
 
-  // 🖼️ Anexar da galeria (funciona sempre)
+  // 🖼️ Anexar (único botão)
   const anexarFoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -63,11 +63,6 @@ const ProfileScreen = () => {
       if (file) fazerUpload(file);
     };
     input.click();
-  };
-
-  // 📸 Orientação para tirar selfie
-  const tirarSelfie = () => {
-    alert('📸 Use o app Câmera do seu celular.\n\nDepois de tirar a selfie, clique em "ANEXAR" e escolha a foto da galeria.');
   };
 
   const handleLogout = async () => {
@@ -104,24 +99,8 @@ const ProfileScreen = () => {
           )}
         </div>
 
-        {/* Botões */}
-        <div style={{ marginTop: 30, display: 'flex', gap: 15, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button
-            onClick={tirarSelfie}
-            style={{
-              padding: '12px 24px',
-              background: '#22c55e',
-              color: '#000',
-              border: 'none',
-              borderRadius: 30,
-              fontWeight: 'bold',
-              fontSize: 16,
-              cursor: 'pointer'
-            }}
-          >
-            🤳 SELFIE
-          </button>
-
+        {/* Botão único */}
+        <div style={{ marginTop: 30 }}>
           <button
             onClick={anexarFoto}
             disabled={uploading}
@@ -137,9 +116,14 @@ const ProfileScreen = () => {
               opacity: uploading ? 0.6 : 1
             }}
           >
-            🖼️ ANEXAR
+            🖼️ ESCOLHER FOTO
           </button>
         </div>
+
+        {/* Dica */}
+        <p style={{ color: '#aaa', fontSize: 12, marginTop: 16 }}>
+          💡 Dica: tire a selfie com o app Câmera e depois clique em "ESCOLHER FOTO".
+        </p>
 
         {message && (
           <div style={{
