@@ -13,7 +13,7 @@ const ProfileScreen = () => {
 
   const getCaminhoFoto = () => `user_${user?.id}.jpg`;
 
-  // Carregar foto com cache busting
+  // Carregar foto
   const carregarFoto = () => {
     if (user) {
       const caminho = getCaminhoFoto();
@@ -26,8 +26,8 @@ const ProfileScreen = () => {
     carregarFoto();
   }, [user, refreshKey]);
 
-  // 🔧 Compressão de imagem
-  const comprimirImagem = (file: File): Promise<Blob> => {
+  // 🔧 Compressão FORTE da selfie (máx 600px, qualidade 0.7)
+  const comprimirSelfie = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -36,17 +36,16 @@ const ProfileScreen = () => {
         img.src = e.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
+          const MAX = 600;
           let width = img.width;
           let height = img.height;
 
-          if (width > height && width > MAX_WIDTH) {
-            height = (height * MAX_WIDTH) / width;
-            width = MAX_WIDTH;
-          } else if (height > MAX_HEIGHT) {
-            width = (width * MAX_HEIGHT) / height;
-            height = MAX_HEIGHT;
+          if (width > height && width > MAX) {
+            height = (height * MAX) / width;
+            width = MAX;
+          } else if (height > MAX) {
+            width = (width * MAX) / height;
+            height = MAX;
           }
 
           canvas.width = width;
@@ -60,7 +59,7 @@ const ProfileScreen = () => {
               else reject(new Error('Falha ao comprimir'));
             },
             'image/jpeg',
-            0.8
+            0.7
           );
         };
         img.onerror = reject;
@@ -69,7 +68,7 @@ const ProfileScreen = () => {
     });
   };
 
-  // Upload com compressão
+  // Upload
   const fazerUpload = async (file: File, fromCamera = false) => {
     if (!user) return;
 
@@ -78,34 +77,40 @@ const ProfileScreen = () => {
 
     try {
       let arquivoParaUpload: File | Blob = file;
+
       if (fromCamera) {
-        arquivoParaUpload = await comprimirImagem(file);
+        arquivoParaUpload = await comprimirSelfie(file);
+        console.log('Selfie comprimida:', arquivoParaUpload.size);
       }
 
       const caminho = getCaminhoFoto();
 
-      const { error } = await supabase.storage
+      const { error, data } = await supabase.storage
         .from('avatars')
         .upload(caminho, arquivoParaUpload, {
           upsert: true,
           contentType: 'image/jpeg'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro Supabase:', error);
+        throw error;
+      }
 
-      // Força atualização da imagem
+      console.log('Upload OK:', data);
       setRefreshKey(Date.now());
       setMessage('✅ Foto salva!');
       setTimeout(() => setMessage(''), 2000);
     } catch (err: any) {
+      console.error('Erro final:', err);
       setMessage(`❌ ${err.message}`);
-      console.error(err);
+      setTimeout(() => setMessage(''), 3000);
     } finally {
       setUploading(false);
     }
   };
 
-  // 🤳 Selfie (câmera frontal + compressão)
+  // 🤳 Selfie
   const tirarSelfie = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -118,7 +123,7 @@ const ProfileScreen = () => {
     input.click();
   };
 
-  // 🖼️ Anexar da galeria
+  // 🖼️ Anexo
   const anexarFoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -145,7 +150,6 @@ const ProfileScreen = () => {
       <h1 style={{ color: '#facc15', textAlign: 'center' }}>Meu Perfil</h1>
 
       <div style={{ textAlign: 'center', marginTop: 30 }}>
-        {/* Círculo da foto com atualização forçada */}
         <div style={{
           width: 120,
           height: 120,
@@ -165,7 +169,6 @@ const ProfileScreen = () => {
           )}
         </div>
 
-        {/* Botões */}
         <div style={{ marginTop: 30, display: 'flex', gap: 15, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button
             onClick={tirarSelfie}
