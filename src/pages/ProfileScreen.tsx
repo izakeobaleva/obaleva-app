@@ -9,24 +9,24 @@ const ProfileScreen = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
+  const [refreshKey, setRefreshKey] = useState(Date.now());
 
   const getCaminhoFoto = () => `user_${user?.id}.jpg`;
 
-  // Carregar foto existente
-  useEffect(() => {
+  // Carregar foto com cache busting
+  const carregarFoto = () => {
     if (user) {
       const caminho = getCaminhoFoto();
       const { data } = supabase.storage.from('avatars').getPublicUrl(caminho);
-
-      fetch(data.publicUrl, { method: 'HEAD' })
-        .then(res => {
-          if (res.ok) setImageUrl(data.publicUrl);
-        })
-        .catch(() => console.log('sem foto'));
+      setImageUrl(`${data.publicUrl}?t=${Date.now()}`);
     }
-  }, [user]);
+  };
 
-  // 🔧 Compressão de imagem (resolve erro de memória)
+  useEffect(() => {
+    carregarFoto();
+  }, [user, refreshKey]);
+
+  // 🔧 Compressão de imagem
   const comprimirImagem = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -69,7 +69,7 @@ const ProfileScreen = () => {
     });
   };
 
-  // Upload com compressão para fotos da câmera
+  // Upload com compressão
   const fazerUpload = async (file: File, fromCamera = false) => {
     if (!user) return;
 
@@ -78,8 +78,6 @@ const ProfileScreen = () => {
 
     try {
       let arquivoParaUpload: File | Blob = file;
-
-      // Se for da câmera, comprime antes
       if (fromCamera) {
         arquivoParaUpload = await comprimirImagem(file);
       }
@@ -95,8 +93,8 @@ const ProfileScreen = () => {
 
       if (error) throw error;
 
-      const { data } = supabase.storage.from('avatars').getPublicUrl(caminho);
-      setImageUrl(data.publicUrl);
+      // Força atualização da imagem
+      setRefreshKey(Date.now());
       setMessage('✅ Foto salva!');
       setTimeout(() => setMessage(''), 2000);
     } catch (err: any) {
@@ -120,7 +118,7 @@ const ProfileScreen = () => {
     input.click();
   };
 
-  // 🖼️ Anexar da galeria (sem compressão extra, já funciona)
+  // 🖼️ Anexar da galeria
   const anexarFoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -147,7 +145,7 @@ const ProfileScreen = () => {
       <h1 style={{ color: '#facc15', textAlign: 'center' }}>Meu Perfil</h1>
 
       <div style={{ textAlign: 'center', marginTop: 30 }}>
-        {/* Círculo da foto */}
+        {/* Círculo da foto com atualização forçada */}
         <div style={{
           width: 120,
           height: 120,
