@@ -57,7 +57,20 @@ const ProfileScreen = () => {
     }
   };
 
-  // 🖼️ Anexar (galeria) – esse já funciona
+  // 🤳 SELFIE (câmera frontal) – FORÇA ABERTURA
+  const tirarSelfie = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.setAttribute('capture', 'user');
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) fazerUpload(file);
+    };
+    input.click();
+  };
+
+  // 🖼️ ANEXAR (galeria)
   const anexarFoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -104,8 +117,28 @@ const ProfileScreen = () => {
           )}
         </div>
 
-        {/* Botão ÚNICO: Anexar foto */}
-        <div style={{ marginTop: 30 }}>
+        {/* Botões */}
+        <div style={{ marginTop: 30, display: 'flex', gap: 15, justifyContent: 'center', flexWrap: 'wrap' }}>
+          {/* SELFIE (câmera frontal) */}
+          <button
+            onClick={tirarSelfie}
+            disabled={uploading}
+            style={{
+              padding: '12px 24px',
+              background: '#22c55e',
+              color: '#000',
+              border: 'none',
+              borderRadius: 30,
+              fontWeight: 'bold',
+              fontSize: 16,
+              cursor: uploading ? 'not-allowed' : 'pointer',
+              opacity: uploading ? 0.6 : 1
+            }}
+          >
+            🤳 SELFIE
+          </button>
+
+          {/* ANEXAR (galeria) */}
           <button
             onClick={anexarFoto}
             disabled={uploading}
@@ -121,14 +154,9 @@ const ProfileScreen = () => {
               opacity: uploading ? 0.6 : 1
             }}
           >
-            🖼️ ANEXAR FOTO
+            🖼️ ANEXAR
           </button>
         </div>
-
-        {/* Mensagem de orientação */}
-        <p style={{ color: '#888', fontSize: 12, marginTop: 16 }}>
-          💡 Dica: tire a selfie com o app Câmera do celular e depois clique em "ANEXAR FOTO".
-        </p>
 
         {message && (
           <div style={{
