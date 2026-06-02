@@ -9,121 +9,50 @@ const ProfileScreen = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
-  const [refreshKey, setRefreshKey] = useState(Date.now());
 
   const getCaminhoFoto = () => `user_${user?.id}.jpg`;
 
   // Carregar foto
-  const carregarFoto = () => {
+  useEffect(() => {
     if (user) {
       const caminho = getCaminhoFoto();
       const { data } = supabase.storage.from('avatars').getPublicUrl(caminho);
-      setImageUrl(`${data.publicUrl}?t=${Date.now()}`);
+      setImageUrl(data.publicUrl);
     }
-  };
+  }, [user]);
 
-  useEffect(() => {
-    carregarFoto();
-  }, [user, refreshKey]);
-
-  // 🔧 Compressão FORTE da selfie (máx 600px, qualidade 0.7)
-  const comprimirSelfie = (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (e) => {
-        const img = new Image();
-        img.src = e.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX = 600;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height && width > MAX) {
-            height = (height * MAX) / width;
-            width = MAX;
-          } else if (height > MAX) {
-            width = (width * MAX) / height;
-            height = MAX;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-
-          canvas.toBlob(
-            (blob) => {
-              if (blob) resolve(blob);
-              else reject(new Error('Falha ao comprimir'));
-            },
-            'image/jpeg',
-            0.7
-          );
-        };
-        img.onerror = reject;
-      };
-      reader.onerror = reject;
-    });
-  };
-
-  // Upload
-  const fazerUpload = async (file: File, fromCamera = false) => {
+  // Upload (funciona para qualquer foto da galeria)
+  const fazerUpload = async (file: File) => {
     if (!user) return;
 
     setUploading(true);
-    setMessage(fromCamera ? '📸 Processando selfie...' : '📤 Enviando...');
+    setMessage('📤 Enviando...');
 
     try {
-      let arquivoParaUpload: File | Blob = file;
-
-      if (fromCamera) {
-        arquivoParaUpload = await comprimirSelfie(file);
-        console.log('Selfie comprimida:', arquivoParaUpload.size);
-      }
-
       const caminho = getCaminhoFoto();
 
-      const { error, data } = await supabase.storage
+      const { error } = await supabase.storage
         .from('avatars')
-        .upload(caminho, arquivoParaUpload, {
+        .upload(caminho, file, {
           upsert: true,
-          contentType: 'image/jpeg'
+          contentType: file.type
         });
 
-      if (error) {
-        console.error('Erro Supabase:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Upload OK:', data);
-      setRefreshKey(Date.now());
+      const { data } = supabase.storage.from('avatars').getPublicUrl(caminho);
+      setImageUrl(data.publicUrl);
       setMessage('✅ Foto salva!');
       setTimeout(() => setMessage(''), 2000);
     } catch (err: any) {
-      console.error('Erro final:', err);
       setMessage(`❌ ${err.message}`);
-      setTimeout(() => setMessage(''), 3000);
+      console.error(err);
     } finally {
       setUploading(false);
     }
   };
 
-  // 🤳 Selfie
-  const tirarSelfie = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.setAttribute('capture', 'user');
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) fazerUpload(file, true);
-    };
-    input.click();
-  };
-
-  // 🖼️ Anexo
+  // 🖼️ Anexar da galeria (funciona sempre)
   const anexarFoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -131,9 +60,14 @@ const ProfileScreen = () => {
     input.removeAttribute('capture');
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) fazerUpload(file, false);
+      if (file) fazerUpload(file);
     };
     input.click();
+  };
+
+  // 📸 Orientação para tirar selfie
+  const tirarSelfie = () => {
+    alert('📸 Use o app Câmera do seu celular.\n\nDepois de tirar a selfie, clique em "ANEXAR" e escolha a foto da galeria.');
   };
 
   const handleLogout = async () => {
@@ -150,6 +84,7 @@ const ProfileScreen = () => {
       <h1 style={{ color: '#facc15', textAlign: 'center' }}>Meu Perfil</h1>
 
       <div style={{ textAlign: 'center', marginTop: 30 }}>
+        {/* Círculo da foto */}
         <div style={{
           width: 120,
           height: 120,
@@ -169,10 +104,10 @@ const ProfileScreen = () => {
           )}
         </div>
 
+        {/* Botões */}
         <div style={{ marginTop: 30, display: 'flex', gap: 15, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button
             onClick={tirarSelfie}
-            disabled={uploading}
             style={{
               padding: '12px 24px',
               background: '#22c55e',
@@ -181,8 +116,7 @@ const ProfileScreen = () => {
               borderRadius: 30,
               fontWeight: 'bold',
               fontSize: 16,
-              cursor: uploading ? 'not-allowed' : 'pointer',
-              opacity: uploading ? 0.6 : 1
+              cursor: 'pointer'
             }}
           >
             🤳 SELFIE
